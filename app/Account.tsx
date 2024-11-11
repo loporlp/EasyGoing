@@ -20,7 +20,7 @@ const Account = () => {
         navigation.dispatch(
             CommonActions.reset({
                 index: 0,
-                routes: [{ name: "SignInScreen" }] // redirects user to the "Sign In" page
+                routes: [{ name: "index" }] // redirects user to the "Sign In" page
             })
         );
       })
