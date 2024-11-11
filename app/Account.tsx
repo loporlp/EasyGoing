@@ -9,13 +9,18 @@ const Account = () => {
 
     const navigation = useNavigation();
 
+    /**
+     * Signs the user out of their account. 
+     */
     const handleSignOut = () => {
       signOut(auth)
       .then(() => {
+        // This clears the navigation stack, making it impossible for a user to 
+        // go back to their account just by going back.
         navigation.dispatch(
             CommonActions.reset({
                 index: 0,
-                routes: [{ name: "SignInScreen" }]
+                routes: [{ name: "SignInScreen" }] // redirects user to the "Sign In" page
             })
         );
       })
@@ -25,8 +30,14 @@ const Account = () => {
 
     };
 
+    /**
+     * Email address
+     */
     const [userEmail, setUserEmail] = useState<string | null>(null);
 
+    /**
+     * Will get the current user's email address.
+     */
     useEffect(() => {
         const currentUser = auth.currentUser;
         if (currentUser) {
