@@ -3,21 +3,28 @@ import React from 'react';
 import { View, Button, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
+import { useRouter } from "expo-router";
 import {getIdToken} from '../scripts/getFirebaseID'
 
 const HomeScreen = () => {
+
+  const router = useRouter();
+
   const handleSignOut = () => {
     signOut(auth).catch((error) => {
       console.error('Sign out error:', error);
     });
   };
 
+  const navigateToAccount = () => {
+    router.push("/Account")
+  }
   return (
     <View style={styles.container}>
       {/* Account Button in the Top Right */}
-      <TouchableOpacity style={styles.accountButton} onPress={handleSignOut}>
-        <Text style={styles.accountButtonText}>Account</Text>
-      </TouchableOpacity>
+      <View>
+        <Button title="Account" onPress={navigateToAccount} />
+      </View>
 
       {/* Two Buttons in the Middle */}
       <View style={styles.buttonContainer}>
