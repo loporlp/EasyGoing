@@ -1,29 +1,27 @@
 // HomeScreen.tsx
 import React from 'react';
 import { View, Button, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import { signOut } from 'firebase/auth';
-import { auth } from '../firebaseConfig';
 import { useRouter } from "expo-router";
 
 const HomeScreen = () => {
 
+  // Sets up navigations
   const router = useRouter();
 
-  const handleSignOut = () => {
-    signOut(auth).catch((error) => {
-      console.error('Sign out error:', error);
-    });
-  };
-
+  /**
+   * Will navigate to the "Account" screen after link is pressed.
+   */
   const navigateToAccount = () => {
     router.push("/Account")
   }
+
   return (
     <View style={styles.container}>
       {/* Account Button in the Top Right */}
-      <View>
-        <Button title="Account" onPress={navigateToAccount} />
-      </View>
+      <TouchableOpacity style={styles.accountButton} onPress={navigateToAccount}>
+        <Text style={styles.accountButtonText}>Account</Text>
+      </TouchableOpacity>
+
 
       {/* Two Buttons in the Middle */}
       <View style={styles.buttonContainer}>
