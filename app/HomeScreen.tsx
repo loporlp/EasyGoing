@@ -20,9 +20,9 @@ const HomeScreen = () => {
 
       {/* Two Buttons in the Middle */}
       <View style={styles.buttonContainer}>
-        <Button title="Button 1" onPress={() => {}} />
+        <Button title="New Trip" onPress={() => {}} />
         <View style={{ height: 20 }} />
-        <Button title="Button 2" onPress={() => {}} />
+        <Button title="Edit Existing Trip" onPress={() => {}} />
       </View>
     </View>
   );
