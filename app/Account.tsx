@@ -3,16 +3,21 @@ import React, { useEffect, useState } from 'react';
 import { View, Button, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
-import { useRouter } from "expo-router";
+import { CommonActions, useNavigation } from '@react-navigation/native';
 
 const Account = () => {
 
-    const router = useRouter();
+    const navigation = useNavigation();
 
     const handleSignOut = () => {
       signOut(auth)
       .then(() => {
-        router.navigate("/SignInScreen");
+        navigation.dispatch(
+            CommonActions.reset({
+                index: 0,
+                routes: [{ name: "SignInScreen" }]
+            })
+        );
       })
       .catch((error) => {
         console.error('Sign out error:', error);
