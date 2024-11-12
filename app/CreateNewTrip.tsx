@@ -1,6 +1,6 @@
 // CreateNewTrip.tsx
 import React, { useEffect, useState } from 'react';
-import { View, Button, StyleSheet, TouchableOpacity, Text, Image } from 'react-native';
+import { View, Button, StyleSheet, TouchableOpacity, Text, Image, TextInput } from 'react-native';
 import { useRouter } from "expo-router";
 
 const CreateNewTrip = () => {
@@ -26,8 +26,17 @@ const CreateNewTrip = () => {
 
             {/* Other UI elements on the screen */}
             <View style={styles.createTripContainer}>
-            <Text style={styles.createTripLabel}>Where are we{" "}
-                <Text style={styles.highlightText}>going</Text>, Jason?</Text>
+                <Text style={styles.createTripLabel}>Where are we{" "}
+                    <Text style={styles.highlightText}>going</Text>, Traveler?</Text>
+                <TextInput placeholder="Destination" placeholderTextColor="lightgray" style={styles.input} />
+                <TextInput placeholder="Dates" placeholderTextColor="lightgray" style={styles.input} />
+                <View style={styles.travelersAndBudgetTextField}>
+                    <TextInput placeholder="Travelers" placeholderTextColor="lightgray" style={styles.smallInput} />
+                    <TextInput placeholder="Budget" placeholderTextColor="lightgray" style={styles.smallInput} />
+                </View>
+                <TouchableOpacity style={styles.createPlanButton} onPress={() => {}}>
+                    <Text style={styles.startPlanningButtonText}>Start Planning!</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
@@ -36,7 +45,6 @@ const CreateNewTrip = () => {
 const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingTop: 60, // For status bar space
       backgroundColor: '#fff',
     },
     backgroundImage: {
@@ -58,17 +66,75 @@ const styles = StyleSheet.create({
     createTripLabel: {
         fontWeight: "bold",
         color: "white",
-        fontSize: 20,
+        fontSize: 25,
+        marginTop: 60,
+        marginBottom: 40,
     },
     highlightText: {
         color: "#24a6ad",
-        fontSize: 20,
+        fontSize: 25,
     },
     createTripContainer: {
         flex: 1,
-        flexDirection: "row",
         justifyContent: "center",
-        marginTop: 60,
+        alignItems: "center",
+        marginTop: 80,
+    },
+    textFields: {
+        flex: 1,
+        flexDirection: "column",
+        alignContent: "center",
+    },
+    input: {
+        height: 40,
+        width: "80%",
+        borderColor: '#999',
+        borderBottomWidth: 1,
+        marginBottom: 20,
+        fontSize: 16,
+        backgroundColor: "white",
+        paddingLeft: 20,
+      },
+    
+    smallInput: {
+        height: 40,
+        width: "37%",
+        borderColor: '#999',
+        borderBottomWidth: 1,
+        marginBottom: 20,
+        fontSize: 16,
+        backgroundColor: "white",
+        paddingLeft: 20,
+        marginLeft: 10,
+        marginRight: 10,
+    },
+    travelersAndBudgetTextField: {
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "space-between",
+      },
+    createPlanButton: {
+        backgroundColor: "#24a6ad",  // Button background color
+        paddingVertical: 15,          // Vertical padding
+        paddingHorizontal: 40,        // Horizontal padding
+        borderRadius: 25,             // Rounded corners
+        marginTop: 20,                // Space between inputs and button
+        justifyContent: "center",     // Center text horizontally
+        alignItems: "center",         // Center text vertically
+        elevation: 5,                 // Shadow for Android
+        shadowColor: "#000",          // Shadow for iOS
+        shadowOffset: { width: 0, height: 4 },  // Shadow offset for iOS
+        shadowOpacity: 0.1,           // Shadow opacity for iOS
+        shadowRadius: 5,   
+        marginBottom: 60,
+
+    },
+    startPlanningButtonText: {
+        color: "white",
+        fontSize: 18,
+        fontWeight: "bold",
+        marginLeft: 40,
+        marginRight: 40,
     },
   });
 
