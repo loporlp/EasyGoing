@@ -2,19 +2,15 @@
 import React, { useEffect, useState } from 'react';
 import { View, Button, StyleSheet, TouchableOpacity, Text, Image, TextInput } from 'react-native';
 import { useRouter } from "expo-router";
-import DateTimePicker from '@react-native-community/datetimepicker';
+
+export const head = () => ({
+    title: "Create New Trip"
+});
 
 const CreateNewTrip = () => {
-    
+
     // Sets up navigations
     const router = useRouter();
-
-    /**
-    * Will navigate to the "Account" screen after link is pressed.
-    */
-    const navigateToAccount = () => {
-        router.push("/Account")
-    }
 
     return (
         <View style={styles.container}>
