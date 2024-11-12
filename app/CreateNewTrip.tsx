@@ -93,6 +93,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         backgroundColor: "white",
         paddingLeft: 20,
+        borderRadius: 10, 
       },
     
     travelerInput: {
@@ -104,6 +105,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         backgroundColor: "white",
         paddingLeft: 20,
+        borderRadius: 10, 
     },
 
     budgetInput: {
@@ -114,6 +116,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         backgroundColor: "white",
         paddingLeft: 20,
+        borderRadius: 10, 
     },
 
     travelersAndBudgetTextField: {
