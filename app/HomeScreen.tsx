@@ -15,6 +15,14 @@ const HomeScreen = () => {
     router.push("/Account")
   }
 
+  /**
+   * Navigates to the "Create New Trip" page
+   */
+  const createNewTrip = () => {
+    console.log("Going to 'Create New Trip'...")
+    router.push("/CreateNewTrip")
+  }
+
   return (
     <View style={styles.container}>
       {/* Account Button in the Top Right */}
@@ -25,7 +33,7 @@ const HomeScreen = () => {
 
       {/* Two Buttons in the Middle */}
       <View style={styles.buttonContainer}>
-        <Button title="New Trip" onPress={() => {}} />
+        <Button title="New Trip" onPress={createNewTrip} />
         <View style={{ height: 20 }} />
         <Button title="Edit Existing Trip" onPress={() => {}} />
       </View>

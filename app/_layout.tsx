@@ -7,6 +7,7 @@ export default function RootLayout() {
       <Stack.Screen name="Account" />
       <Stack.Screen name="HomeScreen" />
       <Stack.Screen name="SignInScreen" />
+      <Stack.Screen name="CreateNewTrip" />
     </Stack>
   );
 }

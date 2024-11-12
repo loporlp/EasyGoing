@@ -55,7 +55,9 @@ const Account = () => {
           )}
           
           {/* Sign-out button */}
-          <Button title="Sign Out" onPress={handleSignOut} />
+            <TouchableOpacity onPress={ handleSignOut }>
+                <Text style={styles.signOut}>Sign Out</Text>
+            </TouchableOpacity>
         </View>
       );
     };
@@ -71,6 +73,9 @@ const Account = () => {
           fontSize: 18,
           marginBottom: 20,
         },
+        signOut: {
+            
+        }
       });
 
 export default Account;
