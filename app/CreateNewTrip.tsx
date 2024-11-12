@@ -2,9 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, Button, StyleSheet, TouchableOpacity, Text, Image, TextInput } from 'react-native';
 import { useRouter } from "expo-router";
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const CreateNewTrip = () => {
-
+    
     // Sets up navigations
     const router = useRouter();
 
@@ -31,8 +32,8 @@ const CreateNewTrip = () => {
                 <TextInput placeholder="Destination" placeholderTextColor="lightgray" style={styles.input} />
                 <TextInput placeholder="Dates" placeholderTextColor="lightgray" style={styles.input} />
                 <View style={styles.travelersAndBudgetTextField}>
-                    <TextInput placeholder="Travelers" placeholderTextColor="lightgray" style={styles.smallInput} />
-                    <TextInput placeholder="Budget" placeholderTextColor="lightgray" style={styles.smallInput} />
+                    <TextInput placeholder="Travelers" placeholderTextColor="lightgray" keyboardType="numeric" style={styles.travelerInput} />
+                    <TextInput placeholder="Budget" placeholderTextColor="lightgray" keyboardType="numeric" style={styles.budgetInput} />
                 </View>
                 <TouchableOpacity style={styles.createPlanButton} onPress={() => {}}>
                     <Text style={styles.startPlanningButtonText}>Start Planning!</Text>
@@ -79,6 +80,8 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         marginTop: 80,
+        marginLeft: 10,
+        marginRight: 10,
     },
     textFields: {
         flex: 1,
@@ -96,22 +99,34 @@ const styles = StyleSheet.create({
         paddingLeft: 20,
       },
     
-    smallInput: {
+    travelerInput: {
         height: 40,
-        width: "37%",
+        flex: 1,                             // Take up the remaining space
         borderColor: '#999',
         borderBottomWidth: 1,
-        marginBottom: 20,
+        marginRight: 10,                     // Space between inputs
         fontSize: 16,
         backgroundColor: "white",
         paddingLeft: 20,
-        marginLeft: 10,
-        marginRight: 10,
     },
+
+    budgetInput: {
+        height: 40,
+        width: "50%",                       // Budget input has a fixed width
+        borderColor: '#999',
+        borderBottomWidth: 1,
+        fontSize: 16,
+        backgroundColor: "white",
+        paddingLeft: 20,
+    },
+
     travelersAndBudgetTextField: {
         flex: 1,
         flexDirection: "row",
         justifyContent: "space-between",
+        width: "80%",
+        marginLeft: 10,
+        marginRight: 10,
       },
     createPlanButton: {
         backgroundColor: "#24a6ad",  // Button background color
