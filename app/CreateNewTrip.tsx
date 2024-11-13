@@ -12,6 +12,9 @@ const CreateNewTrip = () => {
     // Sets up navigations
     const router = useRouter();
 
+    const startPlanning = () => {
+        router.replace("/AddEditDestinations")
+    }
     return (
         <View style={styles.container}>
 
@@ -31,7 +34,7 @@ const CreateNewTrip = () => {
                     <TextInput placeholder="Travelers" placeholderTextColor="lightgray" keyboardType="numeric" style={styles.travelerInput} />
                     <TextInput placeholder="Budget" placeholderTextColor="lightgray" keyboardType="numeric" style={styles.budgetInput} />
                 </View>
-                <TouchableOpacity style={styles.createPlanButton} onPress={() => {}}>
+                <TouchableOpacity style={styles.createPlanButton} onPress={startPlanning}>
                     <Text style={styles.startPlanningButtonText}>Start Planning!</Text>
                 </TouchableOpacity>
             </View>
@@ -41,8 +44,8 @@ const CreateNewTrip = () => {
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1,
-      backgroundColor: '#fff',
+        flex: 1,
+        backgroundColor: '#fff',
     },
     backgroundImage: {
         width: "100%",
@@ -93,30 +96,30 @@ const styles = StyleSheet.create({
         fontSize: 16,
         backgroundColor: "white",
         paddingLeft: 20,
-        borderRadius: 10, 
-      },
-    
+        borderRadius: 10,
+    },
+
     travelerInput: {
         height: 40,
-        flex: 1,                             // Take up the remaining space
+        flex: 1,                   
         borderColor: '#999',
         borderBottomWidth: 1,
-        marginRight: 10,                     // Space between inputs
+        marginRight: 10,               
         fontSize: 16,
         backgroundColor: "white",
         paddingLeft: 20,
-        borderRadius: 10, 
+        borderRadius: 10,
     },
 
     budgetInput: {
         height: 40,
-        width: "50%",                       // Budget input has a fixed width
+        width: "50%",                       
         borderColor: '#999',
         borderBottomWidth: 1,
         fontSize: 16,
         backgroundColor: "white",
         paddingLeft: 20,
-        borderRadius: 10, 
+        borderRadius: 10,
     },
 
     travelersAndBudgetTextField: {
@@ -126,20 +129,20 @@ const styles = StyleSheet.create({
         width: "80%",
         marginLeft: 10,
         marginRight: 10,
-      },
+    },
     createPlanButton: {
-        backgroundColor: "#24a6ad",  // Button background color
-        paddingVertical: 15,          // Vertical padding
-        paddingHorizontal: 40,        // Horizontal padding
-        borderRadius: 25,             // Rounded corners
-        marginTop: 20,                // Space between inputs and button
-        justifyContent: "center",     // Center text horizontally
-        alignItems: "center",         // Center text vertically
-        elevation: 5,                 // Shadow for Android
-        shadowColor: "#000",          // Shadow for iOS
-        shadowOffset: { width: 0, height: 4 },  // Shadow offset for iOS
-        shadowOpacity: 0.1,           // Shadow opacity for iOS
-        shadowRadius: 5,   
+        backgroundColor: "#24a6ad",
+        paddingVertical: 15,
+        paddingHorizontal: 40,
+        borderRadius: 25,
+        marginTop: 20,
+        justifyContent: "center",
+        alignItems: "center",       
+        elevation: 5,               
+        shadowColor: "#000",      
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,           
+        shadowRadius: 5,
         marginBottom: 60,
 
     },
@@ -150,6 +153,6 @@ const styles = StyleSheet.create({
         marginLeft: 40,
         marginRight: 40,
     },
-  });
+});
 
-  export default CreateNewTrip;
+export default CreateNewTrip;
