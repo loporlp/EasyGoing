@@ -5,70 +5,69 @@ import { NavigationContainer } from '@react-navigation/native';
 
 export default function RootLayout() {
   return (
-    <NavigationContainer>
-      <Stack>
+    <Stack>
 
-        {/*Login screen*/}
-        <Stack.Screen
-          name="index"
-          options={{
-            title: "Home",
-            headerStyle: {
-              backgroundColor: '#24a6ad',
-            },
-            headerTintColor: "white",
-            headerTitleStyle: {
-              fontWeight: "bold",
-            },
-          }}
-        />
-        {/*Account screen*/}
-        <Stack.Screen name="Account" />
+      {/*Login screen*/}
+      <Stack.Screen
+        name="index"
+        options={{
+          title: "Home",
+          headerStyle: {
+            backgroundColor: '#24a6ad',
+          },
+          headerTintColor: "white",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
 
-        {/*Home screen*/}
-        <Stack.Screen name="HomeScreen" />
+      {/*Account screen*/}
+      <Stack.Screen name="Account" />
 
-        {/*Sign In screen*/}
-        <Stack.Screen name="SignInScreen" />
+      {/*Home screen*/}
+      <Stack.Screen name="HomeScreen" />
 
-        {/*Create New Trip screen*/}
-        <Stack.Screen
-          name="CreateNewTrip"
-          options={{
-            title: "Create New Trip",
-            headerStyle: {
-              backgroundColor: '#24a6ad',
-            },
-            headerTintColor: "white",
-            headerTitleStyle: {
-              fontWeight: "bold",
-            },
-          }}
-        />
+      {/*Sign In screen*/}
+      <Stack.Screen name="SignInScreen" />
 
-        {/*Add / Edit Destinations screen*/}
-        <Stack.Screen
-          name="AddEditDestinations"
-          options={{
-            headerTitle: () => (
-              <View style={styles.titleContainer}>
-                {/* City and Country Name */}
-                <Text style={styles.headerText}>Tokyo, Japan</Text>
-                {/* Country Flag */}
-                <Flag code="JP" style={styles.flag} />
-              </View>
-            ),
-            headerStyle: {
-              backgroundColor: '#24a6ad',
-            },
-            headerTintColor: "white",
-            headerTitleStyle: {
-              fontWeight: "bold",
-            },
-          }}
-        />
-      </Stack>
-    </NavigationContainer>
+      {/*Create New Trip screen*/}
+      <Stack.Screen
+        name="CreateNewTrip"
+        options={{
+          title: "Create New Trip",
+          headerStyle: {
+            backgroundColor: '#24a6ad',
+          },
+          headerTintColor: "white",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
+
+      {/*Add / Edit Destinations screen*/}
+      <Stack.Screen
+        name="AddEditDestinations"
+        options={{
+          headerTitle: () => (
+            <View style={styles.titleContainer}>
+              {/* City and Country Name */}
+              <Text style={styles.headerText}>Tokyo, Japan</Text>
+              {/* Country Flag */}
+              <Flag code="JP" style={styles.flag} />
+            </View>
+          ),
+          headerStyle: {
+            backgroundColor: '#24a6ad',
+          },
+          headerTintColor: "white",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
+    </Stack>
   )
 };
 
