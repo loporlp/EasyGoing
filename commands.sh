@@ -1,3 +1,4 @@
+npm install expo-router
 npx expo install firebase
 npx expo install expo-auth-session
 npm install @react-navigation/native

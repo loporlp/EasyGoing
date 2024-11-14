@@ -20,12 +20,22 @@ const HomeScreen = () => {
 
       {/* Two Buttons in the Middle */}
       <View style={styles.buttonContainer}>
-        <Button title="Button 1" onPress={() => {}} />
+        <Button title="Button 1" onPress={fetchData} />
         <View style={{ height: 20 }} />
         <Button title="Button 2" onPress={() => {}} />
       </View>
     </View>
   );
+};
+
+const fetchData = async () => {
+  try {
+    const response = await fetch('http://3.129.16.62:3000/api/data');
+    const data = await response.json();
+    console.log(data.message); // This should log "Hello from the server!"
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
 };
 
 const styles = StyleSheet.create({
