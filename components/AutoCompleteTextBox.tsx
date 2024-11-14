@@ -9,7 +9,7 @@ const AutocompleteTextBox = () => {
   return (
     <View style={styles.container}>
       <GooglePlacesAutocomplete
-        placeholder="Search for a place"
+        placeholder="Type in place here"
         onPress={(data, details = null) => {
           setSelectedPlace(details);
           console.log(data, details);

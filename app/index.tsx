@@ -7,6 +7,7 @@ import { auth } from '../firebaseConfig';
 import SignInScreen from './SignInScreen';
 import CreateAccountScreen from './CreateAccountScreen';
 import HomeScreen from './HomeScreen';
+import HomeScreenTest from './HomeScreen_API_Test'
 import { RootStackParamList } from './types';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -51,7 +52,7 @@ const Index = () => {
           <>
             <Stack.Screen
               name="SignIn"
-              component={SignInScreen}
+              component={HomeScreenTest} // TODO: Change back to SignInScreen
               options={{ headerShown: false }}
             />
             <Stack.Screen
