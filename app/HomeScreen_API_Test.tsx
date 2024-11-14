@@ -5,7 +5,7 @@ import { auth } from '../firebaseConfig';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 
-const HomeScreen_API_Test = () => {
+const HomeScreen = () => {
   // State to store the selected place's coordinates
   const [selectedCoordinates, setSelectedCoordinates] = useState({
     latitude: 37.78825,
@@ -110,4 +110,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen_API_Test;
+export default HomeScreen;
