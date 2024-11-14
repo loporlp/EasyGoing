@@ -1,14 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Button, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
+import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 
 const HomeScreen_API_Test = () => {
+  // State to store the selected place's coordinates
+  const [selectedCoordinates, setSelectedCoordinates] = useState({
+    latitude: 37.78825,
+    longitude: -122.4324,
+  });
+
+  // Handle sign out
   const handleSignOut = () => {
     signOut(auth).catch((error) => {
       console.error('Sign out error:', error);
     });
+  };
+
+  // Handle place selection from AutocompleteTextBox
+  const handlePlaceSelect = (place) => {
+    // Extract latitude and longitude from the selected place details
+    if (place && place.geometry && place.geometry.location) {
+      setSelectedCoordinates({
+        latitude: place.geometry.location.lat,
+        longitude: place.geometry.location.lng,
+      });
+    }
   };
 
   return (
@@ -25,20 +44,26 @@ const HomeScreen_API_Test = () => {
         <Button title="Button 2" onPress={() => {}} />
       </View>
 
+      {/* Autocomplete Textbox for searching places */}
+      <View style={styles.searchContainer}>
+        <Text style={styles.header}>Search for a Place</Text>
+        <AutocompleteTextBox onPlaceSelect={handlePlaceSelect} />
+      </View>
+
       {/* Google Map */}
       <View style={styles.mapContainer}>
         <MapView
           provider={PROVIDER_GOOGLE} // Use Google Maps as the provider
           style={styles.map}
           initialRegion={{
-            latitude: 37.78825, // Set initial latitude (e.g., San Francisco)
-            longitude: -122.4324, // Set initial longitude (e.g., San Francisco)
+            latitude: selectedCoordinates.latitude, // Use selected place's coordinates
+            longitude: selectedCoordinates.longitude,
             latitudeDelta: 0.0922, // Zoom level
             longitudeDelta: 0.0421, // Zoom level
           }}
         >
-          {/* Example marker */}
-          <Marker coordinate={{ latitude: 37.78825, longitude: -122.4324 }} />
+          {/* Marker based on selected coordinates */}
+          <Marker coordinate={selectedCoordinates} />
         </MapView>
       </View>
     </View>
@@ -65,6 +90,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 20,
+  },
+  searchContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
   },
   mapContainer: {
     width: '100%',
