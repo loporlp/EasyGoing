@@ -4,6 +4,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
+import MapMarker from '../components/MapMarker';
 
 const HomeScreen = () => {
   // State to store the selected place's coordinates
@@ -51,21 +52,7 @@ const HomeScreen = () => {
       </View>
 
       {/* Google Map */}
-      <View style={styles.mapContainer}>
-        <MapView
-          provider={PROVIDER_GOOGLE} // Use Google Maps as the provider
-          style={styles.map}
-          initialRegion={{
-            latitude: selectedCoordinates.latitude, // Use selected place's coordinates
-            longitude: selectedCoordinates.longitude,
-            latitudeDelta: 0.0922, // Zoom level
-            longitudeDelta: 0.0421, // Zoom level
-          }}
-        >
-          {/* Marker based on selected coordinates */}
-          <Marker coordinate={selectedCoordinates} />
-        </MapView>
-      </View>
+      <MapMarker coordinates={selectedCoordinates} />
     </View>
   );
 };
@@ -94,6 +81,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     padding: 20,
     alignItems: 'center',
+    marginBottom: 20,
   },
   header: {
     fontSize: 20,
