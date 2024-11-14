@@ -13,7 +13,7 @@ const CreateNewTrip = () => {
     const router = useRouter();
 
     const startPlanning = () => {
-        router.replace("/AddEditDestinations")
+        router.push("/AddEditDestinations")
     }
     return (
         <View style={styles.container}>
@@ -47,6 +47,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
     },
+
     backgroundImage: {
         width: "100%",
         height: undefined,
@@ -54,6 +55,7 @@ const styles = StyleSheet.create({
         resizeMode: "cover",
         aspectRatio: 9 / 18,
     },
+
     darkOverlay: {
         position: "absolute",
         top: 0,
@@ -63,6 +65,7 @@ const styles = StyleSheet.create({
         aspectRatio: 9 / 18,
         backgroundColor: "rgba(0, 0, 0, 0.7)",
     },
+
     createTripLabel: {
         fontWeight: "bold",
         color: "white",
@@ -70,10 +73,12 @@ const styles = StyleSheet.create({
         marginTop: 60,
         marginBottom: 40,
     },
+
     highlightText: {
         color: "#24a6ad",
         fontSize: 25,
     },
+
     createTripContainer: {
         flex: 1,
         justifyContent: "center",
@@ -82,11 +87,13 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         marginRight: 10,
     },
+
     textFields: {
         flex: 1,
         flexDirection: "column",
         alignContent: "center",
     },
+
     input: {
         height: 40,
         width: "80%",
@@ -130,6 +137,7 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         marginRight: 10,
     },
+
     createPlanButton: {
         backgroundColor: "#24a6ad",
         paddingVertical: 15,
@@ -144,8 +152,8 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,           
         shadowRadius: 5,
         marginBottom: 60,
-
     },
+    
     startPlanningButtonText: {
         color: "white",
         fontSize: 18,
