@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import 'react-native-get-random-values';
 
 const AutocompleteTextBox = () => {
   const [selectedPlace, setSelectedPlace] = useState(null);
