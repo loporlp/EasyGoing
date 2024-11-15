@@ -1,6 +1,6 @@
 // Account.tsx
 import React, { useEffect, useState } from 'react';
-import { View, Button, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import { CommonActions, useNavigation } from '@react-navigation/native';

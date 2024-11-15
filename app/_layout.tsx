@@ -1,7 +1,6 @@
 import { Stack } from "expo-router";
 import Flag from "react-native-flags";
 import { View, Text, StyleSheet } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
 
 export default function RootLayout() {
   return (

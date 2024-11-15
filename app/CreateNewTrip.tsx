@@ -1,6 +1,5 @@
 // CreateNewTrip.tsx
-import React, { useEffect, useState } from 'react';
-import { View, Button, StyleSheet, TouchableOpacity, Text, Image, TextInput } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, Image, TextInput } from 'react-native';
 import { useRouter } from "expo-router";
 
 export const head = () => ({
