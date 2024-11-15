@@ -3,6 +3,7 @@ npx expo install firebase
 npx expo install expo-auth-session
 npm install @react-navigation/native
 npm install @react-navigation/stack
+npm install react-native-flags
 
 npm install react-native-maps
 npm install react-native-get-random-values
