@@ -104,6 +104,8 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         paddingLeft: 20,
         borderRadius: 10,
+        paddingTop: 5,
+        paddingBottom: 5,
     },
 
     travelerInput: {
@@ -116,6 +118,8 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         paddingLeft: 20,
         borderRadius: 10,
+        paddingTop: 5,
+        paddingBottom: 5,
     },
 
     budgetInput: {
@@ -127,6 +131,8 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         paddingLeft: 20,
         borderRadius: 10,
+        paddingTop: 5,
+        paddingBottom: 5,
     },
 
     travelersAndBudgetTextField: {
@@ -153,7 +159,7 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
         marginBottom: 60,
     },
-    
+
     startPlanningButtonText: {
         color: "white",
         fontSize: 18,
