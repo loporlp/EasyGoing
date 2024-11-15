@@ -31,7 +31,18 @@ const AddEditDestinations = () => {
                         </TouchableOpacity>
                     </View>
                     <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
-                        <View style={styles.destinationElement}></View>
+                        {/* Displays all of the destinations */}
+                        <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
+
+                            {/* Tokyo Skytree */}
+                            <View style={styles.destinationContainer}>
+                                <Image style={styles.destinationImage} source={require("../assets/images/tokyoskytree.jpg")} />
+                                <View style={styles.destinationLabel}>
+                                    <Text style={styles.destinationName}>Tokyo Skytree</Text>
+                                    <Text style={styles.destinationDetails}>Duration: 2hr | Priority: 1</Text>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
                     </ScrollView>
                     <TouchableOpacity style={styles.generatePlanButton} onPress={() => { }}>
                         <Text style={styles.buttonText}>Generate Plans</Text>
@@ -188,6 +199,37 @@ const styles = StyleSheet.create({
         marginTop: 10,
         borderRadius: 10,
         opacity: 0.7,
+        flexDirection: "row", 
+        alignItems: "center",  
+        padding: 5, 
+    },
+
+    destinationImage: {
+        height: 70,
+        width: 70,
+        borderRadius: 10,
+    },
+
+    destinationContainer: {
+        flexDirection: "row",
+        justifyContent: "center",
+    },
+
+    destinationLabel: {
+        flexDirection: "column",
+        marginLeft: 10,
+        justifyContent: "center",
+    },
+
+    destinationName: {
+        color: "white",
+        fontSize: 22,
+        fontWeight: "bold",
+    },
+
+    destinationDetails: {
+        color: "white",
+        fontSize: 18,
     },
 
     // ==== GENERATE PLAN BUTTON ==== //
