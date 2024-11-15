@@ -44,7 +44,7 @@ const Index = () => {
           // User is signed in
           <Stack.Screen
             name="Home"
-            component={HomeScreen}
+            component={AddDestination}
             options={{ headerShown: false }}
           />
         ) : (
@@ -57,7 +57,7 @@ const Index = () => {
             />
             <Stack.Screen
               name="CreateAccount"
-              component={CreateAccountScreen}
+              component={AddDestination}
               options={{ headerShown: false }}
             />
           </>
