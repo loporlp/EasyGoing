@@ -2,6 +2,7 @@ npx expo install firebase
 npx expo install expo-auth-session
 npm install @react-navigation/native
 npm install @react-navigation/stack
+npm install react-native-flags
 npx expo install react-native-screens react-native-safe-area-context
 
 # how to start the project
