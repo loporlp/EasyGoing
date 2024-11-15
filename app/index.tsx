@@ -6,7 +6,7 @@ import { View, ActivityIndicator } from 'react-native';
 import { auth } from '../firebaseConfig';
 import SignInScreen from './SignInScreen';
 import CreateAccountScreen from './CreateAccountScreen';
-import HomeScreen from './HomeScreen';
+import AddDestination from './AddDestination';
 import { RootStackParamList } from './types';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -43,7 +43,7 @@ const Index = () => {
           // User is signed in
           <Stack.Screen
             name="Home"
-            component={HomeScreen}
+            component={AddDestination}
             options={{ headerShown: false }}
           />
         ) : (
@@ -51,12 +51,12 @@ const Index = () => {
           <>
             <Stack.Screen
               name="SignIn"
-              component={SignInScreen}
+              component={AddDestination}
               options={{ headerShown: false }}
             />
             <Stack.Screen
               name="CreateAccount"
-              component={CreateAccountScreen}
+              component={AddDestination}
               options={{ headerShown: false }}
             />
           </>
