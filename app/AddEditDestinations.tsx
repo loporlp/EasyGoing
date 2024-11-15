@@ -6,7 +6,7 @@ const { height } = Dimensions.get('window');
 const AddEditDestinations = () => {
     return (
         <View style={styles.screenContainer}>
-            
+
             {/* Image of Tokyo */}
             <Image style={styles.backgroundImage} source={require("../assets/images/tokyo.jpg")} />
 
@@ -14,12 +14,12 @@ const AddEditDestinations = () => {
             <View style={styles.darkOverlay} />
 
             <View style={styles.inputContainer}>
-                <TextInput placeholder="Dates" placeholderTextColor="lightgray" style={styles.input} />
+                <TextInput placeholder="Jul. 11 - Jul. 15" placeholderTextColor="black" style={styles.input} />
 
                 {/* Group of text fields for travelers and budget */}
                 <View style={styles.travelersAndBudgetTextField}>
-                    <TextInput placeholder="Travelers" placeholderTextColor="lightgray" keyboardType="numeric" style={styles.travelerInput} />
-                    <TextInput placeholder="Budget" placeholderTextColor="lightgray" keyboardType="numeric" style={styles.budgetInput} />
+                    <TextInput placeholder="1 traveler" placeholderTextColor="black" keyboardType="numeric" style={styles.travelerInput} />
+                    <TextInput placeholder="$1,700" placeholderTextColor="black" keyboardType="numeric" style={styles.budgetInput} />
                 </View>
 
                 {/* Divider line below the inputs */}
@@ -47,7 +47,7 @@ const AddEditDestinations = () => {
                                 <Image style={styles.destinationImage} source={require("../assets/images/tokyoskytree.jpg")} />
                                 <View style={styles.destinationLabel}>
                                     <Text style={styles.destinationName}>Tokyo Skytree</Text>
-                                    <Text style={styles.destinationDetails}>Duration: 2hr | Priority: 1</Text>
+                                    <Text style={styles.destinationDetails}>Duration: 2 hrs | Priority: 2</Text>
                                 </View>
                             </View>
                         </TouchableOpacity>
@@ -64,7 +64,7 @@ const AddEditDestinations = () => {
                                 <Image style={styles.destinationImage} source={require("../assets/images/AkihabaraElectricTown.jpg")} />
                                 <View style={styles.destinationLabel}>
                                     <Text style={styles.destinationName}>Akihabara Electric Town</Text>
-                                    <Text style={styles.destinationDetails}>Duration: 2hr | Priority: 1</Text>
+                                    <Text style={styles.destinationDetails}>Duration: 6 hrs | Priority: 1</Text>
                                 </View>
                             </View>
                         </TouchableOpacity>
@@ -81,7 +81,7 @@ const AddEditDestinations = () => {
                                 <Image style={styles.destinationImage} source={require("../assets/images/PokemonCenterShibuya.png")} />
                                 <View style={styles.destinationLabel}>
                                     <Text style={styles.destinationName}>Pokemon Center</Text>
-                                    <Text style={styles.destinationDetails}>Duration: 2hr | Priority: 1</Text>
+                                    <Text style={styles.destinationDetails}>Duration: 1.5 hrs | Priority: 3</Text>
                                 </View>
                             </View>
                         </TouchableOpacity>
@@ -98,7 +98,7 @@ const AddEditDestinations = () => {
                                 <Image style={styles.destinationImage} source={require("../assets/images/MeijiJingu.jpg")} />
                                 <View style={styles.destinationLabel}>
                                     <Text style={styles.destinationName}>Meiji Jingu</Text>
-                                    <Text style={styles.destinationDetails}>Duration: 2hr | Priority: 1</Text>
+                                    <Text style={styles.destinationDetails}>Duration: 2 hrs | Priority: 3</Text>
                                 </View>
                             </View>
                         </TouchableOpacity>
@@ -115,7 +115,7 @@ const AddEditDestinations = () => {
                                 <Image style={styles.destinationImage} source={require("../assets/images/ImperialPalace.jpg")} />
                                 <View style={styles.destinationLabel}>
                                     <Text style={styles.destinationName}>Imperial Palace</Text>
-                                    <Text style={styles.destinationDetails}>Duration: 2hr | Priority: 1</Text>
+                                    <Text style={styles.destinationDetails}>Duration: 2 hrs | Priority: 4</Text>
                                 </View>
                             </View>
                         </TouchableOpacity>
@@ -174,6 +174,8 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         borderRadius: 10,
         paddingLeft: 20,
+        paddingTop: 5,
+        paddingBottom: 5,
     },
 
     travelerInput: {
@@ -186,6 +188,8 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         paddingLeft: 20,
         borderRadius: 10,
+        paddingTop: 5,
+        paddingBottom: 5,
     },
 
     budgetInput: {
@@ -197,6 +201,8 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         paddingLeft: 20,
         borderRadius: 10,
+        paddingTop: 5,
+        paddingBottom: 5,
     },
 
     travelersAndBudgetTextField: {
