@@ -30,7 +30,8 @@ const HomeScreen = () => {
 
 const fetchData = async () => {
   try {
-    const response = await fetch('http://3.129.16.62:3000/api/data');
+    // We should put this ip into a global constant
+    const response = await fetch('http://3.145.147.136:3000/api/data');
     const data = await response.json();
     console.log(data.message); // This should log "Hello from the server!"
   } catch (error) {
