@@ -66,6 +66,21 @@ export default function RootLayout() {
           },
         }}
       />
+
+      {/*Connection to server failed screen*/}
+      <Stack.Screen
+        name="ConnectionToServerFailedScreen"
+        options={{
+          title: "Error",
+          headerStyle: {
+            backgroundColor: '#24a6ad',
+          },
+          headerTintColor: "white",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
     </Stack>
   )
 };
