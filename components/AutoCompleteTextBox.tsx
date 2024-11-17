@@ -9,20 +9,23 @@ const AutocompleteTextBox = () => {
   return (
     <View style={styles.container}>
       <GooglePlacesAutocomplete
-        placeholder="Type in place here"
+        placeholder="Search"
         onPress={(data, details = null) => {
-          setSelectedPlace(details);
-          console.log(data, details);
-        }}
+            setSelectedPlace(details);
+            console.log("Place Selected:", data); // Logs the basic selected data
+            console.log("Place Details:", details); // Logs the full details (if fetched)
+         }}
         query={{
-          key: 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI',
-          language: 'en',
+            key: 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI',
+            language: 'en',
         }}
         fetchDetails={true}
+        onFail={(error) => console.error(error)}
         debounce={200} // Add a small delay for better performance
         styles={{
           textInputContainer: {
             width: '100%',
+            zIndex: 2,
           },
           textInput: {
             height: 40,
@@ -35,6 +38,12 @@ const AutocompleteTextBox = () => {
           predefinedPlacesDescription: {
             color: '#1faadb',
           },
+        }}
+        inputProps={{
+          autoCapitalize: 'none',
+          autoCorrect: true,  // Enable autocorrect
+          autoComplete: 'on', // This should be enabled to trigger autocomplete behavior
+          returnKeyType: 'search',
         }}
       />
 

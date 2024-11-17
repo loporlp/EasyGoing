@@ -5,7 +5,7 @@ npm install @react-navigation/stack
 
 npm install react-native-maps
 npm install react-native-get-random-values
-
+npm install react-native-google-places-autocomplete
 npx expo install react-native-screens react-native-safe-area-context
 
 # how to start the project
