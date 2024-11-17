@@ -38,6 +38,12 @@ const HomeScreen = () => {
         <Text style={styles.accountButtonText}>Account</Text>
       </TouchableOpacity>
 
+      {/* Autocomplete Textbox for searching places */}
+            <View style={styles.searchContainer}>
+              <Text style={styles.header}>Search for a Place</Text>
+              <AutocompleteTextBox onPlaceSelect={handlePlaceSelect} />
+            </View>
+
       {/* Two Buttons in the Middle */}
       <View style={styles.buttonContainer}>
         <Button title="Button 1" onPress={() => {}} />
@@ -45,11 +51,7 @@ const HomeScreen = () => {
         <Button title="Button 2" onPress={() => {}} />
       </View>
 
-      {/* Autocomplete Textbox for searching places */}
-      <View style={styles.searchContainer}>
-        <Text style={styles.header}>Search for a Place</Text>
-        <AutocompleteTextBox onPlaceSelect={handlePlaceSelect} />
-      </View>
+
 
       {/* Google Map */}
       <MapMarker coordinates={selectedCoordinates} />
