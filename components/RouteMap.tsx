@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, Button } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import axios from 'axios';
 import polyline from 'polyline';
@@ -10,15 +10,16 @@ const RouteMap = () => {
     const [coordinates, setCoordinates] = useState([]);
     const [origin, setOrigin] = useState({ latitude: 35.7023, longitude: 139.7745 }); // Akihabara Example
     const [destination, setDestination] = useState({ latitude: 35.7100, longitude: 139.8107 }); // Tokyo Sky Tree Example
+    const [mode, setMode] = useState('driving'); // Can use 'walking', 'driving', 'bicycling', and 'transit'
 
     useEffect(() => {
-        getRoute(origin, destination);
-    }, [origin, destination]);
+        getRoute(origin, destination, mode);
+    }, [origin, destination, mode]);
 
-const getRoute = async (origin, destination) => {
+const getRoute = async (origin, destination, mode) => {
     try {
         // The API Call
-        const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&key=${apiKey}`;
+        const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}&alternatives=true&key=${apiKey}`;
 
         // make the request
         const response = await axios.get(url);
@@ -46,6 +47,11 @@ const decodePolyline = (encoded) => {
     }));
 };
 
+// To have different modes of transport
+const handleModeChange = (newMode) => {
+    setMode(newMode);
+ };
+
 return (
     <View style={styles.container}>
     {/* Display the map */}
@@ -72,6 +78,14 @@ return (
           />
         )}
     </MapView>
+
+    {/* Buttons to change the transportation mode */}
+    <View style={styles.buttonContainer}>
+        <Button title="Driving" onPress={() => handleModeChange('driving')} />
+        <Button title="Walking" onPress={() => handleModeChange('walking')} />
+        <Button title="Transit" onPress={() => handleModeChange('transit')} />
+        <Button title="Bicycling" onPress={() => handleModeChange('bicycling')} />
+    </View>
     </View>
   );
 };
@@ -85,6 +99,14 @@ const styles = StyleSheet.create({
     },
     map: {
         flex: 1,
+    },
+    buttonContainer: {
+        position: 'absolute',
+        bottom: 20,
+        left: 10,
+        right: 10,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
     },
 });
 
