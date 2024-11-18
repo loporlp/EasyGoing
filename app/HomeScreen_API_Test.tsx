@@ -5,6 +5,7 @@ import { auth } from '../firebaseConfig';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import MapMarker from '../components/MapMarker';
+import RouteMap from '../components/RouteMap';
 
 const HomeScreen = () => {
   // State to store the selected place's coordinates
@@ -51,10 +52,10 @@ const HomeScreen = () => {
         <Button title="Button 2" onPress={() => {}} />
       </View>
 
-
+      <RouteMap />
 
       {/* Google Map */}
-      <MapMarker coordinates={selectedCoordinates} />
+     <MapMarker coordinates={selectedCoordinates} />
     </View>
   );
 };
