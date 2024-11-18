@@ -6,6 +6,7 @@ import { auth } from '../firebaseConfig';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types';
 import { useNavigation } from '@react-navigation/native';
+import { useRouter } from "expo-router";
 
 type SignInScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -14,18 +15,41 @@ type SignInScreenNavigationProp = NativeStackNavigationProp<
 
 const SignInScreen = () => {
   const navigation = useNavigation<SignInScreenNavigationProp>();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSignIn = () => {
-    signInWithEmailAndPassword(auth, email.trim(), password)
-      .then(() => {
-        console.log('User signed in!');
-      })
-      .catch((error) => {
-        console.error('Sign in error:', error);
-        alert(error.message);
-      });
+  const handleSignIn = async () => {
+    const isServerRunning = await fetchData();
+
+    if (isServerRunning) {
+      signInWithEmailAndPassword(auth, email.trim(), password)
+        .then(() => {
+          console.log('User signed in!');
+          // Navigate to the next screen, e.g., Home
+        })
+        .catch((error) => {
+          console.error('Sign in error:', error);
+          alert(error.message);
+        });
+    } else {
+      alert('Server is down. Please try again later.');
+      router.replace("/ConnectionToServerFailedScreen");
+    }
+  };
+
+  const fetchData = async () => {
+    try {
+      // We should put this ip into a global constant
+      const response = await fetch('http://3.145.147.136:3000/api/serverstatus');
+      const data = await response.json();
+      console.log(data.message); // This should log "Server is Running"
+      return true;
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      return false;
+    }
   };
 
   return (
