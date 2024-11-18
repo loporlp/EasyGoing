@@ -18,6 +18,7 @@ const AutocompleteTextBox = () => {
         query={{
             key: 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI',
             language: 'en',
+            types: '(address)'
         }}
         fetchDetails={true}
         onFail={(error) => console.error(error)}
