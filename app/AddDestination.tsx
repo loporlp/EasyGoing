@@ -1,6 +1,6 @@
 // AddDestination.tsx
 import { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, Image, Modal } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Text, Image, Modal, ImageBackground } from 'react-native';
 import { useRouter } from "expo-router";
 
 const AddDestination = () => {
@@ -24,7 +24,6 @@ const AddDestination = () => {
     <View style={styles.container}>
       {/* Background Image */}
       {/* <Image source={require("../assets/images/tokyo.jpg")} style={styles.backgroundImage} /> */}
-      <Image source={require("../assets/images/tokyo.jpg")} style={styles.backgroundImage} />
 
       {/* Popup Button */}
       <View style={styles.buttonContainer}>
@@ -33,30 +32,32 @@ const AddDestination = () => {
             </View>
       </View>
 
-      <Modal animationType="fade" visible={visible} transparent={true} onRequestClose={hide}>
+      <Modal style={styles.modal} animationType="fade" visible={visible} transparent={true} onRequestClose={hide}>
         <View style={styles.popup}>
-          <View style={styles.inputContainer}>
-            {/* Text Input For Location, Duration, Priority, and Notes */}
-            <View style={styles.textContainer}>
-              <Text style={styles.text}>Location:</Text>
-              <TextInput style={styles.textBox} placeholder="Tokyo Sky Tree" placeholderTextColor="gray"  />
-              <Text style={styles.text}>Duration (Minutes):</Text>
-              <TextInput style={styles.textBox} placeholder="30 Minutes" placeholderTextColor="gray" keyboardType="numeric"/>
-              <Text style={styles.text}>Priority:</Text>
-              <TextInput style={styles.textBox} placeholder="2" placeholderTextColor="gray" keyboardType="numeric"/>
-              <Text style={styles.text}>Notes:</Text>
-              <TextInput style={styles.textBox} placeholder="Notes" placeholderTextColor="gray"/>
-            </View>
-            {/* Add + Cancel Buttons */}
-            <View style={styles.buttonContainer}>
-              <View style={styles.button}>
-                <Button title="Cancel" onPress={hide} />
+          <ImageBackground source={require("../assets/images/tokyo.jpg")} style={styles.backgroundImage}>
+            <View style={styles.inputContainer}>
+              {/* Text Input For Location, Duration, Priority, and Notes */}
+              <View style={styles.textContainer}>
+                <Text style={styles.text}>Location:</Text>
+                <TextInput style={styles.textBox} placeholder="Tokyo Sky Tree" placeholderTextColor="gray"  />
+                <Text style={styles.text}>Duration (Minutes):</Text>
+                <TextInput style={styles.textBox} placeholder="30 Minutes" placeholderTextColor="gray" keyboardType="numeric"/>
+                <Text style={styles.text}>Priority:</Text>
+                <TextInput style={styles.textBox} placeholder="2" placeholderTextColor="gray" keyboardType="numeric"/>
+                <Text style={styles.text}>Notes:</Text>
+                <TextInput style={styles.textBox} placeholder="Notes" placeholderTextColor="gray"/>
               </View>
-              <View style={styles.button}>
-                <Button title="Add" onPress={cancelAdd} />
+              {/* Add + Cancel Buttons */}
+              <View style={styles.buttonContainer}>
+                <View style={styles.button}>
+                  <Button title="Cancel" onPress={hide} />
+                </View>
+                <View style={styles.button}>
+                  <Button title="Add" onPress={cancelAdd} />
+                </View>
               </View>
             </View>
-          </View>
+          </ImageBackground>
         </View>
       </Modal>
     </View>
@@ -69,6 +70,8 @@ const styles = StyleSheet.create({
     height: "100%",
     position: "absolute",
     resizeMode: "cover",
+    borderColor: "red",
+    borderWidth: 1,
     top: 0,
     left: 0,
   },
@@ -116,8 +119,16 @@ const styles = StyleSheet.create({
     height: 50,
   },
   popup: {
-    width: "50%",
+    paddingTop: 60, // For status bar space
+    width: "100%",
     height: "50%",
+  },
+  modal: {
+    position: "absolute",
+    top: "10%",
+    bottom: "10%",
+    left: "10%",
+    right: "10%",
   }
 });
 
