@@ -122,8 +122,6 @@ const styles = StyleSheet.create({
     height: "80%",
     position: "absolute",
     top: 60, //padding for status bar
-    left: "10%",
-    right: "10%", //TODO: figure out why right isn't being used???
     bottom: "10%",
     justifyContent: "center",
     alignItems: "center",
