@@ -31,7 +31,7 @@ const AddDestination = () => {
         </ImageBackground>
       </View>
 
-      <Modal style={styles.modal} animationType="fade" visible={visible} transparent={true} onRequestClose={hide}>
+      <Modal animationType="fade" visible={visible} transparent={true} onRequestClose={hide}>
         <View style={styles.popup}>
           <ImageBackground source={require("../assets/images/blue.png")} style={styles.backgroundImage}>
             <View style={styles.inputContainer}>
@@ -118,16 +118,14 @@ const styles = StyleSheet.create({
     height: 50,
   },
   popup: {
-    paddingTop: 60, // For status bar space
-    width: "100%",
-    height: "50%",
-  },
-  modal: {
+    width: "80%",
+    height: "80%",
     position: "absolute",
-    top: "10%",
-    bottom: "10%",
-    left: "10%",
-    right: "10%",
+    top: 60, //padding for status bar
+    left: "10%", //TODO: WHY IS THIS NOT APPLYING???
+    justifyContent: "center",
+    alignItems: "center",
+    flex: 1,
   },
   showContainer: {
     flexDirection: "column",
