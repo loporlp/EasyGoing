@@ -18,7 +18,7 @@ const AddDestination = () => {
   return (
     <View style={styles.container}>
       {/* Background Image */}
-      <Image source={require("../assets/images/tokyo.jpg")} style={styles.backgroundImage} />
+      {/* <Image source={require("../assets/images/tokyo.jpg")} style={styles.backgroundImage} /> */}
 
       <View style={styles.inputContainer}>
         {/* Text Input For Location, Duration, Priority, and Notes */}
@@ -38,7 +38,7 @@ const AddDestination = () => {
             <Button title="Cancel" onPress={cancelAdd} />
           </View>
           <View style={styles.button}>
-            <Button title="Add" onPress={() => {}} />
+            <Button title="Add" onPress={() => {console.log("LOG")}} />
           </View>
         </View>
       </View>
@@ -83,12 +83,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   textBox: {
-    flex: 1,
-    height: 80,
+    color: "black",
+    height: 20,
     borderColor: '#999',
     borderBottomWidth: 1,
-    marginRight: 10,
-    fontSize: 32,
+    fontSize: 16,
     backgroundColor: "white",
   },
   buttonContainer: {
