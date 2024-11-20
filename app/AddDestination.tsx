@@ -22,19 +22,18 @@ const AddDestination = () => {
 
   return (
     <View style={styles.container}>
-      {/* Background Image */}
-      {/* <Image source={require("../assets/images/tokyo.jpg")} style={styles.backgroundImage} /> */}
-
       {/* Popup Button */}
-      <View style={styles.buttonContainer}>
-            <View style={styles.button}>
-              <Button title="Show" onPress={show} />
-            </View>
+      <View style={styles.showContainer}>
+        <ImageBackground source={require("../assets/images/green.png")} style={styles.backgroundImage}>
+          <View style={styles.button}>
+            <Button title="Show" onPress={show} />
+          </View>
+        </ImageBackground>
       </View>
 
       <Modal style={styles.modal} animationType="fade" visible={visible} transparent={true} onRequestClose={hide}>
         <View style={styles.popup}>
-          <ImageBackground source={require("../assets/images/tokyo.jpg")} style={styles.backgroundImage}>
+          <ImageBackground source={require("../assets/images/blue.png")} style={styles.backgroundImage}>
             <View style={styles.inputContainer}>
               {/* Text Input For Location, Duration, Priority, and Notes */}
               <View style={styles.textContainer}>
@@ -129,6 +128,11 @@ const styles = StyleSheet.create({
     bottom: "10%",
     left: "10%",
     right: "10%",
+  },
+  showContainer: {
+    flexDirection: "column",
+    width: "100%",
+    height: "100%",
   }
 });
 
