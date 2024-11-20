@@ -1,6 +1,6 @@
 // AddDestination.tsx
-import React from 'react';
-import { View, TextInput, Button, StyleSheet, Text, Image } from 'react-native';
+import { useState } from 'react';
+import { View, TextInput, Button, StyleSheet, Text, Image, Modal } from 'react-native';
 import { useRouter } from "expo-router";
 
 const AddDestination = () => {
@@ -15,33 +15,50 @@ const AddDestination = () => {
     router.push("/HomeScreen")
   }
 
+  // Modal (Pop-up)
+  const [visible, setVisible] = useState(false);
+  const show = () => setVisible(true);
+  const hide = () => setVisible(false);
+
   return (
     <View style={styles.container}>
       {/* Background Image */}
       {/* <Image source={require("../assets/images/tokyo.jpg")} style={styles.backgroundImage} /> */}
+      <Image source={require("../assets/images/tokyo.jpg")} style={styles.backgroundImage} />
 
-      <View style={styles.inputContainer}>
-        {/* Text Input For Location, Duration, Priority, and Notes */}
-        <View style={styles.textContainer}>
-          <Text style={styles.text}>Location:</Text>
-          <TextInput style={styles.textBox} placeholder="Tokyo Sky Tree" placeholderTextColor="black"  />
-          <Text style={styles.text}>Duration:</Text>
-          <TextInput style={styles.textBox} placeholder="30 Minutes" placeholderTextColor="black" keyboardType="numeric"/>
-          <Text style={styles.text}>Priority:</Text>
-          <TextInput style={styles.textBox} placeholder="2" placeholderTextColor="black" keyboardType="numeric"/>
-          <Text style={styles.text}>Notes:</Text>
-          <TextInput style={styles.textBox} placeholder="Notes" placeholderTextColor="black"/>
-        </View>
-        {/* Add + Cancel Buttons */}
-        <View style={styles.buttonContainer}>
-          <View style={styles.button}>
-            <Button title="Cancel" onPress={cancelAdd} />
-          </View>
-          <View style={styles.button}>
-            <Button title="Add" onPress={() => {console.log("LOG")}} />
-          </View>
-        </View>
+      {/* Popup Button */}
+      <View style={styles.buttonContainer}>
+            <View style={styles.button}>
+              <Button title="Show" onPress={show} />
+            </View>
       </View>
+
+      <Modal animationType="fade" visible={visible} transparent={true} onRequestClose={hide}>
+        <View style={styles.popup}>
+          <View style={styles.inputContainer}>
+            {/* Text Input For Location, Duration, Priority, and Notes */}
+            <View style={styles.textContainer}>
+              <Text style={styles.text}>Location:</Text>
+              <TextInput style={styles.textBox} placeholder="Tokyo Sky Tree" placeholderTextColor="gray"  />
+              <Text style={styles.text}>Duration (Minutes):</Text>
+              <TextInput style={styles.textBox} placeholder="30 Minutes" placeholderTextColor="gray" keyboardType="numeric"/>
+              <Text style={styles.text}>Priority:</Text>
+              <TextInput style={styles.textBox} placeholder="2" placeholderTextColor="gray" keyboardType="numeric"/>
+              <Text style={styles.text}>Notes:</Text>
+              <TextInput style={styles.textBox} placeholder="Notes" placeholderTextColor="gray"/>
+            </View>
+            {/* Add + Cancel Buttons */}
+            <View style={styles.buttonContainer}>
+              <View style={styles.button}>
+                <Button title="Cancel" onPress={hide} />
+              </View>
+              <View style={styles.button}>
+                <Button title="Add" onPress={cancelAdd} />
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -97,6 +114,10 @@ const styles = StyleSheet.create({
   },
   button: {
     height: 50,
+  },
+  popup: {
+    width: "50%",
+    height: "50%",
   }
 });
 
