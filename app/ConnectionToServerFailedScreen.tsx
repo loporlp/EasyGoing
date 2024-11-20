@@ -1,6 +1,7 @@
 // ConnectionToServerFailedScreen.tsx
 import { View, Text, StyleSheet, Button } from "react-native";
 import { useRouter } from "expo-router";
+import { fetchData } from '../scripts/fetchData';
 
 const ConnectionToServerFailedScreen = () => {
     const router = useRouter();
@@ -9,13 +10,25 @@ const ConnectionToServerFailedScreen = () => {
         router.replace("/SignInScreen");
     }
 
+    const isServerRunning = async () => {
+        const isRunning = await fetchData();
+        if(isRunning){
+            returnToSignInScreen();
+        } else{
+            alert('Server is down. Please try again later.');
+        }
+        
+    }
+
     return (
         <View style={styles.container}>
             <Text style={styles.textError}>Connection to server failed!</Text>
-            <Button title="Retry" onPress={ returnToSignInScreen}></Button>
+            <Button title="Retry" onPress={ isServerRunning}></Button>
         </View>
     );
 }
+
+
 
 const styles = StyleSheet.create({
     container: {
