@@ -7,6 +7,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from "expo-router";
+import { fetchData } from '../scripts/fetchData';
 
 type SignInScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -38,19 +39,6 @@ const SignInScreen = () => {
     }
   };
 
-  const fetchData = async () => {
-    try {
-      // We should put this ip into a global constant
-      const response = await fetch('http://3.145.147.136:3000/api/serverstatus');
-      const data = await response.json();
-      console.log(data.message); // This should log "Server is Running"
-      return true;
-
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      return false;
-    }
-  };
 
   return (
     <View style={styles.container}>
