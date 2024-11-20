@@ -118,11 +118,13 @@ const styles = StyleSheet.create({
     height: 50,
   },
   popup: {
-    width: "80%",
+    width: "100%",
     height: "80%",
     position: "absolute",
     top: 60, //padding for status bar
-    left: "10%", //TODO: WHY IS THIS NOT APPLYING???
+    left: "10%",
+    right: "10%", //TODO: figure out why right isn't being used???
+    bottom: "10%",
     justifyContent: "center",
     alignItems: "center",
     flex: 1,
