@@ -6,21 +6,23 @@ const { height } = Dimensions.get('window');
 const AddEditDestinations = () => {
     return (
         <View style={styles.screenContainer}>
+
             {/* Image of Tokyo */}
             <Image style={styles.backgroundImage} source={require("../assets/images/tokyo.jpg")} />
+
             {/* Adds a dark overlay on the screen */}
             <View style={styles.darkOverlay} />
 
             <View style={styles.inputContainer}>
-                <TextInput placeholder="Dates" placeholderTextColor="lightgray" style={styles.input} />
+                <TextInput placeholder="Jul. 11 - Jul. 15" placeholderTextColor="black" style={styles.input} />
 
                 {/* Group of text fields for travelers and budget */}
                 <View style={styles.travelersAndBudgetTextField}>
-                    <TextInput placeholder="Travelers" placeholderTextColor="lightgray" keyboardType="numeric" style={styles.travelerInput} />
-                    <TextInput placeholder="Budget" placeholderTextColor="lightgray" keyboardType="numeric" style={styles.budgetInput} />
+                    <TextInput placeholder="1 traveler" placeholderTextColor="black" keyboardType="numeric" style={styles.travelerInput} />
+                    <TextInput placeholder="$1,700" placeholderTextColor="black" keyboardType="numeric" style={styles.budgetInput} />
                 </View>
 
-                {/* Divider Line Below the Inputs */}
+                {/* Divider line below the inputs */}
                 <View style={styles.divider} />
 
                 <View style={styles.destinationsContainer}>
@@ -30,9 +32,96 @@ const AddEditDestinations = () => {
                             <Text style={styles.buttonText}>+ Add</Text>
                         </TouchableOpacity>
                     </View>
+
+                    {/*The window where all of the destinations are shown*/}
                     <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
-                        <View style={styles.destinationElement}></View>
+
+                        {/* Tokyo Skytree */}
+                        <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
+                            {/* Background with opacity */}
+                            <View style={styles.backgroundContainer}>
+                                <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
+                            </View>
+
+                            <View style={styles.destinationContainer}>
+                                <Image style={styles.destinationImage} source={require("../assets/images/tokyoskytree.jpg")} />
+                                <View style={styles.destinationLabel}>
+                                    <Text style={styles.destinationName}>Tokyo Skytree</Text>
+                                    <Text style={styles.destinationDetails}>Duration: 2 hrs | Priority: 2</Text>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+
+                        {/* Akihabara Electric Town */}
+                        <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
+
+                            {/* Background with opacity */}
+                            <View style={styles.backgroundContainer}>
+                                <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
+                            </View>
+
+                            <View style={styles.destinationContainer}>
+                                <Image style={styles.destinationImage} source={require("../assets/images/AkihabaraElectricTown.jpg")} />
+                                <View style={styles.destinationLabel}>
+                                    <Text style={styles.destinationName}>Akihabara Electric Town</Text>
+                                    <Text style={styles.destinationDetails}>Duration: 6 hrs | Priority: 1</Text>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+
+                        {/* Pokemon Center Shibuya */}
+                        <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
+
+                            {/* Background with opacity */}
+                            <View style={styles.backgroundContainer}>
+                                <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
+                            </View>
+
+                            <View style={styles.destinationContainer}>
+                                <Image style={styles.destinationImage} source={require("../assets/images/PokemonCenterShibuya.png")} />
+                                <View style={styles.destinationLabel}>
+                                    <Text style={styles.destinationName}>Pokemon Center</Text>
+                                    <Text style={styles.destinationDetails}>Duration: 1.5 hrs | Priority: 3</Text>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+
+                        {/* Meiji Jingu */}
+                        <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
+
+                            {/* Background with opacity */}
+                            <View style={styles.backgroundContainer}>
+                                <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
+                            </View>
+
+                            <View style={styles.destinationContainer}>
+                                <Image style={styles.destinationImage} source={require("../assets/images/MeijiJingu.jpg")} />
+                                <View style={styles.destinationLabel}>
+                                    <Text style={styles.destinationName}>Meiji Jingu</Text>
+                                    <Text style={styles.destinationDetails}>Duration: 2 hrs | Priority: 3</Text>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+                        
+                        {/* Imperial Palace */}
+                        <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
+
+                            {/* Background with opacity */}
+                            <View style={styles.backgroundContainer}>
+                                <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
+                            </View>
+
+                            <View style={styles.destinationContainer}>
+                                <Image style={styles.destinationImage} source={require("../assets/images/ImperialPalace.jpg")} />
+                                <View style={styles.destinationLabel}>
+                                    <Text style={styles.destinationName}>Imperial Palace</Text>
+                                    <Text style={styles.destinationDetails}>Duration: 2 hrs | Priority: 4</Text>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
                     </ScrollView>
+
+                    {/* "Generate Plan" button */}
                     <TouchableOpacity style={styles.generatePlanButton} onPress={() => { }}>
                         <Text style={styles.buttonText}>Generate Plans</Text>
                     </TouchableOpacity>
@@ -85,6 +174,8 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         borderRadius: 10,
         paddingLeft: 20,
+        paddingTop: 5,
+        paddingBottom: 5,
     },
 
     travelerInput: {
@@ -97,6 +188,8 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         paddingLeft: 20,
         borderRadius: 10,
+        paddingTop: 5,
+        paddingBottom: 5,
     },
 
     budgetInput: {
@@ -108,6 +201,8 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         paddingLeft: 20,
         borderRadius: 10,
+        paddingTop: 5,
+        paddingBottom: 5,
     },
 
     travelersAndBudgetTextField: {
@@ -168,6 +263,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingLeft: 10,
         paddingRight: 10,
+        paddingBottom: 10,
     },
 
     scrollView: {
@@ -184,10 +280,51 @@ const styles = StyleSheet.create({
     destinationElement: {
         width: "100%",
         height: 75,
-        backgroundColor: "#24a6ad",
         marginTop: 10,
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 5,
+        position: "relative",
+    },
+
+    destinationImage: {
+        height: 70,
+        width: 70,
         borderRadius: 10,
-        opacity: 0.7,
+    },
+
+    destinationContainer: {
+        flexDirection: "row",
+        justifyContent: "center",
+    },
+
+    destinationLabel: {
+        flexDirection: "column",
+        marginLeft: 10,
+        justifyContent: "center",
+    },
+
+    destinationName: {
+        color: "white",
+        fontSize: 22,
+        fontWeight: "bold",
+    },
+
+    destinationDetails: {
+        color: "white",
+        fontSize: 18,
+    },
+
+    backgroundContainer: {
+        ...StyleSheet.absoluteFillObject,
+        borderRadius: 10,
+        overflow: "hidden",
+    },
+
+    backgroundOverlay: {
+        flex: 1,
+        backgroundColor: "#24a6ad",
+        borderRadius: 10,
     },
 
     // ==== GENERATE PLAN BUTTON ==== //

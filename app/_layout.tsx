@@ -1,7 +1,6 @@
 import { Stack } from "expo-router";
 import Flag from "react-native-flags";
 import { View, Text, StyleSheet } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
 
 export default function RootLayout() {
   return (
@@ -58,6 +57,21 @@ export default function RootLayout() {
               <Flag code="JP" style={styles.flag} />
             </View>
           ),
+          headerStyle: {
+            backgroundColor: '#24a6ad',
+          },
+          headerTintColor: "white",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
+
+      {/*Connection to server failed screen*/}
+      <Stack.Screen
+        name="ConnectionToServerFailedScreen"
+        options={{
+          title: "Error",
           headerStyle: {
             backgroundColor: '#24a6ad',
           },
