@@ -2,12 +2,18 @@
 import { View, Text, StyleSheet, Button } from "react-native";
 import { useRouter } from "expo-router";
 import { fetchData } from '../scripts/fetchData';
+import { CommonActions, useNavigation } from '@react-navigation/native';
 
 const ConnectionToServerFailedScreen = () => {
-    const router = useRouter();
+    const navigation = useNavigation();
 
     const returnToSignInScreen = () => {
-        router.replace("/SignInScreen");
+        navigation.dispatch(
+        CommonActions.reset({
+              index: 0,
+              routes: [{ name: "index" }] // redirects user to the "Sign In" page
+            })
+          );
     }
 
     const isServerRunning = async () => {
