@@ -10,10 +10,11 @@ const AutocompleteTextBox = () => {
     const [text, setText] = useState('');
     const [addresses, setAddresses] = useState([])
     const [selectedPlace, setSelectedPlace] = useState(null);
+    const [isSelectingAddress, setIsSelectingAddress] = useState(false);  // Track if an address is selected
 
     useEffect(() => {
         // If there's text, get addresses, otherwise, there's nothing
-        if (text) {
+        if (text && !isSelectingAddress) {
             getAddresses(text);
         } else {
             getAddresses([]);
@@ -48,6 +49,12 @@ const handleSelectAddress = (address) => {
     setAddresses([]);
     // Update the TextInput with the selected address
     setText(address.description);
+    // TODO: DON'T recall "bringing up more addresses"
+    setIsSelectingAddress(true);
+    // Temporarily re-enable effect after a short delay (e.g., after 1 second or on next input)
+    setTimeout(() => {
+        setIsSelectingAddress(false);
+    }, 1000);
   };
 
 return (
@@ -55,7 +62,11 @@ return (
         {/* Search textbox */}
         <TextInput
             value={text}
-            onChangeText={setText}
+            onChangeText={(newText) => {
+                setText(newText);
+                setSelectedPlace(null);
+                setIsSelectingAddress(false);
+            }}
             placeholder="Search"
             style={{
                 // TODO: Frontend modifications here
