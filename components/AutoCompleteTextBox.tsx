@@ -12,6 +12,7 @@ const AutocompleteTextBox = () => {
     const [selectedPlace, setSelectedPlace] = useState(null);
 
     useEffect(() => {
+        // If there's text, get addresses, otherwise, there's nothing
         if (text) {
             getAddresses(text);
         } else {
@@ -32,9 +33,8 @@ const AutocompleteTextBox = () => {
                 // Limit results to 3-5 items
                         setAddresses(response.data.predictions.slice(0, 5));
             } else {
-                // TODO: Need a way to show no route
+                // No addresses shown
                 setAddresses([]);
-                Alert.alert('Error', 'No addresses found');
             }
         } catch (error) {
             // TODO: Need something to handle errors
@@ -44,19 +44,21 @@ const AutocompleteTextBox = () => {
     };
 
 const handleSelectAddress = (address) => {
+    // Clear the suggestions once an address is selected
+    setAddresses([]);
     // Update the TextInput with the selected address
     setText(address.description);
-    setAddresses([]); // Clear the suggestions once an address is selected
   };
 
-// TODO: Show the list of addresses (limit it to 3-5)
 return (
     <View>
+        {/* Search textbox */}
         <TextInput
             value={text}
             onChangeText={setText}
             placeholder="Search"
             style={{
+                // TODO: Frontend modifications here
                 borderBottomWidth: 1,
                 borderColor: 'gray',
                 marginBottom: 10,
@@ -74,11 +76,12 @@ return (
                     <TouchableOpacity
                         onPress={() => handleSelectAddress(item)} // Handle address selection
                         style={{
+                            // TODO: Frontend modifications here
                             padding: 10,
                             borderBottomWidth: 1,
                             borderColor: 'gray',
                         }}
-                        >
+                    >
                         <Text>{item.description}</Text>
                     </TouchableOpacity>
                  )}
