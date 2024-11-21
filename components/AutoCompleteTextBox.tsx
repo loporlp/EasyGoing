@@ -1,84 +1,91 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity } from 'react-native';
+import axios from 'axios';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import 'react-native-get-random-values';
 
+const apiKey = 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI';
+
 const AutocompleteTextBox = () => {
-  const [selectedPlace, setSelectedPlace] = useState(null);
+    const [text, setText] = useState('');
+    const [addresses, setAddresses] = useState([])
+    const [selectedPlace, setSelectedPlace] = useState(null);
 
-  return (
-    <View style={styles.container}>
-      <GooglePlacesAutocomplete
-        placeholder="Search"
-        onPress={(data, details = null) => {
-            setSelectedPlace(details);
-            console.log("Place Selected:", data); // Logs the basic selected data
-            console.log("Place Details:", details); // Logs the full details (if fetched)
-         }}
-        query={{
-            key: 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI',
-            language: 'en',
-            types: '(address)'
-        }}
-        fetchDetails={true}
-        onFail={(error) => console.error(error)}
-        debounce={200} // Add a small delay for better performance
-        styles={{
-          textInputContainer: {
-            width: '100%',
-            zIndex: 2,
-          },
-          textInput: {
-            height: 40,
-            borderColor: '#ccc',
-            borderWidth: 1,
-            paddingLeft: 10,
-            fontSize: 16,
-            borderRadius: 5,
-          },
-          predefinedPlacesDescription: {
-            color: '#1faadb',
-          },
-        }}
-        inputProps={{
-          autoCapitalize: 'none',
-          autoCorrect: true,  // Enable autocorrect
-          autoComplete: 'on', // This should be enabled to trigger autocomplete behavior
-          returnKeyType: 'search',
-        }}
-      />
+    useEffect(() => {
+        if (text) {
+            getAddresses(text);
+        } else {
+            getAddresses([]);
+        }
+        }, [text]);
 
-      {/* Display the selected place's details */}
-      {selectedPlace && (
-        <View style={styles.detailsContainer}>
-          <Text style={styles.details}>Place Name: {selectedPlace.name}</Text>
-          <Text style={styles.details}>Address: {selectedPlace.formatted_address}</Text>
-          <Text style={styles.details}>Coordinates: {selectedPlace.geometry.location.lat}, {selectedPlace.geometry.location.lng}</Text>
-        </View>
-      )}
+    const getAddresses = async (text) => {
+        try {
+            // The API Call
+            const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${apiKey}`
+
+            // Make the request
+            const response = await axios.get(url);
+
+            // Are there address results?
+            if (response.data.predictions && response.data.predictions.length > 0) {
+                // Limit results to 3-5 items
+                        setAddresses(response.data.predictions.slice(0, 5));
+            } else {
+                // TODO: Need a way to show no route
+                setAddresses([]);
+                Alert.alert('Error', 'No addresses found');
+            }
+        } catch (error) {
+            // TODO: Need something to handle errors
+            console.error(error);
+            Alert.alert('Error', 'Failed to fetch addresses');
+        }
+    };
+
+const handleSelectAddress = (address) => {
+    // Update the TextInput with the selected address
+    setText(address.description);
+    setAddresses([]); // Clear the suggestions once an address is selected
+  };
+
+// TODO: Show the list of addresses (limit it to 3-5)
+return (
+    <View>
+        <TextInput
+            value={text}
+            onChangeText={setText}
+            placeholder="Search"
+            style={{
+                borderBottomWidth: 1,
+                borderColor: 'gray',
+                marginBottom: 10,
+                paddingLeft: 10,
+                height: 40,
+            }}
+        />
+
+        {/* Render the list of suggestions */}
+        {addresses.length > 0 && (
+            <FlatList
+                data={addresses}
+                keyExtractor={(item) => item.place_id}
+                renderItem={({ item }) => (
+                    <TouchableOpacity
+                        onPress={() => handleSelectAddress(item)} // Handle address selection
+                        style={{
+                            padding: 10,
+                            borderBottomWidth: 1,
+                            borderColor: 'gray',
+                        }}
+                        >
+                        <Text>{item.description}</Text>
+                    </TouchableOpacity>
+                 )}
+            />
+        )}
     </View>
-  );
+    );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  detailsContainer: {
-    marginTop: 20,
-    padding: 10,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    width: '100%',
-  },
-  details: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-});
 
 export default AutocompleteTextBox;
