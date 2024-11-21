@@ -21,7 +21,7 @@ const getRoute = async (origin, destination, mode) => {
         // The API Call
         const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}&alternatives=true&key=${apiKey}`;
 
-        // make the request
+        // Make the request
         const response = await axios.get(url);
 
         // Is it a valid route?
@@ -65,11 +65,11 @@ return (
             longitudeDelta: 0.1,
         }}>
 
-    {/* Add markers for Origin and Destination */}
+    {/* Markers for Origin and Destination */}
     <Marker coordinate={origin} title="Origin" />
     <Marker coordinate={destination} title="Destination" />
 
-    {/* Draw the line for the route */}
+    {/* Route Line */}
     {coordinates.length > 0 && (
         <Polyline
             coordinates={coordinates}
@@ -79,7 +79,7 @@ return (
         )}
     </MapView>
 
-    {/* Buttons to change the transportation mode */}
+    {/* Transportation Mode Buttons */}
     <View style={styles.buttonContainer}>
         <Button title="Driving" onPress={() => handleModeChange('driving')} />
         <Button title="Walking" onPress={() => handleModeChange('walking')} />
