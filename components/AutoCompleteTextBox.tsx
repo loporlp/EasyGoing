@@ -1,105 +1,113 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity, Alert } from 'react-native';
 import axios from 'axios';
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-import 'react-native-get-random-values';
 
 const apiKey = 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI';
 
-const AutocompleteTextBox = () => {
+const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTextColor }) => {
     const [text, setText] = useState('');
-    const [addresses, setAddresses] = useState([])
-    const [selectedPlace, setSelectedPlace] = useState(null);
-    const [isSelectingAddress, setIsSelectingAddress] = useState(false);  // Track if an address is selected
+    const [addresses, setAddresses] = useState([]);
+    const [isSelectingAddress, setIsSelectingAddress] = useState(false); // Track if an address is selected
 
     useEffect(() => {
-        // If there's text, get addresses, otherwise, there's nothing
+        // Fetch addresses only if text is provided and not selecting an address
         if (text && !isSelectingAddress) {
             getAddresses(text);
         } else {
-            getAddresses([]);
+            setAddresses([]); // Clear addresses if no text or selecting address
         }
-        }, [text]);
+    }, [text, isSelectingAddress]);
 
     const getAddresses = async (text) => {
         try {
-            // The API Call
-            const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${apiKey}`
-
-            // Make the request
+            const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${apiKey}`;
             const response = await axios.get(url);
 
-            // Are there address results?
             if (response.data.predictions && response.data.predictions.length > 0) {
-                // Limit results to 3-5 items
-                        setAddresses(response.data.predictions.slice(0, 5));
+                setAddresses(response.data.predictions.slice(0, 5)); // Limit to 5 results
             } else {
-                // No addresses shown
-                setAddresses([]);
+                setAddresses([]); // Clear if no results
             }
         } catch (error) {
-            // TODO: Need something to handle errors
-            console.error(error);
+            console.error('Error fetching autocomplete addresses:', error);
             Alert.alert('Error', 'Failed to fetch addresses');
         }
     };
 
-const handleSelectAddress = (address) => {
-    // Clear the suggestions once an address is selected
-    setAddresses([]);
-    // Update the TextInput with the selected address
-    setText(address.description);
-    // TODO: DON'T recall "bringing up more addresses"
-    setIsSelectingAddress(true);
-    // Temporarily re-enable effect after a short delay (e.g., after 1 second or on next input)
-    setTimeout(() => {
-        setIsSelectingAddress(false);
-    }, 1000);
-  };
+    const handleSelectAddress = (address) => {
+        setAddresses([]); // Clear suggestions
+        setText(address.description); // Set the selected address in the TextInput
+        setIsSelectingAddress(true);
+        setTimeout(() => {
+            setIsSelectingAddress(false); // Re-enable address fetching after a short delay
+        }, 1000);
+    };
 
-return (
-    <View>
-        {/* Search textbox */}
-        <TextInput
-            value={text}
-            onChangeText={(newText) => {
-                setText(newText);
-                setSelectedPlace(null);
-                setIsSelectingAddress(false);
-            }}
-            placeholder="Search"
-            style={{
-                // TODO: Frontend modifications here
-                borderBottomWidth: 1,
-                borderColor: 'gray',
-                marginBottom: 10,
-                paddingLeft: 10,
-                height: 40,
-            }}
-        />
-
-        {/* Render the list of suggestions */}
-        {addresses.length > 0 && (
-            <FlatList
-                data={addresses}
-                keyExtractor={(item) => item.place_id}
-                renderItem={({ item }) => (
-                    <TouchableOpacity
-                        onPress={() => handleSelectAddress(item)} // Handle address selection
-                        style={{
-                            // TODO: Frontend modifications here
-                            padding: 10,
-                            borderBottomWidth: 1,
-                            borderColor: 'gray',
-                        }}
-                    >
-                        <Text>{item.description}</Text>
-                    </TouchableOpacity>
-                 )}
+    return (
+        <View style={[styles.container, style]}>
+            {/* Search textbox */}
+            <TextInput
+                value={text}
+                onChangeText={(newText) => {
+                    setText(newText);
+                    setIsSelectingAddress(false);
+                    setAddresses([]); // Clear suggestions as user types
+                }}
+                placeholder={placeholder}
+                placeholderTextColor={placeholderTextColor}
+                style={[styles.input, style]}
             />
-        )}
-    </View>
+
+            {/* Render the list of suggestions */}
+            {addresses.length > 0 && (
+                <FlatList
+                    data={addresses}
+                    keyExtractor={(item) => item.place_id}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity
+                            onPress={() => handleSelectAddress(item)} // Handle address selection
+                            style={styles.suggestionItem}
+                        >
+                            <Text>{item.description}</Text>
+                        </TouchableOpacity>
+                    )}
+                    style={styles.suggestionList}
+                />
+            )}
+        </View>
     );
 };
+
+// Default styles for the component
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        position: 'relative',
+    },
+    input: {
+        height: 40,
+        borderColor: '#999',
+        borderBottomWidth: 1,
+        fontSize: 16,
+        paddingLeft: 20,
+        borderRadius: 10,
+        marginBottom: 10,
+    },
+    suggestionList: {
+        position: 'absolute',
+        top: 40, // Positioning the list directly below the TextInput
+        left: 0,
+        right: 0,
+        zIndex: 1, // Ensure the suggestions list appears above the TextInput
+        backgroundColor: 'white', // Make sure the list has a background color to separate from the underlying UI
+        borderColor: '#ddd',
+        borderTopWidth: 1, // Optional, to separate suggestions from the input box visually
+    },
+    suggestionItem: {
+        padding: 10,
+        borderBottomWidth: 1,
+        borderColor: 'gray',
+    },
+});
 
 export default AutocompleteTextBox;

@@ -1,6 +1,7 @@
 // CreateNewTrip.tsx
 import { View, StyleSheet, TouchableOpacity, Text, Image, TextInput } from 'react-native';
 import { useRouter } from "expo-router";
+import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 
 export const head = () => ({
     title: "Create New Trip"
@@ -14,6 +15,17 @@ const CreateNewTrip = () => {
     const startPlanning = () => {
         router.push("/AddEditDestinations")
     }
+
+    const handlePlaceSelect = (place) => {
+        // Extract latitude and longitude from the selected place details
+        if (place && place.geometry && place.geometry.location) {
+          setSelectedCoordinates({
+            latitude: place.geometry.location.lat,
+            longitude: place.geometry.location.lng,
+          });
+        }
+      };
+
     return (
         <View style={styles.container}>
 
@@ -27,7 +39,7 @@ const CreateNewTrip = () => {
             <View style={styles.createTripContainer}>
                 <Text style={styles.createTripLabel}>Where are we{" "}
                     <Text style={styles.highlightText}>going</Text>, Traveler?</Text>
-                <TextInput placeholder="Destination" placeholderTextColor="lightgray" style={styles.input} />
+                <AutocompleteTextBox onPlaceSelect={handlePlaceSelect} placeholder="Destination" placeholderTextColor="lightgray" style={styles.input}/>
                 <TextInput placeholder="Dates" placeholderTextColor="lightgray" style={styles.input} />
                 <View style={styles.travelersAndBudgetTextField}>
                     <TextInput placeholder="Travelers" placeholderTextColor="lightgray" keyboardType="numeric" style={styles.travelerInput} />
