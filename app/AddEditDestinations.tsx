@@ -1,11 +1,18 @@
 // AddEditDestinations.tsx
-import { View, Image, StyleSheet, TextInput, Text, TouchableOpacity, ScrollView, Dimensions } from "react-native";
+import { useState } from 'react';
+import { View, Image, StyleSheet, TextInput, Text, TouchableOpacity, ScrollView, Dimensions, Modal, ImageBackground, Button } from "react-native";
 import { useRouter } from "expo-router";
 
 const { height } = Dimensions.get('window');
 
 const AddEditDestinations = () => {
     const router = useRouter();
+
+    // Modal (Pop-up)
+    const [visible, setVisible] = useState(false);
+    const show = () => setVisible(true);
+    const hide = () => setVisible(false);
+
     return (
         <View style={styles.screenContainer}>
 
@@ -30,9 +37,7 @@ const AddEditDestinations = () => {
                 <View style={styles.destinationsContainer}>
                     <View style={styles.addDestinationRow}>
                         <Text style={styles.text}>Destinations</Text>
-                        <TouchableOpacity style={styles.addButton} onPress={() => { 
-                            router.push("/AddDestination");
-                        }}>
+                        <TouchableOpacity style={styles.addButton} onPress={show}>
                             <Text style={styles.buttonText}>+ Add</Text>
                         </TouchableOpacity>
                     </View>
@@ -131,6 +136,35 @@ const AddEditDestinations = () => {
                     <TouchableOpacity style={styles.generatePlanButton} onPress={() => { }}>
                         <Text style={styles.buttonText}>Generate Plans</Text>
                     </TouchableOpacity>
+
+                    <Modal animationType="fade" visible={visible} transparent={true} onRequestClose={hide}>
+                        <View style={styles.popup}>
+                            <ImageBackground source={require("../assets/images/blue.png")} style={styles.backgroundImage}>
+                                <View style={styles.inputContainer}>
+                                    {/* Text Input For Location, Duration, Priority, and Notes */}
+                                    <View style={styles.textContainer}>
+                                        <Text style={styles.text}>Location:</Text>
+                                        <TextInput style={styles.textBox} placeholder="Tokyo Sky Tree" placeholderTextColor="gray"  />
+                                        <Text style={styles.text}>Duration (Minutes):</Text>
+                                        <TextInput style={styles.textBox} placeholder="30 Minutes" placeholderTextColor="gray" keyboardType="numeric"/>
+                                        <Text style={styles.text}>Priority:</Text>
+                                        <TextInput style={styles.textBox} placeholder="2" placeholderTextColor="gray" keyboardType="numeric"/>
+                                        <Text style={styles.text}>Notes:</Text>
+                                        <TextInput style={styles.textBox} placeholder="Notes" placeholderTextColor="gray"/>
+                                    </View>
+                                    {/* Add + Cancel Buttons TODO: figure out why these buttons are overlayed on the text box*/}
+                                    <View style={styles.buttonContainer}>
+                                        <View style={styles.button}>
+                                        <Button title="Cancel" onPress={hide} />
+                                        </View>
+                                        <View style={styles.button}>
+                                        <Button title="Add" onPress={hide} />
+                                        </View>
+                                    </View>
+                                </View>
+                            </ImageBackground>
+                        </View>
+                    </Modal>
                 </View>
             </View>
         </View>
@@ -348,6 +382,44 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 5,
         alignSelf: "center",
+    },
+    popup: {
+        width: "100%",
+        height: "75%",
+        position: "absolute",
+        top: 60, //padding for status bar
+        bottom: "10%",
+        justifyContent: "center",
+        alignItems: "center",
+        flex: 1,
+    },
+    textBox: {
+        color: "black",
+        height: 40,
+        borderColor: "purple",
+        borderWidth: 1,
+        fontSize: 16,
+        backgroundColor: "white",
+        alignSelf: 'stretch',
+        textAlign: 'left',
+    },
+    textContainer: {
+        flexDirection: "column",
+        justifyContent: "space-between",
+        width: "100%",
+        height: "50%",
+        marginBottom: 20,
+    },
+    buttonContainer: {
+        position: "relative",
+        top: 185,
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        width: "100%",
+        height: "20%",
+    },
+    button: {
+        height: 50,
     }
 });
 
