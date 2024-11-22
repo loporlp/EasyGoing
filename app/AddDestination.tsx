@@ -46,7 +46,7 @@ const AddDestination = () => {
                 <Text style={styles.text}>Notes:</Text>
                 <TextInput style={styles.textBox} placeholder="Notes" placeholderTextColor="gray"/>
               </View>
-              {/* Add + Cancel Buttons TODO: figure out why these buttons are overlayed on the text box*/}
+              {/* Add + Cancel Buttons */}
               <View style={styles.buttonContainer}>
                 <View style={styles.button}>
                   <Button title="Cancel" onPress={hide} />
@@ -103,13 +103,17 @@ const styles = StyleSheet.create({
   },
   textBox: {
     color: "black",
-    height: 20,
-    borderColor: '#999',
-    borderBottomWidth: 1,
+    height: 40,
+    borderColor: "purple",
+    borderWidth: 1,
     fontSize: 16,
     backgroundColor: "white",
+    alignSelf: 'stretch',
+    textAlign: 'left',
   },
   buttonContainer: {
+    position: "relative",
+    top: 120,
     flexDirection: "row",
     justifyContent: "flex-end",
     width: "100%",
