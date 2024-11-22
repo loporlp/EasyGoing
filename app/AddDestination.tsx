@@ -103,11 +103,13 @@ const styles = StyleSheet.create({
   },
   textBox: {
     color: "black",
-    height: 20,
-    borderColor: '#999',
-    borderBottomWidth: 1,
+    height: 40,
+    borderColor: "purple",
+    borderWidth: 1,
     fontSize: 16,
     backgroundColor: "white",
+    alignSelf: 'stretch',
+    textAlign: 'left',
   },
   buttonContainer: {
     flexDirection: "row",
