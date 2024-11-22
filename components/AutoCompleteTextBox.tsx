@@ -59,7 +59,7 @@ const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTex
                 }}
                 placeholder={placeholder}
                 placeholderTextColor={placeholderTextColor}
-                style={[styles.input, style]}
+                style={styles.input}
             />
 
             {/* Render the list of suggestions */}
@@ -91,11 +91,14 @@ const styles = StyleSheet.create({
         height: 40,
         borderColor: '#999',
         borderBottomWidth: 1,
+        marginBottom: 20,
         fontSize: 16,
-        paddingLeft: 20,
+        backgroundColor: "white",
         borderRadius: 10,
-        marginBottom: 10,
+        paddingVertical: 5,
+        paddingLeft: 20,
     },
+
     suggestionList: {
         position: 'absolute',
         top: 40, // Positioning the list directly below the TextInput
@@ -105,6 +108,8 @@ const styles = StyleSheet.create({
         backgroundColor: 'white', // Make sure the list has a background color to separate from the underlying UI
         borderColor: '#ddd',
         borderTopWidth: 1, // Optional, to separate suggestions from the input box visually
+        borderBottomLeftRadius: 15,
+        borderBottomRightRadius: 15,
     },
     suggestionItem: {
         padding: 10,

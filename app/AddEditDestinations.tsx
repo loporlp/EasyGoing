@@ -16,7 +16,7 @@ const AddEditDestinations = () => {
             <View style={styles.darkOverlay} />
 
             <View style={styles.inputContainer}>
-                <TextInput placeholder="Jul. 11 - Jul. 15" placeholderTextColor="black" style={styles.input} />
+                <TextInput placeholder="Fri, Jul. 11 - Tue, Jul. 15" placeholderTextColor="black" style={styles.input} />
 
                 {/* Group of text fields for travelers and budget */}
                 <View style={styles.travelersAndBudgetTextField}>
