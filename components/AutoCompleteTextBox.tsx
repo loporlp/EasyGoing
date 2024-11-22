@@ -8,15 +8,17 @@ const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTex
     const [text, setText] = useState('');
     const [addresses, setAddresses] = useState([]);
     const [isSelectingAddress, setIsSelectingAddress] = useState(false); // Track if an address is selected
+    const [previousText, setPreviousText] = useState(''); // Track previous text
 
     useEffect(() => {
-        // Fetch addresses only if text is provided and not selecting an address
-        if (text && !isSelectingAddress) {
+        // Fetch addresses only if text is provided and not selecting an address AND did not just select an address
+        if (text && !isSelectingAddress && text !== previousText) {
             getAddresses(text);
+            setPreviousText(text);
         } else {
             setAddresses([]); // Clear addresses if no text or selecting address
         }
-    }, [text, isSelectingAddress]);
+    }, [text, isSelectingAddress, previousText]);
 
     const getAddresses = async (text) => {
         try {
@@ -38,6 +40,8 @@ const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTex
         setAddresses([]); // Clear suggestions
         setText(address.description); // Set the selected address in the TextInput
         setIsSelectingAddress(true);
+        setPreviousText(address.description);
+
         setTimeout(() => {
             setIsSelectingAddress(false); // Re-enable address fetching after a short delay
         }, 1000);
