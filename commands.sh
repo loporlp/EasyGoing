@@ -11,6 +11,7 @@ npm install react-native-get-random-values
 npm install react-native-google-places-autocomplete
 npx expo install react-native-screens react-native-safe-area-context
 npm install react-native-calendar-picker
+npm install react-native-vector-icons@latest
 
 # For the Routes
 npm install react-native-maps axios
