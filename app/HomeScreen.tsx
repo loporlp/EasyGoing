@@ -1,6 +1,6 @@
 // HomeScreen.tsx
-import React from 'react';
-import { View, Button, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Button, StyleSheet, TouchableOpacity, Text, Image, } from 'react-native';
 import { useRouter } from "expo-router";
 import {getIdToken} from '../scripts/getFirebaseID'
 
@@ -24,13 +24,33 @@ const HomeScreen = () => {
     router.push("/CreateNewTrip")
   }
 
+  // Gets the username
+  const [username, setUsername] = useState<string>('');
+
+  useEffect(() => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (user && user.email) {
+      const email = user.email;
+      const extractedUsername = email.split('@')[0]; // Extract the part before the "@"
+      setUsername(extractedUsername); // Set the extracted username into the state
+    }
+  }, []);
+
   return (
     <View style={styles.container}>
+      {/* Background Image */}
+      <Image style={styles.backgroundImage} source={require("../assets/images/landscape.jpg")} />
+      <View style={styles.darkOverlay} />
+
       {/* Account Button in the Top Right */}
       <TouchableOpacity style={styles.accountButton} onPress={navigateToAccount}>
-        <Text style={styles.accountButtonText}>Account</Text>
+        <Icon name="account-circle" size={50} color="lightgray" />
       </TouchableOpacity>
 
+      <View style={styles.screenContainer}>
+        <Text style={styles.greetingText}>Hello, {username}!</Text>
 
       {/* Two Buttons in the Middle */}
       <View style={styles.buttonContainer}>
@@ -38,6 +58,7 @@ const HomeScreen = () => {
         <View style={{ height: 20 }} />
         <Button title="Button 2" onPress={callProtectedApi} />
       </View>
+
     </View>
   );
 };
@@ -88,18 +109,86 @@ const styles = StyleSheet.create({
     paddingTop: 60, // For status bar space
     backgroundColor: '#fff',
   },
+
+  backgroundImage: {
+    width: "100%",
+    height: 300,
+    position: "absolute",
+    resizeMode: "cover",
+  },
+
+  darkOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: 300,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+  },
+
+  screenContainer: {
+    flex: 1,
+    flexDirection: "column",
+    marginLeft: 20,
+    marginRight: 20,
+  },
+
+  greetingText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 25,
+    marginTop: 20,
+  },
+
   accountButton: {
     position: 'absolute',
     top: 20,
     right: 20,
   },
+
   accountButtonText: {
     fontSize: 16,
     color: 'blue',
   },
+
+  tripRow: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    paddingTop: 50,
+  },
+
+  tripText: {
+    textAlign: "center",
+    color: "white",
+    fontWeight: "bold",
+  },
+
+  tripButton: {
+    width: 140,
+    height: 80,
+    backgroundColor: "#24a6ad",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 20,
+    borderColor: "#24a6ad",
+    borderWidth: 3,
+
+  },
+
+  bottomScreen: {
+    position: "absolute",
+    backgroundColor: "white",
+    top: 270,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    padding: 20,
+  },
+
   buttonContainer: {
     flex: 1,
-    justifyContent: 'center',
     paddingHorizontal: 20,
   },
 });

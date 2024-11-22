@@ -10,7 +10,7 @@ npm install react-native-maps
 npm install react-native-get-random-values
 npm install react-native-google-places-autocomplete
 npx expo install react-native-screens react-native-safe-area-context
-npm install react-native-calendar-picker --legacy-peer-deps
+npm install react-native-calendar-picker
 
 # For the Routes
 npm install react-native-maps axios
