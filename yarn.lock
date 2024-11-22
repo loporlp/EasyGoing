@@ -2735,6 +2735,14 @@
   resolved "https://registry.npmjs.org/@types/prop-types/-/prop-types-15.7.13.tgz"
   integrity sha512-hCZTSvwbzWGvhqxp/RqVqwU999pBf2vp7hzIjiYOsl8wqOmUxkQ6ddw1cV3l8811+kdUFus/q4d1Y3E3SyEifA==
 
+"@types/react-native-calendar-picker@^8.0.0":
+  version "8.0.0"
+  resolved "https://registry.npmjs.org/@types/react-native-calendar-picker/-/react-native-calendar-picker-8.0.0.tgz"
+  integrity sha512-Mymc+MxHx2ue+YoTdF6nnu9V7r2Sxn2eecFZ5qX3B+87MAMBAd7+/jaJzfUVEkIeb8rQKhWiYI1QvvN+hCglXw==
+  dependencies:
+    "@types/react" "*"
+    react-native "*"
+
 "@types/react-test-renderer@^18.3.0":
   version "18.3.0"
   resolved "https://registry.npmjs.org/@types/react-test-renderer/-/react-test-renderer-18.3.0.tgz"
@@ -6525,6 +6533,11 @@ mkdirp@^1.0.4:
   version "1.0.4"
   resolved "https://registry.npmjs.org/mkdirp/-/mkdirp-1.0.4.tgz"
   integrity sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==
+
+moment@^2.30.1:
+  version "2.30.1"
+  resolved "https://registry.npmjs.org/moment/-/moment-2.30.1.tgz"
+  integrity sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==
 
 mrmime@^1.0.0:
   version "1.0.1"
