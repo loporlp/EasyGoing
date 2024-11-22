@@ -46,7 +46,7 @@ const AddDestination = () => {
                 <Text style={styles.text}>Notes:</Text>
                 <TextInput style={styles.textBox} placeholder="Notes" placeholderTextColor="gray"/>
               </View>
-              {/* Add + Cancel Buttons TODO: figure out why these buttons are overlayed on the text box*/}
+              {/* Add + Cancel Buttons */}
               <View style={styles.buttonContainer}>
                 <View style={styles.button}>
                   <Button title="Cancel" onPress={hide} />
