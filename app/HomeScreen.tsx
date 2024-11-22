@@ -34,8 +34,8 @@ const HomeScreen = () => {
 
     if (user && user.email) {
       const email = user.email;
-      const extractedUsername = email.split('@')[0]; // Extract the part before the "@"
-      setUsername(extractedUsername); // Set the extracted username into the state
+      const extractedUsername = email.split('@')[0];
+      setUsername(extractedUsername);
     }
   }, []);
 
