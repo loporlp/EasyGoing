@@ -9,6 +9,7 @@ import CreateAccountScreen from './CreateAccountScreen';
 import HomeScreen from './HomeScreen';
 import HomeScreenTest from './HomeScreen_API_Test'
 import { RootStackParamList } from './types';
+import HomeScreen from './HomeScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -44,7 +45,7 @@ const Index = () => {
           // User is signed in
           <Stack.Screen
             name="Home"
-            component={AddDestination}
+            component={HomeScreen}
             options={{ headerShown: false }}
           />
         ) : (
@@ -57,7 +58,7 @@ const Index = () => {
             />
             <Stack.Screen
               name="CreateAccount"
-              component={AddDestination}
+              component={CreateAccountScreen}
               options={{ headerShown: false }}
             />
           </>
