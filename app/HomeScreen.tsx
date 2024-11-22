@@ -1,28 +1,41 @@
 // HomeScreen.tsx
 import React from 'react';
 import { View, Button, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import { signOut } from 'firebase/auth';
-import { auth } from '../firebaseConfig';
+import { useRouter } from "expo-router";
 
 const HomeScreen = () => {
-  const handleSignOut = () => {
-    signOut(auth).catch((error) => {
-      console.error('Sign out error:', error);
-    });
-  };
+
+  // Sets up navigations
+  const router = useRouter();
+
+  /**
+   * Will navigate to the "Account" screen after link is pressed.
+   */
+  const navigateToAccount = () => {
+    router.push("/Account")
+  }
+
+  /**
+   * Navigates to the "Create New Trip" page
+   */
+  const createNewTrip = () => {
+    console.log("Going to 'Create New Trip'...")
+    router.push("/CreateNewTrip")
+  }
 
   return (
     <View style={styles.container}>
       {/* Account Button in the Top Right */}
-      <TouchableOpacity style={styles.accountButton} onPress={handleSignOut}>
+      <TouchableOpacity style={styles.accountButton} onPress={navigateToAccount}>
         <Text style={styles.accountButtonText}>Account</Text>
       </TouchableOpacity>
 
+
       {/* Two Buttons in the Middle */}
       <View style={styles.buttonContainer}>
-        <Button title="Button 1" onPress={() => {}} />
+        <Button title="New Trip" onPress={createNewTrip} />
         <View style={{ height: 20 }} />
-        <Button title="Button 2" onPress={() => {}} />
+        <Button title="Edit Existing Trip" onPress={() => {}} />
       </View>
     </View>
   );
