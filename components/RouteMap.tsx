@@ -13,6 +13,7 @@ const RouteMap = () => {
     const [mode, setMode] = useState('driving'); // Can use 'walking', 'driving', 'bicycling', and 'transit'
 
     useEffect(() => {
+        setCoordinates([]);
         getRoute(origin, destination, mode);
     }, [origin, destination, mode]);
 
