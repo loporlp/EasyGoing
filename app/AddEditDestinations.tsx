@@ -1,9 +1,11 @@
 // AddEditDestinations.tsx
 import { View, Image, StyleSheet, TextInput, Text, TouchableOpacity, ScrollView, Dimensions } from "react-native";
+import { useRouter } from "expo-router";
 
 const { height } = Dimensions.get('window');
 
 const AddEditDestinations = () => {
+    const router = useRouter();
     return (
         <View style={styles.screenContainer}>
 
@@ -37,7 +39,9 @@ const AddEditDestinations = () => {
                     <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
 
                         {/* Tokyo Skytree */}
-                        <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
+                        <TouchableOpacity style={styles.destinationElement} onPress={() => { 
+                            router.push("/HomeScreen_API_Test")
+                        }}>
                             {/* Background with opacity */}
                             <View style={styles.backgroundContainer}>
                                 <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
