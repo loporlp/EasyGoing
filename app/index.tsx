@@ -51,7 +51,7 @@ const Index = () => {
           <>
             <Stack.Screen
               name="SignIn"
-              component={AddDestination}
+              component={SignInScreen} // TODO: Change back to SignInScreen
               options={{ headerShown: false }}
             />
             <Stack.Screen
