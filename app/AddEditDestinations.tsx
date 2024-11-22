@@ -30,7 +30,9 @@ const AddEditDestinations = () => {
                 <View style={styles.destinationsContainer}>
                     <View style={styles.addDestinationRow}>
                         <Text style={styles.text}>Destinations</Text>
-                        <TouchableOpacity style={styles.addButton} onPress={() => { }}>
+                        <TouchableOpacity style={styles.addButton} onPress={() => { 
+                            router.push("/AddDestination");
+                        }}>
                             <Text style={styles.buttonText}>+ Add</Text>
                         </TouchableOpacity>
                     </View>

@@ -6,9 +6,9 @@ import { View, ActivityIndicator } from 'react-native';
 import { auth } from '../firebaseConfig';
 import SignInScreen from './SignInScreen';
 import CreateAccountScreen from './CreateAccountScreen';
-import HomeScreen from './HomeScreen';
-import HomeScreenTest from './HomeScreen_API_Test'
+import AddDestination from './AddDestination';
 import { RootStackParamList } from './types';
+import HomeScreen from './HomeScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
