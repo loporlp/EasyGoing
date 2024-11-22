@@ -85,7 +85,6 @@ const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTex
 // Default styles for the component
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
         position: 'relative',
     },
     input: {
