@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity, Alert, ViewStyle, TextStyle} from 'react-native';
 import axios from 'axios';
 
 const apiKey = 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI';
 
-const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTextColor }) => {
+type AutocompleteTextBoxProps = {
+    style?: ViewStyle | TextStyle; // TODO: Need a default style
+    onPlaceSelect?: (address: { description: string; place_id: string }) => void; // Callback when a place is selected
+    placeholder: string;
+    placeholderTextColor: string;
+  };
+
+const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTextColor} : AutocompleteTextBoxProps) => {
     const [text, setText] = useState('');
     const [addresses, setAddresses] = useState([]);
     const [isSelectingAddress, setIsSelectingAddress] = useState(false); // Track if an address is selected
@@ -20,7 +27,7 @@ const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTex
         }
     }, [text, isSelectingAddress, previousText]);
 
-    const getAddresses = async (text) => {
+    const getAddresses = async (text : string) => {
         try {
             const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${apiKey}`;
             const response = await axios.get(url);
@@ -36,7 +43,12 @@ const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTex
         }
     };
 
-    const handleSelectAddress = (address) => {
+    type Address = {
+        place_id: string; // TODO: maybe int (has to be set here)
+        description: string;
+      };
+
+    const handleSelectAddress = (address : Address) => {
         setAddresses([]); // Clear suggestions
         setText(address.description); // Set the selected address in the TextInput
         setIsSelectingAddress(true);
