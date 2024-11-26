@@ -6,7 +6,7 @@ const apiKey = 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI';
 
 type AutocompleteTextBoxProps = {
     style?: ViewStyle | TextStyle; // TODO: Need a default style
-    onPlaceSelect?: (address: { description: string; place_id: string }) => void; // Callback when a place is selected
+    onPlaceSelect?: (address: { description: string; place_id: string }) => string; // Callback when a place is selected
     placeholder: string;
     placeholderTextColor: string;
   };
@@ -16,6 +16,12 @@ const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTex
     const [addresses, setAddresses] = useState([]);
     const [isSelectingAddress, setIsSelectingAddress] = useState(false); // Track if an address is selected
     const [previousText, setPreviousText] = useState(''); // Track previous text
+
+    const handlePlaceSelection = (selectedPlace) => {
+        console.log("Place selected:", selectedPlace);
+        // Ensure the callback is invoked with the correct data
+        onPlaceSelect(selectedPlace);
+      };
 
     useEffect(() => {
         // Fetch addresses only if text is provided and not selecting an address AND did not just select an address
@@ -53,6 +59,15 @@ const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTex
         setText(address.description); // Set the selected address in the TextInput
         setIsSelectingAddress(true);
         setPreviousText(address.description);
+
+        // Trigger the callback with the selected address's details
+        if (onPlaceSelect) {
+            console.log('Place selected:', address);
+            onPlaceSelect({
+                description: address.description,
+                place_id: address.place_id,
+            });
+        }
 
         setTimeout(() => {
             setIsSelectingAddress(false); // Re-enable address fetching after a short delay
