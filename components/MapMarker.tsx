@@ -36,8 +36,8 @@ const MapMarker = ({ coordinates }: MapMarkerProps) => {
                 region={{
                     latitude: coordinates.latitude,
                     longitude: coordinates.longitude,
-                    latitudeDelta: 0.0922,
-                    longitudeDelta: 0.0421,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
                 }}
                 onRegionChangeComplete={(region) => {
                     // Optionally handle region change if needed (e.g., track user's movement)
