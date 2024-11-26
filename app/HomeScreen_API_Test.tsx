@@ -25,7 +25,7 @@ const HomeScreen = () => {
   };
 
   // Handle place selection from AutocompleteTextBox
-  const handlePlaceSelect = async (place: Place): Promise<void> => {
+  const handlePlaceSelect = async (place): Promise<void> => {
       const description = place.description
       try {
           // Await coordinates from getCoordinates
