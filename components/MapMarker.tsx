@@ -2,9 +2,9 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 
-const MapMarker = ({ coordinates }) => {
+const MapMarker = ({ coordinates, style }) => {
   return (
-    <View style={styles.mapContainer}>
+    <View style={[styles.mapContainer, style]}>
       <MapView
         provider={PROVIDER_GOOGLE}
         style={styles.map}

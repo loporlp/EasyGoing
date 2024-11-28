@@ -9,6 +9,8 @@ import RouteMap from '../components/RouteMap';
 
 const HomeScreen = () => {
   // State to store the selected place's coordinates
+  const setOrigin = { latitude: 35.7023, longitude: 139.7745 }; // Akihabara Example
+  const setDestination = { latitude: 35.7100, longitude: 139.8107 };
   const [selectedCoordinates, setSelectedCoordinates] = useState({
     latitude: 37.78825,
     longitude: -122.4324,
@@ -40,22 +42,22 @@ const HomeScreen = () => {
       </TouchableOpacity>
 
       {/* Autocomplete Textbox for searching places */}
-            <View style={styles.searchContainer}>
-              <Text style={styles.header}>Search for a Place</Text>
-              <AutocompleteTextBox onPlaceSelect={handlePlaceSelect} />
-            </View>
+      <View style={styles.searchContainer}>
+        <Text style={styles.header}>Search for a Place</Text>
+        <AutocompleteTextBox onPlaceSelect={handlePlaceSelect} />
+      </View>
 
       {/* Two Buttons in the Middle */}
       <View style={styles.buttonContainer}>
-        <Button title="Button 1" onPress={() => {}} />
+        <Button title="Button 1" onPress={() => { }} />
         <View style={{ height: 20 }} />
-        <Button title="Button 2" onPress={() => {}} />
+        <Button title="Button 2" onPress={() => { }} />
       </View>
 
-      <RouteMap />
+      <RouteMap origin={setOrigin} destination={setDestination} style={styles.map} />
 
       {/* Google Map */}
-     <MapMarker coordinates={selectedCoordinates} />
+      <MapMarker coordinates={selectedCoordinates} style={null} />
     </View>
   );
 };
@@ -98,6 +100,7 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
+    height: 300,
   },
 });
 
