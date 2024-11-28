@@ -13,26 +13,43 @@ const GenerateItineraryScreen = () => {
 
     const tokyoSkytree = { latitude: 35.7023, longitude: 139.7745 };
     const akihabaraElectricTown = { latitude: 35.7100, longitude: 139.8107 };
-    const [isVisible, setIsVisible] = useState(false);
+    const pokemonCenter = { latitude: 35.6620, longitude: 139.6984 };
+    const meijiJingu = { latitude: 35.6764, longitude: 139.6993 };
+    const imperialPalace = { latitude: 35.6852, longitude: 139.7528 };
+
+    const [showMapForAkihabara, setShowMapForAkihabara] = useState(false);
+    const [showMapForSkytree, setShowMapForSkytree] = useState(false);
+    const [showMapForMeiji, setShowMapForMeiji] = useState(false);
+
     const [transportationText, setTransportationText] = useState("driving");
     const selectedCoordinates = {
         latitude: 35.652832,
         longitude: 139.839478,
     };
 
-    const handlePress = () => {
-        setIsVisible((prev) => !prev);
+    const handlePress = (destination : String) => {
+        if (destination === "akihabara") {
+            setShowMapForAkihabara((prev) => !prev);
+        } else if (destination === "skytree") {
+            setShowMapForSkytree((prev) => !prev);
+        } else if (destination === "meiji") {
+            setShowMapForMeiji((prev) => !prev);
+        }
     };
 
-    const handleModeChange = (text) => {
+    const handleModeChange = (text : any) => {
         setTransportationText(text); // Update the transportation text when a mode button is pressed
     };
 
     return (
         <View style={styles.container}>
-            {isVisible ? (
-                <RouteMap origin={tokyoSkytree} destination={akihabaraElectricTown} style={styles.map} onModeChange={handleModeChange}/>
-            ) : (
+            {showMapForAkihabara ? (
+                <RouteMap origin={tokyoSkytree} destination={akihabaraElectricTown} style={styles.map} onModeChange={handleModeChange} />
+            ) : showMapForSkytree ? (
+                <RouteMap origin={tokyoSkytree} destination={pokemonCenter} style={styles.map} onModeChange={handleModeChange} />
+            ) : showMapForMeiji ? (
+                <RouteMap origin={meijiJingu} destination={imperialPalace} style={styles.map} onModeChange={handleModeChange} />
+            ): (
                 <MapMarker coordinates={selectedCoordinates} style={styles.map} />
             )}
 
@@ -42,7 +59,7 @@ const GenerateItineraryScreen = () => {
                 </View>
 
                 {/* Akihabara Electric Town */}
-                <TouchableOpacity style={styles.destinationElement} onPress={handlePress}>
+                <TouchableOpacity style={styles.destinationElement} onPress={() => handlePress("akihabara")}>
 
                     {/* Background with opacity */}
                     <View style={styles.backgroundContainer}>
@@ -58,14 +75,14 @@ const GenerateItineraryScreen = () => {
                     </View>
                 </TouchableOpacity>
 
-                {isVisible && (
+                {showMapForAkihabara && (
                     <View style={styles.additionalInfo}>
                         <Text style={styles.additionalText}>{transportationText} instructions to Tokyo Skytree.</Text>
                     </View>
                 )}
 
                 {/* Tokyo Skytree */}
-                <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
+                <TouchableOpacity style={styles.destinationElement} onPress={() => handlePress("skytree")}>
                     {/* Background with opacity */}
                     <View style={styles.backgroundContainer}>
                         <View style={styles.backgroundOverlay}></View>
@@ -79,6 +96,12 @@ const GenerateItineraryScreen = () => {
                         </View>
                     </View>
                 </TouchableOpacity>
+
+                {showMapForSkytree && (
+                    <View style={styles.additionalInfo}>
+                        <Text style={styles.additionalText}>{transportationText} instructions to Pokemon Center Shibuya.</Text>
+                    </View>
+                )}
 
                 {/* Pokemon Center Shibuya */}
                 <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
@@ -102,7 +125,7 @@ const GenerateItineraryScreen = () => {
                 </View>
 
                 {/* Meiji Jingu */}
-                <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
+                <TouchableOpacity style={styles.destinationElement} onPress={() => {handlePress("meiji")}}>
 
                     {/* Background with opacity */}
                     <View style={styles.backgroundContainer}>
@@ -117,6 +140,12 @@ const GenerateItineraryScreen = () => {
                         </View>
                     </View>
                 </TouchableOpacity>
+
+                {showMapForMeiji && (
+                    <View style={styles.additionalInfo}>
+                        <Text style={styles.additionalText}>{transportationText} instructions to Imperial Palace.</Text>
+                    </View>
+                )}
 
                 {/* Imperial Palace */}
                 <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
