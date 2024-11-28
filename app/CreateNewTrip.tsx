@@ -22,7 +22,7 @@ const CreateNewTrip = () => {
     const [datesText, setDatesText] = useState("");
 
     const startPlanning = () => {
-        router.push("/AddEditDestinations")
+        router.push("/AddEditDestinations");
     }
 
     const handleDateChange = (date: Date, type: 'START_DATE' | 'END_DATE') => {

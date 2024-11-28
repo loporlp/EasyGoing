@@ -6,6 +6,7 @@ npm install react-native-flags
 npx expo install react-native-screens react-native-safe-area-context
 npm install react-native-calendar-picker
 npm install react-native-vector-icons@latest
+npm install react-native-elements
 
 # how to start the project
 npx expo start -c # starts project -c clears cache, press a once its started for android
