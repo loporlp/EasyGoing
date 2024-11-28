@@ -2,10 +2,9 @@
 import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image } from "react-native";
 import { useRouter } from "expo-router";
 import MapMarker from '../components/MapMarker';
-import { useState } from 'react';
 import RouteMap from '../components/RouteMap';
-import { Header } from 'react-native-elements';  // Example, make sure to install the library if necessary
 import { Dimensions } from "react-native";
+import { useState } from "react";
 
 const { height } = Dimensions.get('window');
 
@@ -14,33 +13,40 @@ const GenerateItineraryScreen = () => {
 
     const tokyoSkytree = { latitude: 35.7023, longitude: 139.7745 };
     const akihabaraElectricTown = { latitude: 35.7100, longitude: 139.8107 };
+    const [isVisible, setIsVisible] = useState(false);
+    const [transportationText, setTransportationText] = useState("driving");
+    const selectedCoordinates = {
+        latitude: 35.652832,
+        longitude: 139.839478,
+    };
+
+    const handlePress = () => {
+        setIsVisible((prev) => !prev);
+    };
+
+    const handleModeChange = (text) => {
+        setTransportationText(text); // Update the transportation text when a mode button is pressed
+    };
 
     return (
         <View style={styles.container}>
-            <RouteMap origin={tokyoSkytree} destination={akihabaraElectricTown} style={styles.map} />
-            <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
-                {/* Tokyo Skytree */}
-                <TouchableOpacity style={styles.destinationElement} onPress={() => {}}>
-                    {/* Background with opacity */}
-                    <View style={styles.backgroundContainer}>
-                        <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
-                    </View>
+            {isVisible ? (
+                <RouteMap origin={tokyoSkytree} destination={akihabaraElectricTown} style={styles.map} onModeChange={handleModeChange}/>
+            ) : (
+                <MapMarker coordinates={selectedCoordinates} style={styles.map} />
+            )}
 
-                    <View style={styles.destinationContainer}>
-                        <Image style={styles.destinationImage} source={require("../assets/images/tokyoskytree.jpg")} />
-                        <View style={styles.destinationLabel}>
-                            <Text style={styles.destinationName}>Tokyo Skytree</Text>
-                            <Text style={styles.destinationDetails}>Duration: 2 hrs | Priority: 2</Text>
-                        </View>
-                    </View>
-                </TouchableOpacity>
+            <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
+                <View style={styles.dateHeader}>
+                    <Text style={styles.dateText}>Sat, Jul. 12   v</Text>
+                </View>
 
                 {/* Akihabara Electric Town */}
-                <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
+                <TouchableOpacity style={styles.destinationElement} onPress={handlePress}>
 
                     {/* Background with opacity */}
                     <View style={styles.backgroundContainer}>
-                        <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
+                        <View style={styles.backgroundOverlay}></View>
                     </View>
 
                     <View style={styles.destinationContainer}>
@@ -52,12 +58,34 @@ const GenerateItineraryScreen = () => {
                     </View>
                 </TouchableOpacity>
 
+                {isVisible && (
+                    <View style={styles.additionalInfo}>
+                        <Text style={styles.additionalText}>{transportationText} instructions to Tokyo Skytree.</Text>
+                    </View>
+                )}
+
+                {/* Tokyo Skytree */}
+                <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
+                    {/* Background with opacity */}
+                    <View style={styles.backgroundContainer}>
+                        <View style={styles.backgroundOverlay}></View>
+                    </View>
+
+                    <View style={styles.destinationContainer}>
+                        <Image style={styles.destinationImage} source={require("../assets/images/tokyoskytree.jpg")} />
+                        <View style={styles.destinationLabel}>
+                            <Text style={styles.destinationName}>Tokyo Skytree</Text>
+                            <Text style={styles.destinationDetails}>Duration: 2 hrs | Priority: 2</Text>
+                        </View>
+                    </View>
+                </TouchableOpacity>
+
                 {/* Pokemon Center Shibuya */}
                 <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
 
                     {/* Background with opacity */}
                     <View style={styles.backgroundContainer}>
-                        <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
+                        <View style={styles.backgroundOverlay}></View>
                     </View>
 
                     <View style={styles.destinationContainer}>
@@ -69,12 +97,16 @@ const GenerateItineraryScreen = () => {
                     </View>
                 </TouchableOpacity>
 
+                <View style={styles.dateHeader}>
+                    <Text style={styles.dateText}>Sun, Jul. 13   v</Text>
+                </View>
+
                 {/* Meiji Jingu */}
                 <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
 
                     {/* Background with opacity */}
                     <View style={styles.backgroundContainer}>
-                        <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
+                        <View style={styles.backgroundOverlay}></View>
                     </View>
 
                     <View style={styles.destinationContainer}>
@@ -91,7 +123,7 @@ const GenerateItineraryScreen = () => {
 
                     {/* Background with opacity */}
                     <View style={styles.backgroundContainer}>
-                        <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
+                        <View style={styles.backgroundOverlay}></View>
                     </View>
 
                     <View style={styles.destinationContainer}>
@@ -103,6 +135,11 @@ const GenerateItineraryScreen = () => {
                     </View>
                 </TouchableOpacity>
             </ScrollView>
+
+            {/* "Review Itinerary" button */}
+            <TouchableOpacity style={styles.reviewItineraryButton} onPress={() => { }}>
+                <Text style={styles.buttonText}>Review Itinerary</Text>
+            </TouchableOpacity>
         </View>
     );
 };
@@ -117,6 +154,7 @@ const styles = StyleSheet.create({
     map: {
         width: "100%",
         height: 350,
+        marginBottom: 0,
     },
 
     // ==== DESTINATION ELEMENT ==== //
@@ -176,15 +214,70 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingLeft: 10,
         paddingRight: 10,
-        paddingBottom: 10,
+        borderWidth: 2,
+        borderRadius: 10,
+        borderColor: "white",
     },
 
     scrollView: {
-        maxHeight: height * 0.5,
+        maxHeight: height * 0.4,
         borderRadius: 10,
         overflow: "hidden",
-        marginTop: 20,
+        //marginTop: 20,
         marginBottom: 10,
+    },
+
+    // ==== GENERATE PLAN BUTTON ==== //
+    reviewItineraryButton: {
+        backgroundColor: "#24a6ad",
+        paddingVertical: 10,
+        paddingHorizontal: 40,
+        borderRadius: 15,
+        marginTop: 20,
+        justifyContent: "center",
+        alignItems: "center",
+        elevation: 5,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        alignSelf: "center",
+        marginBottom: 10,
+    },
+
+    buttonText: {
+        color: "white",
+        fontSize: 18,
+        fontWeight: "bold",
+        marginLeft: 20,
+        marginRight: 20,
+    },
+
+    dateHeader: {
+        flexDirection: "row",
+        marginTop: 10,
+        backgroundColor: "gray",
+        color: "white",
+        width: "100%",
+    },
+
+    dateText: {
+        color: "white",
+        marginLeft: 20,
+        marginTop: 10,
+        marginBottom: 10,
+        fontSize: 18,
+    },
+
+    additionalInfo: {
+        marginTop: 10,
+        backgroundColor: "#f0f0f0",
+        padding: 10,
+        borderRadius: 5,
+    },
+    additionalText: {
+        fontSize: 16,
+        color: "#333",
     },
 });
 

@@ -6,7 +6,7 @@ import polyline from 'polyline';
 
 const apiKey = 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI';
 
-const RouteMap = ({ origin, destination, style }) => {
+const RouteMap = ({ origin, destination, style, onModeChange }) => {
     const [coordinates, setCoordinates] = useState([]);
     const [mode, setMode] = useState('driving'); // Can use 'walking', 'driving', 'bicycling', and 'transit'
 
@@ -14,7 +14,6 @@ const RouteMap = ({ origin, destination, style }) => {
         setCoordinates([]);
         getRoute(origin, destination, mode);
     }, [origin, destination, mode]);
-
 
     const getRoute = async (origin, destination, mode) => {
         try {
@@ -51,6 +50,7 @@ const RouteMap = ({ origin, destination, style }) => {
     // To have different modes of transport
     const handleModeChange = (newMode) => {
         setMode(newMode);
+        onModeChange(newMode);
     };
 
     return (
