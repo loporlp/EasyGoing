@@ -15,12 +15,41 @@ const RouteMap = ({ origin, destination, style, onModeChange }) => {
         getRoute(origin, destination, mode);
     }, [origin, destination, mode]);
 
-    const getRoute = async (origin, destination, mode) => {
-        try {
-            // The API Call
-            console.log("API CALLING");
-            const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}&alternatives=true&key=${apiKey}`;
-            console.log("URL: " + url);
+const getRoute = async (origin, destination, mode) => {
+    try {
+        // The API Call
+        let url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}&alternatives=true&key=${apiKey}`;
+
+        // Transit Mode (includes walking)
+        if (mode == 'transit') {
+            url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=transit&provideRouteAlternatives=true&transit_routing_preference=less_walking&key=${apiKey}`;
+            const transitResponse = await axios.get(url);
+            if (transitResponse.data.routes.length > 0) {
+                const transitRoute = transitResponse.data.routes[0];
+
+                // Decode the main transit polyline
+                const transitPoints = decodePolyline(transitRoute.overview_polyline.points);
+
+                // Now, look for walking segments
+                let fullRoute = [...transitPoints];
+
+                // Loop through each leg of the route and add walking paths if necessary
+                for (let leg of transitRoute.legs) {
+                    // Walking from origin to the first transit stop, and from the last transit stop to the destination
+                    if (leg.steps) {
+                        leg.steps.forEach(step => {
+                            if (step.travel_mode === 'WALKING') {
+                                const walkingPoints = decodePolyline(step.polyline.points);
+                                fullRoute = [...fullRoute, ...walkingPoints];
+                            }
+                        });
+                    }
+                }
+                setCoordinates(fullRoute);
+            } else {
+                Alert.alert('Error', 'No transit route found');
+            }
+        } else {
             // Make the request
             const response = await axios.get(url);
 
@@ -32,12 +61,13 @@ const RouteMap = ({ origin, destination, style, onModeChange }) => {
                 // TODO: Need a way to show no route
                 Alert.alert('Error', 'No route found');
             }
-        } catch (error) {
-            // TODO: Need something to handle errors
-            console.error(error);
-            Alert.alert('Error', 'Failed to fetch route');
         }
-    };
+    } catch (error) {
+        // TODO: Need something to handle errors
+        console.error(error);
+        Alert.alert('Error', 'Failed to fetch route');
+    }
+};
 
     const decodePolyline = (encoded) => {
         // Figure out location
@@ -53,18 +83,18 @@ const RouteMap = ({ origin, destination, style, onModeChange }) => {
         onModeChange(newMode);
     };
 
-    return (
-        <View style={styles.container}>
-            {/* Display the map */}
-            <MapView
-                provider={PROVIDER_GOOGLE}
-                style={[styles.map, style]}
-                initialRegion={{
-                    latitude: (origin.latitude + destination.latitude) / 2,
-                    longitude: (origin.longitude + destination.longitude) / 2,
-                    latitudeDelta: 0.05,
-                    longitudeDelta: 0.05,
-                }}>
+return (
+    <View style={styles.container}>
+    {/* Display the map */}
+    <MapView
+        provider={PROVIDER_GOOGLE}
+        style={styles.map}
+        initialRegion={{
+            latitude: (origin.latitude + destination.latitude) / 2,
+            longitude: (origin.longitude + destination.longitude) / 2,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+        }}>
 
                 {/* Markers for Origin and Destination */}
                 <Marker coordinate={origin} title="Origin" />
@@ -80,15 +110,16 @@ const RouteMap = ({ origin, destination, style, onModeChange }) => {
                 )}
             </MapView>
 
-            {/* Transportation Mode Buttons */}
-            <View style={styles.buttonContainer}>
-                <Button title="Driving" onPress={() => handleModeChange('driving')} />
-                <Button title="Walking" onPress={() => handleModeChange('walking')} />
-                <Button title="Transit" onPress={() => handleModeChange('transit')} />
-                <Button title="Bicycling" onPress={() => handleModeChange('bicycling')} />
-            </View>
-        </View>
-    );
+    {/* Transportation Mode Buttons */}
+    <View style={styles.buttonContainer}>
+        <Button title="Driving" onPress={() => handleModeChange('driving')} />
+        <Button title="Walking" onPress={() => handleModeChange('walking')} />
+        <Button title="Transit" onPress={() => handleModeChange('transit')} />
+        <Button title="Bicycling" onPress={() => handleModeChange('bicycling')} />
+        // TODO: transit_mode: 'bus|subway|train'
+    </View>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
