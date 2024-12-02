@@ -36,6 +36,7 @@ const MapMarker = ({ coordinates }: MapMarkerProps) => {
                 region={{
                     latitude: coordinates.latitude,
                     longitude: coordinates.longitude,
+                    // Smaller value means more zoomed-in
                     latitudeDelta: 0.01,
                     longitudeDelta: 0.01,
                 }}
