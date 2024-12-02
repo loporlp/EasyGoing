@@ -171,7 +171,7 @@ const GenerateItineraryScreen = () => {
             </TouchableOpacity>
         </View>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
