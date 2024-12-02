@@ -6,7 +6,7 @@ import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import MapMarker from '../components/MapMarker';
 import RouteMap from '../components/RouteMap';
-import { getCoordinates } from '../components/geocoding';
+import { getCoords } from '../scripts/nameToCoords.js';
 
 const HomeScreen = () => {
   // State to store the selected place's coordinates
@@ -24,23 +24,12 @@ const HomeScreen = () => {
 
   // Handle place selection from AutocompleteTextBox
   const handlePlaceSelect = async (place): Promise<void> => {
-      const description = place.description
       try {
-          // Await coordinates from getCoordinates
-          const coordinates = await getCoordinates(description);
-
-          console.log("Selected place:", description);
-          console.log("Selected place coords:", coordinates);
-
-          // Extract latitude and longitude from the selected place details
-          if (coordinates) {
-              console.log("Setting coordinates");
-              setSelectedCoordinates(coordinates);
-          } else {
-              console.log("No coordinates found for the selected place.");
-          }
+          const coordinates = await getCoords(place);
+          console.log("Coordinates returned:", coordinates);
+          setSelectedCoordinates(coordinates)
       } catch (error) {
-          console.error("Error while fetching coordinates:", error);
+          console.error("Error during place selection:", error);
       }
   };
 
