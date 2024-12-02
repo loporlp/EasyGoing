@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity, Alert, ViewStyle, TextStyle} from 'react-native';
 import axios from 'axios';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
+import {getIdToken} from '../scripts/getFirebaseID'
 
+
+// TODO: Delete when converted to backend
 const apiKey = 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI';
 
 type AutocompleteTextBoxProps = {
@@ -34,6 +39,7 @@ const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTex
         }
     }, [text, isSelectingAddress, previousText]);
 
+    // TODO: Delete this and rename the callProtectedApi to getAddresses
     const getAddresses = async (text : string) => {
         try {
             const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${apiKey}`;
@@ -73,7 +79,7 @@ const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTex
 
         const data = await response.json();
         // TODO: Below is added from above in getAddresses
-        if (data.predictions && response.data.predictions.length > 0) {
+        if (data.predictions && data.predictions.length > 0) {
             setAddresses(data.predictions.slice(0, 5)); // Limit to 5 results
         } else {
             setAddresses([]); // Clear if no results

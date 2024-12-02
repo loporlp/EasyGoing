@@ -3,7 +3,7 @@ export const fetchData = async () => {
     const timeout = setTimeout(() => controller.abort(), 5000); // Set timeout to 5 seconds
   
     try {
-      const response = await fetch('http://3.145.147.136:3000/api/serverstatus', {
+      const response = await fetch('http://ezgoing.app/api/serverstatus', {
         signal: controller.signal, // Attach the abort signal
       });
       const data = await response.json();
