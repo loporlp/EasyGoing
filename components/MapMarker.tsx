@@ -3,8 +3,6 @@ import { View, StyleSheet } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import axios from 'axios';
 
-const apiKey = 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI';
-
 type Coordinates = {
     latitude: number;
     longitude: number;

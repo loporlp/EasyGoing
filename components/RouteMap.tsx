@@ -62,8 +62,8 @@ const RouteMap = ({ origin, destination, style, onModeChange }) => {
                 initialRegion={{
                     latitude: (origin.latitude + destination.latitude) / 2,
                     longitude: (origin.longitude + destination.longitude) / 2,
-                    latitudeDelta: 0.1,
-                    longitudeDelta: 0.1,
+                    latitudeDelta: 0.05,
+                    longitudeDelta: 0.05,
                 }}>
 
                 {/* Markers for Origin and Destination */}
