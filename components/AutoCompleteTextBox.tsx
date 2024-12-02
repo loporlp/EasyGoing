@@ -6,9 +6,6 @@ import { auth } from '../firebaseConfig';
 import {getIdToken} from '../scripts/getFirebaseID'
 
 
-// TODO: Delete when converted to backend
-const apiKey = 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI';
-
 type AutocompleteTextBoxProps = {
     style?: ViewStyle | TextStyle; // TODO: Need a default style
     onPlaceSelect?: (address: { description: string; place_id: string }) => string; // Callback when a place is selected
@@ -31,32 +28,14 @@ const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTex
     useEffect(() => {
         // Fetch addresses only if text is provided and not selecting an address AND did not just select an address
         if (text && !isSelectingAddress && text !== previousText) {
-            //getAddresses(text);
-            callProtectedApi(text); // TODO: Testing to replace getAddress
+            callProtectedApi(text);
             setPreviousText(text);
         } else {
             setAddresses([]); // Clear addresses if no text or selecting address
         }
     }, [text, isSelectingAddress, previousText]);
 
-    // TODO: Delete this and rename the callProtectedApi to getAddresses
-    const getAddresses = async (text : string) => {
-        try {
-            const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${apiKey}`;
-            const response = await axios.get(url);
-
-            if (response.data.predictions && response.data.predictions.length > 0) {
-                setAddresses(response.data.predictions.slice(0, 5)); // Limit to 5 results
-            } else {
-                setAddresses([]); // Clear if no results
-            }
-        } catch (error) {
-            console.error('Error fetching autocomplete addresses:', error);
-            Alert.alert('Error', 'Failed to fetch addresses');
-        }
-    };
-
-    // TODO: Convert getAddresses to callProtectedApi
+    {/* Get Addresses */}
     const callProtectedApi = async (text : string) => {
       try {
         // Retrieve the ID token
@@ -78,7 +57,7 @@ const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTex
         }
 
         const data = await response.json();
-        // TODO: Below is added from above in getAddresses
+        // Below is added from above in getAddresses
         if (data.predictions && data.predictions.length > 0) {
             setAddresses(data.predictions.slice(0, 5)); // Limit to 5 results
         } else {
