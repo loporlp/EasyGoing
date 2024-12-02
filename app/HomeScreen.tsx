@@ -57,8 +57,8 @@ const HomeScreen = () => {
 
         {/* Two Buttons in the Middle */}
         <View style={styles.tripRow}>
-       
-          <TouchableOpacity onPress={createNewTrip} style={styles.tripButton}>
+
+          <TouchableOpacity onPress={() => { fetchData(); createNewTrip(); }} style={styles.tripButton}>
             <Text style={styles.tripText}>New Trip</Text>
           </TouchableOpacity>
 
