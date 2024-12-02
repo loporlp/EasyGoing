@@ -26,7 +26,8 @@ const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTex
     useEffect(() => {
         // Fetch addresses only if text is provided and not selecting an address AND did not just select an address
         if (text && !isSelectingAddress && text !== previousText) {
-            getAddresses(text);
+            //getAddresses(text);
+            callProtectedApi(text); // TODO: Testing to replace getAddress
             setPreviousText(text);
         } else {
             setAddresses([]); // Clear addresses if no text or selecting address
@@ -47,6 +48,40 @@ const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTex
             console.error('Error fetching autocomplete addresses:', error);
             Alert.alert('Error', 'Failed to fetch addresses');
         }
+    };
+
+    // TODO: Convert getAddresses to callProtectedApi
+    const callProtectedApi = async (text : string) => {
+      try {
+        // Retrieve the ID token
+        const idToken = await getIdToken(auth);
+
+        // Define the API endpoint
+        const apiUrl = `http://ezgoing.app/api/autocomplete?input=${text}`; // Search term is the user inputted that we are auto completeing
+
+        // Make the API call
+        const response = await fetch(apiUrl, {
+          method: "GET", // Or "POST", "PUT", etc.
+          headers: {
+            Authorization: `Bearer ${idToken}`, // Include the ID token in the header
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        // TODO: Below is added from above in getAddresses
+        if (data.predictions && response.data.predictions.length > 0) {
+            setAddresses(data.predictions.slice(0, 5)); // Limit to 5 results
+        } else {
+            setAddresses([]); // Clear if no results
+        }
+        console.log("API Response:", data); // Handle the response
+      } catch (error) {
+        console.error("Error calling API:", error);
+      }
     };
 
     type Address = {
