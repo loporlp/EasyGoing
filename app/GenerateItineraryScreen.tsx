@@ -41,6 +41,10 @@ const GenerateItineraryScreen = () => {
         setTransportationText(text); // Update the transportation text when a mode button is pressed
     };
 
+    const reviewItinerary = () => {
+        router.push("/ReviewItineraryScreen");
+    }
+
     return (
         <View style={styles.container}>
             {showMapForAkihabara ? (
@@ -166,7 +170,7 @@ const GenerateItineraryScreen = () => {
             </ScrollView>
 
             {/* "Review Itinerary" button */}
-            <TouchableOpacity style={styles.reviewItineraryButton} onPress={() => { }}>
+            <TouchableOpacity style={styles.reviewItineraryButton} onPress={reviewItinerary}>
                 <Text style={styles.buttonText}>Review Itinerary</Text>
             </TouchableOpacity>
         </View>

@@ -102,6 +102,20 @@ export default function RootLayout() {
           },
         }}
       />
+
+      <Stack.Screen
+        name="ReviewItineraryScreen"
+        options={{
+          title: "Review Trip",
+          headerStyle: {
+            backgroundColor: '#24a6ad',
+          },
+          headerTintColor: "white",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
     </Stack>
   )
 };
