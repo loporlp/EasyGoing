@@ -62,8 +62,8 @@ return (
         initialRegion={{
             latitude: (origin.latitude + destination.latitude) / 2,
             longitude: (origin.longitude + destination.longitude) / 2,
-            latitudeDelta: 0.1,
-            longitudeDelta: 0.1,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
         }}>
 
     {/* Markers for Origin and Destination */}
@@ -86,6 +86,7 @@ return (
         <Button title="Walking" onPress={() => handleModeChange('walking')} />
         <Button title="Transit" onPress={() => handleModeChange('transit')} />
         <Button title="Bicycling" onPress={() => handleModeChange('bicycling')} />
+        // TODO: transit_mode: 'bus|subway|train'
     </View>
     </View>
   );
