@@ -1,5 +1,4 @@
 // HomeScreen.tsx
-import React from 'react';
 import React, { useState, useEffect } from 'react';
 import { View, Button, StyleSheet, TouchableOpacity, Text, Image, } from 'react-native';
 import { useRouter } from "expo-router";
@@ -59,7 +58,7 @@ const HomeScreen = () => {
 
         {/* Two Buttons in the Middle */}
         <View style={styles.tripRow}>
-       
+
           <TouchableOpacity onPress={() => { fetchData(); createNewTrip(); }} style={styles.tripButton}>
             <Text style={styles.tripText}>New Trip</Text>
           </TouchableOpacity>
