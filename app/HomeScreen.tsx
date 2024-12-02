@@ -6,7 +6,7 @@ import { getAuth } from 'firebase/auth';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
-import {getIdToken} from '../scripts/getFirebaseID'
+import {getIdToken} from '../scripts/getFirebaseID' // TODO: Eventually delete
 
 const HomeScreen = () => {
 
@@ -89,6 +89,7 @@ const fetchData = async () => {
   }
 };
 
+// TODO: This was just an example. Eventually delete (since we probalby don't need on this page)
 const callProtectedApi = async () => {
   try {
     // Retrieve the ID token
