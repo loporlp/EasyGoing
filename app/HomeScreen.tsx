@@ -88,6 +88,7 @@ const fetchData = async () => {
   }
 };
 
+// TODO: This was just an example. Eventually delete (since we probalby don't need on this page)
 const callProtectedApi = async () => {
   try {
     // Retrieve the ID token
