@@ -46,13 +46,6 @@ const HomeScreen = () => {
               <AutocompleteTextBox onPlaceSelect={handlePlaceSelect} />
             </View>
 
-      {/* Two Buttons in the Middle */}
-      <View style={styles.buttonContainer}>
-        <Button title="Button 1" onPress={() => {}} />
-        <View style={{ height: 20 }} />
-        <Button title="Button 2" onPress={() => {}} />
-      </View>
-
       <RouteMap />
 
       {/* Google Map */}
