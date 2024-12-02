@@ -24,6 +24,9 @@ const HomeScreen = () => {
     });
   };
 
+  const handleModeChange = (text : any) => {
+  };
+
   // Handle place selection from AutocompleteTextBox
   const handlePlaceSelect = async (place): Promise<void> => {
       try {
@@ -55,7 +58,7 @@ const HomeScreen = () => {
         <Button title="Button 2" onPress={() => { }} />
       </View>
 
-      <RouteMap origin={setOrigin} destination={setDestination} style={styles.map} />
+      <RouteMap origin={setOrigin} destination={setDestination} style={styles.map} onModeChange={handleModeChange}/>
 
       {/* Google Map */}
       <MapMarker coordinates={selectedCoordinates} style={null} />

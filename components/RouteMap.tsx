@@ -130,8 +130,7 @@ const styles = StyleSheet.create({
     },
 
     map: {
-        width: "100%",
-        height: "50%",
+        flex: 1,
     },
 
     buttonContainer: {
@@ -139,6 +138,7 @@ const styles = StyleSheet.create({
         left: 10,
         right: 10,
         top: 300,
+        bottom: 20,
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
