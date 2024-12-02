@@ -8,6 +8,10 @@ const { height } = Dimensions.get('window');
 const AddEditDestinations = () => {
     const router = useRouter();
 
+    const generateItinerary = () => {
+        router.push("/GenerateItineraryScreen");
+    }
+
     // Modal (Pop-up)
     const [visible, setVisible] = useState(false);
     const show = () => setVisible(true);
@@ -133,7 +137,7 @@ const AddEditDestinations = () => {
                     </ScrollView>
 
                     {/* "Generate Plan" button */}
-                    <TouchableOpacity style={styles.generatePlanButton} onPress={() => { }}>
+                    <TouchableOpacity style={styles.generatePlanButton} onPress={generateItinerary}>
                         <Text style={styles.buttonText}>Generate Plans</Text>
                     </TouchableOpacity>
 

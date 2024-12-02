@@ -52,8 +52,7 @@ const MapMarker = ({ coordinates }: MapMarkerProps) => {
 const styles = StyleSheet.create({
   mapContainer: {
     width: '100%',
-    height: 300, // Adjust the height of the map as needed
-    marginTop: 20, // Space between the buttons and the map
+    height: "50%", // Adjust the height of the map as needed
   },
   map: {
     flex: 1,

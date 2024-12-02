@@ -10,6 +10,8 @@ import { getCoords } from '../scripts/nameToCoords.js';
 
 const HomeScreen = () => {
   // State to store the selected place's coordinates
+  const setOrigin = { latitude: 35.7023, longitude: 139.7745 }; // Akihabara Example
+  const setDestination = { latitude: 35.7100, longitude: 139.8107 };
   const [selectedCoordinates, setSelectedCoordinates] = useState({
     latitude: 37.78825,
     longitude: -122.4324,
@@ -46,10 +48,10 @@ const HomeScreen = () => {
               <AutocompleteTextBox onPlaceSelect={handlePlaceSelect} />
             </View>
 
-      <RouteMap />
+      <RouteMap origin={setOrigin} destination={setDestination} style={styles.map} />
 
       {/* Google Map */}
-     <MapMarker coordinates={selectedCoordinates} />
+      <MapMarker coordinates={selectedCoordinates} style={null} />
     </View>
   );
 };
@@ -92,6 +94,7 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
+    height: 300,
   },
 });
 

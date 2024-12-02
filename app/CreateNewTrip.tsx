@@ -22,7 +22,7 @@ const CreateNewTrip = () => {
     const [datesText, setDatesText] = useState("");
 
     const startPlanning = () => {
-        router.push("/AddEditDestinations")
+        router.push("/AddEditDestinations");
     }
 
     const handleDateChange = (date: Date, type: 'START_DATE' | 'END_DATE') => {
@@ -211,9 +211,9 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         fontSize: 16,
         backgroundColor: "white",
-        paddingLeft: 15,
+        paddingLeft: 20,
         borderRadius: 10,
-        textAlignVertical: 'center'
+        paddingTop: 10,
     },
 
     travelerInput: {
