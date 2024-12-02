@@ -144,6 +144,8 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingVertical: 5,
         paddingLeft: 20,
+        textAlign: 'left',
+        writingDirection: 'ltr',
     },
 
     suggestionList: {
