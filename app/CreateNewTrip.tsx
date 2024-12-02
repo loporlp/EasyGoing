@@ -211,9 +211,9 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         fontSize: 16,
         backgroundColor: "white",
-        paddingLeft: 15,
+        paddingLeft: 20,
         borderRadius: 10,
-        textAlignVertical: 'center'
+        paddingTop: 10,
     },
 
     travelerInput: {
