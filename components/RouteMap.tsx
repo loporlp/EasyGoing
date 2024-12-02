@@ -20,18 +20,49 @@ const RouteMap = () => {
 const getRoute = async (origin, destination, mode) => {
     try {
         // The API Call
-        const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}&alternatives=true&key=${apiKey}`;
+        let url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}&alternatives=true&key=${apiKey}`;
 
-        // Make the request
-        const response = await axios.get(url);
+        // Transit Mode (includes walking)
+        if (mode == 'transit') {
+            url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=transit&provideRouteAlternatives=true&transit_routing_preference=less_walking&key=${apiKey}`;
+            const transitResponse = await axios.get(url);
+            if (transitResponse.data.routes.length > 0) {
+                const transitRoute = transitResponse.data.routes[0];
 
-        // Is it a valid route?
-        if (response.data.routes.length > 0) {
-            const points = decodePolyline(response.data.routes[0].overview_polyline.points);
-            setCoordinates(points);
+                // Decode the main transit polyline
+                const transitPoints = decodePolyline(transitRoute.overview_polyline.points);
+
+                // Now, look for walking segments
+                let fullRoute = [...transitPoints];
+
+                // Loop through each leg of the route and add walking paths if necessary
+                for (let leg of transitRoute.legs) {
+                    // Walking from origin to the first transit stop, and from the last transit stop to the destination
+                    if (leg.steps) {
+                        leg.steps.forEach(step => {
+                            if (step.travel_mode === 'WALKING') {
+                                const walkingPoints = decodePolyline(step.polyline.points);
+                                fullRoute = [...fullRoute, ...walkingPoints];
+                            }
+                        });
+                    }
+                }
+                setCoordinates(fullRoute);
+            } else {
+                Alert.alert('Error', 'No transit route found');
+            }
         } else {
-            // TODO: Need a way to show no route
-            Alert.alert('Error', 'No route found');
+            // Make the request
+            const response = await axios.get(url);
+
+            // Is it a valid route?
+            if (response.data.routes.length > 0) {
+                const points = decodePolyline(response.data.routes[0].overview_polyline.points);
+                setCoordinates(points);
+            } else {
+                // TODO: Need a way to show no route
+                Alert.alert('Error', 'No route found');
+            }
         }
     } catch (error) {
         // TODO: Need something to handle errors
@@ -62,8 +93,8 @@ return (
         initialRegion={{
             latitude: (origin.latitude + destination.latitude) / 2,
             longitude: (origin.longitude + destination.longitude) / 2,
-            latitudeDelta: 0.1,
-            longitudeDelta: 0.1,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
         }}>
 
     {/* Markers for Origin and Destination */}
@@ -86,6 +117,7 @@ return (
         <Button title="Walking" onPress={() => handleModeChange('walking')} />
         <Button title="Transit" onPress={() => handleModeChange('transit')} />
         <Button title="Bicycling" onPress={() => handleModeChange('bicycling')} />
+        // TODO: transit_mode: 'bus|subway|train'
     </View>
     </View>
   );
