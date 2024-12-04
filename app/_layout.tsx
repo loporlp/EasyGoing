@@ -87,7 +87,7 @@ export default function RootLayout() {
           headerTitle: () => (
             <View style={styles.titleContainer}>
               {/* City and Country Name */}
-              <Text style={styles.headerText}>{placeName || 'No place selected'}</Text>
+              <Text style={styles.headerText}>{placeName || 'Tokyo, Japan'}</Text> // TODO: "No place selected"
               {/* Country Flag */}
               <Flag code="JP" style={styles.flag} />
             </View>
