@@ -5,6 +5,8 @@ import axios from 'axios';
 import polyline from 'polyline';
 import { auth } from '../firebaseConfig';
 import {getIdToken} from '../scripts/getFirebaseID'
+import { auth } from '../firebaseConfig';
+import {getIdToken} from '../scripts/getFirebaseID'
 
 const RouteMap = ({ origin, destination, style, onModeChange }) => {
     const [coordinates, setCoordinates] = useState([]);
@@ -12,6 +14,9 @@ const RouteMap = ({ origin, destination, style, onModeChange }) => {
 
     useEffect(() => {
         setCoordinates([]);
+        if (origin && destination) {
+            getRoute(origin, destination, mode);
+        }
         if (origin && destination) {
             getRoute(origin, destination, mode);
         }
@@ -38,7 +43,45 @@ const getRoute = async (origin, destination, mode) => {
         }
 
         const data = await response.json();
+const getRoute = async (origin, destination, mode) => {
+    try {
+        // Retrieve the ID token
+        const idToken = await getIdToken(auth);
 
+        // Define the API endpoint
+        const apiUrl = `http://ezgoing.app/api/route?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}`;
+
+        // Make the request
+        const response = await fetch(apiUrl, {
+          method: "GET", // Or "POST", "PUT", etc.
+          headers: {
+            Authorization: `Bearer ${idToken}`, // Include the ID token in the header
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Is it a valid route?
+        if (data.routes.length > 0) {
+            const points = decodePolyline(data.routes[0].overview_polyline.points);
+            setCoordinates(points);
+
+            // TODO: Center and scale map to fit the route
+
+        } else {
+            // TODO: Need a way to show no route
+            Alert.alert('Error', 'No route found');
+        }
+    } catch (error) {
+        // TODO: Need something to handle errors
+        console.error(error);
+        Alert.alert('Error', 'Failed to fetch route');
+    }
+};
         // Is it a valid route?
         if (data.routes.length > 0) {
             const points = decodePolyline(data.routes[0].overview_polyline.points);

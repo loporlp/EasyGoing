@@ -7,6 +7,7 @@ import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import MapMarker from '../components/MapMarker';
 import RouteMap from '../components/RouteMap';
 import { getCoords } from '../scripts/nameToCoords.js';
+import { getCoords } from '../scripts/nameToCoords.js';
 
 const HomeScreen = () => {
   // State to store the selected place's coordinates
@@ -46,17 +47,10 @@ const HomeScreen = () => {
       </TouchableOpacity>
 
       {/* Autocomplete Textbox for searching places */}
-      <View style={styles.searchContainer}>
-        <Text style={styles.header}>Search for a Place</Text>
-        <AutocompleteTextBox onPlaceSelect={handlePlaceSelect} />
-      </View>
-
-      {/* Two Buttons in the Middle */}
-      <View style={styles.buttonContainer}>
-        <Button title="Button 1" onPress={() => { }} />
-        <View style={{ height: 20 }} />
-        <Button title="Button 2" onPress={() => { }} />
-      </View>
+            <View style={styles.searchContainer}>
+              <Text style={styles.header}>Search for a Place</Text>
+              <AutocompleteTextBox onPlaceSelect={handlePlaceSelect} />
+            </View>
 
       <RouteMap origin={setOrigin} destination={setDestination} style={styles.map} onModeChange={handleModeChange}/>
 
