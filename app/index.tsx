@@ -8,6 +8,7 @@ import SignInScreen from './SignInScreen';
 import CreateAccountScreen from './CreateAccountScreen';
 import { RootStackParamList } from './types';
 import HomeScreen from './HomeScreen';
+import TestHomeScreen from './HomeScreen_API_Test'
 
 const Stack = createStackNavigator<RootStackParamList>();
 

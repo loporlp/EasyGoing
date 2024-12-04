@@ -1,5 +1,5 @@
 // AddEditDestinations.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Image, StyleSheet, TextInput, Text, TouchableOpacity, ScrollView, Dimensions, Modal, ImageBackground, Button } from "react-native";
 import { useRouter } from "expo-router";
 
@@ -7,6 +7,19 @@ const { height } = Dimensions.get('window');
 
 const AddEditDestinations = () => {
     const router = useRouter();
+
+    const [placeName, setPlaceName] = useState<string | undefined>(undefined);
+
+    useEffect(() => {
+        console.log(router)
+        console.log(router.query)
+        if (router.isReady) {
+            console.log('router.query in Screen B:', router.query); // Check if the query is accessible
+            if (router.query?.placeName) {
+                setPlaceName(router.query.placeName as string); // Set placeName if available
+            }
+        }
+    }, [router, router.isReady, router.query]);
 
     const generateItinerary = () => {
         router.push("/GenerateItineraryScreen");

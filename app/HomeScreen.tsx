@@ -4,8 +4,9 @@ import { View, Button, StyleSheet, TouchableOpacity, Text, Image, } from 'react-
 import { useRouter } from "expo-router";
 import { getAuth } from 'firebase/auth';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { getIdToken } from '../scripts/getFirebaseID';
+import { signOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
+import {getIdToken} from '../scripts/getFirebaseID' // TODO: Eventually delete
 
 const HomeScreen = () => {
 
@@ -57,12 +58,12 @@ const HomeScreen = () => {
 
         {/* Two Buttons in the Middle */}
         <View style={styles.tripRow}>
-       
-          <TouchableOpacity onPress={createNewTrip} style={styles.tripButton}>
+
+          <TouchableOpacity onPress={() => { fetchData(); createNewTrip(); }} style={styles.tripButton}>
             <Text style={styles.tripText}>New Trip</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => { }} style={styles.tripButton}>
+          <TouchableOpacity onPress={() => { callProtectedApi(); }} style={styles.tripButton}>
             <Text style={styles.tripText}>Edit Existing Trip</Text>
           </TouchableOpacity>
 
@@ -88,6 +89,7 @@ const fetchData = async () => {
   }
 };
 
+// TODO: This was just an example. Eventually delete (since we probalby don't need on this page)
 const callProtectedApi = async () => {
   try {
     // Retrieve the ID token

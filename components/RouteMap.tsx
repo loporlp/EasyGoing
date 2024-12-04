@@ -3,8 +3,10 @@ import { View, Text, StyleSheet, Alert, Button } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import axios from 'axios';
 import polyline from 'polyline';
-
-const apiKey = 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI';
+import { auth } from '../firebaseConfig';
+import {getIdToken} from '../scripts/getFirebaseID'
+import { auth } from '../firebaseConfig';
+import {getIdToken} from '../scripts/getFirebaseID'
 
 const RouteMap = ({ origin, destination, style, onModeChange }) => {
     const [coordinates, setCoordinates] = useState([]);
@@ -12,32 +14,91 @@ const RouteMap = ({ origin, destination, style, onModeChange }) => {
 
     useEffect(() => {
         setCoordinates([]);
-        getRoute(origin, destination, mode);
+        if (origin && destination) {
+            getRoute(origin, destination, mode);
+        }
+        if (origin && destination) {
+            getRoute(origin, destination, mode);
+        }
     }, [origin, destination, mode]);
 
-    const getRoute = async (origin, destination, mode) => {
-        try {
-            // The API Call
-            console.log("API CALLING");
-            const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}&alternatives=true&key=${apiKey}`;
-            console.log("URL: " + url);
-            // Make the request
-            const response = await axios.get(url);
+const getRoute = async (origin, destination, mode) => {
+    try {
+        // Retrieve the ID token
+        const idToken = await getIdToken(auth);
 
-            // Is it a valid route?
-            if (response.data.routes.length > 0) {
-                const points = decodePolyline(response.data.routes[0].overview_polyline.points);
-                setCoordinates(points);
-            } else {
-                // TODO: Need a way to show no route
-                Alert.alert('Error', 'No route found');
-            }
-        } catch (error) {
-            // TODO: Need something to handle errors
-            console.error(error);
-            Alert.alert('Error', 'Failed to fetch route');
+        // Define the API endpoint
+        const apiUrl = `http://ezgoing.app/api/route?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}`;
+
+        // Make the request
+        const response = await fetch(apiUrl, {
+          method: "GET", // Or "POST", "PUT", etc.
+          headers: {
+            Authorization: `Bearer ${idToken}`, // Include the ID token in the header
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
-    };
+
+        const data = await response.json();
+const getRoute = async (origin, destination, mode) => {
+    try {
+        // Retrieve the ID token
+        const idToken = await getIdToken(auth);
+
+        // Define the API endpoint
+        const apiUrl = `http://ezgoing.app/api/route?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}`;
+
+        // Make the request
+        const response = await fetch(apiUrl, {
+          method: "GET", // Or "POST", "PUT", etc.
+          headers: {
+            Authorization: `Bearer ${idToken}`, // Include the ID token in the header
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Is it a valid route?
+        if (data.routes.length > 0) {
+            const points = decodePolyline(data.routes[0].overview_polyline.points);
+            setCoordinates(points);
+
+            // TODO: Center and scale map to fit the route
+
+        } else {
+            // TODO: Need a way to show no route
+            Alert.alert('Error', 'No route found');
+        }
+    } catch (error) {
+        // TODO: Need something to handle errors
+        console.error(error);
+        Alert.alert('Error', 'Failed to fetch route');
+    }
+};
+        // Is it a valid route?
+        if (data.routes.length > 0) {
+            const points = decodePolyline(data.routes[0].overview_polyline.points);
+            setCoordinates(points);
+
+            // TODO: Center and scale map to fit the route
+
+        } else {
+            // TODO: Need a way to show no route
+            Alert.alert('Error', 'No route found');
+        }
+    } catch (error) {
+        // TODO: Need something to handle errors
+        console.error(error);
+        Alert.alert('Error', 'Failed to fetch route');
+    }
+};
 
     const decodePolyline = (encoded) => {
         // Figure out location
@@ -53,18 +114,18 @@ const RouteMap = ({ origin, destination, style, onModeChange }) => {
         onModeChange(newMode);
     };
 
-    return (
-        <View style={styles.container}>
-            {/* Display the map */}
-            <MapView
-                provider={PROVIDER_GOOGLE}
-                style={[styles.map, style]}
-                initialRegion={{
-                    latitude: (origin.latitude + destination.latitude) / 2,
-                    longitude: (origin.longitude + destination.longitude) / 2,
-                    latitudeDelta: 0.1,
-                    longitudeDelta: 0.1,
-                }}>
+return (
+    <View style={styles.container}>
+    {/* Display the map */}
+    <MapView
+        provider={PROVIDER_GOOGLE}
+        style={styles.map}
+        initialRegion={{
+            latitude: (origin.latitude + destination.latitude) / 2,
+            longitude: (origin.longitude + destination.longitude) / 2,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+        }}>
 
                 {/* Markers for Origin and Destination */}
                 <Marker coordinate={origin} title="Origin" />
@@ -80,15 +141,16 @@ const RouteMap = ({ origin, destination, style, onModeChange }) => {
                 )}
             </MapView>
 
-            {/* Transportation Mode Buttons */}
-            <View style={styles.buttonContainer}>
-                <Button title="Driving" onPress={() => handleModeChange('driving')} />
-                <Button title="Walking" onPress={() => handleModeChange('walking')} />
-                <Button title="Transit" onPress={() => handleModeChange('transit')} />
-                <Button title="Bicycling" onPress={() => handleModeChange('bicycling')} />
-            </View>
-        </View>
-    );
+    {/* Transportation Mode Buttons */}
+    <View style={styles.buttonContainer}>
+        <Button title="Driving" onPress={() => handleModeChange('driving')} />
+        <Button title="Walking" onPress={() => handleModeChange('walking')} />
+        <Button title="Transit" onPress={() => handleModeChange('transit')} />
+        <Button title="Bicycling" onPress={() => handleModeChange('bicycling')} />
+        // TODO: transit_mode: 'bus|subway|train'
+    </View>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -99,8 +161,7 @@ const styles = StyleSheet.create({
     },
 
     map: {
-        width: "100%",
-        height: "50%",
+        flex: 1,
     },
 
     buttonContainer: {
@@ -108,6 +169,7 @@ const styles = StyleSheet.create({
         left: 10,
         right: 10,
         top: 300,
+        bottom: 20,
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
