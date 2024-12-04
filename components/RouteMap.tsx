@@ -12,7 +12,9 @@ const RouteMap = ({ origin, destination, style, onModeChange }) => {
 
     useEffect(() => {
         setCoordinates([]);
-        getRoute(origin, destination, mode);
+        if (origin && destination) {
+            getRoute(origin, destination, mode);
+        }
     }, [origin, destination, mode]);
 
 const getRoute = async (origin, destination, mode) => {
@@ -41,6 +43,9 @@ const getRoute = async (origin, destination, mode) => {
         if (data.routes.length > 0) {
             const points = decodePolyline(data.routes[0].overview_polyline.points);
             setCoordinates(points);
+
+            // TODO: Center and scale map to fit the route
+
         } else {
             // TODO: Need a way to show no route
             Alert.alert('Error', 'No route found');
