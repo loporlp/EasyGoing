@@ -30,12 +30,10 @@ const GenerateItineraryScreen = () => {
 
     const [selectedDestination, setSelectedDestination] = useState<string | null>(null);
     const [transportationText, setTransportationText] = useState("driving");
-    const selectedCoordinates = {
-        // Default coordinates (e.g., Tokyo Station)
-        // TODO: Change to the origin clicked
+    const [selectedCoordinates, setSelectedCoordinates] = useState({
         latitude: 35.652832,
         longitude: 139.839478,
-    };
+    });
 
     // Determine the route based on the selected destination
     const getRouteDestination = (destination: string) => {
