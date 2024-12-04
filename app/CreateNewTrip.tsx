@@ -20,9 +20,15 @@ const CreateNewTrip = () => {
     const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null); // Explicitly define state type
     const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null); // Explicitly define state type
     const [datesText, setDatesText] = useState("");
+    const [selectedPlace, setSelectedPlace] = useState<string>(''); // for place name
 
     const startPlanning = () => {
-        router.push("/AddEditDestinations");
+        console.log('Selected place before navigation:', selectedPlace);
+        router.push({
+            pathname: "/AddEditDestinations",
+            // Pass information to the next screen
+            query: { placeName: selectedPlace },
+        });
     }
 
     const handleDateChange = (date: Date, type: 'START_DATE' | 'END_DATE') => {
@@ -51,6 +57,7 @@ const CreateNewTrip = () => {
                 longitude: place.geometry.location.lng,
             });
         }
+        setSelectedPlace(place.description);
     };
 
     return (

@@ -11,167 +11,99 @@ const { height } = Dimensions.get('window');
 const GenerateItineraryScreen = () => {
     const router = useRouter();
 
-    const tokyoSkytree = { latitude: 35.7023, longitude: 139.7745 };
-    const akihabaraElectricTown = { latitude: 35.7100, longitude: 139.8107 };
-    const pokemonCenter = { latitude: 35.6620, longitude: 139.6984 };
-    const meijiJingu = { latitude: 35.6764, longitude: 139.6993 };
-    const imperialPalace = { latitude: 35.6852, longitude: 139.7528 };
+    const destinations = {
+        akihabara: { name: "Akihabara Electric Town", coords: { latitude: 35.7100, longitude: 139.8107 }, image: require("../assets/images/AkihabaraElectricTown.jpg") },
+        skytree: { name: "Tokyo Skytree", coords: { latitude: 35.7023, longitude: 139.7745 }, image: require("../assets/images/tokyoskytree.jpg") },
+        pokemon: { name: "Pokemon Center", coords: { latitude: 35.6620, longitude: 139.6984 }, image: require("../assets/images/PokemonCenterShibuya.png") },
+        meiji: { name: "Meiji Jingu", coords: { latitude: 35.6764, longitude: 139.6993 }, image: require("../assets/images/MeijiJingu.jpg") },
+        palace: { name: "Imperial Palace", coords: { latitude: 35.6852, longitude: 139.7528 }, image: require("../assets/images/ImperialPalace.jpg") },
+    };
 
-    const [showMapForAkihabara, setShowMapForAkihabara] = useState(false);
-    const [showMapForSkytree, setShowMapForSkytree] = useState(false);
-    const [showMapForMeiji, setShowMapForMeiji] = useState(false);
-
+    const [selectedDestination, setSelectedDestination] = useState<string | null>(null);
     const [transportationText, setTransportationText] = useState("driving");
     const selectedCoordinates = {
+        // Default coordinates (e.g., Tokyo Station)
         latitude: 35.652832,
         longitude: 139.839478,
     };
 
-    const handlePress = (destination : String) => {
-        if (destination === "akihabara") {
-            setShowMapForAkihabara((prev) => !prev);
-        } else if (destination === "skytree") {
-            setShowMapForSkytree((prev) => !prev);
-        } else if (destination === "meiji") {
-            setShowMapForMeiji((prev) => !prev);
+    // Determine the route based on the selected destination
+    const getRouteDestination = (destination: string) => {
+        switch (destination) {
+            case "akihabara":
+                return destinations.skytree;
+            case "skytree":
+                return destinations.pokemon;
+            case "pokemon":
+                return destinations.meiji;
+            case "meiji":
+                return destinations.palace;
+            default:
+                return destinations.skytree; // TODO: Change default?
         }
+        };
+
+    const handlePress = (destination : string) => {
+        setSelectedDestination(prev => prev === destination ? null : destination);
     };
 
     const handleModeChange = (text : any) => {
-        setTransportationText(text); // Update the transportation text when a mode button is pressed
+        // Update the transportation text when a mode button is pressed
+        setTransportationText(text);
+    };
+
+    const getRouteText = () => {
+        if (!selectedDestination) return "";
+        const routeDestination = getRouteDestination(selectedDestination);
+        return `${transportationText} instructions to ${routeDestination.name}.`;
     };
 
     return (
         <View style={styles.container}>
-            {showMapForAkihabara ? (
-                <RouteMap origin={tokyoSkytree} destination={akihabaraElectricTown} style={styles.map} onModeChange={handleModeChange} />
-            ) : showMapForSkytree ? (
-                <RouteMap origin={tokyoSkytree} destination={pokemonCenter} style={styles.map} onModeChange={handleModeChange} />
-            ) : showMapForMeiji ? (
-                <RouteMap origin={meijiJingu} destination={imperialPalace} style={styles.map} onModeChange={handleModeChange} />
-            ): (
-                <MapMarker coordinates={selectedCoordinates} style={styles.map} />
-            )}
+            <RouteMap
+                origin={selectedCoordinates}
+                destination={selectedDestination ? destinations[selectedDestination].coords : selectedCoordinates}
+                style={styles.map}
+                onModeChange={handleModeChange}
+            />
 
             <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
                 <View style={styles.dateHeader}>
                     <Text style={styles.dateText}>Sat, Jul. 12   v</Text>
                 </View>
 
-                {/* Akihabara Electric Town */}
-                <TouchableOpacity style={styles.destinationElement} onPress={() => handlePress("akihabara")}>
+                {Object.keys(destinations).map((destinationKey) => (
+                    <View key={destinationKey}>
+                        <TouchableOpacity style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
+                            {/* Background with opacity */}
+                            <View style={styles.backgroundContainer}>
+                                <View style={styles.backgroundOverlay}></View>
+                            </View>
 
-                    {/* Background with opacity */}
-                    <View style={styles.backgroundContainer}>
-                        <View style={styles.backgroundOverlay}></View>
+                            <View style={styles.destinationContainer}>
+                                <Image style={styles.destinationImage} source={destinations[destinationKey].image} />
+                                <View style={styles.destinationLabel}>
+                                    <Text style={styles.destinationName}>{destinations[destinationKey].name}</Text>
+                                    <Text style={styles.destinationDetails}>Duration: {destinationKey === 'akihabara' ? '6 hrs' : '2 hrs'} | Priority: {destinationKey === 'akihabara' ? 1 : 2}</Text> // TODO: Make this generic for different priority and stuff
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+
+                        {selectedDestination === destinationKey && (
+                            <View style={styles.additionalInfo}>
+                                <Text style={styles.additionalText}>{getRouteText()}</Text>
+                            </View>
+                        )}
                     </View>
-
-                    <View style={styles.destinationContainer}>
-                        <Image style={styles.destinationImage} source={require("../assets/images/AkihabaraElectricTown.jpg")} />
-                        <View style={styles.destinationLabel}>
-                            <Text style={styles.destinationName}>Akihabara Electric Town</Text>
-                            <Text style={styles.destinationDetails}>Duration: 6 hrs | Priority: 1</Text>
-                        </View>
-                    </View>
-                </TouchableOpacity>
-
-                {showMapForAkihabara && (
-                    <View style={styles.additionalInfo}>
-                        <Text style={styles.additionalText}>{transportationText} instructions to Tokyo Skytree.</Text>
-                    </View>
-                )}
-
-                {/* Tokyo Skytree */}
-                <TouchableOpacity style={styles.destinationElement} onPress={() => handlePress("skytree")}>
-                    {/* Background with opacity */}
-                    <View style={styles.backgroundContainer}>
-                        <View style={styles.backgroundOverlay}></View>
-                    </View>
-
-                    <View style={styles.destinationContainer}>
-                        <Image style={styles.destinationImage} source={require("../assets/images/tokyoskytree.jpg")} />
-                        <View style={styles.destinationLabel}>
-                            <Text style={styles.destinationName}>Tokyo Skytree</Text>
-                            <Text style={styles.destinationDetails}>Duration: 2 hrs | Priority: 2</Text>
-                        </View>
-                    </View>
-                </TouchableOpacity>
-
-                {showMapForSkytree && (
-                    <View style={styles.additionalInfo}>
-                        <Text style={styles.additionalText}>{transportationText} instructions to Pokemon Center Shibuya.</Text>
-                    </View>
-                )}
-
-                {/* Pokemon Center Shibuya */}
-                <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
-
-                    {/* Background with opacity */}
-                    <View style={styles.backgroundContainer}>
-                        <View style={styles.backgroundOverlay}></View>
-                    </View>
-
-                    <View style={styles.destinationContainer}>
-                        <Image style={styles.destinationImage} source={require("../assets/images/PokemonCenterShibuya.png")} />
-                        <View style={styles.destinationLabel}>
-                            <Text style={styles.destinationName}>Pokemon Center</Text>
-                            <Text style={styles.destinationDetails}>Duration: 1.5 hrs | Priority: 3</Text>
-                        </View>
-                    </View>
-                </TouchableOpacity>
-
-                <View style={styles.dateHeader}>
-                    <Text style={styles.dateText}>Sun, Jul. 13   v</Text>
-                </View>
-
-                {/* Meiji Jingu */}
-                <TouchableOpacity style={styles.destinationElement} onPress={() => {handlePress("meiji")}}>
-
-                    {/* Background with opacity */}
-                    <View style={styles.backgroundContainer}>
-                        <View style={styles.backgroundOverlay}></View>
-                    </View>
-
-                    <View style={styles.destinationContainer}>
-                        <Image style={styles.destinationImage} source={require("../assets/images/MeijiJingu.jpg")} />
-                        <View style={styles.destinationLabel}>
-                            <Text style={styles.destinationName}>Meiji Jingu</Text>
-                            <Text style={styles.destinationDetails}>Duration: 2 hrs | Priority: 3</Text>
-                        </View>
-                    </View>
-                </TouchableOpacity>
-
-                {showMapForMeiji && (
-                    <View style={styles.additionalInfo}>
-                        <Text style={styles.additionalText}>{transportationText} instructions to Imperial Palace.</Text>
-                    </View>
-                )}
-
-                {/* Imperial Palace */}
-                <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
-
-                    {/* Background with opacity */}
-                    <View style={styles.backgroundContainer}>
-                        <View style={styles.backgroundOverlay}></View>
-                    </View>
-
-                    <View style={styles.destinationContainer}>
-                        <Image style={styles.destinationImage} source={require("../assets/images/ImperialPalace.jpg")} />
-                        <View style={styles.destinationLabel}>
-                            <Text style={styles.destinationName}>Imperial Palace</Text>
-                            <Text style={styles.destinationDetails}>Duration: 2 hrs | Priority: 4</Text>
-                        </View>
-                    </View>
-                </TouchableOpacity>
+                ))}
             </ScrollView>
 
-            {/* "Review Itinerary" button */}
             <TouchableOpacity style={styles.reviewItineraryButton} onPress={() => { }}>
                 <Text style={styles.buttonText}>Review Itinerary</Text>
             </TouchableOpacity>
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -252,7 +184,6 @@ const styles = StyleSheet.create({
         maxHeight: height * 0.4,
         borderRadius: 10,
         overflow: "hidden",
-        //marginTop: 20,
         marginBottom: 10,
     },
 
@@ -282,6 +213,7 @@ const styles = StyleSheet.create({
         marginRight: 20,
     },
 
+
     dateHeader: {
         flexDirection: "row",
         marginTop: 10,
@@ -304,6 +236,7 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 5,
     },
+
     additionalText: {
         fontSize: 16,
         color: "#333",

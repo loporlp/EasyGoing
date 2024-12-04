@@ -1,8 +1,23 @@
 import { Stack } from "expo-router";
 import Flag from "react-native-flags";
 import { View, Text, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 
 export default function RootLayout() {
+  const [placeName, setPlaceName] = useState<string | undefined>(undefined);
+
+  const router = useRouter();
+
+  // Use effect to update placeName once router.query is populated
+  useEffect(() => {
+      console.log("Router.query:", router.query);
+      if (router.isReady && router.query?.placeName) {
+          setPlaceName(router.query.placeName as string);
+      }
+  }, [router, router.query, router.isReady]);
+
+
   return (
     <Stack>
 
@@ -52,7 +67,7 @@ export default function RootLayout() {
           headerTitle: () => (
             <View style={styles.titleContainer}>
               {/* City and Country Name */}
-              <Text style={styles.headerText}>Tokyo, Japan</Text>
+              <Text style={styles.headerText}>{placeName || 'No place selected'}</Text>
               {/* Country Flag */}
               <Flag code="JP" style={styles.flag} />
             </View>
@@ -88,7 +103,7 @@ export default function RootLayout() {
           headerTitle: () => (
             <View style={styles.titleContainer}>
               {/* City and Country Name */}
-              <Text style={styles.headerText}>Tokyo, Japan</Text>
+              <Text style={styles.headerText}>{placeName || 'No place selected'}</Text>
               {/* Country Flag */}
               <Flag code="JP" style={styles.flag} />
             </View>
