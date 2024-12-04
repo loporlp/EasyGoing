@@ -4,8 +4,6 @@ import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import axios from 'axios';
 import polyline from 'polyline';
 
-const apiKey = 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI';
-
 const RouteMap = ({ origin, destination, style, onModeChange }) => {
     const [coordinates, setCoordinates] = useState([]);
     const [mode, setMode] = useState('driving'); // Can use 'walking', 'driving', 'bicycling', and 'transit'
@@ -17,11 +15,14 @@ const RouteMap = ({ origin, destination, style, onModeChange }) => {
 
 const getRoute = async (origin, destination, mode) => {
     try {
-        // The API Call
-        const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}&alternatives=true&key=${apiKey}`;
+        // Retrieve the ID token
+        const idToken = await getIdToken(auth);
+
+        // Define the API endpoint
+        const apiUrl = `http://ezgoing.app/api/route?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}`;
 
         // Make the request
-        const response = await axios.get(url);
+        const response = await axios.get(apiUrl);
 
             // Is it a valid route?
             if (response.data.routes.length > 0) {
