@@ -4,6 +4,8 @@ import { View, Button, StyleSheet, TouchableOpacity, Text, Image, } from 'react-
 import { useRouter } from "expo-router";
 import { getAuth } from 'firebase/auth';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { getIdToken } from '../scripts/getFirebaseID';
+import { auth } from '../firebaseConfig';
 
 const HomeScreen = () => {
 
