@@ -1,4 +1,6 @@
 import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { CommonActions } from '@react-navigation/native';
 
 /**
  *  City Header (picture of city, overlay with text -> City, Country; Dates Visiting; # travelers)
@@ -8,6 +10,16 @@ import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image } from "rea
  *  Buttons to 1) Export 2) Share 3) Save + Confirm -> return to Home page 4) Cancel -> send back to Home
  */
 const ReviewItineraryScreen = () => {
+    const navigation = useNavigation();
+    const goToHome = () => {
+        navigation.dispatch(
+            CommonActions.reset({
+                index: 0, // The first screen in the stack, effectively HomeScreen in this case
+                routes: [{ name: 'HomeScreen' }], // The HomeScreen will be the only route in the stack
+            })
+        );
+    }
+
     return (
         <View>
             <ScrollView style={styles.container}>
@@ -112,8 +124,8 @@ const ReviewItineraryScreen = () => {
                             </View>
                         </View>
                     </TouchableOpacity>
-                    
-                    { /* Transportation */ }
+
+                    { /* Transportation */}
                     <TouchableOpacity style={styles.destinationElement}>
                         <View style={styles.backgroundContainer}>
                             <View style={styles.backgroundOverlay}></View>
@@ -138,7 +150,7 @@ const ReviewItineraryScreen = () => {
                         </View>
                     </TouchableOpacity>
 
-                    { /* Transportation */ }
+                    { /* Transportation */}
                     <TouchableOpacity style={styles.destinationElement}>
                         <View style={styles.backgroundContainer}>
                             <View style={styles.backgroundOverlay}></View>
@@ -224,8 +236,8 @@ const ReviewItineraryScreen = () => {
             < View style={styles.buttonContainer} >
                 <TouchableOpacity style={styles.button}><Text>Export</Text></TouchableOpacity>
                 <TouchableOpacity style={styles.button}><Text>Share</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.button}><Text>Save + Confirm</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.button}><Text>Cancel</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.button} onPress={goToHome}><Text>Save + Confirm</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.button} onPress={goToHome}><Text>Cancel</Text></TouchableOpacity>
             </View >
         </View >
     );
