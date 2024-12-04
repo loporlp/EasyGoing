@@ -4,8 +4,6 @@ import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import axios from 'axios';
 import polyline from 'polyline';
 
-const apiKey = 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI';
-
 const RouteMap = ({ origin, destination, style, onModeChange }) => {
     const [coordinates, setCoordinates] = useState([]);
     const [mode, setMode] = useState('driving'); // Can use 'walking', 'driving', 'bicycling', and 'transit'
@@ -17,41 +15,14 @@ const RouteMap = ({ origin, destination, style, onModeChange }) => {
 
 const getRoute = async (origin, destination, mode) => {
     try {
-        // The API Call
-        let url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}&alternatives=true&key=${apiKey}`;
+        // Retrieve the ID token
+        const idToken = await getIdToken(auth);
 
-        // Transit Mode (includes walking)
-        if (mode == 'transit') {
-            url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=transit&provideRouteAlternatives=true&transit_routing_preference=less_walking&key=${apiKey}`;
-            const transitResponse = await axios.get(url);
-            if (transitResponse.data.routes.length > 0) {
-                const transitRoute = transitResponse.data.routes[0];
+        // Define the API endpoint
+        const apiUrl = `http://ezgoing.app/api/route?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}`;
 
-                // Decode the main transit polyline
-                const transitPoints = decodePolyline(transitRoute.overview_polyline.points);
-
-                // Now, look for walking segments
-                let fullRoute = [...transitPoints];
-
-                // Loop through each leg of the route and add walking paths if necessary
-                for (let leg of transitRoute.legs) {
-                    // Walking from origin to the first transit stop, and from the last transit stop to the destination
-                    if (leg.steps) {
-                        leg.steps.forEach(step => {
-                            if (step.travel_mode === 'WALKING') {
-                                const walkingPoints = decodePolyline(step.polyline.points);
-                                fullRoute = [...fullRoute, ...walkingPoints];
-                            }
-                        });
-                    }
-                }
-                setCoordinates(fullRoute);
-            } else {
-                Alert.alert('Error', 'No transit route found');
-            }
-        } else {
-            // Make the request
-            const response = await axios.get(url);
+        // Make the request
+        const response = await axios.get(apiUrl);
 
             // Is it a valid route?
             if (response.data.routes.length > 0) {
