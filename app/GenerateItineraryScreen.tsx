@@ -32,6 +32,7 @@ const GenerateItineraryScreen = () => {
     const [transportationText, setTransportationText] = useState("driving");
     const selectedCoordinates = {
         // Default coordinates (e.g., Tokyo Station)
+        // TODO: Change to the origin clicked
         latitude: 35.652832,
         longitude: 139.839478,
     };
