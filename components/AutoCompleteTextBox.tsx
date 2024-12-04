@@ -7,7 +7,7 @@ import {getIdToken} from '../scripts/getFirebaseID'
 
 
 type AutocompleteTextBoxProps = {
-    style?: ViewStyle | TextStyle; // TODO: Need a default style
+    style?: ViewStyle; // TODO: Need a default style
     onPlaceSelect?: (address: { description: string; place_id: string }) => string; // Callback when a place is selected
     placeholder: string;
     placeholderTextColor: string;
@@ -15,14 +15,17 @@ type AutocompleteTextBoxProps = {
 
 const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTextColor} : AutocompleteTextBoxProps) => {
     const [text, setText] = useState('');
-    const [addresses, setAddresses] = useState([]);
+    const [addresses, setAddresses] = useState<Address[]>([]);
     const [isSelectingAddress, setIsSelectingAddress] = useState(false); // Track if an address is selected
     const [previousText, setPreviousText] = useState(''); // Track previous text
+    
 
-    const handlePlaceSelection = (selectedPlace) => {
+    const handlePlaceSelection = (selectedPlace : string) => {
         console.log("Place selected:", selectedPlace);
         // Ensure the callback is invoked with the correct data
-        onPlaceSelect(selectedPlace);
+        if (onPlaceSelect) {
+            onPlaceSelect({ description: selectedPlace, place_id: "test" });
+        }
       };
 
     useEffect(() => {

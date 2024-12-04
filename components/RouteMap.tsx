@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, Alert, Button } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import axios from 'axios';
 import polyline from 'polyline';
+import { auth } from '../firebaseConfig';
+import {getIdToken} from '../scripts/getFirebaseID'
 
 const RouteMap = ({ origin, destination, style, onModeChange }) => {
     const [coordinates, setCoordinates] = useState([]);
@@ -22,16 +24,26 @@ const getRoute = async (origin, destination, mode) => {
         const apiUrl = `http://ezgoing.app/api/route?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}`;
 
         // Make the request
-        const response = await axios.get(apiUrl);
+        const response = await fetch(apiUrl, {
+          method: "GET", // Or "POST", "PUT", etc.
+          headers: {
+            Authorization: `Bearer ${idToken}`, // Include the ID token in the header
+          },
+        });
 
-            // Is it a valid route?
-            if (response.data.routes.length > 0) {
-                const points = decodePolyline(response.data.routes[0].overview_polyline.points);
-                setCoordinates(points);
-            } else {
-                // TODO: Need a way to show no route
-                Alert.alert('Error', 'No route found');
-            }
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Is it a valid route?
+        if (data.routes.length > 0) {
+            const points = decodePolyline(data.routes[0].overview_polyline.points);
+            setCoordinates(points);
+        } else {
+            // TODO: Need a way to show no route
+            Alert.alert('Error', 'No route found');
         }
     } catch (error) {
         // TODO: Need something to handle errors
