@@ -6,6 +6,8 @@ import { auth } from '../firebaseConfig';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types';
 import { useNavigation } from '@react-navigation/native';
+import { useRouter } from "expo-router";
+import { fetchData } from '../scripts/fetchData';
 
 type SignInScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -14,19 +16,29 @@ type SignInScreenNavigationProp = NativeStackNavigationProp<
 
 const SignInScreen = () => {
   const navigation = useNavigation<SignInScreenNavigationProp>();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSignIn = () => {
-    signInWithEmailAndPassword(auth, email.trim(), password)
-      .then(() => {
-        console.log('User signed in!');
-      })
-      .catch((error) => {
-        console.error('Sign in error:', error);
-        alert(error.message);
-      });
+  const handleSignIn = async () => {
+    const isServerRunning = await fetchData();
+
+    if (isServerRunning) {
+      signInWithEmailAndPassword(auth, email.trim(), password)
+        .then(() => {
+          console.log('User signed in!');
+          // Navigate to the next screen, e.g., Home
+        })
+        .catch((error) => {
+          console.error('Sign in error:', error);
+          alert(error.message);
+        });
+    } else {
+      alert('Server is down. Please try again later.');
+      router.replace("/ConnectionToServerFailedScreen");
+    }
   };
+
 
   return (
     <View style={styles.container}>
