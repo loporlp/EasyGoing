@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Button, StyleSheet, TouchableOpacity, Text, Image, } from 'react-native';
 import { useRouter } from "expo-router";
-import {getIdToken} from '../scripts/getFirebaseID'
+import { getAuth } from 'firebase/auth';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const HomeScreen = () => {
 
@@ -52,11 +53,22 @@ const HomeScreen = () => {
       <View style={styles.screenContainer}>
         <Text style={styles.greetingText}>Hello, {username}!</Text>
 
-      {/* Two Buttons in the Middle */}
-      <View style={styles.buttonContainer}>
-        <Button title="New Trip" onPress={createNewTrip} />
-        <View style={{ height: 20 }} />
-        <Button title="Button 2" onPress={callProtectedApi} />
+        {/* Two Buttons in the Middle */}
+        <View style={styles.tripRow}>
+       
+          <TouchableOpacity onPress={createNewTrip} style={styles.tripButton}>
+            <Text style={styles.tripText}>New Trip</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => { }} style={styles.tripButton}>
+            <Text style={styles.tripText}>Edit Existing Trip</Text>
+          </TouchableOpacity>
+
+        </View>
+      </View>
+
+      <View style={styles.bottomScreen}>
+        <Text >Insert stuff here</Text>
       </View>
 
     </View>
