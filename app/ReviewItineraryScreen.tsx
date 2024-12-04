@@ -14,7 +14,7 @@ const ReviewItineraryScreen = () => {
 
                 { /* City Header */}
                 <View style={styles.headerContainer}>
-                    <Image style={styles.backgroundImage} source={require("../assets/images/landscape.jpg")} />
+                    <Image style={styles.backgroundImage} source={require("../assets/images/tokyoskyline.jpg")} />
                     <View style={styles.darkOverlay} />
                     <View style={styles.screenContainer}>
                         <Text style={styles.greetingText}>Tokyo, Japan</Text>
@@ -77,7 +77,7 @@ const ReviewItineraryScreen = () => {
                     { /* Itinerary */}
                     <Text style={styles.textLabel}>Itinerary:</Text>
                     <View style={styles.dateHeader}>
-                        <Text style={styles.dateText}>Sat, Jul. 12 | $202.35 | v</Text>
+                        <Text style={styles.dateText}>Sat, Jul. 13 | $202.35 | v</Text>
                     </View>
 
                     {/* Akihabara Electric Town */}
@@ -181,7 +181,7 @@ const ReviewItineraryScreen = () => {
                     </TouchableOpacity>
 
                     <View style={styles.dateHeader}>
-                        <Text style={styles.dateText}>Sun, Jul. 13   v</Text>
+                        <Text style={styles.dateText}>Sun, Jul. 14   v</Text>
                     </View>
 
                     {/* Meiji Jingu */}
@@ -327,6 +327,8 @@ const styles = StyleSheet.create({
 
     buttonContainer: {
         marginTop: 20,
+        marginLeft: 20,
+        marginRight: 20,
         flexDirection: "row",
         justifyContent: "space-between",
     },
