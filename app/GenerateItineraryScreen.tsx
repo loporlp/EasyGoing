@@ -11,7 +11,16 @@ const { height } = Dimensions.get('window');
 const GenerateItineraryScreen = () => {
     const router = useRouter();
 
-    const destinations = {
+    type Place = {
+        name: string;
+        coords: {
+            latitude: number;
+            longitude: number;
+        };
+        image: any;
+    };
+
+    const destinations : Record<string, Place> = {
         akihabara: { name: "Akihabara Electric Town", coords: { latitude: 35.7100, longitude: 139.8107 }, image: require("../assets/images/AkihabaraElectricTown.jpg") },
         skytree: { name: "Tokyo Skytree", coords: { latitude: 35.7023, longitude: 139.7745 }, image: require("../assets/images/tokyoskytree.jpg") },
         pokemon: { name: "Pokemon Center", coords: { latitude: 35.6620, longitude: 139.6984 }, image: require("../assets/images/PokemonCenterShibuya.png") },
