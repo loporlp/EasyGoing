@@ -29,24 +29,6 @@ const GenerateItineraryScreen = () => {
     };
 
     const [selectedDestination, setSelectedDestination] = useState<string | null>(null);
-    type Place = {
-        name: string;
-        coords: {
-            latitude: number;
-            longitude: number;
-        };
-        image: any;
-    };
-
-    const destinations : Record<string, Place> = {
-        akihabara: { name: "Akihabara Electric Town", coords: { latitude: 35.7100, longitude: 139.8107 }, image: require("../assets/images/AkihabaraElectricTown.jpg") },
-        skytree: { name: "Tokyo Skytree", coords: { latitude: 35.7023, longitude: 139.7745 }, image: require("../assets/images/tokyoskytree.jpg") },
-        pokemon: { name: "Pokemon Center", coords: { latitude: 35.6620, longitude: 139.6984 }, image: require("../assets/images/PokemonCenterShibuya.png") },
-        meiji: { name: "Meiji Jingu", coords: { latitude: 35.6764, longitude: 139.6993 }, image: require("../assets/images/MeijiJingu.jpg") },
-        palace: { name: "Imperial Palace", coords: { latitude: 35.6852, longitude: 139.7528 }, image: require("../assets/images/ImperialPalace.jpg") },
-    };
-
-    const [selectedDestination, setSelectedDestination] = useState<string | null>(null);
     const [transportationText, setTransportationText] = useState("driving");
     const [selectedCoordinates, setSelectedCoordinates] = useState({
         latitude: 35.652832,
@@ -114,16 +96,17 @@ const GenerateItineraryScreen = () => {
                                 <Image style={styles.destinationImage} source={destinations[destinationKey].image} />
                                 <View style={styles.destinationLabel}>
                                     <Text style={styles.destinationName}>{destinations[destinationKey].name}</Text>
-                                    <Text style={styles.destinationDetails}>Duration: {destinationKey === 'akihabara' ? '6 hrs' : '2 hrs'} | Priority: {destinationKey === 'akihabara' ? 1 : 2}</Text> // TODO: Make this generic for different priority and stuff
+                                    <Text style={styles.destinationDetails}>Duration: {destinationKey === 'akihabara' ? '6 hrs' : '2 hrs'} | Priority: {destinationKey === 'akihabara' ? 1 : 2}</Text> 
+                                     {/*TODO: Make this generic for different priority and stuff*/}
                                 </View>
                             </View>
                         </TouchableOpacity>
 
-                        {selectedDestination === destinationKey && (
+                        {selectedDestination === destinationKey ? (
                             <View style={styles.additionalInfo}>
                                 <Text style={styles.additionalText}>{getRouteText()}</Text>
                             </View>
-                        )}
+                        ) : null}
                     </View>
                 ))}
             </ScrollView>

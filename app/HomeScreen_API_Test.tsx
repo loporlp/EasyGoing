@@ -7,7 +7,7 @@ import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import MapMarker from '../components/MapMarker';
 import RouteMap from '../components/RouteMap';
 import { getCoords } from '../scripts/nameToCoords.js';
-import { getCoords } from '../scripts/nameToCoords.js';
+
 
 const HomeScreen = () => {
   // State to store the selected place's coordinates

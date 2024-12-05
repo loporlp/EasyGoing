@@ -63,7 +63,7 @@ const HomeScreen = () => {
             <Text style={styles.tripText}>New Trip</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => { callProtectedApi(); }} style={styles.tripButton}>
+          <TouchableOpacity onPress={() => {  }} style={styles.tripButton}>
             <Text style={styles.tripText}>Edit Existing Trip</Text>
           </TouchableOpacity>
 
