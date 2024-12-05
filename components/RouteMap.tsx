@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Alert, Button } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import axios from 'axios';
@@ -10,16 +10,21 @@ import {getIdToken} from '../scripts/getFirebaseID'
 const RouteMap = ({ origin, destination, style, onModeChange }) => {
     const [coordinates, setCoordinates] = useState([]);
     const [mode, setMode] = useState('driving'); // Can use 'walking', 'driving', 'bicycling', and 'transit'
+    const [loading, setLoading] = useState(false);
+    const mapRef = useRef(null);
 
     useEffect(() => {
-        setCoordinates([]);
         if (origin && destination) {
             getRoute(origin, destination, mode);
         }
-
     }, [origin, destination, mode]);
 
+    useEffect(() => {
+      console.log('Coordinates Updated:', coordinates); // Log after coordinates update
+    }, [coordinates]);
+
 const getRoute = async (origin, destination, mode) => {
+    setLoading(true);
     try {
         // Retrieve the ID token
         const idToken = await getIdToken(auth);
@@ -45,6 +50,16 @@ const getRoute = async (origin, destination, mode) => {
             const points = decodePolyline(data.routes[0].overview_polyline.points);
             setCoordinates(points);
 
+            if (mapRef.current) {
+                const region = {
+                    latitude: (origin.latitude + destination.latitude) / 2,
+                    longitude: (origin.longitude + destination.longitude) / 2,
+                    latitudeDelta: 0.1,
+                    longitudeDelta: 0.1,
+                };
+                mapRef.current.animateToRegion(region, 1000);
+            }
+
             // TODO: Center and scale map to fit the route
 
         } else {
@@ -55,6 +70,8 @@ const getRoute = async (origin, destination, mode) => {
         // TODO: Need something to handle errors
         console.error(error);
         Alert.alert('Error', 'Failed to fetch route');
+    } finally {
+        setLoading(false);
     }
 };
 
@@ -72,30 +89,36 @@ const getRoute = async (origin, destination, mode) => {
         onModeChange(newMode);
     };
 
+    useEffect(() => {
+        if (coordinates.length > 0 && mapRef.current) {
+            const region = {
+                latitude: (origin.latitude + destination.latitude) / 2,
+                longitude: (origin.longitude + destination.longitude) / 2,
+                latitudeDelta: 0.1,
+                longitudeDelta: 0.1,
+            };
+            mapRef.current.animateToRegion(region, 1000);
+        }
+    }, [coordinates, origin, destination])
+
 return (
     <View style={styles.container}>
+
+    {console.log('Rendering MapView with:', { origin, destination, coordinates })}
     {/* Display the map */}
     <MapView
+        ref={mapRef}
         provider={PROVIDER_GOOGLE}
         style={styles.map}
-        region={{
-            latitude: (origin.latitude + destination.latitude) / 2,
-            longitude: (origin.longitude + destination.longitude) / 2,
-            // Smaller value means more zoomed-in
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.05,
-        }}
-        onRegionChangeComplete={(region) => {
-            // Optionally handle region change if needed (e.g., track user's movement)
-        }}
         initialRegion={{
-            latitude: (origin.latitude + destination.latitude) / 2,
-            longitude: (origin.longitude + destination.longitude) / 2,
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.05,
-        }}>
+                  latitude: (origin.latitude + destination.latitude) / 2,
+                  longitude: (origin.longitude + destination.longitude) / 2,
+                  latitudeDelta: 0.05,
+                  longitudeDelta: 0.05,
+                }}>
 
                 {/* Markers for Origin and Destination */}
+                {console.log('Marker coords:', { origin, destination })}
                 <Marker coordinate={origin} title="Origin" />
                 <Marker coordinate={destination} title="Destination" />
 
