@@ -111,26 +111,27 @@ return (
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         initialRegion={{
-                  latitude: (origin.latitude + destination.latitude) / 2,
-                  longitude: (origin.longitude + destination.longitude) / 2,
-                  latitudeDelta: 0.05,
-                  longitudeDelta: 0.05,
-                }}>
+            latitude: (origin.latitude + destination.latitude) / 2,
+            longitude: (origin.longitude + destination.longitude) / 2,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+        }}
+    >
 
-                {/* Markers for Origin and Destination */}
-                {console.log('Marker coords:', { origin, destination })}
-                <Marker coordinate={origin} title="Origin" />
-                <Marker coordinate={destination} title="Destination" />
+        {/* Markers for Origin and Destination */}
+        {console.log('Marker coords:', { origin, destination })}
+        <Marker coordinate={origin} title="Origin" />
+        <Marker coordinate={destination} title="Destination" />
 
-                {/* Route Line */}
-                {coordinates.length > 0 ? (
-                    <Polyline
-                        coordinates={coordinates}
-                        strokeColor="#FF5733"
-                        strokeWidth={6}
-                    />
-                ) : null}
-            </MapView>
+        {/* Route Line */}
+        {coordinates.length > 0 ? (
+            <Polyline
+                coordinates={coordinates}
+                strokeColor="#FF5733"
+                strokeWidth={6}
+            />
+        ) : null}
+    </MapView>
 
     {/* Transportation Mode Buttons */}
     <View style={styles.buttonContainer}>
