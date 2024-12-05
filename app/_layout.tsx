@@ -87,7 +87,7 @@ export default function RootLayout() {
           headerTitle: () => (
             <View style={styles.titleContainer}>
               {/* City and Country Name */}
-              <Text style={styles.headerText}>{placeName || 'Tokyo, Japan'}</Text> // TODO: "No place selected"
+              <Text style={styles.headerText}>{placeName || 'Tokyo, Japan'}</Text> 
               {/* Country Flag */}
               <Flag code="JP" style={styles.flag} />
             </View>
@@ -123,7 +123,7 @@ export default function RootLayout() {
           headerTitle: () => (
             <View style={styles.titleContainer}>
               {/* City and Country Name */}
-              <Text style={styles.headerText}>{placeName || 'Tokyo, Japan'}</Text> // TODO: "No place selected"
+              <Text style={styles.headerText}>{placeName || 'Tokyo, Japan'}</Text> 
               {/* Country Flag */}
               <Flag code="JP" style={styles.flag} />
             </View>

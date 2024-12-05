@@ -8,12 +8,6 @@
   integrity sha512-xuSJ9WXwTmtngWkbdEoopMo6F8NLtjy84UNAMsAr5C3/2SgAL/dEU10TMqTIsipqPQ8HA/7WzeqQ9DEQxSvPPA==
 
 "@0no-co/graphql.web@^1.0.8":
-"@0no-co/graphql.web@^1.0.5":
-  version "1.0.11"
-  resolved "https://registry.npmjs.org/@0no-co/graphql.web/-/graphql.web-1.0.11.tgz"
-  integrity sha512-xuSJ9WXwTmtngWkbdEoopMo6F8NLtjy84UNAMsAr5C3/2SgAL/dEU10TMqTIsipqPQ8HA/7WzeqQ9DEQxSvPPA==
-
-"@0no-co/graphql.web@^1.0.8":
   version "1.0.11"
   resolved "https://registry.npmjs.org/@0no-co/graphql.web/-/graphql.web-1.0.11.tgz"
   integrity sha512-xuSJ9WXwTmtngWkbdEoopMo6F8NLtjy84UNAMsAr5C3/2SgAL/dEU10TMqTIsipqPQ8HA/7WzeqQ9DEQxSvPPA==
@@ -6477,6 +6471,8 @@ merge-descriptors@1.0.3:
   version "1.0.3"
   resolved "https://registry.npmjs.org/merge-descriptors/-/merge-descriptors-1.0.3.tgz"
   integrity sha512-gaNvAS7TZ897/rVaZ0nMtAyxNyi/pdbjbAwUpFQpN70GqnVfOiXpeUUMKRBmzXaSQ8DdTX4/0ms62r2K+hE6mQ==
+  dependencies:
+    is-plain-obj "^2.1.0"
 
 merge-options@^3.0.4:
   version "3.0.4"

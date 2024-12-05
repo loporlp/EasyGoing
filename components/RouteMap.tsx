@@ -5,8 +5,7 @@ import axios from 'axios';
 import polyline from 'polyline';
 import { auth } from '../firebaseConfig';
 import {getIdToken} from '../scripts/getFirebaseID'
-import { auth } from '../firebaseConfig';
-import {getIdToken} from '../scripts/getFirebaseID'
+
 
 const RouteMap = ({ origin, destination, style, onModeChange }) => {
     const [coordinates, setCoordinates] = useState([]);
@@ -17,9 +16,7 @@ const RouteMap = ({ origin, destination, style, onModeChange }) => {
         if (origin && destination) {
             getRoute(origin, destination, mode);
         }
-        if (origin && destination) {
-            getRoute(origin, destination, mode);
-        }
+
     }, [origin, destination, mode]);
 
 const getRoute = async (origin, destination, mode) => {
@@ -43,45 +40,6 @@ const getRoute = async (origin, destination, mode) => {
         }
 
         const data = await response.json();
-const getRoute = async (origin, destination, mode) => {
-    try {
-        // Retrieve the ID token
-        const idToken = await getIdToken(auth);
-
-        // Define the API endpoint
-        const apiUrl = `http://ezgoing.app/api/route?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}`;
-
-        // Make the request
-        const response = await fetch(apiUrl, {
-          method: "GET", // Or "POST", "PUT", etc.
-          headers: {
-            Authorization: `Bearer ${idToken}`, // Include the ID token in the header
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        // Is it a valid route?
-        if (data.routes.length > 0) {
-            const points = decodePolyline(data.routes[0].overview_polyline.points);
-            setCoordinates(points);
-
-            // TODO: Center and scale map to fit the route
-
-        } else {
-            // TODO: Need a way to show no route
-            Alert.alert('Error', 'No route found');
-        }
-    } catch (error) {
-        // TODO: Need something to handle errors
-        console.error(error);
-        Alert.alert('Error', 'Failed to fetch route');
-    }
-};
         // Is it a valid route?
         if (data.routes.length > 0) {
             const points = decodePolyline(data.routes[0].overview_polyline.points);
@@ -120,6 +78,16 @@ return (
     <MapView
         provider={PROVIDER_GOOGLE}
         style={styles.map}
+        region={{
+            latitude: (origin.latitude + destination.latitude) / 2,
+            longitude: (origin.longitude + destination.longitude) / 2,
+            // Smaller value means more zoomed-in
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+        }}
+        onRegionChangeComplete={(region) => {
+            // Optionally handle region change if needed (e.g., track user's movement)
+        }}
         initialRegion={{
             latitude: (origin.latitude + destination.latitude) / 2,
             longitude: (origin.longitude + destination.longitude) / 2,
@@ -132,13 +100,13 @@ return (
                 <Marker coordinate={destination} title="Destination" />
 
                 {/* Route Line */}
-                {coordinates.length > 0 && (
+                {coordinates.length > 0 ? (
                     <Polyline
                         coordinates={coordinates}
                         strokeColor="#FF5733"
                         strokeWidth={6}
                     />
-                )}
+                ) : null}
             </MapView>
 
     {/* Transportation Mode Buttons */}
@@ -147,7 +115,7 @@ return (
         <Button title="Walking" onPress={() => handleModeChange('walking')} />
         <Button title="Transit" onPress={() => handleModeChange('transit')} />
         <Button title="Bicycling" onPress={() => handleModeChange('bicycling')} />
-        // TODO: transit_mode: 'bus|subway|train'
+        { /*TODO: transit_mode: 'bus|subway|train'*/}
     </View>
     </View>
   );
