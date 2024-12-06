@@ -36,6 +36,21 @@ export default function RootLayout() {
         }}
       />
 
+      {/*Edit existing trips screen*/}
+      <Stack.Screen
+        name="EditExistingTripsScreen"
+        options={{
+          title: "Edit Existing Trips",
+          headerStyle: {
+            backgroundColor: '#24a6ad',
+          },
+          headerTintColor: "white",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
+
       {/*Account screen*/}
       <Stack.Screen name="Account" />
 
