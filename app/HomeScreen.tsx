@@ -17,15 +17,19 @@ const HomeScreen = () => {
    * Will navigate to the "Account" screen after link is pressed.
    */
   const navigateToAccount = () => {
-    router.push("/Account")
+    router.push("/Account");
   }
 
   /**
    * Navigates to the "Create New Trip" page
    */
   const createNewTrip = () => {
-    console.log("Going to 'Create New Trip'...")
-    router.push("/CreateNewTrip")
+    console.log("Going to 'Create New Trip'...");
+    router.push("/CreateNewTrip");
+  }
+
+  const editExistingTrips = () => {
+    router.push("/EditExistingTripsScreen");
   }
 
   // Gets the username
@@ -63,7 +67,7 @@ const HomeScreen = () => {
             <Text style={styles.tripText}>New Trip</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => {  }} style={styles.tripButton}>
+          <TouchableOpacity onPress={() => { editExistingTrips(); }} style={styles.tripButton}>
             <Text style={styles.tripText}>Edit Existing Trip</Text>
           </TouchableOpacity>
 
