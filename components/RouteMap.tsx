@@ -5,6 +5,7 @@ import axios from 'axios';
 import polyline from 'polyline';
 import { auth } from '../firebaseConfig';
 import {getIdToken} from '../scripts/getFirebaseID'
+import { useIsFocused } from '@react-navigation/native';
 
 
 const RouteMap = ({ origin, destination, style, onModeChange }) => {
@@ -12,6 +13,14 @@ const RouteMap = ({ origin, destination, style, onModeChange }) => {
     const [mode, setMode] = useState('driving'); // Can use 'walking', 'driving', 'bicycling', and 'transit'
     const [loading, setLoading] = useState(false);
     const mapRef = useRef(null);
+    const isFocused = useIsFocused();
+    const [mapKey, setMapKey] = useState(Date.now());
+
+    useEffect(() => {
+        if (isFocused) {
+            setMapKey(Date.now()); // Update key when screen is focused
+        }
+    }, [isFocused]);
 
     useEffect(() => {
         if (origin && destination) {
@@ -23,6 +32,7 @@ const RouteMap = ({ origin, destination, style, onModeChange }) => {
       console.log('Coordinates Updated:', coordinates); // Log after coordinates update
     }, [coordinates]);
 
+    
 const getRoute = async (origin, destination, mode) => {
     setLoading(true);
     try {
@@ -107,6 +117,7 @@ return (
     {console.log('Rendering MapView with:', { origin, destination, coordinates })}
     {/* Display the map */}
     <MapView
+        key={mapKey}
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
         style={styles.map}
@@ -166,5 +177,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
 });
+
 
 export default RouteMap;
