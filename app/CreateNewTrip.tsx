@@ -220,7 +220,6 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         paddingLeft: 20,
         borderRadius: 10,
-        paddingTop: 10,
     },
 
     travelerInput: {
