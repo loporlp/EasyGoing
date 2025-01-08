@@ -14,35 +14,9 @@ const TestOptimalRouteScreen = () => {
   const setOrigin = { latitude: 35.7023, longitude: 139.7745 }; // Akihabara Example
   const setDestination = { latitude: 35.7100, longitude: 139.8107 };
 
-  // Handle sign out
-  const handleSignOut = () => {
-    signOut(auth).catch((error) => {
-      console.error('Sign out error:', error);
-    });
-  };
-
-  const handleModeChange = (text : any) => {
-  };
-
-
-  function handlePlaceSelect(address: { description: string; place_id: string; }): string {
-    throw new Error('Function not implemented.');
-  }
 
   return (
     <View style={styles.container}>
-      {/* Account Button in the Top Right */}
-      <TouchableOpacity style={styles.accountButton} onPress={handleSignOut}>
-        <Text style={styles.accountButtonText}>Account</Text>
-      </TouchableOpacity>
-
-      {/* Autocomplete Textbox for searching places */}
-            <View style={styles.searchContainer}>
-              <Text style={styles.header}>Search for a Place</Text>
-              <AutocompleteTextBox onPlaceSelect={handlePlaceSelect} />
-            </View>
-
-      <RouteMap origin={setOrigin} destination={setDestination} style={styles.map} onModeChange={handleModeChange}/>
 
     </View>
   );
