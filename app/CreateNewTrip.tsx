@@ -24,11 +24,6 @@ const CreateNewTrip = () => {
 
     const startPlanning = () => {
         console.log('Selected place before navigation:', selectedPlace);
-        router.push({
-            pathname: "/AddEditDestinations",
-            // Pass information to the next screen
-            query: { placeName: selectedPlace },
-        });
     }
 
     const handleDateChange = (date: Date, type: 'START_DATE' | 'END_DATE') => {
@@ -49,7 +44,7 @@ const CreateNewTrip = () => {
         setModalVisible(false);
     };
 
-    const handlePlaceSelect = (place) => {
+    const handlePlaceSelect = (place: { geometry: { location: { lat: any; lng: any; }; }; description: React.SetStateAction<string>; }) => {
         // Extract latitude and longitude from the selected place details
         if (place && place.geometry && place.geometry.location) {
             setSelectedCoordinates({
@@ -312,3 +307,7 @@ const styles = StyleSheet.create({
 });
 
 export default CreateNewTrip;
+
+function setSelectedCoordinates(arg0: { latitude: any; longitude: any; }) {
+    
+}
