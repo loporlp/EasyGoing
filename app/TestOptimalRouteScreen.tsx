@@ -17,6 +17,12 @@ const TestOptimalRouteScreen = () => {
       { name: 'Tokyo Tower, Tokyo', address: '4 Chome-2-8 Shibakoen, Minato City, Tokyo, Japan' },
       { name: 'Shibuya Scramble Crossing', address: '21 Udagawa-cho, Shibuya, Tokyo, Japan' },
       { name: 'Akihabara Electric Town', address: '1 Chome-12 Soto-Kanda, Chiyoda City, Tokyo, Japan'} ];
+  /*const origin = 'Mexico City, Mexico';
+  let locations = [
+      { name: 'Chicago', address: 'Chicago, Illinois' },
+      { name: 'Disneyland Park', address: 'Disneyland Park' },
+      { name: 'Caesars Palace', address: '3570 S Las Vegas Blvd, Paradise, NV 89109'},
+      { name: 'Austin', address: 'Austin, Texas' }];*/
   
   useEffect(() => {
     const fetchOptimalRoute = async () => {
