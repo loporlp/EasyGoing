@@ -1,23 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Button, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
-import AutocompleteTextBox from '../components/AutoCompleteTextBox';
-import MapMarker from '../components/MapMarker';
 import RouteMap from '../components/RouteMap';
 import { getCoords } from '../scripts/nameToCoords.js';
+import { calculateOptimalRoute } from '../scripts/optimalRoute.js';
 
 
 const TestOptimalRouteScreen = () => {
-  // State to store the selected place's coordinates
-  const setOrigin = { latitude: 35.7023, longitude: 139.7745 }; // Akihabara Example
-  const setDestination = { latitude: 35.7100, longitude: 139.8107 };
 
+  const [optimalRoute, setOptimalRoute] = useState<any[][]>([]);
+
+  const origin = 'Tokyo International Airport, Tokyo';
+  let locations = ['Tokyo Tower, Tokyo', 'Shibuya Crossing, Tokyo', 'Kyoto Station, Kyoto'];
+  
+  useEffect(() => {
+    const fetchOptimalRoute = async () => {
+      try {
+        const result = await calculateOptimalRoute(locations, origin); // Your function for optimal route
+        setOptimalRoute(result); // Set optimal route to state
+      } catch (error) {
+        console.error("Failed to get optimal route:", error);
+      }
+    };
+
+    fetchOptimalRoute();
+  }, []);
 
   return (
     <View style={styles.container}>
-
+      {optimalRoute.length > 0 ? (
+        optimalRoute.map(([origin, destination], index) => (
+          <Text key={index} style={styles.routeText}>
+            From {origin} to {destination}
+          </Text>
+        ))
+      ) : (
+        <Text>Loading optimal route...</Text>
+      )}
     </View>
   );
 };
@@ -62,6 +83,9 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 300,
   },
+  routeText: {
+
+  }
 });
 
 export default TestOptimalRouteScreen;
