@@ -3,7 +3,7 @@ import axios from 'axios';
 // Distance Matrix API
 async function getDistanceMatrix(origin, destinations) {
     const url = 'https://maps.googleapis.com/maps/api/distancematrix/json';
-    const destinationsStr = destinations.join('|'); // Between each destination, add this symbol
+    const destinationsStr = destinations.map(d => d.address).join('|'); // Between each destination, add this symbol
 
     const apiKey = "AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI";
     const fullUrl = `${url}?origins=${encodeURIComponent(origin)}&destinations=${encodeURIComponent(destinationsStr)}&key=${apiKey}`;
@@ -38,6 +38,7 @@ async function getDistanceMatrix(origin, destinations) {
     // Process and return the distances and durations
     const distances = data.rows[0].elements.map((element, index) => ({
         destination: data.destination_addresses[index],
+        originalLocationName: destinations[index].name, // location name
         distance: element.distance.value,  // in meters
         duration: element.duration.value,  // in seconds
     }));
@@ -61,14 +62,20 @@ export async function calculateOptimalRoute(locations, origin) {
         const destination = distancesList.reduce((prev, current) => (prev.distance < current.distance ? prev : current));
 
         // Add the current origin and destination to the route
-        optimalRoute.push([currentOrigin, destination.destination]);
+        optimalRoute.push([currentOrigin, destination.originalLocationName]);
 
         // Update the current origin to the chosen destination
-        currentOrigin = destination.destination;
+        currentOrigin = destination.originalLocationName;
+
+        //console.log("To remove: ", currentOrigin);
 
         // Remove the destination from the list of locations
-        const destinationIndex = locations.indexOf(destination.destination); // TODO: fix this as it's not right deletion rn
-        locations.splice(destinationIndex, 1);
+        const destinationIndex = locations.findIndex(loc => loc.name === destination.originalLocationName);
+        if (destinationIndex !== -1) {
+            locations.splice(destinationIndex, 1); // Remove the matched destination
+        } else {
+            console.log("Destination not found in locations array");
+        }
     }
     console.log("End");
 

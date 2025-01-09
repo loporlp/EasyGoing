@@ -13,7 +13,10 @@ const TestOptimalRouteScreen = () => {
   const [optimalRoute, setOptimalRoute] = useState<any[][]>([]);
 
   const origin = 'Tokyo International Airport, Tokyo';
-  let locations = ['Tokyo Tower, Tokyo', 'Shibuya Crossing, Tokyo', 'Kyoto Station, Kyoto'];
+  let locations = [
+      { name: 'Tokyo Tower, Tokyo', address: '4 Chome-2-8 Shibakoen, Minato City, Tokyo, Japan' },
+      { name: 'Shibuya Scramble Crossing', address: '21 Udagawa-cho, Shibuya, Tokyo, Japan' },
+      { name: 'Akihabara Electric Town', address: '1 Chome-12 Soto-Kanda, Chiyoda City, Tokyo, Japan'} ];
   
   useEffect(() => {
     const fetchOptimalRoute = async () => {
