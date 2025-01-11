@@ -71,6 +71,25 @@ app.get('/api/serverstatus', (req, res) => {
     res.json({ message: 'Server is Running' });
 });
 
+const pool = require('./db'); // Import DB connection
+
+// Register user in the database
+app.post('/api/register', verifyFirebaseToken, async (req, res) => {
+    const { uid, email } = req.user;
+
+    try {
+        await pool.query(
+            'INSERT INTO users (id, email) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING',
+            [uid, email]
+        );
+        res.status(200).json({ message: 'User registered' });
+    } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+
 
 // Start the server
 app.listen(port, () => {
