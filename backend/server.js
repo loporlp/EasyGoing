@@ -66,6 +66,8 @@ app.get('/api/autocomplete', verifyFirebaseToken, async (req, res) => {
   }
 });
 
+// Database Endpoints
+
 // Status endpoint
 app.get('/api/serverstatus', (req, res) => {
     res.json({ message: 'Server is Running' });
@@ -88,6 +90,44 @@ app.post('/api/register', verifyFirebaseToken, async (req, res) => {
         res.status(500).json({ error: 'Database error' });
     }
 });
+
+// Get all trips from a specific user
+app.post('/api/trips', verifyFirebaseToken,  async (req, res) => {
+    const { trip_details } = req.body;
+    const { uid } = req.user;
+
+    try {
+        const result = await pool.query(
+            'INSERT INTO trips (user_id, trip_details) VALUES ($1, $2) RETURNING *',
+            [uid, trip_details]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// Create and add trip to database
+app.post('/api/trips', verifyFirebaseToken, async (req, res) => {
+    const { trip_details } = req.body;
+    const { uid } = req.user;
+
+    try {
+        const result = await pool.query(
+            'INSERT INTO trips (user_id, trip_details) VALUES ($1, $2) RETURNING *',
+            [uid, trip_details]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+
+
+
 
 
 
