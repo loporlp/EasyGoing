@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Button, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, Button, StyleSheet, TouchableOpacity, Text, SafeAreaView } from 'react-native';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import RouteMap from '../components/RouteMap';
 import { getCoords } from '../scripts/nameToCoords.js';
 import { calculateOptimalRoute } from '../scripts/optimalRoute.js';
+import MultiRoutesMap from '../components/MultiRoutesMap';
 
 
 const TestOptimalRouteScreen = () => {
@@ -37,6 +38,8 @@ const TestOptimalRouteScreen = () => {
     fetchOptimalRoute();
   }, []);
 
+  const transportationModes = ['Driving', 'Walking', 'Transit'];
+
   return (
     <View style={styles.container}>
       {optimalRoute.length > 0 ? (
@@ -48,6 +51,10 @@ const TestOptimalRouteScreen = () => {
       ) : (
         <Text>Loading optimal route...</Text>
       )}
+
+      <SafeAreaView style={{ flex: 1 }}>
+        <MultiRoutesMap locations={optimalRoute} transportationModes={transportationModes} />
+      </SafeAreaView>
     </View>
   );
 };

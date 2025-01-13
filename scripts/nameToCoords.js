@@ -1,6 +1,6 @@
 import { getCoordinates } from '../components/geocoding';
 
-export const getCoords = async (place): Promise<void> => {
+export const getCoords = async (place) => {
     const description = place.description
         try {
             // Await coordinates from getCoordinates
