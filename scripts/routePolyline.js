@@ -40,46 +40,58 @@ function decodePolyline(encoded) {
 }
 
 export async function getRoutePolyline(origin, destination, mode) {
-  console.log("Origin in Poly: " + origin);
-  console.log("Dest in Poly: " + destination);
-  console.log("Mode in Poly: " + mode);
+    //Combine name & address for origin and destination
+    origin = origin[0] + ", " + origin[1];
+    destination = destination[0] + ", " + destination[1];
+    console.log("Origin in Poly: " + origin);
+    console.log("Dest in Poly: " + destination);
+    console.log("Mode in Poly: " + mode);
 
-  try {
-    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&mode=${mode}&key=${apiKey}`;
-    const response = await fetch(url);
-    const data = await response.json();
+    // Then use getCoords() to convert and pass into URL
+    const originCoords = await getCoords({ description: origin, place_id: '' });
+    const destinationCoords = await getCoords({ description: destination, place_id: '' });
+    // We will then be able to use the ezgoing API call
 
-    if (data.status === 'OK') {
-      const polyline = data.routes[0].overview_polyline.points;
-      const decodedPolyline = decodePolyline(polyline);
+    try {
+        //TODO: Convert to ezgoing API Call
+        const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${originCoords.latitude},${originCoords.longitude}&destination=${destinationCoords.latitude},${destinationCoords.longitude}&mode=${mode.toLowerCase()}&key=${apiKey}`;
+        console.log("URL: " + url);
+        const response = await fetch(url);
+        const data = await response.json();
 
-      const modeColors = {
-        DRIVING: '#FF0000', // Red for driving
-        WALKING: '#0000FF', // Blue for walking
-        BICYCLING: '#00FF00', // Green for bicycling
-        TRANSIT: '#FFD700', // Gold for transit
-      };
+        //console.log("API Response:", data);
 
-      // Set the stroke color based on the mode
-      const strokeColor = modeColors[mode.toUpperCase()] || '#FF0000'; // Default to red
+        if (data.status === 'OK') {
+        const polyline = data.routes[0].overview_polyline.points;
+        const decodedPolyline = decodePolyline(polyline);
 
-      const routePolyline = {
-        path: decodedPolyline,
-        strokeColor: strokeColor,
-        strokeOpacity: 1.0,
-        strokeWeight: 2,
-      };
+        const modeColors = {
+            DRIVING: '#FF0000', // Red for driving
+            WALKING: '#0000FF', // Blue for walking
+            BICYCLING: '#00FF00', // Green for bicycling
+            TRANSIT: '#FFD700', // Gold for transit
+        };
 
-      routePolylines.push(routePolyline);
-      return routePolyline; // Return both path and strokeColor
-    } else {
-      console.error('Error fetching route:', data.status);
-      return null;
+        // Set the stroke color based on the mode
+        const strokeColor = modeColors[mode.toUpperCase()] || '#FF0000'; // Default to red
+
+        const routePolyline = {
+            path: decodedPolyline,
+            strokeColor: strokeColor,
+            strokeOpacity: 1.0,
+            strokeWeight: 2,
+        };
+
+        routePolylines.push(routePolyline);
+        return routePolyline; // Return both path and strokeColor
+        } else {
+        console.error('Error fetching route:', data.status);
+        return null;
+        }
+    } catch (error) {
+        console.error('Error fetching route:', error);
+        return null;
     }
-  } catch (error) {
-    console.error('Error fetching route:', error);
-    return null;
-  }
 }
 
 

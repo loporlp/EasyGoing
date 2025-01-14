@@ -13,24 +13,28 @@ const TestOptimalRouteScreen = () => {
 
   const [optimalRoute, setOptimalRoute] = useState<any[][]>([]);
 
-  /*const origin = 'Tokyo International Airport, Tokyo';
+  const origin = { name: 'Tokyo International Airport, Tokyo', address: 'Hanedakuko, Ota City, Tokyo 144-0041, Japan' };
   let locations = [
       { name: 'Tokyo Tower, Tokyo', address: '4 Chome-2-8 Shibakoen, Minato City, Tokyo, Japan' },
       { name: 'Shibuya Scramble Crossing', address: '21 Udagawa-cho, Shibuya, Tokyo, Japan' },
       { name: 'Akihabara Electric Town', address: '1 Chome-12 Soto-Kanda, Chiyoda City, Tokyo, Japan'} ];
-  const transportationModes = ['Driving', 'Walking', 'Transit'];*/
-  const origin = 'Mexico City, Mexico';
+  const transportationModes = ['DRIVING', 'WALKING', 'TRANSIT'];
+  /*const origin = { name: 'Mexico City, Mexico', address: 'Mexico City, Mexico' };
   let locations = [
       { name: 'Chicago', address: 'Chicago, Illinois' },
       { name: 'Disneyland Park', address: 'Disneyland Park' },
       { name: 'Caesars Palace', address: '3570 S Las Vegas Blvd, Paradise, NV 89109'},
       { name: 'Austin', address: 'Austin, Texas' }];
-  const transportationModes = ['Driving', 'Walking', 'Transit', 'Bicycling'];
+  const transportationModes = ['DRIVING', 'WALKING', 'TRANSIT', 'BICYCLING'];*/
+  /*const origin = { name: 'Tokyo Tower, Tokyo', address: '4 Chome-2-8 Shibakoen, Minato City, Tokyo, Japan' };
+  let locations = [ { name: 'Kura Sushi Global Flagship Store Asakusa', address: 'Japan, 〒111-0032 Tokyo, Taito City, Asakusa, 1 Chome−25−15 ROX4F'} ];
+  const transportationModes = ['TRANSIT'];*/
   
   useEffect(() => {
     const fetchOptimalRoute = async () => {
       try {
-        const result = await calculateOptimalRoute(locations, origin); // Your function for optimal route
+        const mode = 'DRIVING';
+        const result = await calculateOptimalRoute(locations, origin, mode);
         setOptimalRoute(result); // Set optimal route to state
       } catch (error) {
         console.error("Failed to get optimal route:", error);
@@ -45,7 +49,7 @@ const TestOptimalRouteScreen = () => {
       {optimalRoute.length > 0 ? (
         optimalRoute.map(([origin, destination], index) => (
           <Text key={index} style={styles.routeText}>
-            From {origin} to {destination}
+            From "{origin[0]}, {origin[1]}" to "{destination[0]}, {destination[1]}"
           </Text>
         ))
       ) : (

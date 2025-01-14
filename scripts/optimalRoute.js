@@ -1,13 +1,18 @@
 import axios from 'axios';
 
 // Distance Matrix API
-async function getDistanceMatrix(origin, destinations) {
+async function getDistanceMatrix(origin, destinations, mode) {
     const url = 'https://maps.googleapis.com/maps/api/distancematrix/json';
     const destinationsStr = destinations.map(d => d.address).join('|'); // Between each destination, add this symbol
+    console.log("DestStr:" + destinationsStr);
 
     const apiKey = "AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI";
-    const fullUrl = `${url}?origins=${encodeURIComponent(origin)}&destinations=${encodeURIComponent(destinationsStr)}&key=${apiKey}`;
-    //console.log('Request URL:', fullUrl);
+    const originFull = origin.name + ", " + origin.address; //TODO: name + address
+    console.log("Origin OptimalRoute: " + originFull);
+    // TODO: Convert to getCoords()
+    // TODO: Switch to ezgoing API call
+    const fullUrl = `${url}?origins=${encodeURIComponent(originFull)}&destinations=${encodeURIComponent(destinationsStr)}&mode=${mode}&key=${apiKey}`;
+    console.log('Request URL:', fullUrl);
 
     let response;
 
@@ -37,7 +42,7 @@ async function getDistanceMatrix(origin, destinations) {
 
     // Process and return the distances and durations
     const distances = data.rows[0].elements.map((element, index) => ({
-        destination: data.destination_addresses[index],
+        destinationAddress: data.destination_addresses[index], // address
         originalLocationName: destinations[index].name, // location name
         distance: element.distance.value,  // in meters
         duration: element.duration.value,  // in seconds
@@ -47,25 +52,29 @@ async function getDistanceMatrix(origin, destinations) {
 }
 
 // Optimal Route Main Function
-export async function calculateOptimalRoute(locations, origin) {
+export async function calculateOptimalRoute(locations, origin, mode) {
     const optimalRoute = [];
     let currentOrigin = origin;
 
     const length = locations.length;
-    console.log(length);
+    console.log("Locations Length: " + length);
     for (let i = 0; i < length; i++) {
         console.log(locations);
         // Get the distance matrix for the current origin and remaining locations
-        const distancesList = await getDistanceMatrix(currentOrigin, locations);
+        const distancesList = await getDistanceMatrix(currentOrigin, locations, mode);
 
         // Find the destination with the minimum distance
+        // TODO: Based on user input, whether it's distance or duration
         const destination = distancesList.reduce((prev, current) => (prev.distance < current.distance ? prev : current));
 
         // Add the current origin and destination to the route
-        optimalRoute.push([currentOrigin, destination.originalLocationName]);
+        optimalRoute.push([
+            [currentOrigin.name, currentOrigin.address],
+            [destination.originalLocationName, destination.destinationAddress]
+        ]);         
 
         // Update the current origin to the chosen destination
-        currentOrigin = destination.originalLocationName;
+        currentOrigin = { name: destination.originalLocationName, address: destination.destinationAddress };
 
         //console.log("To remove: ", currentOrigin);
 

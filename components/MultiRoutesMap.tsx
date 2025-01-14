@@ -14,8 +14,10 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
   const mapRef = useRef<MapView>(null);
 
   useEffect(() => {
+    // Remember that 'locations' are origin-destination pairs and NOT individual locations. Hence the length should be the same
     if (locations.length !== transportationModes.length) {
-      console.log('Locations and Transportation Modes are not the same length');
+      console.log('Error: Locations and Transportation Modes are not the same length: ' + locations.length + ", " + transportationModes.length);
+      console.log(locations);
       return;
     }
 
@@ -32,7 +34,7 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
         if (routePolyline) {
           // Add polyline data to the list
           allPolylines.push({
-            id: `${origin}-${destination}-${mode}`,
+            id: `${origin[0]}-${destination[0]}-${mode}`,
             coordinates: routePolyline.path, // Use the path from the response
             strokeColor: routePolyline.strokeColor, // Use the color from the response
             strokeWidth: 4, // Set a stroke width (optional)
@@ -71,7 +73,7 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
 
       <Text style={styles.subTitle}>Locations:</Text>
       {locations.map((location, index) => (
-        <Text key={index} style={styles.text}>{`Origin: ${location[0]} - Destination: ${location[1]}`}</Text>
+        <Text key={index} style={styles.text}>{`Origin: ${location[0][0]} - Destination: ${location[1][0]}`}</Text> // [0][0] first index is which location, sescond index is for name/address
       ))}
 
       <Text style={styles.subTitle}>Transportation Modes:</Text>
