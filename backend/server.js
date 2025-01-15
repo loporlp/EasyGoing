@@ -66,6 +66,41 @@ app.get('/api/autocomplete', verifyFirebaseToken, async (req, res) => {
   }
 });
 
+// Route Endpoint
+app.get('/api/directions', verifyFirebaseToken, async (req, res) => {
+    console.log("directions called");
+    try {
+        // Get parameters from the client request
+        const { origin, destination, mode } = req.query;
+
+        // Validate required parameters
+        if (!origin || !destination || !mode) {
+            return res.status(400).json({ error: 'Missing required parameters: origin, destination, or mode' });
+        }
+
+        
+        const apiUrl = 'https://maps.googleapis.com/maps/api/directions/json';
+
+        // Make the API request
+        const response = await axios.get(apiUrl, {
+            params: {
+                origin,              
+                destination,         
+                mode,                
+                alternatives: true,  
+                key: GOOGLE_API_KEY, 
+            },
+        });
+
+        // Send back the response from Google Directions API to the client
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching directions:', error.message);
+        res.status(500).json({ error: 'An error occurred while fetching directions' });
+    }
+});
+
+
 // Database Endpoints
 
 // Status endpoint
