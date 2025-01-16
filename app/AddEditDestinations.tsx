@@ -1,34 +1,21 @@
 // AddEditDestinations.tsx
 import { useState, useEffect } from 'react';
-import { View, Image, StyleSheet, TextInput, Text, TouchableOpacity, ScrollView, Dimensions, Modal, ImageBackground, Button } from "react-native";
-import { useRouter } from "expo-router";
+import { View, Image, StyleSheet, TextInput, Text, TouchableOpacity, ScrollView, Dimensions, Modal, ImageBackground, Button, GestureResponderEvent } from "react-native";
 
 const { height } = Dimensions.get('window');
 
 const AddEditDestinations = () => {
-    const router = useRouter();
 
     const [placeName, setPlaceName] = useState<string | undefined>(undefined);
-
-    useEffect(() => {
-        console.log(router)
-        console.log(router.query)
-        if (router.isReady) {
-            console.log('router.query in Screen B:', router.query); // Check if the query is accessible
-            if (router.query?.placeName) {
-                setPlaceName(router.query.placeName as string); // Set placeName if available
-            }
-        }
-    }, [router, router.isReady, router.query]);
-
-    const generateItinerary = () => {
-        router.push("/GenerateItineraryScreen");
-    }
 
     // Modal (Pop-up)
     const [visible, setVisible] = useState(false);
     const show = () => setVisible(true);
     const hide = () => setVisible(false);
+
+    function generateItinerary(event: GestureResponderEvent): void {
+        throw new Error('Function not implemented.');
+    }
 
     return (
         <View style={styles.screenContainer}>
@@ -64,7 +51,6 @@ const AddEditDestinations = () => {
 
                         {/* Tokyo Skytree */}
                         <TouchableOpacity style={styles.destinationElement} onPress={() => { 
-                            router.push("/HomeScreen_API_Test")
                         }}>
                             {/* Background with opacity */}
                             <View style={styles.backgroundContainer}>

@@ -8,7 +8,8 @@ import SignInScreen from './SignInScreen';
 import CreateAccountScreen from './CreateAccountScreen';
 import { RootStackParamList } from './types';
 import HomeScreen from './HomeScreen';
-import TestHomeScreen from './HomeScreen_API_Test'
+import TestHomeScreen from './HomeScreen_API_Test';
+import TestOptScreen from './TestOptimalRouteScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -54,7 +55,7 @@ const Index = () => {
           <>
             <Stack.Screen
               name="SignIn"
-              component={SignInScreen} // TODO: Change back to SignInScreen
+              component={TestOptScreen} // TODO: Change back to SignInScreen
               options={{ headerShown: false, title: "Sign In" }}
             />
             <Stack.Screen
