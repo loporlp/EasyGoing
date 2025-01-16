@@ -85,11 +85,13 @@ export async function getRoutePolyline(origin, destination, mode) {
         routePolylines.push(routePolyline);
         return routePolyline; // Return both path and strokeColor
         } else {
-        console.error('Error fetching route:', data.status);
+        console.error('Error fetching route (data):', data.status);
+
+        // TODO: Sometimes transit works. In the cases it doesn't due to multiple stops required, we handle it here.
         return null;
         }
     } catch (error) {
-        console.error('Error fetching route:', error);
+        console.error('Error fetching route: (error)', error);
         return null;
     }
 }

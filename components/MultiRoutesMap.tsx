@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import MapView, { PROVIDER_GOOGLE, Polyline } from 'react-native-maps';
+import MapView, { PROVIDER_GOOGLE, Polyline, Marker } from 'react-native-maps';
 import { getRoutePolyline } from '../scripts/routePolyline';
 
 interface MultiRoutesMapProps {
@@ -55,12 +55,19 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
       // Set the map region to focus on the route(s)
       if (minLat !== Infinity && maxLat !== -Infinity && minLon !== Infinity && maxLon !== -Infinity) {
         const padding = 0.05; // Adjust padding to give some space around the routes
-        setMapRegion({
+        const newRegion = {
           latitude: (minLat + maxLat) / 2,
           longitude: (minLon + maxLon) / 2,
           latitudeDelta: maxLat - minLat + padding,
           longitudeDelta: maxLon - minLon + padding,
-        });
+        };
+
+        setMapRegion(newRegion);
+
+        // Smoothly transition to the new region using animateToRegion
+        if (mapRef.current && newRegion) {
+          mapRef.current.animateToRegion(newRegion, 1000); // 1000ms animation duration
+        }
       }
     };
 
@@ -69,18 +76,6 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Multi Routes Map</Text>
-
-      <Text style={styles.subTitle}>Locations:</Text>
-      {locations.map((location, index) => (
-        <Text key={index} style={styles.text}>{`Origin: ${location[0][0]} - Destination: ${location[1][0]}`}</Text> // [0][0] first index is which location, sescond index is for name/address
-      ))}
-
-      <Text style={styles.subTitle}>Transportation Modes:</Text>
-      {transportationModes.map((mode, index) => (
-        <Text key={index} style={styles.text}>{mode}</Text>
-      ))}
-
       <MapView
         provider={PROVIDER_GOOGLE}
         style={styles.map}
@@ -98,6 +93,18 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
           />
         ))}
       </MapView>
+
+      <Text style={styles.subTitle}>Locations:</Text>
+      {locations.map((location, index) => (
+        <Text key={index} style={styles.text}>
+          {`Origin: ${location[0][0]} - Destination: ${location[1][0]}`}
+        </Text>
+      ))}
+
+      <Text style={styles.subTitle}>Transportation Modes:</Text>
+      {transportationModes.map((mode, index) => (
+        <Text key={index} style={styles.text}>{mode}</Text>
+      ))}
     </View>
   );
 };
