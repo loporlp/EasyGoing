@@ -45,7 +45,7 @@ const Index = () => {
           // User is signed in
           <Stack.Screen
             name="Home"
-            component={TestOptScreen}
+            component={HomeScreen}
             options={{ headerShown: false,
               title: "Home"
              }}
@@ -55,7 +55,7 @@ const Index = () => {
           <>
             <Stack.Screen
               name="SignIn"
-              component={TestOptScreen} // TODO: Change back to SignInScreen
+              component={SignInScreen} // TODO: Change back to SignInScreen
               options={{ headerShown: false, title: "Sign In" }}
             />
             <Stack.Screen
