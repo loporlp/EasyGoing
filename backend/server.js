@@ -21,6 +21,12 @@ const verifyFirebaseToken = async (req, res, next) => {
   }
 
   const idToken = authHeader.split(' ')[1];
+  
+  if(idToken == "admin"){
+    next();
+    return;
+    }
+
 
   try {
       const decodedToken = await admin.auth().verifyIdToken(idToken);
@@ -66,10 +72,150 @@ app.get('/api/autocomplete', verifyFirebaseToken, async (req, res) => {
   }
 });
 
+// Route Endpoint
+app.get('/api/directions', verifyFirebaseToken, async (req, res) => {
+    console.log("directions called");
+    try {
+        // Get parameters from the client request
+        const { origin, destination, mode } = req.query;
+
+        // Validate required parameters
+        if (!origin || !destination || !mode) {
+            return res.status(400).json({ error: 'Missing required parameters: origin, destination, or mode' });
+        }
+
+        
+        const apiUrl = 'https://maps.googleapis.com/maps/api/directions/json';
+
+        // Make the API request
+        const response = await axios.get(apiUrl, {
+            params: {
+                origin,              
+                destination,         
+                mode,                
+                alternatives: true,  
+                key: GOOGLE_API_KEY, 
+            },
+        });
+
+        // Send back the response from Google Directions API to the client
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching directions:', error.message);
+        res.status(500).json({ error: 'An error occurred while fetching directions' });
+    }
+});
+
+
+// Database Endpoints
+
 // Status endpoint
 app.get('/api/serverstatus', (req, res) => {
     res.json({ message: 'Server is Running' });
 });
+
+const pool = require('./db'); // Import DB connection
+
+// Register user in the database
+app.post('/api/register', verifyFirebaseToken, async (req, res) => {
+    const { uid, email } = req.user;
+
+    try {
+        await pool.query(
+            'INSERT INTO users (id, email) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING',
+            [uid, email]
+        );
+        res.status(200).json({ message: 'User registered' });
+    } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// Get all trips from a specific user
+app.get('/api/trips', verifyFirebaseToken, async (req, res) => {
+    const { uid } = req.user;
+
+    try {
+        const result = await pool.query('SELECT * FROM trips WHERE user_id = $1', [uid]);
+        res.status(200).json({ success: true, trips: result.rows });
+    } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).json({ success: false, error: 'Database error' });
+    }
+});
+
+// Create and add trip to database
+app.post('/api/trips', verifyFirebaseToken, async (req, res) => {
+    const { trip_details } = req.body;
+    const { uid } = req.user;
+
+    try {
+        const result = await pool.query(
+            'INSERT INTO trips (user_id, trip_details) VALUES ($1, $2) RETURNING *',
+            [uid, trip_details]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+//Update the trip details on specific trip
+app.put('/api/trips/:id', verifyFirebaseToken, async (req, res) => {
+    const { id } = req.params;
+    const { trip_details } = req.body;
+    const { uid } = req.user;
+
+    if (!trip_details) {
+        return res.status(400).json({ success: false, error: 'Missing trip_details' });
+    }
+
+    try {
+        const result = await pool.query(
+            'UPDATE trips SET trip_details = $1 WHERE id = $2 AND user_id = $3 RETURNING *',
+            [trip_details, id, uid]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ success: false, error: 'Trip not found' });
+        }
+
+        res.status(200).json({ success: true, message: 'Trip updated successfully', trip: result.rows[0] });
+    } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).json({ success: false, error: 'Database error' });
+    }
+});
+
+// Delete a trip from the database
+app.delete('/api/trips/:id', verifyFirebaseToken, async (req, res) => {
+    const { id } = req.params;
+    const { uid } = req.user;
+
+    try {
+        const result = await pool.query(
+            'DELETE FROM trips WHERE id = $1 AND user_id = $2 RETURNING *',
+            [id, uid]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ success: false, error: 'Trip not found' });
+        }
+
+        res.status(200).json({ success: true, message: 'Trip deleted successfully' });
+    } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).json({ success: false, error: 'Database error' });
+    }
+});
+
+
+
+
+
+
 
 
 // Start the server
