@@ -162,6 +162,56 @@ app.post('/api/trips', verifyFirebaseToken, async (req, res) => {
     }
 });
 
+//Update the trip details on specific trip
+app.put('/api/trips/:id', verifyFirebaseToken, async (req, res) => {
+    const { id } = req.params;
+    const { trip_details } = req.body;
+    const { uid } = req.user;
+
+    if (!trip_details) {
+        return res.status(400).json({ success: false, error: 'Missing trip_details' });
+    }
+
+    try {
+        const result = await pool.query(
+            'UPDATE trips SET trip_details = $1 WHERE id = $2 AND user_id = $3 RETURNING *',
+            [trip_details, id, uid]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ success: false, error: 'Trip not found' });
+        }
+
+        res.status(200).json({ success: true, message: 'Trip updated successfully', trip: result.rows[0] });
+    } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).json({ success: false, error: 'Database error' });
+    }
+});
+
+// Delete a trip from the database
+app.delete('/api/trips/:id', verifyFirebaseToken, async (req, res) => {
+    const { id } = req.params;
+    const { uid } = req.user;
+
+    try {
+        const result = await pool.query(
+            'DELETE FROM trips WHERE id = $1 AND user_id = $2 RETURNING *',
+            [id, uid]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ success: false, error: 'Trip not found' });
+        }
+
+        res.status(200).json({ success: true, message: 'Trip deleted successfully' });
+    } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).json({ success: false, error: 'Database error' });
+    }
+});
+
+
 
 
 
