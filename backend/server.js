@@ -133,19 +133,15 @@ app.post('/api/register', verifyFirebaseToken, async (req, res) => {
 });
 
 // Get all trips from a specific user
-app.post('/api/trips', verifyFirebaseToken,  async (req, res) => {
-    const { trip_details } = req.body;
+app.get('/api/trips', verifyFirebaseToken, async (req, res) => {
     const { uid } = req.user;
 
     try {
-        const result = await pool.query(
-            'INSERT INTO trips (user_id, trip_details) VALUES ($1, $2) RETURNING *',
-            [uid, trip_details]
-        );
-        res.status(201).json(result.rows[0]);
+        const result = await pool.query('SELECT * FROM trips WHERE user_id = $1', [uid]);
+        res.status(200).json({ success: true, trips: result.rows });
     } catch (error) {
         console.error('Database error:', error);
-        res.status(500).json({ error: 'Database error' });
+        res.status(500).json({ success: false, error: 'Database error' });
     }
 });
 
