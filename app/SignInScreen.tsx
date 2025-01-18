@@ -1,6 +1,6 @@
 // SignInScreen.tsx
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Image, TouchableOpacity, Text } from 'react-native';
+import { View, TextInput, StyleSheet, Image, TouchableOpacity, Text } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -21,6 +21,9 @@ const SignInScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  /**
+   * Handles sign-in and server connection checks.
+   */
   const handleSignIn = async () => {
     const isServerRunning = await fetchData();
 
@@ -43,13 +46,16 @@ const SignInScreen = () => {
 
   return (
     <View style={styles.container}>
+      {/* Background image */}
       <Image style={styles.backgroundImage} source={require("../assets/images/createTripImage.jpg")} />
       <View style={styles.darkOverlay} />
 
+      {/* EasyGoing logo */}
       <Text style={{ color: "white", fontWeight: "bold", marginBottom: 20, fontSize: 25 }}>Easy<Text style={{ color: "#24a6ad", fontWeight: "bold" }}>Going</Text></Text>
 
-      <View style={styles.usernameSection}>
-        <View style={styles.usernameTextInput}>
+      {/* Username */}
+      <View style={styles.inputUserPass}>
+        <View style={styles.userPassTextInput}>
           <Ionicons name="person" size={18} color={"#24a6ad"} style={{ marginRight: 10 }} />
           <TextInput
             placeholder="Email"
@@ -64,32 +70,28 @@ const SignInScreen = () => {
         </View>
       </View>
 
-      <View style={styles.usernameSection}>
-        <View style={styles.usernameTextInput}>
+      {/* Password */}
+      <View style={styles.inputUserPass}>
+        <View style={styles.userPassTextInput}>
           <Ionicons name="lock-closed" size={18} color={"#24a6ad"} style={{ marginRight: 10 }} />
           <TextInput
             placeholder="Password"
             placeholderTextColor="#d6d6d6"
             value={password}
             onChangeText={setPassword}
-            style={styles.input}
+            style={{ fontSize: 18 }}
             secureTextEntry
             textContentType="password"
           />
         </View>
       </View>
 
+      {/* Sign In Button */}
       <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
-        <Text style={{
-          color: "white",
-          fontSize: 18,
-          fontWeight: "bold",
-          marginLeft: 40,
-          marginRight: 40,
-        }}>
-          Sign In</Text>
+        <Text style={styles.signInText}>Sign In</Text>
       </TouchableOpacity>
 
+      {/* Create New Account Button */}
       <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
         <Text style={{ color: "white", fontSize: 15, marginTop: 15 }}>Create an Account</Text>
       </TouchableOpacity>
@@ -105,6 +107,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
+  // ---- BACKGROUND ----//
   backgroundImage: {
     width: "100%",
     height: "100%",
@@ -120,7 +123,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
 
-  usernameSection: {
+  // ---- USERNAME/PASSWORD FIELDS ---- //
+  inputUserPass: {
     flexDirection: "row",
     width: "80%",
     marginTop: 15,
@@ -130,7 +134,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
 
-  usernameTextInput: {
+  userPassTextInput: {
     flex: 1,
     flexDirection: "row",
     backgroundColor: "white",
@@ -139,10 +143,7 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
 
-  input: {
-    fontSize: 18
-  },
-
+  // ---- SIGN IN BUTTON ---- //
   signInButton: {
     backgroundColor: "#24a6ad",
     width: "80%",
@@ -156,6 +157,14 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
+  },
+
+  signInText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 40,
+    marginRight: 40,
   }
 });
 
