@@ -62,7 +62,7 @@ const SignInScreen = () => {
             placeholderTextColor="#d6d6d6"
             value={email}
             onChangeText={setEmail}
-            style={styles.input}
+            style={{ fontSize: 18 }}
             autoCapitalize="none"
             keyboardType="email-address"
             textContentType="emailAddress"
