@@ -3,17 +3,29 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import { Tabs, Link } from 'expo-router'
+import { useRouter } from "expo-router";
+import { Link } from 'expo-router'
 import { getAuth } from 'firebase/auth';
 
 const HomeScreen = () => {
+
+    // Sets up navigations
+    const router = useRouter();
 
     const headerHeight = useHeaderHeight();
     const [activeIndex, setActiveIndex] = useState(0);
     const handleSelectCategory = (index: number) => {
         setActiveIndex(index);
     };
+
+    /**
+   * Navigates to the "Create New Trip" page
+   */
+    const createNewTrip = () => {
+        console.log("Going to 'Create New Trip'...")
+        router.push("/CreateNewTrip")
+    }
+
 
     const scrollRef = useRef<ScrollView>(null);
     const recommendedList = [
@@ -104,14 +116,12 @@ const HomeScreen = () => {
                     <Image style={{ width: "100%", height: 230, position: "relative" }} source={require("../assets/images/mountains.jpg")} />
                     <View style={{ width: "100%", height: 230, position: "absolute", backgroundColor: "rgba(0, 0, 0, 0.5)" }}></View>
                     <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-evenly", position: "absolute", top: 125, width: "100%" }}>
-                        <Link href={"../CreateNewTrip"} asChild>
-                            <TouchableOpacity style={styles.tripButton}>
-                                <View style={styles.tripButtons}>
-                                    <Ionicons name="add" size={18} color={"white"} />
-                                    <Text style={{ color: "white", fontSize: 16, marginLeft: 10 }}>New Trip</Text>
-                                </View>
-                            </TouchableOpacity>
-                        </Link>
+                        <TouchableOpacity style={styles.tripButton} onPress={createNewTrip}>
+                            <View style={styles.tripButtons}>
+                                <Ionicons name="add" size={18} color={"white"} />
+                                <Text style={{ color: "white", fontSize: 16, marginLeft: 10 }}>New Trip</Text>
+                            </View>
+                        </TouchableOpacity>
 
                         <TouchableOpacity style={styles.tripButton}>
                             <View style={styles.tripButtons}>
