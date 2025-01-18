@@ -1,6 +1,6 @@
 // SignInScreen.tsx
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Image, TouchableOpacity, Text } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -8,6 +8,7 @@ import { RootStackParamList } from './types';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from "expo-router";
 import { fetchData } from '../scripts/fetchData';
+import { Ionicons } from '@expo/vector-icons';
 
 type SignInScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -42,28 +43,56 @@ const SignInScreen = () => {
 
   return (
     <View style={styles.container}>
-      <TextInput
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        style={styles.input}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        textContentType="emailAddress"
-      />
-      <TextInput
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        style={styles.input}
-        secureTextEntry
-        textContentType="password"
-      />
-      <Button title="Sign In" onPress={handleSignIn} />
-      <Button
-        title="Create an Account"
-        onPress={() => navigation.navigate('CreateAccount')}
-      />
+      <Image style={styles.backgroundImage} source={require("../assets/images/createTripImage.jpg")} />
+      <View style={styles.darkOverlay} />
+
+      <Text style={{ color: "white", fontWeight: "bold", marginBottom: 20, fontSize: 25 }}>Easy<Text style={{ color: "#24a6ad", fontWeight: "bold" }}>Going</Text></Text>
+
+      <View style={styles.usernameSection}>
+        <View style={styles.usernameTextInput}>
+          <Ionicons name="person" size={18} color={"#24a6ad"} style={{ marginRight: 10 }} />
+          <TextInput
+            placeholder="Email"
+            placeholderTextColor="#d6d6d6"
+            value={email}
+            onChangeText={setEmail}
+            style={styles.input}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            textContentType="emailAddress"
+          />
+        </View>
+      </View>
+
+      <View style={styles.usernameSection}>
+        <View style={styles.usernameTextInput}>
+          <Ionicons name="lock-closed" size={18} color={"#24a6ad"} style={{ marginRight: 10 }} />
+          <TextInput
+            placeholder="Password"
+            placeholderTextColor="#d6d6d6"
+            value={password}
+            onChangeText={setPassword}
+            style={styles.input}
+            secureTextEntry
+            textContentType="password"
+          />
+        </View>
+      </View>
+
+      <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
+        <Text style={{
+          color: "white",
+          fontSize: 18,
+          fontWeight: "bold",
+          marginLeft: 40,
+          marginRight: 40,
+        }}>
+          Sign In</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
+        <Text style={{ color: "white", fontSize: 15, marginTop: 15 }}>Create an Account</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -71,17 +100,63 @@ const SignInScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: '#fff',
-    justifyContent: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
+
+  backgroundImage: {
+    width: "100%",
+    height: "100%",
+    position: "absolute"
+  },
+
+  darkOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+
+  usernameSection: {
+    flexDirection: "row",
+    width: "80%",
+    marginTop: 15,
+    shadowColor: "#333333",
+    shadowOffset: { width: 1, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+
+  usernameTextInput: {
+    flex: 1,
+    flexDirection: "row",
+    backgroundColor: "white",
+    padding: 10,
+    borderRadius: 10,
+    alignItems: "center"
+  },
+
   input: {
-    height: 50,
-    borderColor: '#999',
-    borderBottomWidth: 1,
-    marginBottom: 20,
-    fontSize: 16,
+    fontSize: 18
   },
+
+  signInButton: {
+    backgroundColor: "#24a6ad",
+    width: "80%",
+    paddingVertical: 10,
+    paddingHorizontal: 40,
+    borderRadius: 10,
+    marginTop: 25,
+    alignItems: "center",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+  }
 });
 
 export default SignInScreen;
