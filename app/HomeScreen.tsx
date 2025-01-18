@@ -1,17 +1,13 @@
 import { View, Text, TouchableOpacity, StyleSheet, TextInput, Image, ScrollView, FlatList } from 'react-native'
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { Tabs, Link } from 'expo-router'
+import { getAuth } from 'firebase/auth';
 
 const HomeScreen = () => {
-    const navigation = useNavigation();
-
-    React.useEffect(() => {
-        navigation.setOptions({ headerShown: false });  // Disable the header
-    }, [navigation]);
 
     const headerHeight = useHeaderHeight();
     const [activeIndex, setActiveIndex] = useState(0);
@@ -80,11 +76,25 @@ const HomeScreen = () => {
         museum: require("../assets/images/museum.jpg"),
     };
 
+    // Gets the username
+    const [username, setUsername] = useState<string>('');
+
+    useEffect(() => {
+        const auth = getAuth();
+        const user = auth.currentUser;
+
+        if (user && user.email) {
+            const email = user.email;
+            const extractedUsername = email.split('@')[0];
+            setUsername(extractedUsername);
+        }
+    }, []);
+
     return (
         <>
             <ScrollView style={styles.container} contentContainerStyle={{ paddingTop: headerHeight }}>
                 <View style={styles.headerContainer}>
-                    <Text style={styles.headerText}>Hello, <Text style={{ color: "#24a6ad" }}>Jason<Text style={{ color: "white" }}>!</Text></Text></Text>
+                    <Text style={styles.headerText}>Hello, <Text style={{ color: "#24a6ad" }}>{username}<Text style={{ color: "white" }}>!</Text></Text></Text>
                     <TouchableOpacity onPress={() => { }} style={styles.notificationButton}>
                         <Ionicons name="notifications" size={20} color="black" />
                     </TouchableOpacity>
@@ -116,7 +126,7 @@ const HomeScreen = () => {
                     <View style={styles.searchSection}>
                         <View style={styles.searchBar}>
                             <Ionicons name="search" size={18} style={{ marginRight: 10 }} color={"black"} />
-                            <TextInput placeholder="Search..." placeholderTextColor="#F0F0F0" style={{ fontSize: 18 }} />
+                            <TextInput placeholder="Search..." placeholderTextColor="#d6d6d6" style={{ fontSize: 18 }} />
                         </View>
                     </View>
 
