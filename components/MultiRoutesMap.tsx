@@ -27,27 +27,33 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
       let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
 
       for (let i = 0; i < locations.length; i++) {
-        const [origin, destination] = locations[i];
-        const mode = transportationModes[i];
-        const routePolyline = await getRoutePolyline(origin, destination, mode); // Get route polyline data
+          const [origin, destination] = locations[i];
+          const mode = transportationModes[i];
+          const routePolyline = await getRoutePolyline(origin, destination, mode); // Get route polyline data
+          console.log("Hi: " + routePolyline);
 
-        if (routePolyline) {
-          // Add polyline data to the list
-          allPolylines.push({
-            id: `${origin[0]}-${destination[0]}-${mode}`,
-            coordinates: routePolyline.path, // Use the path from the response
-            strokeColor: routePolyline.strokeColor, // Use the color from the response
-            strokeWidth: 4, // Set a stroke width (optional)
-          });
+          if (routePolyline) {
+              // Handle the case where multiple polylines are returned (e.g., for transit)
+              const polylinesArray = Array.isArray(routePolyline) ? routePolyline : [routePolyline];
 
-          // Update the bounds for each polyline
-          routePolyline.path.forEach((coord: { latitude: number, longitude: number }) => {
-            minLat = Math.min(minLat, coord.latitude);
-            maxLat = Math.max(maxLat, coord.latitude);
-            minLon = Math.min(minLon, coord.longitude);
-            maxLon = Math.max(maxLon, coord.longitude);
-          });
-        }
+              // Add polyline data to the list
+              polylinesArray.forEach((polyline: any) => {
+                  allPolylines.push({
+                      id: `${origin[0]}-${destination[0]}-${mode}`,
+                      coordinates: polyline.path, // Use the path from the response
+                      strokeColor: polyline.strokeColor, // Use the color from the response
+                      strokeWidth: 4, // Set a stroke width (optional)
+                  });
+
+                  // Update the bounds for each polyline
+                  polyline.path.forEach((coord: { latitude: number, longitude: number }) => {
+                      minLat = Math.min(minLat, coord.latitude);
+                      maxLat = Math.max(maxLat, coord.latitude);
+                      minLon = Math.min(minLon, coord.longitude);
+                      maxLon = Math.max(maxLon, coord.longitude);
+                  });
+              });
+          }
       }
 
       setPolylines(allPolylines);
@@ -72,6 +78,7 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
     };
 
     fetchPolylines();
+    console.log("Plotting polylines done");
   }, [locations, transportationModes]);
 
   return (
@@ -84,13 +91,13 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
         showsUserLocation={true} // Optional: Show user's location
       >
         {/* Render polylines on the map */}
-        {polylines.map((polyline) => (
-          <Polyline
-            key={polyline.id}
-            coordinates={polyline.coordinates}
-            strokeColor={polyline.strokeColor} // Use the dynamic stroke color
-            strokeWidth={polyline.strokeWidth}
-          />
+        {polylines.map((polyline, index) => (
+            <Polyline
+                key={`${polyline.id}-${index}`} // Add index to make the key unique
+                coordinates={polyline.coordinates}
+                strokeColor={polyline.strokeColor}
+                strokeWidth={polyline.strokeWidth}
+            />
         ))}
       </MapView>
 

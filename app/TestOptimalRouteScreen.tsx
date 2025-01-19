@@ -18,17 +18,20 @@ const TestOptimalRouteScreen = () => {
       { name: 'Tokyo Tower, Tokyo', address: '4 Chome-2-8 Shibakoen, Minato City, Tokyo, Japan' },
       { name: 'Shibuya Scramble Crossing', address: '21 Udagawa-cho, Shibuya, Tokyo, Japan' },
       { name: 'Akihabara Electric Town', address: '1 Chome-12 Soto-Kanda, Chiyoda City, Tokyo, Japan'} ];
-  const transportationModes = ['DRIVING', 'WALKING', 'WALKING'];*/
-  const origin = { name: 'Mexico City, Mexico', address: 'Mexico City, Mexico' };
+  const transportationModes = ['DRIVING', 'WALKING', 'BICYCLING'];*/
+  /*const origin = { name: 'Mexico City, Mexico', address: 'Mexico City, Mexico' };
   let locations = [
       { name: 'Chicago', address: 'Chicago, Illinois' },
       { name: 'Disneyland Park', address: 'Disneyland Park' },
       { name: 'Caesars Palace', address: '3570 S Las Vegas Blvd, Paradise, NV 89109'},
       { name: 'Austin', address: 'Austin, Texas' }];
-  const transportationModes = ['DRIVING', 'WALKING', 'TRANSIT', 'BICYCLING'];
-  /*const origin = { name: 'Tokyo Tower, Tokyo', address: '4 Chome-2-8 Shibakoen, Minato City, Tokyo, Japan' };
+  const transportationModes = ['DRIVING', 'WALKING', 'TRANSIT', 'BICYCLING'];*/
+  const origin = { name: 'Tokyo Tower, Tokyo', address: '4 Chome-2-8 Shibakoen, Minato City, Tokyo, Japan' };
   let locations = [ { name: 'Kura Sushi Global Flagship Store Asakusa', address: 'Japan, 〒111-0032 Tokyo, Taito City, Asakusa, 1 Chome−25−15 ROX4F'} ];
-  const transportationModes = ['TRANSIT'];*/
+  const transportationModes = ['TRANSIT'];
+  /*const origin = { name: 'Chicago', address: 'Chicago, Illinois' };
+  const locations = [{ name: 'Caesars Palace', address: '3570 S Las Vegas Blvd, Paradise, NV 89109'}];
+  const transportationModes = ['WALKING'];*/
   
   useEffect(() => {
     const fetchOptimalRoute = async () => {
