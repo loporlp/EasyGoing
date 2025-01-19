@@ -8,6 +8,8 @@ interface MultiRoutesMapProps {
   transportationModes: string[]; // Array of transportation modes
 }
 
+const stroke_width = 2;
+
 const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportationModes }) => {
   const [polylines, setPolylines] = useState<any[]>([]); // State to store polylines
   const [mapRegion, setMapRegion] = useState<any>(null); // State to store the map's region
@@ -42,7 +44,7 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
                       id: `${origin[0]}-${destination[0]}-${mode}`,
                       coordinates: polyline.path, // Use the path from the response
                       strokeColor: polyline.strokeColor, // Use the color from the response
-                      strokeWidth: 4, // Set a stroke width (optional)
+                      strokeWidth: stroke_width, // Set a stroke width (optional)
                   });
 
                   // Update the bounds for each polyline
@@ -70,9 +72,9 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
 
         setMapRegion(newRegion);
 
-        // Smoothly transition to the new region using animateToRegion
+        // Smoothly transition to the new region
         if (mapRef.current && newRegion) {
-          mapRef.current.animateToRegion(newRegion, 1000); // 1000ms animation duration
+          mapRef.current.animateToRegion(newRegion, 1000);
         }
       }
     };
@@ -93,7 +95,7 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
         {/* Render polylines on the map */}
         {polylines.map((polyline, index) => (
             <Polyline
-                key={`${polyline.id}-${index}`} // Add index to make the key unique
+                key={`${polyline.id}-${index}`}
                 coordinates={polyline.coordinates}
                 strokeColor={polyline.strokeColor}
                 strokeWidth={polyline.strokeWidth}
