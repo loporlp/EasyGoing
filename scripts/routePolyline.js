@@ -1,6 +1,7 @@
 import { getCoords } from '../scripts/nameToCoords.js';
 import { getIdToken } from '../scripts/getFirebaseID';
 import { auth } from '../firebaseConfig';
+import { getTransitRoute } from '../scripts/transitRoute.js';
 
 let routePolylines = [];
 
@@ -39,7 +40,111 @@ function decodePolyline(encoded) {
     return path;
 }
 
+const driving_color = '#FF0000'; // Red
+const walking_color = '#0000FF'; // Blue
+const bike_color = '#00FF00'; // Green
+const transit_color = '#800080'; // Purple
+const bus_color = '#006400'; // Dark Green
+const train_color = '#800000'; // Maroon
+const subway_color = '#000080'; // Navy
+const tram_color = '#808080'; // Gray
+const ferry_color = '#40E0D0'; // Turquoise
+
+const stroke_opacity = 0.8;
+const stroke_weight = 2;
+
+const modeColors = {
+    DRIVING: driving_color,
+    WALKING: walking_color,
+    BICYCLING: bike_color,
+    TRANSIT: transit_color,
+    BUS: bus_color,
+    TRAIN: train_color,
+    SUBWAY: subway_color,
+    TRAM: tram_color,
+    FERRY: ferry_color,
+};
+
+// Transit Polylines
+async function getTransitRoutePolylines(originCoords, destinationCoords, mode) {
+    try {
+        const transitData = await getTransitRoute(originCoords, destinationCoords);
+
+        if (transitData) {
+            console.log('Transit Route Data:', transitData);
+
+            const polylineSegments = [];  // This array will store all the polylines for the transit route.
+
+            if (Array.isArray(transitData) && transitData.length > 0) {
+                const topRoute = transitData[0];
+                console.log(`Top Route:`, topRoute);
+
+                if (topRoute.legs && Array.isArray(topRoute.legs) && topRoute.legs.length > 0) {
+                    topRoute.legs.forEach(leg => {
+                        if (Array.isArray(leg.steps)) {
+                            leg.steps.forEach(step => {
+                                if (step.polyline && step.polyline.points) {
+                                    const decodedPolyline = decodePolyline(step.polyline.points);
+
+                                    let strokeColor = transit_color;  // Default to purple for TRANSIT
+
+                                    // Check if the step is a walking step
+                                    if (step.travel_mode === 'WALKING') {
+                                        strokeColor = modeColors.WALKING;
+                                    }
+                                    // Check the mode for each step (bus, train, subway, etc.)
+                                    else if (step.transit_details && step.transit_details.line && step.transit_details.line.vehicle) {
+                                        const vehicleType = step.transit_details.line.vehicle.type.toUpperCase();
+
+                                        // Assign specific colors for each vehicle type
+                                        if (vehicleType === 'BUS') {
+                                            strokeColor = modeColors.BUS;
+                                        } else if (vehicleType === 'TRAIN') {
+                                            strokeColor = modeColors.TRAIN;
+                                        } else if (vehicleType === 'SUBWAY') {
+                                            strokeColor = modeColors.SUBWAY;
+                                        } else if (vehicleType === 'TRAM') {
+                                            strokeColor = modeColors.TRAM;
+                                        } else if (vehicleType === 'FERRY') {
+                                            strokeColor = modeColors.FERRY;
+                                        } else {
+                                            // Use generic color for other transit vehicle types
+                                            strokeColor = modeColors[vehicleType] || transit_color;
+                                        }
+                                    }
+
+                                    const routePolyline = {
+                                        path: decodedPolyline,
+                                        strokeColor: strokeColor,
+                                        strokeOpacity: stroke_opacity,
+                                        strokeWeight: stroke_weight,
+                                    };
+                                    polylineSegments.push(routePolyline);  // Add each polyline segment to the array
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    console.log(`Top Route does not have valid legs.`);
+                }
+            } else {
+                console.log("Transit data is not an array or is empty");
+            }
+
+            return polylineSegments;  // Return the array of polylines for the transit route
+        } else {
+            console.error('No transit data returned.');
+            return null;
+        }
+    } catch (error) {
+        console.error('Error fetching transit route: (error)', error);
+        return null;
+    }
+}
+
 export async function getRoutePolyline(origin, destination, mode) {
+    let originCoords;
+    let destinationCoords;
     try {
         // Combine name & address for origin and destination
         origin = origin[0] + ", " + origin[1];
@@ -49,8 +154,14 @@ export async function getRoutePolyline(origin, destination, mode) {
         console.log("Mode in Poly: " + mode);
 
         // Get coordinates using getCoords
-        const originCoords = await getCoords({ description: origin, place_id: '' });
-        const destinationCoords = await getCoords({ description: destination, place_id: '' });
+        originCoords = await getCoords({ description: origin, place_id: '' });
+        destinationCoords = await getCoords({ description: destination, place_id: '' });
+
+        if (mode.toUpperCase() == "TRANSIT") {
+            // Transit Polyline
+            const transitPolylines = await getTransitRoutePolylines(originCoords, destinationCoords, mode);
+            return transitPolylines;
+        }
 
         // Retrieve the ID token from Firebase
         const idToken = await getIdToken(auth);
@@ -77,37 +188,27 @@ export async function getRoutePolyline(origin, destination, mode) {
             const polyline = data.routes[0].overview_polyline.points;
             const decodedPolyline = decodePolyline(polyline);
 
-            const modeColors = {
-                DRIVING: '#FF0000', // Red for driving
-                WALKING: '#0000FF', // Blue for walking
-                BICYCLING: '#00FF00', // Green for bicycling
-                TRANSIT: '#FFD700', // Yellow for transit
-            };
-
-            // Set the stroke color based on the mode
-            const strokeColor = modeColors[mode.toUpperCase()] || '#FF0000'; // Default to red
+            const strokeColor = modeColors[mode.toUpperCase()] || driving_color; // Default to driving_color
 
             const routePolyline = {
                 path: decodedPolyline,
                 strokeColor: strokeColor,
-                strokeOpacity: 1.0,
-                strokeWeight: 2,
+                strokeOpacity: stroke_opacity,
+                strokeWeight: stroke_weight,
             };
 
             routePolylines.push(routePolyline);
             return routePolyline; // Return both path and strokeColor
         } else {
             console.error('Error fetching route (data):', data.status);
+            console.log("Switching to transit mode");
 
-            // TODO: Sometimes transit works. In the cases it doesn't due to multiple stops required, we handle it here.
-            return null;
+            // Transit Polyline
+            const transitPolylines = await getTransitRoutePolylines(originCoords, destinationCoords, mode);
+            return transitPolylines;  // Return the polyline segments for the transit route
         }
     } catch (error) {
         console.error('Error fetching route: (error)', error);
         return null;
     }
-}
-
-export function clearRoutePolylines() {
-    routePolylines = [];
 }
