@@ -88,8 +88,12 @@ async function getTransitRoutePolylines(originCoords, destinationCoords, mode) {
 
                                     let strokeColor = transit_color;  // Default to purple for TRANSIT
 
+                                    // Check if the step is a walking step
+                                    if (step.travel_mode === 'WALKING') {
+                                        strokeColor = modeColors.WALKING;
+                                    }
                                     // Check the mode for each step (bus, train, subway, etc.)
-                                    if (step.transit_details && step.transit_details.line && step.transit_details.line.vehicle) {
+                                    else if (step.transit_details && step.transit_details.line && step.transit_details.line.vehicle) {
                                         const vehicleType = step.transit_details.line.vehicle.type.toUpperCase();
 
                                         // Assign specific colors for each vehicle type

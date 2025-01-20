@@ -8,7 +8,7 @@ interface MultiRoutesMapProps {
   transportationModes: string[]; // Array of transportation modes
 }
 
-const stroke_width = 2;
+const stroke_width = 4;
 
 const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportationModes }) => {
   const [polylines, setPolylines] = useState<any[]>([]); // State to store polylines
@@ -32,7 +32,7 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
           const [origin, destination] = locations[i];
           const mode = transportationModes[i];
           const routePolyline = await getRoutePolyline(origin, destination, mode); // Get route polyline data
-          console.log("Hi: " + routePolyline);
+          //console.log("Hi: " + routePolyline);
           //console.log("Hi: " + JSON.stringify(routePolyline));
 
           if (routePolyline) {
