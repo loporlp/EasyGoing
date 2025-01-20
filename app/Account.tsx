@@ -3,11 +3,22 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
+import { Ionicons } from '@expo/vector-icons';
 import { CommonActions, useNavigation } from '@react-navigation/native';
+import { useRouter } from "expo-router";
 
 const Account = () => {
 
   const navigation = useNavigation();
+  const router = useRouter();
+
+  const viewTrips = () => {
+    router.replace("/EditExistingTripsScreen")
+  }
+
+  const homeScreen = () => {
+    router.replace("/HomeScreen")
+  }
 
   /**
    * Signs the user out of their account. 
@@ -46,18 +57,35 @@ const Account = () => {
   }, []);
 
   return (
-    <View style={styles.container}>
-      {/* Display the user's email if logged in */}
-      {userEmail ? (
-        <Text style={styles.emailText}>Email: {userEmail}</Text>
-      ) : (
-        <Text style={styles.emailText}>No user logged in</Text>
-      )}
+    <View style={{ flex: 1, flexDirection: "column" }}>
+      <View style={styles.container}>
+        {/* Display the user's email if logged in */}
+        {userEmail ? (
+          <Text style={styles.emailText}>Email: {userEmail}</Text>
+        ) : (
+          <Text style={styles.emailText}>No user logged in</Text>
+        )}
 
-      {/* Sign-out button */}
-      <TouchableOpacity onPress={handleSignOut}>
-        <Text style={styles.signOut}>Sign Out</Text>
-      </TouchableOpacity>
+        {/* Sign-out button */}
+        <TouchableOpacity onPress={handleSignOut}>
+          <Text style={styles.signOut}>Sign Out</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.navBar}>
+        <TouchableOpacity style={{ padding: 10, marginLeft: 20 }} onPress={homeScreen}>
+          <Ionicons name="home" size={30} color={"lightgray"} />
+        </TouchableOpacity>
+        <TouchableOpacity style={{ padding: 10 }}>
+          <Ionicons name="search" size={30} color={"lightgray"} />
+        </TouchableOpacity>
+        <TouchableOpacity style={{ padding: 10 }} onPress={viewTrips}>
+          <Ionicons name="calendar" size={30} color={"lightgray"} />
+        </TouchableOpacity>
+        <TouchableOpacity style={{ padding: 10, marginRight: 20 }}>
+          <Ionicons name="person" size={30} color={"#24a6ad"} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -65,9 +93,9 @@ const Account = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center"
   },
   emailText: {
     fontSize: 18,
@@ -75,6 +103,17 @@ const styles = StyleSheet.create({
   },
   signOut: {
     color: "red",
+  },
+  navBar: {
+    flexDirection: "row",
+    backgroundColor: "white",
+    justifyContent: "space-between",
+    alignItems: "center",
+    height: "8%",
+    shadowColor: "#333333",
+    shadowOffset: { width: 1, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
   }
 });
 

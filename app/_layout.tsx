@@ -41,19 +41,15 @@ export default function RootLayout() {
       />
 
       {/*Account screen*/}
-      <Stack.Screen name="Account" />
+      <Stack.Screen name="Account" 
+        options={{
+          headerShown: false,
+          animation:"none"
+        }}/>
 
       {/*Home screen*/}
       <Stack.Screen name="HomeScreen"
         options={{
-          title: "Home",
-          headerStyle: {
-            backgroundColor: '#24a6ad',
-          },
-          headerTintColor: "white",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
           headerShown: false,
           animation: "none"
         }} />

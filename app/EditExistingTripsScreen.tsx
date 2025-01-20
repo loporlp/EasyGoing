@@ -14,6 +14,10 @@ const EditExistingTripsScreen = () => {
         router.replace("/HomeScreen")
     }
 
+    const accountScreen = () => {
+        router.replace("/Account")
+    }
+
     return (
         <View style={{flex: 1, flexDirection: "column"}}>
             <ScrollView style={styles.container} contentContainerStyle={{flexGrow: 1}}>
@@ -39,7 +43,7 @@ const EditExistingTripsScreen = () => {
                 <TouchableOpacity style={{ padding: 10 }}>
                     <Ionicons name="calendar" size={30} color={"#24a6ad"} />
                 </TouchableOpacity>
-                <TouchableOpacity style={{ padding: 10, marginRight: 20 }}>
+                <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={accountScreen}>
                     <Ionicons name="person" size={30} color={"lightgray"} />
                 </TouchableOpacity>
             </View>

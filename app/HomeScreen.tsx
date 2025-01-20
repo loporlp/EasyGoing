@@ -28,7 +28,12 @@ const HomeScreen = () => {
 
     const viewTrips = () => {
         router.replace("/EditExistingTripsScreen")
-      }
+    }
+
+    const accountScreen = () => {
+        router.replace("/Account")
+    }
+
 
     const scrollRef = useRef<ScrollView>(null);
     const recommendedList = [
@@ -264,7 +269,7 @@ const HomeScreen = () => {
                     <TouchableOpacity style={{padding: 10}} onPress={viewTrips}>
                         <Ionicons name="calendar" size={30} color={"lightgray"} />
                     </TouchableOpacity>
-                    <TouchableOpacity style={{padding: 10, marginRight: 20}}>
+                    <TouchableOpacity style={{padding: 10, marginRight: 20}} onPress={accountScreen}>
                         <Ionicons name="person" size={30} color={"lightgray"} />
                     </TouchableOpacity>
                 </View>
