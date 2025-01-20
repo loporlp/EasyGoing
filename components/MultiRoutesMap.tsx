@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Polyline, Marker } from 'react-native-maps';
 import { getRoutePolyline } from '../scripts/routePolyline';
+import { getCoords } from '../scripts/nameToCoords.js';
 
 interface MultiRoutesMapProps {
   locations: string[][]; // An array of origin-destination pairs
@@ -13,53 +14,59 @@ const stroke_width = 4;
 const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportationModes }) => {
   const [polylines, setPolylines] = useState<any[]>([]); // State to store polylines
   const [mapRegion, setMapRegion] = useState<any>(null); // State to store the map's region
+  const [markers, setMarkers] = useState<any[]>([]); // State to store marker data
   const mapRef = useRef<MapView>(null);
 
   useEffect(() => {
-    // Remember that 'locations' are origin-destination pairs and NOT individual locations. Hence the length should be the same
-    if (locations.length !== transportationModes.length) {
-      console.log('Error: Locations and Transportation Modes are not the same length: ' + locations.length + ", " + transportationModes.length);
-      console.log(locations);
-      return;
-    }
-
-    // Loop through each origin-destination pair and transportation mode
-    const fetchPolylines = async () => {
+    // Fetch polylines and markers asynchronously
+    const fetchPolylinesAndMarkers = async () => {
       const allPolylines: any[] = [];
       let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
+      const allMarkers: any[] = [];
 
       for (let i = 0; i < locations.length; i++) {
-          const [origin, destination] = locations[i];
-          const mode = transportationModes[i];
-          const routePolyline = await getRoutePolyline(origin, destination, mode); // Get route polyline data
-          //console.log("Hi: " + routePolyline);
-          //console.log("Hi: " + JSON.stringify(routePolyline));
+        const [origin, destination] = locations[i];
+        const mode = transportationModes[i];
 
-          if (routePolyline) {
-              // Handle the case where multiple polylines are returned (e.g., for transit)
-              const polylinesArray = Array.isArray(routePolyline) ? routePolyline : [routePolyline];
+        // Get the polyline for the route
+        const routePolyline = await getRoutePolyline(origin, destination, mode);
 
-              // Add polyline data to the list
-              polylinesArray.forEach((polyline: any) => {
-                  allPolylines.push({
-                      id: `${origin[0]}-${destination[0]}-${mode}`,
-                      coordinates: polyline.path, // Use the path from the response
-                      strokeColor: polyline.strokeColor, // Use the color from the response
-                      strokeWidth: stroke_width, // Set a stroke width (optional)
-                  });
+        // Fetch coordinates for origin and destination
+        const originCoords = await getCoords({ description: origin, place_id: '' });
+        const destinationCoords = await getCoords({ description: destination, place_id: '' });
 
-                  // Update the bounds for each polyline
-                  polyline.path.forEach((coord: { latitude: number, longitude: number }) => {
-                      minLat = Math.min(minLat, coord.latitude);
-                      maxLat = Math.max(maxLat, coord.latitude);
-                      minLon = Math.min(minLon, coord.longitude);
-                      maxLon = Math.max(maxLon, coord.longitude);
-                  });
-              });
-          }
+        if (routePolyline) {
+          const polylinesArray = Array.isArray(routePolyline) ? routePolyline : [routePolyline];
+
+          // Add polyline data to the list
+          polylinesArray.forEach((polyline: any) => {
+            allPolylines.push({
+              id: `${origin}-${destination}-${mode}`,
+              coordinates: polyline.path, // Use the path from the response
+              strokeColor: polyline.strokeColor,
+              strokeWidth: stroke_width,
+            });
+
+            // Update the bounds for each polyline
+            polyline.path.forEach((coord: { latitude: number, longitude: number }) => {
+              minLat = Math.min(minLat, coord.latitude);
+              maxLat = Math.max(maxLat, coord.latitude);
+              minLon = Math.min(minLon, coord.longitude);
+              maxLon = Math.max(maxLon, coord.longitude);
+            });
+          });
+        }
+
+        // Store markers
+        allMarkers.push({
+          origin: originCoords,
+          destination: destinationCoords,
+        });
       }
 
+      // Update state with polylines and markers
       setPolylines(allPolylines);
+      setMarkers(allMarkers);
 
       // Set the map region to focus on the route(s)
       if (minLat !== Infinity && maxLat !== -Infinity && minLon !== Infinity && maxLon !== -Infinity) {
@@ -80,8 +87,8 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
       }
     };
 
-    fetchPolylines();
-    console.log("Plotting polylines done");
+    fetchPolylinesAndMarkers();
+    console.log("Plotting polylines and fetching markers done");
   }, [locations, transportationModes]);
 
   return (
@@ -95,19 +102,39 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
       >
         {/* Render polylines on the map */}
         {polylines.map((polyline, index) => (
-            <Polyline
-                key={`${polyline.id}-${index}`}
-                coordinates={polyline.coordinates}
-                strokeColor={polyline.strokeColor}
-                strokeWidth={polyline.strokeWidth}
-            />
+          <Polyline
+            key={`${polyline.id}-${index}`}
+            coordinates={polyline.coordinates}
+            strokeColor={polyline.strokeColor}
+            strokeWidth={polyline.strokeWidth}
+          />
         ))}
+
+        {/* Render markers for each origin and destination */}
+        {markers.map((marker, index) => {
+            return (
+            <>
+              <Marker
+                key={`origin-${index}`}
+                coordinate={{ latitude: marker.origin.latitude, longitude: marker.origin.longitude }}
+                title={locations[index][0][0]}
+                zIndex={10}
+              />
+              <Marker
+                key={`destination-${index}`}
+                coordinate={{ latitude: marker.destination.latitude, longitude: marker.destination.longitude }}
+                title={locations[index][1][0]}
+                zIndex={10}
+              />
+            </>
+          );
+        })}
       </MapView>
 
       <Text style={styles.subTitle}>Locations:</Text>
       {locations.map((location, index) => (
         <Text key={index} style={styles.text}>
-          {`Origin: ${location[0][0]} - Destination: ${location[1][0]}`}
+          {`Origin: ${location[0]} - Destination: ${location[1]}`}
         </Text>
       ))}
 
