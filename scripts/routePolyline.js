@@ -44,6 +44,11 @@ const driving_color = '#FF0000'; // Red
 const walking_color = '#0000FF'; // Blue
 const bike_color = '#00FF00'; // Green
 const transit_color = '#800080'; // Purple
+const bus_color = '#006400'; // Dark Green
+const train_color = '#800000'; // Maroon
+const subway_color = '#000080'; // Navy
+const tram_color = '#808080'; // Gray
+const ferry_color = '#40E0D0'; // Turquoise
 
 const stroke_opacity = 0.8;
 const stroke_weight = 2;
@@ -53,6 +58,11 @@ const modeColors = {
     WALKING: walking_color,
     BICYCLING: bike_color,
     TRANSIT: transit_color,
+    BUS: bus_color,
+    TRAIN: train_color,
+    SUBWAY: subway_color,
+    TRAM: tram_color,
+    FERRY: ferry_color,
 };
 
 // Transit Polylines
@@ -70,24 +80,46 @@ async function getTransitRoutePolylines(originCoords, destinationCoords, mode) {
                 console.log(`Top Route:`, topRoute);
 
                 if (topRoute.legs && Array.isArray(topRoute.legs) && topRoute.legs.length > 0) {
-                    const firstLeg = topRoute.legs[0]; // Take the first leg from the top route
-                    if (firstLeg.steps && Array.isArray(firstLeg.steps)) {
-                        firstLeg.steps.forEach(step => {
-                            if (step.polyline && step.polyline.points) {
-                                const decodedPolyline = decodePolyline(step.polyline.points);
+                    topRoute.legs.forEach(leg => {
+                        if (Array.isArray(leg.steps)) {
+                            leg.steps.forEach(step => {
+                                if (step.polyline && step.polyline.points) {
+                                    const decodedPolyline = decodePolyline(step.polyline.points);
 
-                                const strokeColor = modeColors[mode.toUpperCase()] || transit_color;
+                                    let strokeColor = transit_color;  // Default to purple for TRANSIT
 
-                                const routePolyline = {
-                                    path: decodedPolyline,
-                                    strokeColor: strokeColor,
-                                    strokeOpacity: stroke_opacity,
-                                    strokeWeight: stroke_weight,
-                                };
-                                polylineSegments.push(routePolyline);  // Add each polyline segment to the array
-                            }
-                        });
-                    }
+                                    // Check the mode for each step (bus, train, subway, etc.)
+                                    if (step.transit_details && step.transit_details.line && step.transit_details.line.vehicle) {
+                                        const vehicleType = step.transit_details.line.vehicle.type.toUpperCase();
+
+                                        // Assign specific colors for each vehicle type
+                                        if (vehicleType === 'BUS') {
+                                            strokeColor = modeColors.BUS;
+                                        } else if (vehicleType === 'TRAIN') {
+                                            strokeColor = modeColors.TRAIN;
+                                        } else if (vehicleType === 'SUBWAY') {
+                                            strokeColor = modeColors.SUBWAY;
+                                        } else if (vehicleType === 'TRAM') {
+                                            strokeColor = modeColors.TRAM;
+                                        } else if (vehicleType === 'FERRY') {
+                                            strokeColor = modeColors.FERRY;
+                                        } else {
+                                            // Use generic color for other transit vehicle types
+                                            strokeColor = modeColors[vehicleType] || transit_color;
+                                        }
+                                    }
+
+                                    const routePolyline = {
+                                        path: decodedPolyline,
+                                        strokeColor: strokeColor,
+                                        strokeOpacity: stroke_opacity,
+                                        strokeWeight: stroke_weight,
+                                    };
+                                    polylineSegments.push(routePolyline);  // Add each polyline segment to the array
+                                }
+                            });
+                        }
+                    });
                 } else {
                     console.log(`Top Route does not have valid legs.`);
                 }
@@ -121,7 +153,7 @@ export async function getRoutePolyline(origin, destination, mode) {
         originCoords = await getCoords({ description: origin, place_id: '' });
         destinationCoords = await getCoords({ description: destination, place_id: '' });
 
-        if (mode == "TRANSIT") {
+        if (mode.toUpperCase() == "TRANSIT") {
             // Transit Polyline
             const transitPolylines = await getTransitRoutePolylines(originCoords, destinationCoords, mode);
             return transitPolylines;

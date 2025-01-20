@@ -2,20 +2,11 @@ import axios from 'axios'
 
 export async function getTransitRoute(originCoords, destinationCoords) {
   try {
-    // Define the request body based on the coordinates
-    const requestBody = {
-      origin: `${originCoords.latitude},${originCoords.longitude}`,
-      destination: `${destinationCoords.latitude},${destinationCoords.longitude}`,
-      travelMode: 'TRANSIT',
-      computeAlternativeRoutes: true,
-      transitPreferences: {
-        routingPreference: 'LESS_WALKING',  // or 'FEWER_TRANSFERS'
-      }
-    };
-
     // Construct the API URL
     const apiKey = 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI';
-    const apiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${requestBody.origin}&destination=${requestBody.destination}&mode=${requestBody.travelMode}&alternatives=${requestBody.computeAlternativeRoutes}&transit_routing_preference=${requestBody.transitPreferences.routingPreference}&key=${apiKey}`;
+    const apiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${originCoords.latitude},${originCoords.longitude}&destination=${destinationCoords.latitude},${destinationCoords.longitude}&mode=transit&key=${apiKey}`;
+    // TEST API FOR TRANSIT
+    //const apiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=Draper+Station&destination=University+of+Utah&mode=transit&key=AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI`;
 
     console.log(apiUrl);
 

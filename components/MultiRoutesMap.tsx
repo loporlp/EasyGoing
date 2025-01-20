@@ -33,6 +33,7 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
           const mode = transportationModes[i];
           const routePolyline = await getRoutePolyline(origin, destination, mode); // Get route polyline data
           console.log("Hi: " + routePolyline);
+          //console.log("Hi: " + JSON.stringify(routePolyline));
 
           if (routePolyline) {
               // Handle the case where multiple polylines are returned (e.g., for transit)
