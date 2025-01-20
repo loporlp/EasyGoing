@@ -115,13 +115,13 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
             return (
             <>
               <Marker
-                key={`origin-${index}`}
+                key={`origin-${locations[index][0]}-${locations[index][1]}`}
                 coordinate={{ latitude: marker.origin.latitude, longitude: marker.origin.longitude }}
                 title={locations[index][0][0]}
                 zIndex={10}
               />
               <Marker
-                key={`destination-${index}`}
+                key={`destination-${locations[index][0]}-${locations[index][1]}`}
                 coordinate={{ latitude: marker.destination.latitude, longitude: marker.destination.longitude }}
                 title={locations[index][1][0]}
                 zIndex={10}
