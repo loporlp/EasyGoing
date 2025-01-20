@@ -55,8 +55,8 @@ const Index = () => {
           <>
             <Stack.Screen
               name="SignIn"
-              component={SignInScreen} // TODO: Change back to SignInScreen
-              options={{ headerShown: false, title: "Sign In" }}
+              component={SignInScreen} 
+              options={{ headerShown: false }}
             />
             <Stack.Screen
               name="CreateAccount"

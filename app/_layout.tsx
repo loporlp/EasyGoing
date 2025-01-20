@@ -15,9 +15,7 @@ export default function RootLayout() {
         name="index"
         options={{
           title: "Home",
-          headerStyle: {
-            backgroundColor: '#24a6ad',
-          },
+          headerShown: false,
           headerTintColor: "white",
           headerTitleStyle: {
             fontWeight: "bold",
@@ -47,19 +45,6 @@ export default function RootLayout() {
       <Stack.Screen name="HomeScreen"
         options={{
           title: "Home",
-          headerStyle: {
-            backgroundColor: '#24a6ad',
-          },
-          headerTintColor: "white",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
-        }} />
-
-      {/*Sign In screen*/}
-      <Stack.Screen name="SignInScreen"
-        options={{
-          title: "Sign In",
           headerStyle: {
             backgroundColor: '#24a6ad',
           },
