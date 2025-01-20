@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import CalendarPicker from 'react-native-calendar-picker';
 import moment from "moment";
+import AddEditDestinations from './AddEditDestinations';
 
 export const head = () => ({
     title: "Create New Trip"
@@ -24,6 +25,7 @@ const CreateNewTrip = () => {
 
     const startPlanning = () => {
         console.log('Selected place before navigation:', selectedPlace);
+        router.push("/AddEditDestinations");
     }
 
     const handleDateChange = (date: Date, type: 'START_DATE' | 'END_DATE') => {
