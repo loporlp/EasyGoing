@@ -1,34 +1,77 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Alert, Button } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import axios from 'axios';
 import polyline from 'polyline';
+import { auth } from '../firebaseConfig';
+import {getIdToken} from '../scripts/getFirebaseID'
+import { useIsFocused } from '@react-navigation/native';
 
-const apiKey = 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI';
 
-const RouteMap = () => {
+const RouteMap = ({ origin, destination, style, onModeChange }) => {
     const [coordinates, setCoordinates] = useState([]);
-    const [origin, setOrigin] = useState({ latitude: 35.7023, longitude: 139.7745 }); // Akihabara Example
-    const [destination, setDestination] = useState({ latitude: 35.7100, longitude: 139.8107 }); // Tokyo Sky Tree Example
     const [mode, setMode] = useState('driving'); // Can use 'walking', 'driving', 'bicycling', and 'transit'
+    const [loading, setLoading] = useState(false);
+    const mapRef = useRef(null);
+    const isFocused = useIsFocused();
+    const [mapKey, setMapKey] = useState(Date.now());
 
     useEffect(() => {
-        setCoordinates([]);
-        getRoute(origin, destination, mode);
+        if (isFocused) {
+            setMapKey(Date.now()); // Update key when screen is focused
+        }
+    }, [isFocused]);
+
+    useEffect(() => {
+        if (origin && destination) {
+            getRoute(origin, destination, mode);
+        }
     }, [origin, destination, mode]);
 
+    useEffect(() => {
+      console.log('Coordinates Updated:', coordinates); // Log after coordinates update
+    }, [coordinates]);
+
+    
 const getRoute = async (origin, destination, mode) => {
+    setLoading(true);
     try {
-        // The API Call
-        const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}&alternatives=true&key=${apiKey}`;
+        // Retrieve the ID token
+        const idToken = await getIdToken(auth);
+
+        // Define the API endpoint
+        const apiUrl = `http://ezgoing.app/api/route?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}`;
 
         // Make the request
-        const response = await axios.get(url);
+        const response = await fetch(apiUrl, {
+          method: "GET", // Or "POST", "PUT", etc.
+          headers: {
+            Authorization: `Bearer ${idToken}`, // Include the ID token in the header
+          },
+        });
 
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
         // Is it a valid route?
-        if (response.data.routes.length > 0) {
-            const points = decodePolyline(response.data.routes[0].overview_polyline.points);
+        if (data.routes.length > 0) {
+            const points = decodePolyline(data.routes[0].overview_polyline.points);
             setCoordinates(points);
+
+            if (mapRef.current) {
+                const region = {
+                    latitude: (origin.latitude + destination.latitude) / 2,
+                    longitude: (origin.longitude + destination.longitude) / 2,
+                    latitudeDelta: 0.1,
+                    longitudeDelta: 0.1,
+                };
+                mapRef.current.animateToRegion(region, 1000);
+            }
+
+            // TODO: Center and scale map to fit the route
+
         } else {
             // TODO: Need a way to show no route
             Alert.alert('Error', 'No route found');
@@ -37,47 +80,68 @@ const getRoute = async (origin, destination, mode) => {
         // TODO: Need something to handle errors
         console.error(error);
         Alert.alert('Error', 'Failed to fetch route');
+    } finally {
+        setLoading(false);
     }
 };
 
-const decodePolyline = (encoded) => {
-    // Figure out location
-    return polyline.decode(encoded).map(point => ({
-        latitude: point[0],
-        longitude: point[1]
-    }));
-};
+    const decodePolyline = (encoded) => {
+        // Figure out location
+        return polyline.decode(encoded).map(point => ({
+            latitude: point[0],
+            longitude: point[1]
+        }));
+    };
 
-// To have different modes of transport
-const handleModeChange = (newMode) => {
-    setMode(newMode);
- };
+    // To have different modes of transport
+    const handleModeChange = (newMode) => {
+        setMode(newMode);
+        onModeChange(newMode);
+    };
+
+    useEffect(() => {
+        if (coordinates.length > 0 && mapRef.current) {
+            const region = {
+                latitude: (origin.latitude + destination.latitude) / 2,
+                longitude: (origin.longitude + destination.longitude) / 2,
+                latitudeDelta: 0.1,
+                longitudeDelta: 0.1,
+            };
+            mapRef.current.animateToRegion(region, 1000);
+        }
+    }, [coordinates, origin, destination])
 
 return (
     <View style={styles.container}>
+
+    {console.log('Rendering MapView with:', { origin, destination, coordinates })}
     {/* Display the map */}
     <MapView
+        key={mapKey}
+        ref={mapRef}
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         initialRegion={{
             latitude: (origin.latitude + destination.latitude) / 2,
             longitude: (origin.longitude + destination.longitude) / 2,
-            latitudeDelta: 0.1,
-            longitudeDelta: 0.1,
-        }}>
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+        }}
+    >
 
-    {/* Markers for Origin and Destination */}
-    <Marker coordinate={origin} title="Origin" />
-    <Marker coordinate={destination} title="Destination" />
+        {/* Markers for Origin and Destination */}
+        {console.log('Marker coords:', { origin, destination })}
+        <Marker coordinate={origin} title="Origin" />
+        <Marker coordinate={destination} title="Destination" />
 
-    {/* Route Line */}
-    {coordinates.length > 0 && (
-        <Polyline
-            coordinates={coordinates}
-            strokeColor="#FF5733"
-            strokeWidth={6}
-          />
-        )}
+        {/* Route Line */}
+        {coordinates.length > 0 ? (
+            <Polyline
+                coordinates={coordinates}
+                strokeColor="#FF5733"
+                strokeWidth={6}
+            />
+        ) : null}
     </MapView>
 
     {/* Transportation Mode Buttons */}
@@ -86,6 +150,7 @@ return (
         <Button title="Walking" onPress={() => handleModeChange('walking')} />
         <Button title="Transit" onPress={() => handleModeChange('transit')} />
         <Button title="Bicycling" onPress={() => handleModeChange('bicycling')} />
+        { /*TODO: transit_mode: 'bus|subway|train'*/}
     </View>
     </View>
   );
@@ -94,21 +159,24 @@ return (
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingTop: 50,
-        paddingHorizontal: 20,
+        flexDirection: "row",
         backgroundColor: '#fff',
     },
+
     map: {
         flex: 1,
     },
+
     buttonContainer: {
         position: 'absolute',
-        bottom: 20,
         left: 10,
         right: 10,
+        top: 300,
+        bottom: 20,
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
 });
+
 
 export default RouteMap;

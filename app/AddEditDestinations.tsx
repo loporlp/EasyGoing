@@ -133,7 +133,7 @@ const AddEditDestinations = () => {
                     </ScrollView>
 
                     {/* "Generate Plan" button */}
-                    <TouchableOpacity style={styles.generatePlanButton} onPress={() => { }}>
+                    <TouchableOpacity style={styles.generatePlanButton} onPress={() => {router.push("/GenerateItineraryScreen") }}>
                         <Text style={styles.buttonText}>Generate Plans</Text>
                     </TouchableOpacity>
 

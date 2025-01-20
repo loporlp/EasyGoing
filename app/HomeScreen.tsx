@@ -270,6 +270,47 @@ const HomeScreen = () => {
     );
 }
 
+const fetchData = async () => {
+  try {
+    // We should put this ip into a global constant
+    const response = await fetch('http://ezgoing.app/api/serverstatus');
+    const data = await response.json();
+    console.log(data.message); // This should log "Hello from the server!"
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
+};
+
+// TODO: This was just an example. Eventually delete (since we probalby don't need on this page)
+const callProtectedApi = async () => {
+  try {
+    // Retrieve the ID token
+    const idToken = await getIdToken(auth);
+
+    const searchTerm = "McDona"
+    // Define the API endpoint
+    const apiUrl = `http://ezgoing.app/api/autocomplete?input=${searchTerm}`; // Search term is the user inputted that we are auto completeing
+
+    // Make the API call
+    const response = await fetch(apiUrl, {
+      method: "GET", // Or "POST", "PUT", etc.
+      headers: {
+        Authorization: `Bearer ${idToken}`, // Include the ID token in the header
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("API Response:", data); // Handle the response
+  } catch (error) {
+    console.error("Error calling API:", error);
+  }
+};
+
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,

@@ -6,9 +6,13 @@ import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import MapMarker from '../components/MapMarker';
 import RouteMap from '../components/RouteMap';
+import { getCoords } from '../scripts/nameToCoords.js';
+
 
 const HomeScreen = () => {
   // State to store the selected place's coordinates
+  const setOrigin = { latitude: 35.7023, longitude: 139.7745 }; // Akihabara Example
+  const setDestination = { latitude: 35.7100, longitude: 139.8107 };
   const [selectedCoordinates, setSelectedCoordinates] = useState({
     latitude: 37.78825,
     longitude: -122.4324,
@@ -21,15 +25,18 @@ const HomeScreen = () => {
     });
   };
 
+  const handleModeChange = (text : any) => {
+  };
+
   // Handle place selection from AutocompleteTextBox
-  const handlePlaceSelect = (place) => {
-    // Extract latitude and longitude from the selected place details
-    if (place && place.geometry && place.geometry.location) {
-      setSelectedCoordinates({
-        latitude: place.geometry.location.lat,
-        longitude: place.geometry.location.lng,
-      });
-    }
+  const handlePlaceSelect = async (place: any): Promise<void> => {
+      try {
+          const coordinates = await getCoords(place);
+          console.log("Coordinates returned:", coordinates);
+          setSelectedCoordinates(coordinates)
+      } catch (error) {
+          console.error("Error during place selection:", error);
+      }
   };
 
   return (
@@ -45,17 +52,10 @@ const HomeScreen = () => {
               <AutocompleteTextBox onPlaceSelect={handlePlaceSelect} />
             </View>
 
-      {/* Two Buttons in the Middle */}
-      <View style={styles.buttonContainer}>
-        <Button title="Button 1" onPress={() => {}} />
-        <View style={{ height: 20 }} />
-        <Button title="Button 2" onPress={() => {}} />
-      </View>
-
-      <RouteMap />
+      <RouteMap origin={setOrigin} destination={setDestination} style={styles.map} onModeChange={handleModeChange}/>
 
       {/* Google Map */}
-     <MapMarker coordinates={selectedCoordinates} />
+      <MapMarker coordinates={selectedCoordinates} style={null} />
     </View>
   );
 };
@@ -98,6 +98,7 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
+    height: 300,
   },
 });
 
