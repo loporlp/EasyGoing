@@ -20,9 +20,10 @@ const CreateNewTrip = () => {
     const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null); // Explicitly define state type
     const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null); // Explicitly define state type
     const [datesText, setDatesText] = useState("");
+    const [selectedPlace, setSelectedPlace] = useState<string>(''); // for place name
 
     const startPlanning = () => {
-        router.push("/AddEditDestinations")
+        console.log('Selected place before navigation:', selectedPlace);
     }
 
     const handleDateChange = (date: Date, type: 'START_DATE' | 'END_DATE') => {
@@ -43,7 +44,7 @@ const CreateNewTrip = () => {
         setModalVisible(false);
     };
 
-    const handlePlaceSelect = (place) => {
+    const handlePlaceSelect = (place: { geometry: { location: { lat: any; lng: any; }; }; description: React.SetStateAction<string>; }) => {
         // Extract latitude and longitude from the selected place details
         if (place && place.geometry && place.geometry.location) {
             setSelectedCoordinates({
@@ -51,6 +52,7 @@ const CreateNewTrip = () => {
                 longitude: place.geometry.location.lng,
             });
         }
+        setSelectedPlace(place.description);
     };
 
     return (
@@ -211,9 +213,8 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         fontSize: 16,
         backgroundColor: "white",
-        paddingLeft: 15,
+        paddingLeft: 20,
         borderRadius: 10,
-        textAlignVertical: 'center'
     },
 
     travelerInput: {
@@ -306,3 +307,7 @@ const styles = StyleSheet.create({
 });
 
 export default CreateNewTrip;
+
+function setSelectedCoordinates(arg0: { latitude: any; longitude: any; }) {
+    
+}

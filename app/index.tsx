@@ -6,9 +6,10 @@ import { View, ActivityIndicator } from 'react-native';
 import { auth } from '../firebaseConfig';
 import SignInScreen from './SignInScreen';
 import CreateAccountScreen from './CreateAccountScreen';
-import AddDestination from './AddDestination';
 import { RootStackParamList } from './types';
 import HomeScreen from './HomeScreen';
+import TestHomeScreen from './HomeScreen_API_Test';
+import TestOptScreen from './TestOptimalRouteScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -45,7 +46,9 @@ const Index = () => {
           <Stack.Screen
             name="Home"
             component={HomeScreen}
-            options={{ headerShown: false }}
+            options={{ headerShown: false,
+              title: "Home"
+             }}
           />
         ) : (
           // User is not signed in
@@ -58,7 +61,7 @@ const Index = () => {
             <Stack.Screen
               name="CreateAccount"
               component={CreateAccountScreen}
-              options={{ headerShown: false }}
+              options={{ headerShown: false, title: "Create Account" }}
             />
           </>
         )}

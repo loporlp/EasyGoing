@@ -1,17 +1,21 @@
 // AddEditDestinations.tsx
-import { useState } from 'react';
-import { View, Image, StyleSheet, TextInput, Text, TouchableOpacity, ScrollView, Dimensions, Modal, ImageBackground, Button } from "react-native";
-import { useRouter } from "expo-router";
+import { useState, useEffect } from 'react';
+import { View, Image, StyleSheet, TextInput, Text, TouchableOpacity, ScrollView, Dimensions, Modal, ImageBackground, Button, GestureResponderEvent } from "react-native";
 
 const { height } = Dimensions.get('window');
 
 const AddEditDestinations = () => {
-    const router = useRouter();
+
+    const [placeName, setPlaceName] = useState<string | undefined>(undefined);
 
     // Modal (Pop-up)
     const [visible, setVisible] = useState(false);
     const show = () => setVisible(true);
     const hide = () => setVisible(false);
+
+    function generateItinerary(event: GestureResponderEvent): void {
+        throw new Error('Function not implemented.');
+    }
 
     return (
         <View style={styles.screenContainer}>
@@ -47,7 +51,6 @@ const AddEditDestinations = () => {
 
                         {/* Tokyo Skytree */}
                         <TouchableOpacity style={styles.destinationElement} onPress={() => { 
-                            router.push("/HomeScreen_API_Test")
                         }}>
                             {/* Background with opacity */}
                             <View style={styles.backgroundContainer}>
@@ -133,7 +136,7 @@ const AddEditDestinations = () => {
                     </ScrollView>
 
                     {/* "Generate Plan" button */}
-                    <TouchableOpacity style={styles.generatePlanButton} onPress={() => { }}>
+                    <TouchableOpacity style={styles.generatePlanButton} onPress={generateItinerary}>
                         <Text style={styles.buttonText}>Generate Plans</Text>
                     </TouchableOpacity>
 
