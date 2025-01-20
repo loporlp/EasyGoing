@@ -26,6 +26,9 @@ const HomeScreen = () => {
         router.push("/CreateNewTrip")
     }
 
+    const viewTrips = () => {
+        router.replace("/EditExistingTripsScreen")
+      }
 
     const scrollRef = useRef<ScrollView>(null);
     const recommendedList = [
@@ -258,7 +261,7 @@ const HomeScreen = () => {
                     <TouchableOpacity style={{padding: 10}}>
                         <Ionicons name="search" size={30} color={"lightgray"} />
                     </TouchableOpacity>
-                    <TouchableOpacity style={{padding: 10}}>
+                    <TouchableOpacity style={{padding: 10}} onPress={viewTrips}>
                         <Ionicons name="calendar" size={30} color={"lightgray"} />
                     </TouchableOpacity>
                     <TouchableOpacity style={{padding: 10, marginRight: 20}}>

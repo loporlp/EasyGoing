@@ -35,6 +35,8 @@ export default function RootLayout() {
           headerTitleStyle: {
             fontWeight: "bold",
           },
+          headerShown: false,
+          animation: "none"
         }}
       />
 
@@ -52,6 +54,8 @@ export default function RootLayout() {
           headerTitleStyle: {
             fontWeight: "bold",
           },
+          headerShown: false,
+          animation: "none"
         }} />
 
       {/*Create New Trip screen*/}
