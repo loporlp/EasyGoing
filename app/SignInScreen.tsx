@@ -25,25 +25,29 @@ const SignInScreen = () => {
    * Handles sign-in and server connection checks.
    */
   const handleSignIn = async () => {
-    const isServerRunning = await fetchData();
-
-    if (isServerRunning) {
-      signInWithEmailAndPassword(auth, email.trim(), password)
-        .then(() => {
-          console.log('User signed in!');
-          // Navigate to the next screen, e.g., Home
-        })
-        .catch((error) => {
-          console.error('Sign in error:', error);
-          alert(error.message);
-        });
-    } else {
-      alert('Server is down. Please try again later.');
-      router.replace("/ConnectionToServerFailedScreen");
+    try {
+      const isServerRunning = await fetchData();
+  
+      if (!isServerRunning) {
+        alert('Server is down. Please try again later.');
+        router.replace("/ConnectionToServerFailedScreen");
+        return;
+      }
+  
+      // Sign in 
+      const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
+      console.log('User signed in!');
+  
+      // Get the Firebase ID
+      const idToken = await userCredential.user.getIdToken();
+      console.log("Firebase ID Token:", idToken);
+  
+    } catch (error: any) {
+      console.error('Sign in error:', error.message);
+      alert(error.message);
     }
   };
-
-
+  
   return (
     <View style={styles.container}>
       {/* Background image */}
