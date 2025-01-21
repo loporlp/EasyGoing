@@ -13,7 +13,32 @@ const AddEditDestinations = () => {
     const show = () => setVisible(true);
     const hide = () => setVisible(false);
 
-    const destinations = [
+    const addLocation = () => {
+        if (!location || !duration || !priority) {
+            alert("Please fill out all fields");
+            return;
+        }
+
+        const newDestination = {
+            name: location,
+            image: require("../assets/images/tokyoskytree.jpg"),
+            duration: duration,
+            priority: priority,
+            route: ""
+        };
+
+        setDestinations(prevDestinations => [...prevDestinations, newDestination]);
+
+        // Clear the input fields after adding
+        setLocation("");
+        setDuration("");
+        setPriority("");
+        setNotes("");
+
+        hide();
+    };
+
+    const [destinations, setDestinations] = useState([
         {
             name: "Tokyo Skytree",
             image: require("../assets/images/tokyoskytree.jpg"),
@@ -49,7 +74,12 @@ const AddEditDestinations = () => {
             priority: "4",
             route: ""
         }
-    ];
+    ]);
+
+    const [location, setLocation] = useState("");
+    const [duration, setDuration] = useState("");
+    const [priority, setPriority] = useState("");
+    const [notes, setNotes] = useState("");
 
     return (
         <View style={styles.screenContainer}>
@@ -122,13 +152,39 @@ const AddEditDestinations = () => {
                                     {/* Text Input For Location, Duration, Priority, and Notes */}
                                     <View style={styles.textContainer}>
                                         <Text style={styles.text}>Location:</Text>
-                                        <TextInput style={styles.textBox} placeholder="Tokyo Sky Tree" placeholderTextColor="gray"  />
+                                        <TextInput
+                                            style={styles.textBox}
+                                            placeholder="Location"
+                                            placeholderTextColor="gray"
+                                            value={location}
+                                            onChangeText={setLocation}
+                                        />
                                         <Text style={styles.text}>Duration (Minutes):</Text>
-                                        <TextInput style={styles.textBox} placeholder="30 Minutes" placeholderTextColor="gray" keyboardType="numeric"/>
+                                        <TextInput
+                                            style={styles.textBox}
+                                            placeholder="1 hr"
+                                            placeholderTextColor="gray"
+                                            keyboardType="numeric"
+                                            value={duration}
+                                            onChangeText={setDuration}
+                                        />
                                         <Text style={styles.text}>Priority:</Text>
-                                        <TextInput style={styles.textBox} placeholder="2" placeholderTextColor="gray" keyboardType="numeric"/>
+                                        <TextInput
+                                            style={styles.textBox}
+                                            placeholder="1"
+                                            placeholderTextColor="gray"
+                                            keyboardType="numeric"
+                                            value={priority}
+                                            onChangeText={setPriority}
+                                        />
                                         <Text style={styles.text}>Notes:</Text>
-                                        <TextInput style={styles.textBox} placeholder="Notes" placeholderTextColor="gray"/>
+                                        <TextInput
+                                            style={styles.textBox}
+                                            placeholder="Notes"
+                                            placeholderTextColor="gray"
+                                            value={notes}
+                                            onChangeText={setNotes}
+                                        />
                                     </View>
                                     {/* Add + Cancel Buttons TODO: figure out why these buttons are overlayed on the text box*/}
                                     <View style={styles.buttonContainer}>
@@ -136,7 +192,7 @@ const AddEditDestinations = () => {
                                         <Button title="Cancel" onPress={hide} />
                                         </View>
                                         <View style={styles.button}>
-                                        <Button title="Add" onPress={hide} />
+                                        <Button title="Add" onPress={addLocation} />
                                         </View>
                                     </View>
                                 </View>
