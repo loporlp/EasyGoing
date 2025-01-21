@@ -62,13 +62,13 @@ const SignInScreen = () => {
       {/* Username */}
       <View style={styles.inputUserPass}>
         <View style={styles.userPassTextInput}>
-          <Ionicons name="person" size={18} color={"#24a6ad"} style={{ marginRight: 10 }} />
+          <Ionicons name="person" size={18} color={"#24a6ad"}/>
           <TextInput
             placeholder="Email"
             placeholderTextColor="#d6d6d6"
             value={email}
             onChangeText={setEmail}
-            style={{ fontSize: 18 }}
+            style={{ fontSize: 18, marginHorizontal: 15 }}
             autoCapitalize="none"
             keyboardType="email-address"
             textContentType="emailAddress"
@@ -79,13 +79,13 @@ const SignInScreen = () => {
       {/* Password */}
       <View style={styles.inputUserPass}>
         <View style={styles.userPassTextInput}>
-          <Ionicons name="lock-closed" size={18} color={"#24a6ad"} style={{ marginRight: 10 }} />
+          <Ionicons name="lock-closed" size={18} color={"#24a6ad"}/>
           <TextInput
             placeholder="Password"
             placeholderTextColor="#d6d6d6"
             value={password}
             onChangeText={setPassword}
-            style={{ fontSize: 18 }}
+            style={{ fontSize: 18, marginHorizontal: 15 }}
             secureTextEntry
             textContentType="password"
           />
@@ -98,7 +98,7 @@ const SignInScreen = () => {
       </TouchableOpacity>
 
       {/* Create New Account Button */}
-      <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
+      <TouchableOpacity onPress={() => navigation.replace('CreateAccount')}>
         <Text style={{ color: "white", fontSize: 15, marginTop: 15 }}>Create an Account</Text>
       </TouchableOpacity>
     </View>

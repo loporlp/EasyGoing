@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 export const fetchData = async () => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5000); // Set timeout to 5 seconds
