@@ -14,13 +14,17 @@ const EditExistingTripsScreen = () => {
         router.replace("/HomeScreen")
     }
 
+    const searchScreen = () => {
+        router.replace("/SearchScreen")
+    }
+
     const accountScreen = () => {
         router.replace("/Account")
     }
 
     return (
-        <View style={{flex: 1, flexDirection: "column"}}>
-            <ScrollView style={styles.container} contentContainerStyle={{flexGrow: 1}}>
+        <View style={{ flex: 1, flexDirection: "column" }}>
+            <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1 }}>
                 { /* Tokyo, Japan trip */}
                 <TouchableOpacity style={styles.tripButtonTokyo} onPress={editTrip}>
                     <Image style={styles.backgroundImage} source={require("../assets/images/tokyoskyline.jpg")} />
@@ -37,7 +41,7 @@ const EditExistingTripsScreen = () => {
                 <TouchableOpacity style={{ padding: 10, marginLeft: 20 }} onPress={homeScreen}>
                     <Ionicons name="home" size={30} color={"lightgray"} />
                 </TouchableOpacity>
-                <TouchableOpacity style={{ padding: 10 }}>
+                <TouchableOpacity style={{ padding: 10 }} onPress={searchScreen}>
                     <Ionicons name="search" size={30} color={"lightgray"} />
                 </TouchableOpacity>
                 <TouchableOpacity style={{ padding: 10 }}>

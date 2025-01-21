@@ -20,6 +20,10 @@ const Account = () => {
     router.replace("/HomeScreen")
   }
 
+  const searchScreen = () => {
+    router.replace("/SearchScreen")
+  }
+
   /**
    * Signs the user out of their account. 
    */
@@ -76,7 +80,7 @@ const Account = () => {
         <TouchableOpacity style={{ padding: 10, marginLeft: 20 }} onPress={homeScreen}>
           <Ionicons name="home" size={30} color={"lightgray"} />
         </TouchableOpacity>
-        <TouchableOpacity style={{ padding: 10 }}>
+        <TouchableOpacity style={{ padding: 10 }} onPress={searchScreen}>
           <Ionicons name="search" size={30} color={"lightgray"} />
         </TouchableOpacity>
         <TouchableOpacity style={{ padding: 10 }} onPress={viewTrips}>

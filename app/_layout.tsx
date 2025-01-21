@@ -41,14 +41,22 @@ export default function RootLayout() {
       />
 
       {/*Account screen*/}
-      <Stack.Screen name="Account" 
+      <Stack.Screen name="Account"
         options={{
           headerShown: false,
-          animation:"none"
-        }}/>
+          animation: "none"
+        }} />
 
       {/*Home screen*/}
       <Stack.Screen name="HomeScreen"
+        options={{
+          headerShown: false,
+          animation: "none"
+        }} />
+
+      {/* Search screen */}
+      <Stack.Screen
+        name="SearchScreen"
         options={{
           headerShown: false,
           animation: "none"
@@ -76,7 +84,7 @@ export default function RootLayout() {
           headerTitle: () => (
             <View style={styles.titleContainer}>
               {/* City and Country Name */}
-              <Text style={styles.headerText}>{placeName || 'Tokyo, Japan'}</Text> 
+              <Text style={styles.headerText}>{placeName || 'Tokyo, Japan'}</Text>
               {/* Country Flag */}
               <Flag code="JP" style={styles.flag} />
             </View>
@@ -112,7 +120,7 @@ export default function RootLayout() {
           headerTitle: () => (
             <View style={styles.titleContainer}>
               {/* City and Country Name */}
-              <Text style={styles.headerText}>{placeName || 'Tokyo, Japan'}</Text> 
+              <Text style={styles.headerText}>{placeName || 'Tokyo, Japan'}</Text>
               {/* Country Flag */}
               <Flag code="JP" style={styles.flag} />
             </View>
