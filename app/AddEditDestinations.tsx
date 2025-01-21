@@ -38,6 +38,10 @@ const AddEditDestinations = () => {
         hide();
     };
 
+    const deleteLocation = (index: number) => {
+        setDestinations(prevDestinations => prevDestinations.filter((_, i) => i !== index));
+    };
+
     const [destinations, setDestinations] = useState([
         {
             name: "Tokyo Skytree",
@@ -113,30 +117,35 @@ const AddEditDestinations = () => {
                     {/*The window where all of the destinations are shown*/}
                     <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
                         {destinations.map((destination, index) => (
-                            <TouchableOpacity
-                                key={index}
-                                style={styles.destinationElement}
-                                onPress={() => {
-                                    if (destination.route) {
-                                        router.push(destination.route);
-                                    }
-                                }}
-                            >
-                                {/* Background with opacity */}
-                                <View style={styles.backgroundContainer}>
-                                    <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
-                                </View>
-
-                                <View style={styles.destinationContainer}>
-                                    <Image style={styles.destinationImage} source={destination.image} />
-                                    <View style={styles.destinationLabel}>
-                                        <Text style={styles.destinationName}>{destination.name}</Text>
-                                        <Text style={styles.destinationDetails}>
-                                            Duration: {destination.duration} | Priority: {destination.priority}
-                                        </Text>
+                            <View key={index} style={styles.destinationElement}>
+                                <TouchableOpacity
+                                    style={styles.destinationContainer}
+                                    onPress={() => {
+                                        if (destination.route) {
+                                            router.push(destination.route);
+                                        }
+                                    }}
+                                >
+                                    <View style={styles.backgroundContainer}>
+                                        <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
                                     </View>
-                                </View>
-                             </TouchableOpacity>
+
+                                    <View style={styles.destinationContainer}>
+                                        <Image style={styles.destinationImage} source={destination.image} />
+                                        <View style={styles.destinationLabel}>
+                                            <Text style={styles.destinationName}>{destination.name}</Text>
+                                            <Text style={styles.destinationDetails}>
+                                                Duration: {destination.duration} | Priority: {destination.priority}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                </TouchableOpacity>
+
+                                {/* Delete button */}
+                                <TouchableOpacity style={styles.deleteButton} onPress={() => deleteLocation(index)}>
+                                    <Text style={styles.buttonText}>Delete</Text>
+                                </TouchableOpacity>
+                            </View>
                         ))}
                     </ScrollView>
 
@@ -324,12 +333,10 @@ const styles = StyleSheet.create({
     },
 
     buttonText: {
-        color: "white",
-        fontSize: 18,
-        fontWeight: "bold",
-        marginLeft: 20,
-        marginRight: 20,
-    },
+         color: "white",
+         fontSize: 16,
+         fontWeight: "bold",
+     },
 
     // ==== SCROLL WINDOW FOR DESTINATIONS ==== //
     scrollViewContainer: {
@@ -370,6 +377,7 @@ const styles = StyleSheet.create({
     destinationContainer: {
         flexDirection: "row",
         justifyContent: "center",
+        width: "100%",
     },
 
     destinationLabel: {
@@ -454,7 +462,16 @@ const styles = StyleSheet.create({
     },
     button: {
         height: 50,
-    }
+    },
+    deleteButton: {
+        position: "absolute", // Position it absolutely within the parent container
+        top: 5,               // Adjust the distance from the top
+        right: 5,             // Adjust the distance from the right edge
+        backgroundColor: "red",
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 10,
+    },
 });
 
 export default AddEditDestinations;
