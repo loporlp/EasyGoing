@@ -131,7 +131,7 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
         })}
       </MapView>
 
-      <Text style={styles.subTitle}>Locations:</Text>
+      {/*<Text style={styles.subTitle}>Locations:</Text>
       {locations.map((location, index) => (
         <Text key={index} style={styles.text}>
           {`Origin: ${location[0]} - Destination: ${location[1]}`}
@@ -141,7 +141,7 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
       <Text style={styles.subTitle}>Transportation Modes:</Text>
       {transportationModes.map((mode, index) => (
         <Text key={index} style={styles.text}>{mode}</Text>
-      ))}
+      ))}*/}
     </View>
   );
 };
