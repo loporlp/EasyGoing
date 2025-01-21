@@ -26,10 +26,13 @@ const AddEditDestinations = () => {
             image: require("../assets/images/tokyoskytree.jpg"),
             duration: duration,
             priority: priority,
-            route: ""
+            route: "",
+            notes: typedNotes
         };
 
         setDestinations(prevDestinations => [...prevDestinations, newDestination]);
+
+        console.log(destinations);
 
         // Clear the input fields after adding
         setLocation("");
@@ -97,7 +100,7 @@ const AddEditDestinations = () => {
     const [locationAddress, setLocationAddress] = useState("");
     const [duration, setDuration] = useState("");
     const [priority, setPriority] = useState("");
-    const [notes, setNotes] = useState("");
+    const [typedNotes, setNotes] = useState("");
 
     return (
         <View style={styles.screenContainer}>
@@ -212,7 +215,7 @@ const AddEditDestinations = () => {
                                             style={styles.textBox}
                                             placeholder="Notes"
                                             placeholderTextColor="gray"
-                                            value={notes}
+                                            value={typedNotes}
                                             onChangeText={setNotes}
                                         />
                                     </View>
