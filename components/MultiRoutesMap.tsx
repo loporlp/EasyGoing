@@ -18,6 +18,7 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
   const [markers, setMarkers] = useState<any[]>([]); // State to store marker data
   const mapRef = useRef<MapView>(null);
   const isFocused = useIsFocused();
+  const [mapKey, setMapKey] = useState(Date.now());
 
   useEffect(() => {
     // Fetch polylines and markers asynchronously
@@ -91,6 +92,7 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
 
     if (isFocused) {
         console.log("Screen is focused, fetching polylines and markers...");
+        setMapKey(Date.now()); // Update key when screen is focused
         fetchPolylinesAndMarkers();
     } else {
         // Optionally reset polylines and markers when screen is unfocused
@@ -105,7 +107,7 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
   return (
     <View style={styles.container}>
       <MapView
-        key={isFocused ? 'focused' : 'unfocused'} // Forces re-render on focus change
+        key={mapKey}
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         ref={mapRef}
