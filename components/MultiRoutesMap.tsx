@@ -31,12 +31,12 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
         const [origin, destination] = locations[i];
         const mode = transportationModes[i];
 
-        // Get the polyline for the route
-        const routePolyline = await getRoutePolyline(origin, destination, mode);
-
         // Fetch coordinates for origin and destination
         const originCoords = await getCoords({ description: origin, place_id: '' });
         const destinationCoords = await getCoords({ description: destination, place_id: '' });
+
+        // Get the polyline for the route
+        const routePolyline = await getRoutePolyline(origin, originCoords, destination, destinationCoords, mode);
 
         if (routePolyline) {
           const polylinesArray = Array.isArray(routePolyline) ? routePolyline : [routePolyline];
