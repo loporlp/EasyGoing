@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { View, Image, StyleSheet, TextInput, Text, TouchableOpacity, ScrollView, Dimensions, Modal, ImageBackground, Button } from "react-native";
 import { useRouter } from "expo-router";
+import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 
 const { height } = Dimensions.get('window');
 
@@ -14,13 +15,14 @@ const AddEditDestinations = () => {
     const hide = () => setVisible(false);
 
     const addLocation = () => {
-        if (!location || !duration || !priority) {
+        if (!location || !locationAddress || !duration || !priority) {
             alert("Please fill out all fields");
             return;
         }
 
         const newDestination = {
             name: location,
+            address: locationAddress,
             image: require("../assets/images/tokyoskytree.jpg"),
             duration: duration,
             priority: priority,
@@ -31,6 +33,7 @@ const AddEditDestinations = () => {
 
         // Clear the input fields after adding
         setLocation("");
+        setLocationAddress("");
         setDuration("");
         setPriority("");
         setNotes("");
@@ -45,42 +48,53 @@ const AddEditDestinations = () => {
     const [destinations, setDestinations] = useState([
         {
             name: "Tokyo Skytree",
+            address: "",
             image: require("../assets/images/tokyoskytree.jpg"),
             duration: "2 hrs",
             priority: "2",
-            route: "/HomeScreen_API_Test"
+            route: "/HomeScreen_API_Test",
+            notes: ""
         },
         {
             name: "Akihabara Electric Town",
+            address: "",
             image: require("../assets/images/AkihabaraElectricTown.jpg"),
             duration: "6 hrs",
             priority: "1",
-            route: ""
+            route: "",
+            notes: ""
         },
         {
             name: "Pokemon Center",
+            address: "",
             image: require("../assets/images/PokemonCenterShibuya.png"),
             duration: "1.5 hrs",
             priority: "3",
-            route: ""
+            route: "",
+            notes: ""
         },
         {
             name: "Meiji Jingu",
+            address: "",
             image: require("../assets/images/MeijiJingu.jpg"),
             duration: "2 hrs",
             priority: "3",
-            route: ""
+            route: "",
+            notes: ""
         },
         {
             name: "Imperial Palace",
+            address: "",
             image: require("../assets/images/ImperialPalace.jpg"),
             duration: "2 hrs",
             priority: "4",
-            route: ""
+            route: "",
+            notes: ""
         }
     ]);
 
     const [location, setLocation] = useState("");
+    const [locationAddress, setLocationAddress] = useState("");
     const [duration, setDuration] = useState("");
     const [priority, setPriority] = useState("");
     const [notes, setNotes] = useState("");
@@ -167,6 +181,13 @@ const AddEditDestinations = () => {
                                             placeholderTextColor="gray"
                                             value={location}
                                             onChangeText={setLocation}
+                                        />
+                                        <Text style={styles.text}>Location:</Text>
+                                        <AutocompleteTextBox
+                                            onPlaceSelect={setLocationAddress}
+                                            placeholder="Address"
+                                            placeholderTextColor="gray"
+                                            style={styles.textBox}
                                         />
                                         <Text style={styles.text}>Duration (Minutes):</Text>
                                         <TextInput
