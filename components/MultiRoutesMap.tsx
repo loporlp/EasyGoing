@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Polyline, Marker } from 'react-native-maps';
 import { getRoutePolyline } from '../scripts/routePolyline';
 import { getCoords } from '../scripts/nameToCoords.js';
+import { useIsFocused } from '@react-navigation/native';
 
 interface MultiRoutesMapProps {
   locations: string[][]; // An array of origin-destination pairs
@@ -16,6 +17,8 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
   const [mapRegion, setMapRegion] = useState<any>(null); // State to store the map's region
   const [markers, setMarkers] = useState<any[]>([]); // State to store marker data
   const mapRef = useRef<MapView>(null);
+  const isFocused = useIsFocused();
+  const [mapKey, setMapKey] = useState(Date.now());
 
   useEffect(() => {
     // Fetch polylines and markers asynchronously
@@ -87,13 +90,24 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
       }
     };
 
-    fetchPolylinesAndMarkers();
+    if (isFocused) {
+        console.log("Screen is focused, fetching polylines and markers...");
+        setMapKey(Date.now()); // Update key when screen is focused
+        fetchPolylinesAndMarkers();
+    } else {
+        // Optionally reset polylines and markers when screen is unfocused
+        setPolylines([]);
+        setMarkers([]);
+        setMapRegion(null);
+    }
+
     console.log("Plotting polylines and fetching markers done");
-  }, [locations, transportationModes]);
+  }, [locations, transportationModes, isFocused]);
 
   return (
     <View style={styles.container}>
       <MapView
+        key={mapKey}
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         ref={mapRef}
@@ -103,7 +117,7 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
         {/* Render polylines on the map */}
         {polylines.map((polyline, index) => (
           <Polyline
-            key={`${polyline.id}-${index}`}
+            key={polyline.id}
             coordinates={polyline.coordinates}
             strokeColor={polyline.strokeColor}
             strokeWidth={polyline.strokeWidth}
@@ -115,13 +129,13 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
             return (
             <>
               <Marker
-                key={`origin-${locations[index][0]}-${locations[index][1]}`}
+                key={`origin-${index}-${marker.origin.latitude}-${marker.origin.longitude}`}
                 coordinate={{ latitude: marker.origin.latitude, longitude: marker.origin.longitude }}
                 title={locations[index][0][0]}
                 zIndex={10}
               />
               <Marker
-                key={`destination-${locations[index][0]}-${locations[index][1]}`}
+                key={`destination-${index}-${marker.destination.latitude}-${marker.destination.longitude}`}
                 coordinate={{ latitude: marker.destination.latitude, longitude: marker.destination.longitude }}
                 title={locations[index][1][0]}
                 zIndex={10}

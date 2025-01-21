@@ -30,6 +30,13 @@ const GenerateItineraryScreen = () => {
         { name: 'Austin', address: 'Austin, Texas' }];
     const transportationModes = ['DRIVING', 'WALKING', 'TRANSIT', 'BICYCLING'];
 
+    /*const origin = { name: 'Tokyo International Airport, Tokyo', address: 'Hanedakuko, Ota City, Tokyo 144-0041, Japan' };
+      let locations = [
+          { name: 'Tokyo Tower, Tokyo', address: '4 Chome-2-8 Shibakoen, Minato City, Tokyo, Japan' },
+          { name: 'Shibuya Scramble Crossing', address: '21 Udagawa-cho, Shibuya, Tokyo, Japan' },
+          { name: 'Akihabara Electric Town', address: '1 Chome-12 Soto-Kanda, Chiyoda City, Tokyo, Japan'} ];
+      const transportationModes = ['TRANSIT', 'TRANSIT', 'TRANSIT'];*/
+
     const [optimalRoute, setOptimalRoute] = useState<any[][]>([]);
     useEffect(() => {
         const fetchOptimalRoute = async () => {
