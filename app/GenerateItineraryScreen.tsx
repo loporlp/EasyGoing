@@ -1,10 +1,12 @@
 // GenerateItineraryScreen.tsx
-import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image } from "react-native";
+import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image, SafeAreaView } from "react-native";
 import { useRouter } from "expo-router";
 import MapMarker from '../components/MapMarker';
 import RouteMap from '../components/RouteMap';
+import MultiRoutesMap from '../components/MultiRoutesMap';
+import { calculateOptimalRoute } from '../scripts/optimalRoute.js';
 import { Dimensions } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const { height } = Dimensions.get('window');
 
@@ -19,6 +21,36 @@ const GenerateItineraryScreen = () => {
         };
         image: any;
     };
+
+    const origin = { name: 'Mexico City, Mexico', address: 'Mexico City, Mexico' };
+    let locations = [
+        { name: 'Chicago', address: 'Chicago, Illinois' },
+        { name: 'Disneyland Park', address: 'Disneyland Park' },
+        { name: 'Caesars Palace', address: '3570 S Las Vegas Blvd, Paradise, NV 89109'},
+        { name: 'Austin', address: 'Austin, Texas' }];
+    const transportationModes = ['DRIVING', 'WALKING', 'TRANSIT', 'BICYCLING'];
+
+    /*const origin = { name: 'Tokyo International Airport, Tokyo', address: 'Hanedakuko, Ota City, Tokyo 144-0041, Japan' };
+      let locations = [
+          { name: 'Tokyo Tower, Tokyo', address: '4 Chome-2-8 Shibakoen, Minato City, Tokyo, Japan' },
+          { name: 'Shibuya Scramble Crossing', address: '21 Udagawa-cho, Shibuya, Tokyo, Japan' },
+          { name: 'Akihabara Electric Town', address: '1 Chome-12 Soto-Kanda, Chiyoda City, Tokyo, Japan'} ];
+      const transportationModes = ['TRANSIT', 'TRANSIT', 'TRANSIT'];*/
+
+    const [optimalRoute, setOptimalRoute] = useState<any[][]>([]);
+    useEffect(() => {
+        const fetchOptimalRoute = async () => {
+          try {
+            const mode = 'DRIVING';
+            const result = await calculateOptimalRoute(locations, origin, mode);
+            setOptimalRoute(result); // Set optimal route to state
+          } catch (error) {
+            console.error("Failed to get optimal route:", error);
+          }
+        };
+
+        fetchOptimalRoute();
+      }, []);
 
     const destinations : Record<string, Place> = {
         akihabara: { name: "Akihabara Electric Town", coords: { latitude: 35.7100, longitude: 139.8107 }, image: require("../assets/images/AkihabaraElectricTown.jpg") },
@@ -72,12 +104,9 @@ const GenerateItineraryScreen = () => {
 
     return (
         <View style={styles.container}>
-            <RouteMap
-                origin={selectedCoordinates}
-                destination={selectedDestination ? destinations[selectedDestination].coords : selectedCoordinates}
-                style={styles.map}
-                onModeChange={handleModeChange}
-            />
+            <SafeAreaView style={{ flex: 1 }}>
+                <MultiRoutesMap locations={optimalRoute} transportationModes={transportationModes} />
+            </SafeAreaView>
 
             <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
                 <View style={styles.dateHeader}>
