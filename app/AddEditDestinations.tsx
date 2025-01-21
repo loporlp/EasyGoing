@@ -13,6 +13,44 @@ const AddEditDestinations = () => {
     const show = () => setVisible(true);
     const hide = () => setVisible(false);
 
+    const destinations = [
+        {
+            name: "Tokyo Skytree",
+            image: require("../assets/images/tokyoskytree.jpg"),
+            duration: "2 hrs",
+            priority: "2",
+            route: "/HomeScreen_API_Test"
+        },
+        {
+            name: "Akihabara Electric Town",
+            image: require("../assets/images/AkihabaraElectricTown.jpg"),
+            duration: "6 hrs",
+            priority: "1",
+            route: ""
+        },
+        {
+            name: "Pokemon Center",
+            image: require("../assets/images/PokemonCenterShibuya.png"),
+            duration: "1.5 hrs",
+            priority: "3",
+            route: ""
+        },
+        {
+            name: "Meiji Jingu",
+            image: require("../assets/images/MeijiJingu.jpg"),
+            duration: "2 hrs",
+            priority: "3",
+            route: ""
+        },
+        {
+            name: "Imperial Palace",
+            image: require("../assets/images/ImperialPalace.jpg"),
+            duration: "2 hrs",
+            priority: "4",
+            route: ""
+        }
+    ];
+
     return (
         <View style={styles.screenContainer}>
 
@@ -44,92 +82,32 @@ const AddEditDestinations = () => {
 
                     {/*The window where all of the destinations are shown*/}
                     <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
-
-                        {/* Tokyo Skytree */}
-                        <TouchableOpacity style={styles.destinationElement} onPress={() => { 
-                            router.push("/HomeScreen_API_Test")
-                        }}>
-                            {/* Background with opacity */}
-                            <View style={styles.backgroundContainer}>
-                                <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
-                            </View>
-
-                            <View style={styles.destinationContainer}>
-                                <Image style={styles.destinationImage} source={require("../assets/images/tokyoskytree.jpg")} />
-                                <View style={styles.destinationLabel}>
-                                    <Text style={styles.destinationName}>Tokyo Skytree</Text>
-                                    <Text style={styles.destinationDetails}>Duration: 2 hrs | Priority: 2</Text>
+                        {destinations.map((destination, index) => (
+                            <TouchableOpacity
+                                key={index}
+                                style={styles.destinationElement}
+                                onPress={() => {
+                                    if (destination.route) {
+                                        router.push(destination.route);
+                                    }
+                                }}
+                            >
+                                {/* Background with opacity */}
+                                <View style={styles.backgroundContainer}>
+                                    <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
                                 </View>
-                            </View>
-                        </TouchableOpacity>
 
-                        {/* Akihabara Electric Town */}
-                        <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
-
-                            {/* Background with opacity */}
-                            <View style={styles.backgroundContainer}>
-                                <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
-                            </View>
-
-                            <View style={styles.destinationContainer}>
-                                <Image style={styles.destinationImage} source={require("../assets/images/AkihabaraElectricTown.jpg")} />
-                                <View style={styles.destinationLabel}>
-                                    <Text style={styles.destinationName}>Akihabara Electric Town</Text>
-                                    <Text style={styles.destinationDetails}>Duration: 6 hrs | Priority: 1</Text>
+                                <View style={styles.destinationContainer}>
+                                    <Image style={styles.destinationImage} source={destination.image} />
+                                    <View style={styles.destinationLabel}>
+                                        <Text style={styles.destinationName}>{destination.name}</Text>
+                                        <Text style={styles.destinationDetails}>
+                                            Duration: {destination.duration} | Priority: {destination.priority}
+                                        </Text>
+                                    </View>
                                 </View>
-                            </View>
-                        </TouchableOpacity>
-
-                        {/* Pokemon Center Shibuya */}
-                        <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
-
-                            {/* Background with opacity */}
-                            <View style={styles.backgroundContainer}>
-                                <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
-                            </View>
-
-                            <View style={styles.destinationContainer}>
-                                <Image style={styles.destinationImage} source={require("../assets/images/PokemonCenterShibuya.png")} />
-                                <View style={styles.destinationLabel}>
-                                    <Text style={styles.destinationName}>Pokemon Center</Text>
-                                    <Text style={styles.destinationDetails}>Duration: 1.5 hrs | Priority: 3</Text>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-
-                        {/* Meiji Jingu */}
-                        <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
-
-                            {/* Background with opacity */}
-                            <View style={styles.backgroundContainer}>
-                                <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
-                            </View>
-
-                            <View style={styles.destinationContainer}>
-                                <Image style={styles.destinationImage} source={require("../assets/images/MeijiJingu.jpg")} />
-                                <View style={styles.destinationLabel}>
-                                    <Text style={styles.destinationName}>Meiji Jingu</Text>
-                                    <Text style={styles.destinationDetails}>Duration: 2 hrs | Priority: 3</Text>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-                        
-                        {/* Imperial Palace */}
-                        <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
-
-                            {/* Background with opacity */}
-                            <View style={styles.backgroundContainer}>
-                                <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
-                            </View>
-
-                            <View style={styles.destinationContainer}>
-                                <Image style={styles.destinationImage} source={require("../assets/images/ImperialPalace.jpg")} />
-                                <View style={styles.destinationLabel}>
-                                    <Text style={styles.destinationName}>Imperial Palace</Text>
-                                    <Text style={styles.destinationDetails}>Duration: 2 hrs | Priority: 4</Text>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
+                             </TouchableOpacity>
+                        ))}
                     </ScrollView>
 
                     {/* "Generate Plan" button */}
