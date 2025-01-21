@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { View, Image, StyleSheet, TextInput, Text, TouchableOpacity, ScrollView, Dimensions, Modal, ImageBackground, Button } from "react-native";
 import { useRouter } from "expo-router";
+import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 
 const { height } = Dimensions.get('window');
 
@@ -12,6 +13,91 @@ const AddEditDestinations = () => {
     const [visible, setVisible] = useState(false);
     const show = () => setVisible(true);
     const hide = () => setVisible(false);
+
+    const addLocation = () => {
+        if (!location || !locationAddress || !duration || !priority) {
+            alert("Please fill out all fields");
+            return;
+        }
+
+        const newDestination = {
+            name: location,
+            address: locationAddress,
+            image: require("../assets/images/tokyoskytree.jpg"),
+            duration: duration,
+            priority: priority,
+            route: ""
+        };
+
+        setDestinations(prevDestinations => [...prevDestinations, newDestination]);
+
+        // Clear the input fields after adding
+        setLocation("");
+        setLocationAddress("");
+        setDuration("");
+        setPriority("");
+        setNotes("");
+
+        hide();
+    };
+
+    const deleteLocation = (index: number) => {
+        setDestinations(prevDestinations => prevDestinations.filter((_, i) => i !== index));
+    };
+
+    const [destinations, setDestinations] = useState([
+        {
+            name: "Tokyo Skytree",
+            address: "",
+            image: require("../assets/images/tokyoskytree.jpg"),
+            duration: "2 hrs",
+            priority: "2",
+            route: "/HomeScreen_API_Test",
+            notes: ""
+        },
+        {
+            name: "Akihabara Electric Town",
+            address: "",
+            image: require("../assets/images/AkihabaraElectricTown.jpg"),
+            duration: "6 hrs",
+            priority: "1",
+            route: "",
+            notes: ""
+        },
+        {
+            name: "Pokemon Center",
+            address: "",
+            image: require("../assets/images/PokemonCenterShibuya.png"),
+            duration: "1.5 hrs",
+            priority: "3",
+            route: "",
+            notes: ""
+        },
+        {
+            name: "Meiji Jingu",
+            address: "",
+            image: require("../assets/images/MeijiJingu.jpg"),
+            duration: "2 hrs",
+            priority: "3",
+            route: "",
+            notes: ""
+        },
+        {
+            name: "Imperial Palace",
+            address: "",
+            image: require("../assets/images/ImperialPalace.jpg"),
+            duration: "2 hrs",
+            priority: "4",
+            route: "",
+            notes: ""
+        }
+    ]);
+
+    const [location, setLocation] = useState("");
+    const [locationAddress, setLocationAddress] = useState("");
+    const [duration, setDuration] = useState("");
+    const [priority, setPriority] = useState("");
+    const [notes, setNotes] = useState("");
 
     return (
         <View style={styles.screenContainer}>
@@ -44,92 +130,37 @@ const AddEditDestinations = () => {
 
                     {/*The window where all of the destinations are shown*/}
                     <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
+                        {destinations.map((destination, index) => (
+                            <View key={index} style={styles.destinationElement}>
+                                <TouchableOpacity
+                                    style={styles.destinationContainer}
+                                    onPress={() => {
+                                        if (destination.route) {
+                                            router.push(destination.route);
+                                        }
+                                    }}
+                                >
+                                    <View style={styles.backgroundContainer}>
+                                        <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
+                                    </View>
 
-                        {/* Tokyo Skytree */}
-                        <TouchableOpacity style={styles.destinationElement} onPress={() => { 
-                            router.push("/HomeScreen_API_Test")
-                        }}>
-                            {/* Background with opacity */}
-                            <View style={styles.backgroundContainer}>
-                                <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
+                                    <View style={styles.destinationContainer}>
+                                        <Image style={styles.destinationImage} source={destination.image} />
+                                        <View style={styles.destinationLabel}>
+                                            <Text style={styles.destinationName}>{destination.name}</Text>
+                                            <Text style={styles.destinationDetails}>
+                                                Duration: {destination.duration} | Priority: {destination.priority}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                </TouchableOpacity>
+
+                                {/* Delete button */}
+                                <TouchableOpacity style={styles.deleteButton} onPress={() => deleteLocation(index)}>
+                                    <Text style={styles.buttonText}>Delete</Text>
+                                </TouchableOpacity>
                             </View>
-
-                            <View style={styles.destinationContainer}>
-                                <Image style={styles.destinationImage} source={require("../assets/images/tokyoskytree.jpg")} />
-                                <View style={styles.destinationLabel}>
-                                    <Text style={styles.destinationName}>Tokyo Skytree</Text>
-                                    <Text style={styles.destinationDetails}>Duration: 2 hrs | Priority: 2</Text>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-
-                        {/* Akihabara Electric Town */}
-                        <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
-
-                            {/* Background with opacity */}
-                            <View style={styles.backgroundContainer}>
-                                <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
-                            </View>
-
-                            <View style={styles.destinationContainer}>
-                                <Image style={styles.destinationImage} source={require("../assets/images/AkihabaraElectricTown.jpg")} />
-                                <View style={styles.destinationLabel}>
-                                    <Text style={styles.destinationName}>Akihabara Electric Town</Text>
-                                    <Text style={styles.destinationDetails}>Duration: 6 hrs | Priority: 1</Text>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-
-                        {/* Pokemon Center Shibuya */}
-                        <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
-
-                            {/* Background with opacity */}
-                            <View style={styles.backgroundContainer}>
-                                <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
-                            </View>
-
-                            <View style={styles.destinationContainer}>
-                                <Image style={styles.destinationImage} source={require("../assets/images/PokemonCenterShibuya.png")} />
-                                <View style={styles.destinationLabel}>
-                                    <Text style={styles.destinationName}>Pokemon Center</Text>
-                                    <Text style={styles.destinationDetails}>Duration: 1.5 hrs | Priority: 3</Text>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-
-                        {/* Meiji Jingu */}
-                        <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
-
-                            {/* Background with opacity */}
-                            <View style={styles.backgroundContainer}>
-                                <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
-                            </View>
-
-                            <View style={styles.destinationContainer}>
-                                <Image style={styles.destinationImage} source={require("../assets/images/MeijiJingu.jpg")} />
-                                <View style={styles.destinationLabel}>
-                                    <Text style={styles.destinationName}>Meiji Jingu</Text>
-                                    <Text style={styles.destinationDetails}>Duration: 2 hrs | Priority: 3</Text>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-                        
-                        {/* Imperial Palace */}
-                        <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
-
-                            {/* Background with opacity */}
-                            <View style={styles.backgroundContainer}>
-                                <View style={[styles.backgroundOverlay, { opacity: 0.7 }]}></View>
-                            </View>
-
-                            <View style={styles.destinationContainer}>
-                                <Image style={styles.destinationImage} source={require("../assets/images/ImperialPalace.jpg")} />
-                                <View style={styles.destinationLabel}>
-                                    <Text style={styles.destinationName}>Imperial Palace</Text>
-                                    <Text style={styles.destinationDetails}>Duration: 2 hrs | Priority: 4</Text>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
+                        ))}
                     </ScrollView>
 
                     {/* "Generate Plan" button */}
@@ -144,13 +175,46 @@ const AddEditDestinations = () => {
                                     {/* Text Input For Location, Duration, Priority, and Notes */}
                                     <View style={styles.textContainer}>
                                         <Text style={styles.text}>Location:</Text>
-                                        <TextInput style={styles.textBox} placeholder="Tokyo Sky Tree" placeholderTextColor="gray"  />
+                                        <TextInput
+                                            style={styles.textBox}
+                                            placeholder="Location"
+                                            placeholderTextColor="gray"
+                                            value={location}
+                                            onChangeText={setLocation}
+                                        />
+                                        <Text style={styles.text}>Location:</Text>
+                                        <AutocompleteTextBox
+                                            onPlaceSelect={setLocationAddress}
+                                            placeholder="Address"
+                                            placeholderTextColor="gray"
+                                            style={styles.textBox}
+                                        />
                                         <Text style={styles.text}>Duration (Minutes):</Text>
-                                        <TextInput style={styles.textBox} placeholder="30 Minutes" placeholderTextColor="gray" keyboardType="numeric"/>
+                                        <TextInput
+                                            style={styles.textBox}
+                                            placeholder="1 hr"
+                                            placeholderTextColor="gray"
+                                            keyboardType="numeric"
+                                            value={duration}
+                                            onChangeText={setDuration}
+                                        />
                                         <Text style={styles.text}>Priority:</Text>
-                                        <TextInput style={styles.textBox} placeholder="2" placeholderTextColor="gray" keyboardType="numeric"/>
+                                        <TextInput
+                                            style={styles.textBox}
+                                            placeholder="1"
+                                            placeholderTextColor="gray"
+                                            keyboardType="numeric"
+                                            value={priority}
+                                            onChangeText={setPriority}
+                                        />
                                         <Text style={styles.text}>Notes:</Text>
-                                        <TextInput style={styles.textBox} placeholder="Notes" placeholderTextColor="gray"/>
+                                        <TextInput
+                                            style={styles.textBox}
+                                            placeholder="Notes"
+                                            placeholderTextColor="gray"
+                                            value={notes}
+                                            onChangeText={setNotes}
+                                        />
                                     </View>
                                     {/* Add + Cancel Buttons TODO: figure out why these buttons are overlayed on the text box*/}
                                     <View style={styles.buttonContainer}>
@@ -158,7 +222,7 @@ const AddEditDestinations = () => {
                                         <Button title="Cancel" onPress={hide} />
                                         </View>
                                         <View style={styles.button}>
-                                        <Button title="Add" onPress={hide} />
+                                        <Button title="Add" onPress={addLocation} />
                                         </View>
                                     </View>
                                 </View>
@@ -290,12 +354,10 @@ const styles = StyleSheet.create({
     },
 
     buttonText: {
-        color: "white",
-        fontSize: 18,
-        fontWeight: "bold",
-        marginLeft: 20,
-        marginRight: 20,
-    },
+         color: "white",
+         fontSize: 16,
+         fontWeight: "bold",
+     },
 
     // ==== SCROLL WINDOW FOR DESTINATIONS ==== //
     scrollViewContainer: {
@@ -336,6 +398,7 @@ const styles = StyleSheet.create({
     destinationContainer: {
         flexDirection: "row",
         justifyContent: "center",
+        width: "100%",
     },
 
     destinationLabel: {
@@ -420,7 +483,16 @@ const styles = StyleSheet.create({
     },
     button: {
         height: 50,
-    }
+    },
+    deleteButton: {
+        position: "absolute", // Position it absolutely within the parent container
+        top: 5,               // Adjust the distance from the top
+        right: 5,             // Adjust the distance from the right edge
+        backgroundColor: "red",
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 10,
+    },
 });
 
 export default AddEditDestinations;
