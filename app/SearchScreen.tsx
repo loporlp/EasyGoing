@@ -7,25 +7,34 @@ import AutocompleteTextBox from '@/components/AutoCompleteTextBox';
 const SearchScreen = () => {
     const router = useRouter();
 
+    /**
+     * Goes to the Home Screen
+     */
     const homeScreen = () => {
         router.replace("/HomeScreen")
     }
 
+    /**
+     * Goes to the Edit Existing Trips screen
+     */
     const viewTrips = () => {
         router.replace("/EditExistingTripsScreen")
     }
 
+    /**
+     * Goes to the Account/Profile screen
+     */
     const accountScreen = () => {
         router.replace("/Account")
     }
 
     return (
-        <View>
+        <View style={{ flex: 1, flexDirection: "column" }}>
             <View style={styles.searchSection}>
-                <TouchableOpacity style={styles.searchBar}>
-                    <Ionicons name="search" size={18} style={{ marginRight: 10 }} color={"black"} />
-                    <AutocompleteTextBox placeholder="Search..." placeholderTextColor="#d6d6d6" />
-                </TouchableOpacity>
+                <View style={styles.searchBar}>
+                    <Ionicons name="search" size={20} style={{  }} color={"black"} />
+                    <AutocompleteTextBox placeholder="Search..." placeholderTextColor="#d6d6d6" style={styles.destinationInput}/>
+                </View>
             </View>
 
             <View style={styles.navBar}>
@@ -47,10 +56,15 @@ const SearchScreen = () => {
 };
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        flexDirection: "column",
+    },
+
     searchSection: {
         flexDirection: "row",
         marginVertical: 20,
-        marginTop: 15,
+        marginTop: 60,
         paddingHorizontal: 20,
         shadowColor: "#333333",
         shadowOffset: { width: 1, height: 2 },
@@ -61,12 +75,16 @@ const styles = StyleSheet.create({
     searchBar: {
         flex: 1,
         flexDirection: "row",
+        alignItems: "center",
         backgroundColor: "white",
-        padding: 10,
-        borderRadius: 10
+        borderRadius: 10,
+        paddingHorizontal: 5
     },
 
     navBar: {
+        position: "absolute",
+        bottom: 0,
+        width: "100%",
         flexDirection: "row",
         backgroundColor: "white",
         justifyContent: "space-between",
@@ -76,7 +94,18 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 1, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 3,
-    }
+    },
+
+    destinationInput: {
+        height: 30,
+        width: "80%",
+        borderColor: '#999',
+        marginBottom: 20,
+        fontSize: 16,
+        borderRadius: 10,
+        paddingVertical: 5,
+        alignSelf: 'center',
+    },
 });
 
 export default SearchScreen;

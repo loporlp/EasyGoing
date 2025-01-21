@@ -183,7 +183,7 @@ const HomeScreen = () => {
 
                     <View style={styles.homeSection}>
                         <View style={styles.searchSection}>
-                            <TouchableOpacity style={styles.searchBar}>
+                            <TouchableOpacity style={styles.searchBar} onPress={searchScreen}>
                                 <Ionicons name="search" size={18} style={{ marginRight: 10 }} color={"black"} />
                                 <Text style={{ fontSize: 18, color: "#d6d6d6" }}>Search...</Text>
                             </TouchableOpacity>

@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     input: {
         height: 40,
         borderColor: '#999',
-        borderBottomWidth: 1,
+        borderBottomWidth: 0,
         marginBottom: 20,
         fontSize: 18,
         backgroundColor: "white",
