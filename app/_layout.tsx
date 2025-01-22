@@ -35,23 +35,31 @@ export default function RootLayout() {
           headerTitleStyle: {
             fontWeight: "bold",
           },
+          headerShown: false,
+          animation: "none"
         }}
       />
 
       {/*Account screen*/}
-      <Stack.Screen name="Account" />
+      <Stack.Screen name="Account"
+        options={{
+          headerShown: false,
+          animation: "none"
+        }} />
 
       {/*Home screen*/}
       <Stack.Screen name="HomeScreen"
         options={{
-          title: "Home",
-          headerStyle: {
-            backgroundColor: '#24a6ad',
-          },
-          headerTintColor: "white",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
+          headerShown: false,
+          animation: "none"
+        }} />
+
+      {/* Search screen */}
+      <Stack.Screen
+        name="SearchScreen"
+        options={{
+          headerShown: false,
+          animation: "none"
         }} />
 
       {/*Create New Trip screen*/}
@@ -76,7 +84,7 @@ export default function RootLayout() {
           headerTitle: () => (
             <View style={styles.titleContainer}>
               {/* City and Country Name */}
-              <Text style={styles.headerText}>{placeName || 'Tokyo, Japan'}</Text> 
+              <Text style={styles.headerText}>{placeName || 'Tokyo, Japan'}</Text>
               {/* Country Flag */}
               <Flag code="JP" style={styles.flag} />
             </View>
@@ -112,7 +120,7 @@ export default function RootLayout() {
           headerTitle: () => (
             <View style={styles.titleContainer}>
               {/* City and Country Name */}
-              <Text style={styles.headerText}>{placeName || 'Tokyo, Japan'}</Text> 
+              <Text style={styles.headerText}>{placeName || 'Tokyo, Japan'}</Text>
               {/* Country Flag */}
               <Flag code="JP" style={styles.flag} />
             </View>
