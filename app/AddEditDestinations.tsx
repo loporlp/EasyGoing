@@ -5,18 +5,32 @@ import { useRouter } from "expo-router";
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import { storeData, getData } from '../scripts/localStore.js';
 
-//stores the destionation's name in async storage (local)
-async function storeDestinationName(destName: string) {
-    await storeData('destination', destName);
-    console.log(`Destination Name stored as destination with value ${destName}`);
+//stores destination object in local storage with key 'destination'
+async function storeDestination(key: string, destination: any) {
+    await storeData(key, destination);
+    console.log(`New Destination stored as ${key} with values: 
+        Name - ${destination.name}, 
+        Address - ${destination.address}, 
+        Image - ${destination.image}, 
+        Duration - ${destination.duration}, 
+        Priority - ${destination.priority}, 
+        Route - ${destination.route}, 
+        Notes - ${destination.notes}`);
 }
 
-//retrieved the destination's name in async storage (local)
-async function getDestinationName(key: string) {
+//retrieves destination object in local storage with key provided
+async function retrieveDestination(key: string) {
     try {
-        const destinationName = await getData(key);
-        console.log(`Retrieved Destination Name: ${destinationName}`);
-        return destinationName; // Return the name if you need to use it elsewhere
+        const destination = await getData(key);
+        console.log(`Retrieved ${key} with values: 
+            Name - ${destination.name}, 
+            Address - ${destination.address}, 
+            Image - ${destination.image}, 
+            Duration - ${destination.duration}, 
+            Priority - ${destination.priority}, 
+            Route - ${destination.route}, 
+            Notes - ${destination.notes}`);
+        return destination; // Return the destination object as it was stored originally
     } catch (e) {
         console.error(`Error retrieving ${key}:`, e);
         return null;
@@ -54,8 +68,8 @@ const AddEditDestinations = () => {
         console.log(destinations);
 
          // Store the new destination in AsyncStorage
-        storeDestinationName(newDestination.name);
-        console.log(getDestinationName('destination'));
+        storeDestination("destination", newDestination);
+        retrieveDestination("destination");
 
         // Clear the input fields after adding
         setLocation("");
