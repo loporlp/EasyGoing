@@ -78,6 +78,7 @@ const AddEditDestinations = () => {
         setPriority("");
         setNotes("");
 
+        // Re-hides input screen
         hide();
     };
 
