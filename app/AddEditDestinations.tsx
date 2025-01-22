@@ -3,6 +3,12 @@ import { useState } from 'react';
 import { View, Image, StyleSheet, TextInput, Text, TouchableOpacity, ScrollView, Dimensions, Modal, ImageBackground, Button } from "react-native";
 import { useRouter } from "expo-router";
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
+import { storeData } from '../scripts/localStore.js';
+
+async function storeDestinationName(destName: string) {
+    await storeData('destination', destName);
+    console.log(`Destination Name stored as destination with value ${destName}`);
+}
 
 const { height } = Dimensions.get('window');
 
@@ -33,6 +39,9 @@ const AddEditDestinations = () => {
         setDestinations(prevDestinations => [...prevDestinations, newDestination]);
 
         console.log(destinations);
+
+         // Store the new destination in AsyncStorage
+        storeDestinationName(newDestination.name);
 
         // Clear the input fields after adding
         setLocation("");
