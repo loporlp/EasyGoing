@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { View, Image, StyleSheet, TextInput, Text, TouchableOpacity, ScrollView, Dimensions, Modal, ImageBackground, Button } from "react-native";
 import { useRouter } from "expo-router";
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
+import DynamicImage from '../components/DynamicImage';
 
 const { height } = Dimensions.get('window');
 
@@ -23,7 +24,7 @@ const AddEditDestinations = () => {
         const newDestination = {
             name: location,
             address: locationAddress,
-            image: require("../assets/images/tokyoskytree.jpg"),
+            image: location,
             duration: duration,
             priority: priority,
             route: "",
@@ -52,7 +53,7 @@ const AddEditDestinations = () => {
         {
             name: "Tokyo Skytree",
             address: "",
-            image: require("../assets/images/tokyoskytree.jpg"),
+            image: "Tokyo Skytree",
             duration: "2 hrs",
             priority: "2",
             route: "/HomeScreen_API_Test",
@@ -61,7 +62,7 @@ const AddEditDestinations = () => {
         {
             name: "Akihabara Electric Town",
             address: "",
-            image: require("../assets/images/AkihabaraElectricTown.jpg"),
+            image: "Akihabara Electric Town",
             duration: "6 hrs",
             priority: "1",
             route: "",
@@ -70,7 +71,7 @@ const AddEditDestinations = () => {
         {
             name: "Pokemon Center",
             address: "",
-            image: require("../assets/images/PokemonCenterShibuya.png"),
+            image: "Pokemon Center",
             duration: "1.5 hrs",
             priority: "3",
             route: "",
@@ -79,7 +80,7 @@ const AddEditDestinations = () => {
         {
             name: "Meiji Jingu",
             address: "",
-            image: require("../assets/images/MeijiJingu.jpg"),
+            image: "Meiji Jingu",
             duration: "2 hrs",
             priority: "3",
             route: "",
@@ -88,7 +89,7 @@ const AddEditDestinations = () => {
         {
             name: "Imperial Palace",
             address: "",
-            image: require("../assets/images/ImperialPalace.jpg"),
+            image: "Imperial Palace",
             duration: "2 hrs",
             priority: "4",
             route: "",
@@ -106,7 +107,7 @@ const AddEditDestinations = () => {
         <View style={styles.screenContainer}>
 
             {/* Image of Tokyo */}
-            <Image style={styles.backgroundImage} source={require("../assets/images/tokyo.jpg")} />
+            <DynamicImage placeName="Tokyo" containerStyle={styles.backgroundImage} imageStyle={styles.backgroundImage} />
 
             {/* Adds a dark overlay on the screen */}
             <View style={styles.darkOverlay} />
@@ -148,7 +149,11 @@ const AddEditDestinations = () => {
                                     </View>
 
                                     <View style={styles.destinationContainer}>
-                                        <Image style={styles.destinationImage} source={destination.image} />
+                                        <DynamicImage
+                                            placeName={destination.image}
+                                            containerStyle={styles.destinationImage} 
+                                            imageStyle={styles.destinationImage}
+                                        />
                                         <View style={styles.destinationLabel}>
                                             <Text style={styles.destinationName}>{destination.name}</Text>
                                             <Text style={styles.destinationDetails}>
