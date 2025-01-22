@@ -3,11 +3,24 @@ import { useState } from 'react';
 import { View, Image, StyleSheet, TextInput, Text, TouchableOpacity, ScrollView, Dimensions, Modal, ImageBackground, Button } from "react-native";
 import { useRouter } from "expo-router";
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
-import { storeData } from '../scripts/localStore.js';
+import { storeData, getData } from '../scripts/localStore.js';
 
+//stores the destionation's name in async storage (local)
 async function storeDestinationName(destName: string) {
     await storeData('destination', destName);
     console.log(`Destination Name stored as destination with value ${destName}`);
+}
+
+//retrieved the destination's name in async storage (local)
+async function getDestinationName(key: string) {
+    try {
+        const destinationName = await getData(key);
+        console.log(`Retrieved Destination Name: ${destinationName}`);
+        return destinationName; // Return the name if you need to use it elsewhere
+    } catch (e) {
+        console.error(`Error retrieving ${key}:`, e);
+        return null;
+    }
 }
 
 const { height } = Dimensions.get('window');
@@ -42,6 +55,7 @@ const AddEditDestinations = () => {
 
          // Store the new destination in AsyncStorage
         storeDestinationName(newDestination.name);
+        console.log(getDestinationName('destination'));
 
         // Clear the input fields after adding
         setLocation("");

@@ -10,9 +10,11 @@ export const storeData = async (key, value) => {
         return;
     }   
     try {
-        let jsonValue = value;
+        let jsonValue;
         //converts item into JSON string if it's not already a string
-        if(!(typeof value === 'string' || value instanceof String)){
+        if(typeof value === 'string' || value instanceof String){
+            jsonValue = value; //store directly if it's a string
+        } else {
             jsonValue = JSON.stringify(value);
         }
         await storage.setItem(key, jsonValue);
@@ -34,8 +36,18 @@ export const getData = async (key) => {
     try {
         const jsonValue = await storage.getItem(key);
         console.log(`${key} retrieved ${jsonValue}`);
-        return jsonValue != null ? JSON.parse(jsonValue) : null;
+        return jsonValue != null ? (isJsonString(jsonValue) ? JSON.parse(jsonValue) : jsonValue) : null;
     } catch (e) {
         console.error(e);
     }
+};
+
+// Helper function to check if a string is valid JSON
+const isJsonString = (str) => {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
 };
