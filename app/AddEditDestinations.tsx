@@ -3,7 +3,39 @@ import { useState } from 'react';
 import { View, Image, StyleSheet, TextInput, Text, TouchableOpacity, ScrollView, Dimensions, Modal, ImageBackground, Button } from "react-native";
 import { useRouter } from "expo-router";
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
-import DynamicImage from '../components/DynamicImage';
+import { storeData, getData } from '../scripts/localStore.js';
+
+//stores destination object in local storage with key 'destination'
+async function storeDestination(key: string, destination: any) {
+    await storeData(key, destination);
+    console.log(`New Destination stored as ${key} with values: 
+        Name - ${destination.name}, 
+        Address - ${destination.address}, 
+        Image - ${destination.image}, 
+        Duration - ${destination.duration}, 
+        Priority - ${destination.priority}, 
+        Route - ${destination.route}, 
+        Notes - ${destination.notes}`);
+}
+
+//retrieves destination object in local storage with key provided
+async function retrieveDestination(key: string) {
+    try {
+        const destination = await getData(key);
+        console.log(`Retrieved ${key} with values: 
+            Name - ${destination.name}, 
+            Address - ${destination.address}, 
+            Image - ${destination.image}, 
+            Duration - ${destination.duration}, 
+            Priority - ${destination.priority}, 
+            Route - ${destination.route}, 
+            Notes - ${destination.notes}`);
+        return destination; // Return the destination object as it was stored originally
+    } catch (e) {
+        console.error(`Error retrieving ${key}:`, e);
+        return null;
+    }
+}
 
 const { height } = Dimensions.get('window');
 
@@ -52,6 +84,10 @@ const AddEditDestinations = () => {
 
         console.log(destinations);
 
+         // Store the new destination in AsyncStorage
+        storeDestination("destination", newDestination);
+        retrieveDestination("destination");
+
         // Clear the input fields after adding
         setLocation("");
         setLocationAddress("");
@@ -59,6 +95,7 @@ const AddEditDestinations = () => {
         setPriority("");
         setNotes("");
 
+        // Re-hides input screen
         hide();
     };
 
