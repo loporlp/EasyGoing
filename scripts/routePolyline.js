@@ -190,6 +190,7 @@ export async function getRoutePolyline(origin, originCoords, destination, destin
         if (data.status === 'OK') {
             const polyline = data.routes[0].overview_polyline.points;
             const decodedPolyline = decodePolyline(polyline);
+            const duration = data.routes[0].legs[0].duration.text;
 
             const strokeColor = modeColors[mode.toUpperCase()] || driving_color; // Default to driving_color
 
@@ -198,10 +199,11 @@ export async function getRoutePolyline(origin, originCoords, destination, destin
                 strokeColor: strokeColor,
                 strokeOpacity: stroke_opacity,
                 strokeWeight: stroke_weight,
+                duration: duration,
             };
 
             routePolylines.push(routePolyline);
-            return routePolyline; // Return both path and strokeColor
+            return routePolyline; // Return path strokeColor, opacity weight, and duration
         } else {
             console.error('Error fetching route (data):', data.status);
             console.log("Switching to transit mode");
