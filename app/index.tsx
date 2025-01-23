@@ -56,12 +56,12 @@ const Index = () => {
             <Stack.Screen
               name="SignIn"
               component={SignInScreen} 
-              options={{ headerShown: false }}
+              options={{ headerShown: false, animation: "none" }}
             />
             <Stack.Screen
               name="CreateAccount"
               component={CreateAccountScreen}
-              options={{ headerShown: false, title: "Create Account" }}
+              options={{ headerShown: false, animation: "none" }}
             />
           </>
         )}

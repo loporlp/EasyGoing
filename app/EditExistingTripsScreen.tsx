@@ -1,29 +1,60 @@
 // EditExistingTripsScreen.tsx
 import { ScrollView, Image, StyleSheet, TouchableOpacity, Text, View } from "react-native";
 import { useRouter } from "expo-router";
+import { Ionicons } from '@expo/vector-icons';
 
 const EditExistingTripsScreen = () => {
     const router = useRouter();
 
     const editTrip = () => {
-        console.log("ERERER")
         router.push("/AddEditDestinations");
     }
 
-    return (
-        <ScrollView style={styles.container}>
-            { /* Tokyo, Japan trip */}
-            <TouchableOpacity style={styles.tripButtonTokyo} onPress={ editTrip }>
-                <Image style={styles.backgroundImage} source={require("../assets/images/tokyoskyline.jpg")} />
-                <View style={styles.darkOverlay} />
-                <View style={styles.screenContainer}>
-                    <Text style={styles.upcoming}>UPCOMING</Text>
-                    <Text style={styles.destinationName}>Tokyo, Japan</Text>
-                    <Text style={styles.dates}>Sat. Jul 13 - Sun. Jul 14</Text>
-                </View>
-            </TouchableOpacity>
+    const homeScreen = () => {
+        router.replace("/HomeScreen")
+    }
 
-        </ScrollView>
+    const searchScreen = () => {
+        router.replace("/SearchScreen")
+    }
+
+    const accountScreen = () => {
+        router.replace("/Account")
+    }
+
+    return (
+        <View style={{ flex: 1, flexDirection: "column" }}>
+            <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1 }}>
+                { /* Tokyo, Japan trip */}
+                <TouchableOpacity style={styles.tripButtonTokyo} onPress={editTrip}>
+                    <Image style={styles.backgroundImage} source={require("../assets/images/tokyoskyline.jpg")} />
+                    <View style={styles.darkOverlay} />
+                    <View style={styles.screenContainer}>
+                        <Text style={styles.upcoming}>UPCOMING</Text>
+                        <Text style={styles.destinationName}>Tokyo, Japan</Text>
+                        <Text style={styles.dates}>Sat. Jul 13 - Sun. Jul 14</Text>
+                    </View>
+                </TouchableOpacity>
+
+            </ScrollView>
+            <View style={styles.navBar}>
+                <TouchableOpacity style={{ padding: 10, marginLeft: 20 }} onPress={homeScreen}>
+                    <Ionicons name="home" size={30} color={"lightgray"} />
+                </TouchableOpacity>
+                <TouchableOpacity style={{ padding: 10 }} onPress={searchScreen}>
+                    <Ionicons name="search" size={30} color={"lightgray"} />
+                </TouchableOpacity>
+                <TouchableOpacity style={{ padding: 10 }}>
+                    <Ionicons name="calendar" size={30} color={"#24a6ad"} />
+                </TouchableOpacity>
+                <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={accountScreen}>
+                    <Ionicons name="person" size={30} color={"lightgray"} />
+                </TouchableOpacity>
+            </View>
+        </View>
+
+
+
     );
 }
 
@@ -49,6 +80,7 @@ const styles = StyleSheet.create({
     tripButtonTokyo: {
         width: "100%",
         height: 250,
+        marginTop: 30
     },
 
     backgroundImage: {
@@ -80,7 +112,20 @@ const styles = StyleSheet.create({
 
     dates: {
         color: "white",
+    },
+
+    navBar: {
+        flexDirection: "row",
+        backgroundColor: "white",
+        justifyContent: "space-between",
+        alignItems: "center",
+        height: "8%",
+        shadowColor: "#333333",
+        shadowOffset: { width: 1, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
     }
+
 });
 
 export default EditExistingTripsScreen;

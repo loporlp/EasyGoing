@@ -48,17 +48,34 @@ const AddEditDestinations = () => {
     const hide = () => setVisible(false);
 
     const addLocation = () => {
-        if (!location || !locationAddress || !duration || !priority) {
-            alert("Please fill out all fields");
+        // If missing a required field
+        let errorMessage = "";
+        if (!locationAddress) {
+            errorMessage += "Address is required.\n";
+        }
+        if (!duration) {
+            errorMessage += "Duration is required.\n";
+        }
+        if (errorMessage) {
+            alert(errorMessage.trim());
             return;
         }
 
+        // Set default priority to -1 (as an integer) if it's empty or invalid
+        const priorityValue = priority.trim() === "" || isNaN(Number(priority)) ? -1 : parseInt(priority);
+
+        // If no location is provided, extract the name from the address (before the first comma)
+        const name = location || (locationAddress?.description && typeof locationAddress.description === 'string'
+                ? locationAddress.description.split(",")[0]?.trim()
+                : 'Unnamed Location');
+        //console.log("Extracted name:", name);
+
         const newDestination = {
-            name: location,
+            name: name,
             address: locationAddress,
-            image: require("../assets/images/tokyoskytree.jpg"),
+            image: name,
             duration: duration,
-            priority: priority,
+            priority: priorityValue,
             route: "",
             notes: typedNotes
         };
@@ -90,45 +107,45 @@ const AddEditDestinations = () => {
         {
             name: "Tokyo Skytree",
             address: "",
-            image: require("../assets/images/tokyoskytree.jpg"),
+            image: "Tokyo Skytree",
             duration: "2 hrs",
-            priority: "2",
+            priority: 2,
             route: "/HomeScreen_API_Test",
             notes: ""
         },
         {
             name: "Akihabara Electric Town",
             address: "",
-            image: require("../assets/images/AkihabaraElectricTown.jpg"),
+            image: "Akihabara Electric Town",
             duration: "6 hrs",
-            priority: "1",
+            priority: 1,
             route: "",
             notes: ""
         },
         {
             name: "Pokemon Center",
             address: "",
-            image: require("../assets/images/PokemonCenterShibuya.png"),
+            image: "Pokemon Center",
             duration: "1.5 hrs",
-            priority: "3",
+            priority: 3,
             route: "",
             notes: ""
         },
         {
             name: "Meiji Jingu",
             address: "",
-            image: require("../assets/images/MeijiJingu.jpg"),
+            image: "Meiji Jingu",
             duration: "2 hrs",
-            priority: "3",
+            priority: 3,
             route: "",
             notes: ""
         },
         {
             name: "Imperial Palace",
             address: "",
-            image: require("../assets/images/ImperialPalace.jpg"),
+            image: "Imperial Palace",
             duration: "2 hrs",
-            priority: "4",
+            priority: 4,
             route: "",
             notes: ""
         }
@@ -144,7 +161,7 @@ const AddEditDestinations = () => {
         <View style={styles.screenContainer}>
 
             {/* Image of Tokyo */}
-            <Image style={styles.backgroundImage} source={require("../assets/images/tokyo.jpg")} />
+            <DynamicImage placeName="Tokyo" containerStyle={styles.backgroundImage} imageStyle={styles.backgroundImage} />
 
             {/* Adds a dark overlay on the screen */}
             <View style={styles.darkOverlay} />
@@ -186,7 +203,11 @@ const AddEditDestinations = () => {
                                     </View>
 
                                     <View style={styles.destinationContainer}>
-                                        <Image style={styles.destinationImage} source={destination.image} />
+                                        <DynamicImage
+                                            placeName={destination.image}
+                                            containerStyle={styles.destinationImage} 
+                                            imageStyle={styles.destinationImage}
+                                        />
                                         <View style={styles.destinationLabel}>
                                             <Text style={styles.destinationName}>{destination.name}</Text>
                                             <Text style={styles.destinationDetails}>

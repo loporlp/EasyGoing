@@ -26,6 +26,17 @@ const HomeScreen = () => {
         router.push("/CreateNewTrip")
     }
 
+    const viewTrips = () => {
+        router.replace("/EditExistingTripsScreen")
+    }
+
+    const accountScreen = () => {
+        router.replace("/Account")
+    }
+
+    const searchScreen = () => {
+        router.replace("/SearchScreen")
+    }
 
     const scrollRef = useRef<ScrollView>(null);
     const recommendedList = [
@@ -49,45 +60,82 @@ const HomeScreen = () => {
 
     const destinationList = [
         {
-            destination: "Disneyland Tokyo",
-            image: "disneyland",
-            time: "12h",
-            amount: "$124",
-        },
-        {
-            destination: "Tokyo Skytree",
-            image: "skytree",
+            destination: "Statue of Liberty",
+            image: "statue",
             time: "3h",
-            amount: "$14",
+            amount: "$25",
+            review: "4.7",
+            reviewAmt: "105k"
         },
         {
-            destination: "Mt. Fuji Tour",
-            image: "fuji",
-            time: "10h",
-            amount: "$33",
+            destination: "The Metropolitan Meuseum of Art",
+            image: "moma",
+            time: "4h",
+            amount: "$30",
+            review: "4.8",
+            reviewAmt: "84k"
         },
         {
-            destination: "Senso-ji",
-            image: "sensoji",
+            destination: "Grand Central Market",
+            image: "market",
+            time: "1h",
+            amount: "$$$",
+            review: "4.5",
+            reviewAmt: "1468"
+        },
+        {
+            destination: "Joe's Shanghai",
+            image: "food",
+            time: "N/A",
+            amount: "$$",
+            review: "4.2",
+            reviewAmt: "5705"
+        },
+        {
+            destination: "Central Park",
+            image: "park",
             time: "2h",
             amount: "$0",
-        },
-        {
-            destination: "Tokyo National Museum",
-            image: "museum",
-            time: "4h",
-            amount: "$6.35",
+            review: "4.8",
+            reviewAmt: "278k"
         },
     ];
 
     const imageMap = {
-        disneyland: require("../assets/images/tokyodisneyland.jpg"),
-        skytree: require("../assets/images/skytree.jpg"),
-        fuji: require("../assets/images/fuji.jpg"),
-        sensoji: require("../assets/images/sensoji.jpg"),
-        museum: require("../assets/images/museum.jpg"),
+        statue: require("../assets/images/statueofliberty.jpg"),
+        moma: require("../assets/images/moma.jpg"),
+        market: require("../assets/images/grandCentralMarket.jpg"),
+        food: require("../assets/images/joesshanghai.jpg"),
+        park: require("../assets/images/CentralPark.jpg"),
+        tower: require("../assets/images/skytree.jpg")
     };
 
+    const recentSearches = [
+        {
+            destination: "Statue of Liberty",
+            image: "statue",
+            time: "3h",
+            amount: "$25",
+            review: "4.7",
+            reviewAmt: "105k"
+        },
+        {
+            destination: "The Metropolitan Meuseum of Art",
+            image: "moma",
+            time: "4h",
+            amount: "$30",
+            review: "4.8",
+            reviewAmt: "84k"
+        },
+        {
+            destination: "Tokyo Skytree",
+            image: "tower",
+            time: "3h",
+            amount: "$13.49",
+            review: "4.4",
+            reviewAmt: "94k"
+        }
+    ];
     // Gets the username
     const [username, setUsername] = useState<string>('');
 
@@ -104,199 +152,231 @@ const HomeScreen = () => {
 
     return (
         <>
-            <ScrollView style={styles.container} contentContainerStyle={{ paddingTop: headerHeight }}>
-                <View style={styles.headerContainer}>
-                    <Text style={styles.headerText}>Hello, <Text style={{ color: "#24a6ad" }}>{username}<Text style={{ color: "white" }}>!</Text></Text></Text>
-                    <TouchableOpacity onPress={() => { }} style={styles.notificationButton}>
-                        <Ionicons name="notifications" size={20} color="black" />
+            <View style={{ flex: 1, flexDirection: "column" }}>
+                <ScrollView style={styles.container} contentContainerStyle={{ paddingTop: headerHeight, flexGrow: 1 }}>
+                    <View style={styles.headerContainer}>
+                        <Text style={styles.headerText}>Hello, <Text style={{ color: "#24a6ad" }}>{username}<Text style={{ color: "white" }}>!</Text></Text></Text>
+                        <TouchableOpacity onPress={() => { }} style={styles.notificationButton}>
+                            <Ionicons name="notifications" size={20} color="black" />
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={{ justifyContent: "center", alignItems: "center" }}>
+                        <Image style={{ width: "100%", height: 230, position: "relative" }} source={require("../assets/images/mountains.jpg")} />
+                        <View style={{ width: "100%", height: 230, position: "absolute", backgroundColor: "rgba(0, 0, 0, 0.5)" }}></View>
+                        <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-evenly", position: "absolute", top: 125, width: "100%" }}>
+                            <TouchableOpacity style={styles.tripButton} onPress={createNewTrip}>
+                                <View style={styles.tripButtons}>
+                                    <Ionicons name="add" size={18} color={"white"} />
+                                    <Text style={{ color: "white", fontSize: 16, marginLeft: 10 }}>New Trip</Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.tripButton}>
+                                <View style={styles.tripButtons}>
+                                    <Ionicons name="pencil" size={18} color={"white"} />
+                                    <Text style={{ color: "white", fontSize: 16, marginLeft: 10 }}>Edit Trip</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    <View style={styles.homeSection}>
+                        <View style={styles.searchSection}>
+                            <TouchableOpacity style={styles.searchBar} onPress={searchScreen}>
+                                <Ionicons name="search" size={18} style={{ marginRight: 10 }} color={"black"} />
+                                <Text style={{ fontSize: 18, color: "#d6d6d6" }}>Search...</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={{ paddingHorizontal: 20 }}>
+                            <View>
+                                <Image style={styles.backgroundImage} source={require("../assets/images/newyorkcity.jpg")} />
+                                <View style={styles.backgroundImageOverlay}></View>
+                                <View style={styles.currentLocationText}>
+                                    <Text style={{ color: "white", marginLeft: 10 }}>Currently in...</Text>
+                                    <Text style={{ color: "white", fontWeight: "bold", marginLeft: 10, fontSize: 18 }}>New York City, USA</Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={{ paddingHorizontal: 20, marginTop: 15 }}>
+                            <Text style={{ fontSize: 22, fontWeight: "700", }}>Recommended</Text>
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false} ref={scrollRef} contentContainerStyle={{
+                                gap: 10,
+                                paddingVertical: 10,
+                                marginBottom: 10
+                            }}>
+                                {recommendedList.map((item, index) => (
+                                    <TouchableOpacity onPress={() => handleSelectCategory(index)} style={activeIndex == index ? styles.activeRecommendBtn : styles.recommendBtn} key={index}>
+                                        <MaterialCommunityIcons name={item.iconName as any} size={20} color={activeIndex == index ? "white" : "black"} />
+                                        <Text style={activeIndex == index ? styles.recommendBtnTextActive : styles.recommendBtnText}>{item.title}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+
+                            <FlatList
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                data={destinationList}
+                                keyExtractor={(item) => item.destination}
+                                contentContainerStyle={{
+                                    gap: 10,
+                                    marginBottom: 10
+                                }}
+                                renderItem={({ item }) => (
+                                    <View>
+                                        <TouchableOpacity style={styles.recommendDest}>
+                                            <View style={styles.destImageWrapper}>
+                                                <Image style={styles.destImage} source={imageMap[item.image]} />
+                                                <TouchableOpacity style={styles.saveIconWrapper}>
+                                                    <Ionicons name="bookmark" size={22} color={"white"} />
+                                                </TouchableOpacity>
+                                            </View>
+
+                                            <View style={styles.destTextWrapper}>
+                                                <View style={{ flex: 1, flexDirection: "row", marginTop: 5, alignItems: "center" }}>
+                                                    <Ionicons name="location" size={22} color={"#24a6ad"} />
+                                                    <Text style={{ marginLeft: 5, fontSize: 20, fontWeight: "bold", flexWrap: "wrap" }} numberOfLines={2} ellipsizeMode="tail">{item.destination}</Text>
+                                                </View>
+                                                <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", top: 8 }}>
+                                                    <View style={{ flex: 1, flexDirection: "row", justifyContent: "flex-start" }}>
+                                                        <View style={{ flex: 1, flexDirection: "row", alignItems: "center", marginTop: -10 }}>
+                                                            <Ionicons name="time" size={18} color={"#24a6ad"} />
+                                                            <Text style={{ marginLeft: 5, fontSize: 16 }}>{item.time}</Text>
+                                                        </View>
+                                                        <View style={{ flex: 1, flexDirection: "row", alignItems: "center", marginTop: -10, marginLeft: -140 }}>
+                                                            <Ionicons name="star" size={18} color={"gold"} />
+                                                            <Text style={{ fontSize: 16 }}>{item.review}</Text>
+                                                            <Text style={{ fontSize: 16 }}>({item.reviewAmt})</Text>
+                                                        </View>
+                                                    </View>
+                                                    <Text style={{ fontSize: 16 }}>{item.amount}</Text>
+                                                </View>
+                                            </View>
+
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+                            >
+                            </FlatList>
+                        </View>
+
+                        <View style={{ paddingHorizontal: 20, marginTop: 15 }}>
+                            <Text style={{ fontSize: 22, fontWeight: "700", }}>Recent Searches</Text>
+                            <FlatList
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                data={recentSearches}
+                                keyExtractor={(item) => item.destination}
+                                contentContainerStyle={{
+                                    gap: 10,
+                                    marginVertical: 10
+                                }}
+                                renderItem={({ item }) => (
+                                    <View>
+                                        <TouchableOpacity style={styles.recommendDest}>
+                                            <View style={styles.destImageWrapper}>
+                                                <Image style={styles.destImage} source={imageMap[item.image]} />
+                                                <TouchableOpacity style={styles.saveIconWrapper}>
+                                                    <Ionicons name="bookmark" size={22} color={"white"} />
+                                                </TouchableOpacity>
+                                            </View>
+
+                                            <View style={styles.destTextWrapper}>
+                                                <View style={{ flex: 1, flexDirection: "row", marginTop: 5, alignItems: "center" }}>
+                                                    <Ionicons name="location" size={22} color={"#24a6ad"} />
+                                                    <Text style={{ marginLeft: 5, fontSize: 20, fontWeight: "bold", flexWrap: "wrap" }} numberOfLines={2} ellipsizeMode="tail">{item.destination}</Text>
+                                                </View>
+                                                <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", top: 8 }}>
+                                                    <View style={{ flex: 1, flexDirection: "row", justifyContent: "flex-start" }}>
+                                                        <View style={{ flex: 1, flexDirection: "row", alignItems: "center", marginTop: -10 }}>
+                                                            <Ionicons name="time" size={18} color={"#24a6ad"} />
+                                                            <Text style={{ marginLeft: 5, fontSize: 16 }}>{item.time}</Text>
+                                                        </View>
+                                                        <View style={{ flex: 1, flexDirection: "row", alignItems: "center", marginTop: -10, marginLeft: -140 }}>
+                                                            <Ionicons name="star" size={18} color={"gold"} />
+                                                            <Text style={{ fontSize: 16 }}>{item.review}</Text>
+                                                            <Text style={{ fontSize: 16 }}>({item.reviewAmt})</Text>
+                                                        </View>
+                                                    </View>
+                                                    <Text style={{ fontSize: 16 }}>{item.amount}</Text>
+                                                </View>
+                                            </View>
+
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+                            >
+                            </FlatList>
+                        </View>
+                    </View>
+                </ScrollView>
+
+                <View style={styles.navBar}>
+                    <TouchableOpacity style={{ padding: 10, marginLeft: 20 }}>
+                        <Ionicons name="home" size={30} color={"#24a6ad"} />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{ padding: 10 }} onPress={searchScreen}>
+                        <Ionicons name="search" size={30} color={"lightgray"} />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{ padding: 10 }} onPress={viewTrips}>
+                        <Ionicons name="calendar" size={30} color={"lightgray"} />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={accountScreen}>
+                        <Ionicons name="person" size={30} color={"lightgray"} />
                     </TouchableOpacity>
                 </View>
-
-                <View style={{ justifyContent: "center", alignItems: "center" }}>
-                    <Image style={{ width: "100%", height: 230, position: "relative" }} source={require("../assets/images/mountains.jpg")} />
-                    <View style={{ width: "100%", height: 230, position: "absolute", backgroundColor: "rgba(0, 0, 0, 0.5)" }}></View>
-                    <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-evenly", position: "absolute", top: 125, width: "100%" }}>
-                        <TouchableOpacity style={styles.tripButton} onPress={createNewTrip}>
-                            <View style={styles.tripButtons}>
-                                <Ionicons name="add" size={18} color={"white"} />
-                                <Text style={{ color: "white", fontSize: 16, marginLeft: 10 }}>New Trip</Text>
-                            </View>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.tripButton}>
-                            <View style={styles.tripButtons}>
-                                <Ionicons name="pencil" size={18} color={"white"} />
-                                <Text style={{ color: "white", fontSize: 16, marginLeft: 10 }}>Edit Trip</Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-
-                <View style={styles.homeSection}>
-                    <View style={styles.searchSection}>
-                        <View style={styles.searchBar}>
-                            <Ionicons name="search" size={18} style={{ marginRight: 10 }} color={"black"} />
-                            <TextInput placeholder="Search..." placeholderTextColor="#d6d6d6" style={{ fontSize: 18 }} />
-                        </View>
-                    </View>
-
-                    <View style={{ paddingHorizontal: 20 }}>
-                        <View>
-                            <Image style={styles.backgroundImage} source={require("../assets/images/tokyojpn.jpg")} />
-                            <View style={styles.backgroundImageOverlay}></View>
-                            <View style={styles.currentLocationText}>
-                                <Text style={{ color: "white", marginLeft: 10 }}>Currently in...</Text>
-                                <Text style={{ color: "white", fontWeight: "bold", marginLeft: 10, fontSize: 18 }}>Tokyo, Japan</Text>
-                            </View>
-                        </View>
-                    </View>
-
-                    <View style={{ paddingHorizontal: 20, marginTop: 15 }}>
-                        <Text style={{ fontSize: 22, fontWeight: "700", }}>Recommended</Text>
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} ref={scrollRef} contentContainerStyle={{
-                            gap: 10,
-                            paddingVertical: 10,
-                            marginBottom: 10
-                        }}>
-                            {recommendedList.map((item, index) => (
-                                <TouchableOpacity onPress={() => handleSelectCategory(index)} style={activeIndex == index ? styles.activeRecommendBtn : styles.recommendBtn} key={index}>
-                                    <MaterialCommunityIcons name={item.iconName as any} size={20} color={activeIndex == index ? "white" : "black"} />
-                                    <Text style={activeIndex == index ? styles.recommendBtnTextActive : styles.recommendBtnText}>{item.title}</Text>
-                                </TouchableOpacity>
-                            ))}
-                        </ScrollView>
-
-                        <FlatList
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            data={destinationList}
-                            keyExtractor={(item) => item.destination}
-                            contentContainerStyle={{
-                                gap: 10,
-                                marginBottom: 10
-                            }}
-                            renderItem={({ item }) => (
-                                <View>
-                                    <TouchableOpacity style={styles.recommendDest}>
-                                        <View style={styles.destImageWrapper}>
-                                            <Image style={styles.destImage} source={imageMap[item.image]} />
-                                            <TouchableOpacity style={styles.saveIconWrapper}>
-                                                <Ionicons name="bookmark" size={22} color={"white"} />
-                                            </TouchableOpacity>
-                                        </View>
-
-                                        <View style={styles.destTextWrapper}>
-                                            <View style={{ flex: 1, flexDirection: "row", marginTop: 5, alignItems: "center" }}>
-                                                <Ionicons name="location" size={22} color={"#24a6ad"} />
-                                                <Text style={{ marginLeft: 5, fontSize: 20, fontWeight: "bold", flexWrap: "wrap" }} numberOfLines={2} ellipsizeMode="tail">{item.destination}</Text>
-                                            </View>
-                                            <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", top: 8 }}>
-                                                <View style={{ flex: 1, flexDirection: "row", alignItems: "center", marginTop: -10 }}>
-                                                    <Ionicons name="time" size={18} color={"#24a6ad"} />
-                                                    <Text style={{ marginLeft: 5, fontSize: 16 }}>{item.time}</Text>
-                                                </View>
-                                                <Text style={{ fontSize: 16 }}>{item.amount}</Text>
-                                            </View>
-                                        </View>
-
-                                    </TouchableOpacity>
-                                </View>
-                            )}
-                        >
-                        </FlatList>
-                    </View>
-
-                    <View style={{ paddingHorizontal: 20, marginTop: 15 }}>
-                        <Text style={{ fontSize: 22, fontWeight: "700", }}>Recent Searches</Text>
-                        <FlatList
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            data={destinationList}
-                            keyExtractor={(item) => item.destination}
-                            contentContainerStyle={{
-                                gap: 10,
-                                marginVertical: 10
-                            }}
-                            renderItem={({ item }) => (
-                                <View>
-                                    <TouchableOpacity style={styles.recommendDest}>
-                                        <View style={styles.destImageWrapper}>
-                                            <Image style={styles.destImage} source={imageMap[item.image]} />
-                                            <TouchableOpacity style={styles.saveIconWrapper}>
-                                                <Ionicons name="bookmark" size={22} color={"white"} />
-                                            </TouchableOpacity>
-                                        </View>
-
-                                        <View style={styles.destTextWrapper}>
-                                            <View style={{ flex: 1, flexDirection: "row", marginTop: 5, alignItems: "center" }}>
-                                                <Ionicons name="location" size={22} color={"#24a6ad"} />
-                                                <Text style={{ marginLeft: 5, fontSize: 20, fontWeight: "bold", flexWrap: "wrap" }} numberOfLines={2} ellipsizeMode="tail">{item.destination}</Text>
-                                            </View>
-                                            <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", top: 8 }}>
-                                                <View style={{ flex: 1, flexDirection: "row", alignItems: "center", marginTop: -10 }}>
-                                                    <Ionicons name="time" size={18} color={"#24a6ad"} />
-                                                    <Text style={{ marginLeft: 5, fontSize: 16 }}>{item.time}</Text>
-                                                </View>
-                                                <Text style={{ fontSize: 16 }}>{item.amount}</Text>
-                                            </View>
-                                        </View>
-
-                                    </TouchableOpacity>
-                                </View>
-                            )}
-                        >
-                        </FlatList>
-                    </View>
-                </View>
-            </ScrollView>
+            </View>
         </>
     );
 }
 
 const fetchData = async () => {
-  try {
-    // We should put this ip into a global constant
-    const response = await fetch('http://ezgoing.app/api/serverstatus');
-    const data = await response.json();
-    console.log(data.message); // This should log "Hello from the server!"
-  } catch (error) {
-    console.error('Error fetching data:', error);
-  }
+    try {
+        // We should put this ip into a global constant
+        const response = await fetch('http://ezgoing.app/api/serverstatus');
+        const data = await response.json();
+        console.log(data.message); // This should log "Hello from the server!"
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
 };
 
 // TODO: This was just an example. Eventually delete (since we probalby don't need on this page)
 const callProtectedApi = async () => {
-  try {
-    // Retrieve the ID token
-    const idToken = await getIdToken(auth);
+    try {
+        // Retrieve the ID token
+        const idToken = await getIdToken(auth);
 
-    const searchTerm = "McDona"
-    // Define the API endpoint
-    const apiUrl = `http://ezgoing.app/api/autocomplete?input=${searchTerm}`; // Search term is the user inputted that we are auto completeing
+        const searchTerm = "McDona"
+        // Define the API endpoint
+        const apiUrl = `http://ezgoing.app/api/autocomplete?input=${searchTerm}`; // Search term is the user inputted that we are auto completeing
 
-    // Make the API call
-    const response = await fetch(apiUrl, {
-      method: "GET", // Or "POST", "PUT", etc.
-      headers: {
-        Authorization: `Bearer ${idToken}`, // Include the ID token in the header
-      },
-    });
+        // Make the API call
+        const response = await fetch(apiUrl, {
+            method: "GET", // Or "POST", "PUT", etc.
+            headers: {
+                Authorization: `Bearer ${idToken}`, // Include the ID token in the header
+            },
+        });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("API Response:", data); // Handle the response
+    } catch (error) {
+        console.error("Error calling API:", error);
     }
-
-    const data = await response.json();
-    console.log("API Response:", data); // Handle the response
-  } catch (error) {
-    console.error("Error calling API:", error);
-  }
 };
 
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        height: "70%"
     },
 
     headerContainer: {
@@ -467,6 +547,18 @@ const styles = StyleSheet.create({
         flexDirection: "column",
         marginTop: 5
     },
+
+    navBar: {
+        flexDirection: "row",
+        backgroundColor: "white",
+        justifyContent: "space-between",
+        alignItems: "center",
+        height: "8%",
+        shadowColor: "#333333",
+        shadowOffset: { width: 1, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+    }
 });
 
 export default HomeScreen;
