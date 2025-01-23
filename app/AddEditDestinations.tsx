@@ -4,6 +4,8 @@ import { View, Image, StyleSheet, TextInput, Text, TouchableOpacity, ScrollView,
 import { useRouter } from "expo-router";
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import { storeData, getData } from '../scripts/localStore.js';
+import DynamicImage from '../components/DynamicImage';
+
 
 //stores destination object in local storage with key 'destination'
 async function storeDestination(key: string, destination: any) {
