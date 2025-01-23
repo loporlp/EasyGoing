@@ -55,7 +55,7 @@ const HomeScreen = () => {
       <RouteMap origin={setOrigin} destination={setDestination} style={styles.map} onModeChange={handleModeChange}/>
 
       {/* Google Map */}
-      <MapMarker coordinates={selectedCoordinates} style={null} />
+      <MapMarker coordinates={selectedCoordinates} />
     </View>
   );
 };

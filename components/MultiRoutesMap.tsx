@@ -169,8 +169,6 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
                 ? (markers[index].origin.longitude + markers[index].destination.longitude) / 2
                 : 0, // Default to 0 if undefined
             }}
-            width={0}
-            height={0}
           >
             <View style={styles.routeInfoContainer}>
               <Text style={styles.routeText}>

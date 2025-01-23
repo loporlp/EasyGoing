@@ -1,4 +1,3 @@
-import { getCoords } from '../scripts/nameToCoords.js';
 import { getIdToken } from '../scripts/getFirebaseID';
 import { auth } from '../firebaseConfig';
 import { getTransitRoute } from '../scripts/transitRoute.js';
