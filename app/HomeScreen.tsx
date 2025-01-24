@@ -6,8 +6,20 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 import { Link } from 'expo-router'
 import { getAuth } from 'firebase/auth';
+import {storeData, getData, fillLocal} from "../scripts/localStore";
+import storage from '@react-native-async-storage/async-storage';
+import { auth } from '@/firebaseConfig';
+import { updateTrip } from '@/scripts/databaseInteraction';
 
 const HomeScreen = () => {
+
+
+    fillLocal();
+    // Fill the local storage with trips if it is empty
+    // Trip ids in local storage can be accessed through getData("tripIDs")
+    useEffect(() => {
+        fillLocal();
+      }, []);
 
     // Sets up navigations
     const router = useRouter();
@@ -331,6 +343,7 @@ const HomeScreen = () => {
         </>
     );
 }
+
 
 const fetchData = async () => {
     try {
