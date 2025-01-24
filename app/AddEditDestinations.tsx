@@ -278,8 +278,8 @@ const AddEditDestinations = () => {
 
                     <View style={styles.travelersAndBudgetTextField}>
                         <TouchableOpacity style={[styles.travelerInput, { flex: 1, flexDirection: "row", alignItems: 'center' }]}>
-                            <Ionicons name="people" size={22} color={"#24a6ad"} />
-                            <TextInput placeholder="1 traveler" placeholderTextColor="black" keyboardType="numeric" style={{ fontSize: 18, marginLeft: 5 }} />
+                            <Ionicons name="time" size={22} color={"#24a6ad"} />
+                            <TextInput placeholder="Leave at..." placeholderTextColor="gray" keyboardType="numeric" style={{ fontSize: 18, marginLeft: 5 }} />
                         </TouchableOpacity>
 
                         <TouchableOpacity style={[styles.budgetInput, { flex: 1, flexDirection: "row", alignItems: 'center' }]}>
