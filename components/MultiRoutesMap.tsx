@@ -14,6 +14,7 @@ const stroke_width = 4;
 
 const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportationModes }) => {
   const [polylines, setPolylines] = useState<any[]>([]); // State to store polylines
+  const [transportDurations, setTransportDurations] = useState<any[]>([]) // State to store transport durations
   const [mapRegion, setMapRegion] = useState<any>(null); // State to store the map's region
   const [markers, setMarkers] = useState<any[]>([]); // State to store marker data
   const mapRef = useRef<MapView>(null);
@@ -24,6 +25,8 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
     // Fetch polylines and markers asynchronously
     const fetchPolylinesAndMarkers = async () => {
       const allPolylines: any[] = [];
+      const allTransportDurations: any[] = [];
+
       let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
       const allMarkers: any[] = [];
 
@@ -47,7 +50,15 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
               id: `${origin}-${destination}-${mode}`,
               coordinates: polyline.path, // Use the path from the response
               strokeColor: polyline.strokeColor,
-              strokeWidth: stroke_width,
+              strokeWidth: stroke_width, // TODO: Maybe use polyline.strokeWidth but this is optional
+            });
+
+            // Add duration to the list
+            allTransportDurations.push({
+              origin,
+              destination,
+              mode,
+              duration: polyline.duration, // Store the duration
             });
 
             // Update the bounds for each polyline
@@ -67,8 +78,9 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
         });
       }
 
-      // Update state with polylines and markers
+      // Update state with polylines, durations, and markers
       setPolylines(allPolylines);
+      setTransportDurations(allTransportDurations)
       setMarkers(allMarkers);
 
       // Set the map region to focus on the route(s)
@@ -91,17 +103,18 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
     };
 
     if (isFocused) {
-        console.log("Screen is focused, fetching polylines and markers...");
+        console.log("Screen is focused, fetching polylines, markers, and durations...");
         setMapKey(Date.now()); // Update key when screen is focused
         fetchPolylinesAndMarkers();
     } else {
-        // Optionally reset polylines and markers when screen is unfocused
+        // Optionally reset polylines, markers and durations when screen is unfocused
         setPolylines([]);
         setMarkers([]);
+        setTransportDurations([])
         setMapRegion(null);
     }
 
-    console.log("Plotting polylines and fetching markers done");
+    console.log("Plotting polylines, fetching markers and storing durations are done");
   }, [locations, transportationModes, isFocused]);
 
   return (
@@ -143,6 +156,28 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
             </>
           );
         })}
+
+        {/* Render route durations above the routes */}
+        {transportDurations.map((route, index) => (
+          <Marker
+            key={index}
+            coordinate={{
+              latitude: markers[index]?.origin?.latitude && markers[index]?.destination?.latitude
+                ? (markers[index].origin.latitude + markers[index].destination.latitude) / 2
+                : 0, // Default to 0 if undefined
+              longitude: markers[index]?.origin?.longitude && markers[index]?.destination?.longitude
+                ? (markers[index].origin.longitude + markers[index].destination.longitude) / 2
+                : 0, // Default to 0 if undefined
+            }}
+          >
+            <View style={styles.routeInfoContainer}>
+              <Text style={styles.routeText}>
+                {`${route.mode}: ${route.duration}`}
+              </Text>
+            </View>
+          </Marker>
+        ))}
+
       </MapView>
 
       {/*<Text style={styles.subTitle}>Locations:</Text>
@@ -186,6 +221,17 @@ const styles = StyleSheet.create({
     height: '50%',
     marginTop: 20,
   },
+  routeInfoContainer: {
+    position: 'absolute',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)', // Transparent background for text
+    padding: 5,
+    borderRadius: 10,
+  },
+  routeText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#333',
+  }
 });
 
 export default MultiRoutesMap;
