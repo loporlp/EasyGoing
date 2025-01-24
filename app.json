@@ -16,10 +16,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true,
-      "config": {
-        "googleMapsApiKey": "AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI"
-      }
+      "bundleIdentifier": "com.easygoing.easygoing",
+      "googleMapsApiKey": "AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI"
     },
     "android": {
       "adaptiveIcon": {
