@@ -228,16 +228,20 @@ const AddEditDestinations = () => {
                 <View style={{ flex: 1, flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                     <DynamicImage placeName={item.name} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
                     <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10 }}>
-                        <Text style={{ flex: 1, marginLeft: -50, fontSize: 20, fontWeight: "700" }}>{item.name}</Text>
+                        <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginLeft: -50 }}>
+                            <Ionicons name="location" size={20} color={"#24a6ad"} />
+                            <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{item.name}</Text>
+                        </View>
+
                         <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5, marginLeft: -50 }}>
                             <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                                 <Ionicons name="time" size={18} color={"#24a6ad"} />
-                                <Text style={{marginLeft: 5}}>{item.duration}</Text>
+                                <Text style={{ marginLeft: 5 }}>{item.duration}</Text>
                             </View>
 
                             <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginRight: 5 }}>
                                 <MaterialCommunityIcons name="priority-high" size={18} color={"#24a6ad"} />
-                                <Text style={{marginLeft: 5}}>{item.priority}</Text>
+                                <Text style={{ marginLeft: 5 }}>{item.priority}</Text>
                             </View>
                         </View>
                     </View>
@@ -264,23 +268,23 @@ const AddEditDestinations = () => {
                     <TouchableOpacity style={[styles.input, { flex: 1, flexDirection: "row", alignItems: 'center' }]}>
                         <Ionicons name="location" size={22} color={"#24a6ad"} />
                         {/* TODO: switch TextInput with AutocompleteTextBox */}
-                        <TextInput placeholder="New York City, USA" placeholderTextColor="black" style={{ fontSize: 16, marginLeft: 5, width: "100%" }} />
+                        <AutocompleteTextBox placeholder="Origin" placeholderTextColor="gray" />
                     </TouchableOpacity>
 
                     <TouchableOpacity style={[styles.input, { flex: 1, flexDirection: "row", alignItems: 'center' }]} onPress={() => setModalVisible(true)}>
                         <Ionicons name="calendar-sharp" size={22} color={"#24a6ad"} />
-                        <Text style={{ fontSize: 16, marginLeft: 5, width: "100%", color: 'black' }}>{datesText || "Sat. Jul 13 - Sun. Jul 14"}</Text>
+                        <Text style={{ fontSize: 18, marginLeft: 5, width: "100%", color: 'black' }}>{datesText || "Sat. Jul 13 - Sun. Jul 14"}</Text>
                     </TouchableOpacity>
 
                     <View style={styles.travelersAndBudgetTextField}>
                         <TouchableOpacity style={[styles.travelerInput, { flex: 1, flexDirection: "row", alignItems: 'center' }]}>
                             <Ionicons name="people" size={22} color={"#24a6ad"} />
-                            <TextInput placeholder="1 traveler" placeholderTextColor="black" keyboardType="numeric" style={{ fontSize: 16, marginLeft: 5 }} />
+                            <TextInput placeholder="1 traveler" placeholderTextColor="black" keyboardType="numeric" style={{ fontSize: 18, marginLeft: 5 }} />
                         </TouchableOpacity>
 
                         <TouchableOpacity style={[styles.budgetInput, { flex: 1, flexDirection: "row", alignItems: 'center' }]}>
                             <Ionicons name="wallet" size={22} color={"#24a6ad"} />
-                            <TextInput placeholder="$1,700" placeholderTextColor="black" keyboardType="numeric" style={{ fontSize: 16, marginLeft: 5 }} />
+                            <TextInput placeholder="$1,700" placeholderTextColor="black" keyboardType="numeric" style={{ fontSize: 18, marginLeft: 5 }} />
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -449,7 +453,7 @@ const styles = StyleSheet.create({
         shadowColor: "#333333",
         shadowOffset: { width: 1, height: 2 },
         shadowOpacity: 0.1,
-        shadowRadius: 3
+        shadowRadius: 3,
     },
 
     budgetInput: {
@@ -457,7 +461,7 @@ const styles = StyleSheet.create({
         width: "50%",
         borderColor: '#999',
         borderBottomWidth: 1,
-        fontSize: 16,
+        fontSize: 18,
         backgroundColor: "white",
         paddingLeft: 10,
         borderRadius: 10,

@@ -141,14 +141,14 @@ const styles = StyleSheet.create({
         height: 40,
         borderColor: '#999',
         borderBottomWidth: 0,
-        marginBottom: 20,
         fontSize: 18,
         backgroundColor: "white",
         borderRadius: 10,
         paddingVertical: 5,
-        paddingLeft: 20,
+        paddingLeft: 5,
         textAlign: 'left',
         writingDirection: 'ltr',
+        alignItems: "center"
     },
 
     suggestionList: {
