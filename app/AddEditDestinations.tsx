@@ -9,6 +9,9 @@ import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SwipeListView } from 'react-native-swipe-list-view';
+import CalendarPicker from 'react-native-calendar-picker';
+import moment from "moment";
+import GenerateItineraryScreen from './GenerateItineraryScreen';
 
 //stores destination object in local storage with key 'destination'
 async function storeDestination(key: string, destination: any) {
@@ -110,45 +113,45 @@ const AddEditDestinations = () => {
 
     const [destinations, setDestinations] = useState([
         {
-            name: "Tokyo Skytree",
+            name: "Central Park",
             address: "",
-            image: "Tokyo Skytree",
+            image: "Central Park",
             duration: "2 hrs",
             priority: 2,
             route: "/HomeScreen_API_Test",
             notes: ""
         },
         {
-            name: "Akihabara Electric Town",
+            name: "Empire State Building",
             address: "",
-            image: "Akihabara Electric Town",
-            duration: "6 hrs",
+            image: "Empire State Building",
+            duration: "2 hrs",
             priority: 1,
             route: "",
             notes: ""
         },
         {
-            name: "Pokemon Center",
+            name: "Statue of Liberty",
             address: "",
-            image: "Pokemon Center",
-            duration: "1.5 hrs",
+            image: "Statue of Liberty",
+            duration: "3 hrs",
             priority: 3,
             route: "",
             notes: ""
         },
         {
-            name: "Meiji Jingu",
+            name: "Times Square",
             address: "",
-            image: "Meiji Jingu",
+            image: "Times Square",
             duration: "2 hrs",
             priority: 3,
             route: "",
             notes: ""
         },
         {
-            name: "Imperial Palace",
+            name: "Brooklyn Bridge",
             address: "",
-            image: "Imperial Palace",
+            image: "Brooklyn Bridge",
             duration: "2 hrs",
             priority: 4,
             route: "",
@@ -161,6 +164,30 @@ const AddEditDestinations = () => {
     const [duration, setDuration] = useState("");
     const [priority, setPriority] = useState("");
     const [typedNotes, setNotes] = useState("");
+
+    // Calendar Modal
+    const [isModalVisible, setModalVisible] = useState(false); // To control modal visibility
+    const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null); // Explicitly define state type
+    const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null); // Explicitly define state type
+    const [datesText, setDatesText] = useState("");
+
+    const handleDateChange = (date: Date, type: 'START_DATE' | 'END_DATE') => {
+        if (type === "END_DATE") {
+            setSelectedEndDate(date);
+        } else {
+            setSelectedStartDate(date);
+            setSelectedEndDate(null); // Reset the end date when start date is changed
+        }
+    };
+
+    const handleDone = () => {
+        if (selectedStartDate && selectedEndDate) {
+            const startFormatted = moment(selectedStartDate).format("ddd, MMM D");
+            const endFormatted = moment(selectedEndDate).format("ddd, MMM D");
+            setDatesText(`${startFormatted} - ${endFormatted}`);
+        }
+        setModalVisible(false);
+    };
 
     // Swipable List components
     const [swipeStatus, setSwipeStatus] = useState<{ [key: string]: boolean }>({});
@@ -177,13 +204,13 @@ const AddEditDestinations = () => {
         }
     };
 
-    const renderHiddenItem = ({ item, rowMap }: any) => (
+    const renderHiddenItem = ({ item, index }: { item: any; index: number }) => (
         <View style={[styles.hiddenItem, { height: 100 }]}>
             <TouchableOpacity onPress={() => { }} style={[styles.editButton, { width: Math.abs(rightOpenValue / 2) }]}>
                 <Ionicons name="pencil-sharp" size={25} color={"white"} />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => { }} style={[styles.deleteButton, { width: Math.abs(rightOpenValue / 2) }]}>
+            <TouchableOpacity onPress={() => { }} style={[styles.deleteButton, { width: Math.abs(rightOpenValue / 2) }]} onPressIn={() => deleteLocation(index)}>
                 <Ionicons name="trash-bin" size={25} color={"white"} />
             </TouchableOpacity>
         </View>
@@ -198,9 +225,22 @@ const AddEditDestinations = () => {
                     { borderRadius: isSwiped ? 0 : 10 },
                 ]}
             >
-                <View style={{flex: 1, flexDirection: "row", justifyContent: "flex-start", alignItems: "center"}}>
+                <View style={{ flex: 1, flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                     <DynamicImage placeName={item.name} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
-                    <Text style={{flex: 1}}>{item.name}</Text>
+                    <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10 }}>
+                        <Text style={{ flex: 1, marginLeft: -50, fontSize: 20, fontWeight: "700" }}>{item.name}</Text>
+                        <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5, marginLeft: -50 }}>
+                            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                <Ionicons name="time" size={18} color={"#24a6ad"} />
+                                <Text style={{marginLeft: 5}}>{item.duration}</Text>
+                            </View>
+
+                            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginRight: 5 }}>
+                                <MaterialCommunityIcons name="priority-high" size={18} color={"#24a6ad"} />
+                                <Text style={{marginLeft: 5}}>{item.priority}</Text>
+                            </View>
+                        </View>
+                    </View>
                 </View>
             </View>
         );
@@ -223,12 +263,13 @@ const AddEditDestinations = () => {
                 <View style={{ marginTop: 15 }}>
                     <TouchableOpacity style={[styles.input, { flex: 1, flexDirection: "row", alignItems: 'center' }]}>
                         <Ionicons name="location" size={22} color={"#24a6ad"} />
-                        <TextInput placeholder="New York City, USA" placeholderTextColor="black" style={{ fontSize: 16, marginLeft: 5 }} />
+                        {/* TODO: switch TextInput with AutocompleteTextBox */}
+                        <TextInput placeholder="New York City, USA" placeholderTextColor="black" style={{ fontSize: 16, marginLeft: 5, width: "100%" }} />
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={[styles.input, { flex: 1, flexDirection: "row", alignItems: 'center' }]}>
+                    <TouchableOpacity style={[styles.input, { flex: 1, flexDirection: "row", alignItems: 'center' }]} onPress={() => setModalVisible(true)}>
                         <Ionicons name="calendar-sharp" size={22} color={"#24a6ad"} />
-                        <TextInput placeholder="Fri, Jul. 11 - Tue, Jul. 15" placeholderTextColor="black" style={{ fontSize: 16, marginLeft: 5 }} />
+                        <Text style={{ fontSize: 16, marginLeft: 5, width: "100%", color: 'black' }}>{datesText || "Sat. Jul 13 - Sun. Jul 14"}</Text>
                     </TouchableOpacity>
 
                     <View style={styles.travelersAndBudgetTextField}>
@@ -247,11 +288,11 @@ const AddEditDestinations = () => {
 
             {/* Scrollable window that displays all the destinations added */}
             <View style={styles.destinationScreen}>
-                <Text style={{ fontSize: 22, fontWeight: "700", marginBottom: 10, marginHorizontal: 20, marginTop: 10 }}>Destinations Selected <Text style={{color: "#24a6ad"}}>({destinations.length})</Text>:</Text>
+                <Text style={{ fontSize: 22, fontWeight: "700", marginBottom: 10, marginHorizontal: 20, marginTop: 10 }}>Destinations Selected <Text style={{ color: "#24a6ad" }}>({destinations.length})</Text>:</Text>
                 <SwipeListView
                     data={destinations.map((item, index) => ({ ...item, key: `${index}` }))}
                     renderItem={renderItem}
-                    renderHiddenItem={renderHiddenItem}
+                    renderHiddenItem={(data, rowMap) => renderHiddenItem({ ...data, index: parseInt(data.item.key) })}
                     leftOpenValue={rightOpenValue}
                     rightOpenValue={rightOpenValue}
                     friction={60}
@@ -262,16 +303,107 @@ const AddEditDestinations = () => {
             </View>
 
             <View style={styles.navBar}>
-                <TouchableOpacity style={{ padding: 10, marginLeft: 20 }}>
+                <TouchableOpacity style={{ padding: 10, marginLeft: 20 }} onPress={show}>
                     <Ionicons name="add" size={30} color={"#24a6ad"} />
                 </TouchableOpacity>
                 <TouchableOpacity style={{ padding: 10 }}>
                     <MaterialCommunityIcons name="application-import" size={30} color={"#24a6ad"} />
                 </TouchableOpacity>
-                <TouchableOpacity style={{ padding: 10, marginRight: 20 }}>
+                <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={() => { router.push("/GenerateItineraryScreen") }}>
                     <Ionicons name="arrow-forward-circle-sharp" size={30} color={"#24a6ad"} />
                 </TouchableOpacity>
             </View>
+
+            {/* Add destination pop-up */}
+            <Modal animationType="fade" visible={visible} transparent={true} onRequestClose={hide}>
+                <View style={styles.popup}>
+                    <ImageBackground source={require("../assets/images/blue.png")} style={styles.backgroundImage}>
+                        <View style={styles.inputContainer}>
+                            {/* Text Input For Location, Duration, Priority, and Notes */}
+                            <View style={styles.textContainer}>
+                                <Text style={styles.text}>Location:</Text>
+                                <TextInput
+                                    style={styles.textBox}
+                                    placeholder="Location"
+                                    placeholderTextColor="gray"
+                                    value={location}
+                                    onChangeText={setLocation}
+                                />
+                                <Text style={styles.text}>Location:</Text>
+                                <AutocompleteTextBox
+                                    onPlaceSelect={setLocationAddress}
+                                    placeholder="Address"
+                                    placeholderTextColor="gray"
+                                    style={styles.textBox}
+                                />
+                                <Text style={styles.text}>Duration (Minutes):</Text>
+                                <TextInput
+                                    style={styles.textBox}
+                                    placeholder="1 hr"
+                                    placeholderTextColor="gray"
+                                    keyboardType="numeric"
+                                    value={duration}
+                                    onChangeText={setDuration}
+                                />
+                                <Text style={styles.text}>Priority:</Text>
+                                <TextInput
+                                    style={styles.textBox}
+                                    placeholder="1"
+                                    placeholderTextColor="gray"
+                                    keyboardType="numeric"
+                                    value={priority}
+                                    onChangeText={setPriority}
+                                />
+                                <Text style={styles.text}>Notes:</Text>
+                                <TextInput
+                                    style={styles.textBox}
+                                    placeholder="Notes"
+                                    placeholderTextColor="gray"
+                                    value={typedNotes}
+                                    onChangeText={setNotes}
+                                />
+                            </View>
+                            {/* Add + Cancel Buttons TODO: figure out why these buttons are overlayed on the text box*/}
+                            <View style={styles.buttonContainer}>
+                                <View style={styles.button}>
+                                    <Button title="Cancel" onPress={hide} />
+                                </View>
+                                <View style={styles.button}>
+                                    <Button title="Add" onPress={addLocation} />
+                                </View>
+                            </View>
+                        </View>
+                    </ImageBackground>
+                </View>
+            </Modal>
+
+            {/* Pop-up for Date Interval picker */}
+            {/* Modal with CalendarPicker */}
+            <Modal
+                visible={isModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+
+                        <CalendarPicker
+                            startFromMonday={true}
+                            allowRangeSelection={true}
+                            minDate={new Date()}
+                            onDateChange={handleDateChange}
+                            selectedDayColor="#24a6ad"
+                            dayShape="circle"
+                        />
+
+                        <TouchableOpacity style={styles.calendarDoneButton} onPress={handleDone}>
+                            <Text style={styles.startPlanningButtonText}>Done</Text>
+                        </TouchableOpacity>
+
+                    </View>
+                </View>
+            </Modal>
         </View>
 
     );
@@ -432,7 +564,100 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
         justifyContent: "center",
         alignItems: "center",
-    }
+    },
+
+    // ==== MODAL ==== //
+    popup: {
+        width: "100%",
+        height: "75%",
+        position: "absolute",
+        top: 60, //padding for status bar
+        bottom: "10%",
+        justifyContent: "center",
+        alignItems: "center",
+        flex: 1,
+    },
+    textBox: {
+        color: "black",
+        height: 40,
+        borderColor: "purple",
+        borderWidth: 1,
+        fontSize: 16,
+        backgroundColor: "white",
+        alignSelf: 'stretch',
+        textAlign: 'left',
+    },
+    textContainer: {
+        flexDirection: "column",
+        justifyContent: "space-between",
+        width: "100%",
+        height: "50%",
+        marginBottom: 20,
+    },
+    buttonContainer: {
+        position: "relative",
+        top: 185,
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        width: "100%",
+        height: "20%",
+    },
+    button: {
+        height: 50,
+    },
+
+    text: {
+        color: "white",
+        fontSize: 20,
+        fontWeight: "bold",
+        marginTop: 20,
+    },
+
+    inputContainer: {
+        flexDirection: "column",
+        alignItems: "center",
+        width: "100%",
+        paddingTop: 40,
+        paddingHorizontal: 20,
+    },
+
+    // ==== Calendar Modal === //
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+
+    modalContent: {
+        width: '100%',
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 10,
+    },
+
+    calendarDoneButton: {
+        backgroundColor: "#24a6ad",
+        paddingVertical: 10,
+        paddingHorizontal: 10,
+        borderRadius: 15,
+        marginTop: 10,
+        justifyContent: "center",
+        alignItems: "center",
+        elevation: 5,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+    },
+
+    startPlanningButtonText: {
+        color: "white",
+        fontSize: 18,
+        fontWeight: "bold",
+        marginLeft: 40,
+        marginRight: 40,
+    },
 });
 
 export default AddEditDestinations;
