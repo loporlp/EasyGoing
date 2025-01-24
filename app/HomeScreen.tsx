@@ -348,7 +348,7 @@ const HomeScreen = () => {
 const fetchData = async () => {
     try {
         // We should put this ip into a global constant
-        const response = await fetch('http://ezgoing.app/api/serverstatus');
+        const response = await fetch('https://ezgoing.app/api/serverstatus');
         const data = await response.json();
         console.log(data.message); // This should log "Hello from the server!"
     } catch (error) {
@@ -364,7 +364,7 @@ const callProtectedApi = async () => {
 
         const searchTerm = "McDona"
         // Define the API endpoint
-        const apiUrl = `http://ezgoing.app/api/autocomplete?input=${searchTerm}`; // Search term is the user inputted that we are auto completeing
+        const apiUrl = `https://ezgoing.app/api/autocomplete?input=${searchTerm}`; // Search term is the user inputted that we are auto completeing
 
         // Make the API call
         const response = await fetch(apiUrl, {

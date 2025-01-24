@@ -14,7 +14,7 @@ export const getTrips = async () => {
     try {
       const idToken = await getIdToken(auth);
 
-      const response = await fetch('http://ezgoing.app/api/trips', {
+      const response = await fetch('https://ezgoing.app/api/trips', {
         signal: controller.signal,
         method: "GET",
         headers: {
@@ -54,7 +54,7 @@ export const createTrip = async () => {
     try {
         const idToken = await getIdToken(auth);
 
-        const response = await fetch(`http://ezgoing.app/api/trips`, {
+        const response = await fetch(`https://ezgoing.app/api/trips`, {
             signal: controller.signal,
             method: "POST",
             headers: {
@@ -100,7 +100,7 @@ export const deleteTrip = async (tripId) => {
     try {
       const idToken = await getIdToken(auth);
 
-      const response = await fetch(`http://ezgoing.app/api/trips/${tripId}`, {
+      const response = await fetch(`https://ezgoing.app/api/trips/${tripId}`, {
         signal: controller.signal,
         method: "DELETE",
         headers: {
@@ -136,7 +136,7 @@ export const updateTrip = async (tripId) => {
   
     try {
       const idToken = await getIdToken(auth);
-      const response = await fetch(`http://ezgoing.app/api/trips/${tripId}`, {
+      const response = await fetch(`https://ezgoing.app/api/trips/${tripId}`, {
         signal: controller.signal,
         method: "PUT",
         headers: {
