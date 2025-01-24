@@ -2,10 +2,10 @@ import { Stack } from "expo-router";
 import Flag from "react-native-flags";
 import { View, Text, StyleSheet } from 'react-native';
 import { useEffect, useState } from 'react';
+import { useNavigation } from "@react-navigation/native";
 
 export default function RootLayout() {
   const [placeName, setPlaceName] = useState<string | undefined>(undefined);
-
 
   return (
     <Stack>
@@ -81,22 +81,8 @@ export default function RootLayout() {
       <Stack.Screen
         name="AddEditDestinations"
         options={{
-          headerTitle: () => (
-            <View style={styles.titleContainer}>
-              {/* City and Country Name */}
-              <Text style={styles.headerText}>{placeName || 'Tokyo, Japan'}</Text>
-              {/* Country Flag */}
-              <Flag code="JP" style={styles.flag} />
-            </View>
-          ),
-          headerStyle: {
-            backgroundColor: '#24a6ad',
-          },
-          headerTintColor: "white",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
-        }}
+          headerShown: false,
+        }} 
       />
 
       {/*Connection to server failed screen*/}

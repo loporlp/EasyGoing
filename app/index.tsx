@@ -10,6 +10,7 @@ import { RootStackParamList } from './types';
 import HomeScreen from './HomeScreen';
 import TestHomeScreen from './HomeScreen_API_Test';
 import TestOptScreen from './TestOptimalRouteScreen';
+import GenerateItineraryScreen from './GenerateItineraryScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -55,7 +56,7 @@ const Index = () => {
           <>
             <Stack.Screen
               name="SignIn"
-              component={SignInScreen} 
+              component={HomeScreen} 
               options={{ headerShown: false, animation: "none" }}
             />
             <Stack.Screen
