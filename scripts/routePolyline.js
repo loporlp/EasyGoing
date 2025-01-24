@@ -169,7 +169,7 @@ export async function getRoutePolyline(origin, originCoords, destination, destin
         const idToken = await getIdToken(auth);
 
         // Construct the API URL
-        const url = `http://ezgoing.app/api/directions?origin=${originCoords.latitude},${originCoords.longitude}&destination=${destinationCoords.latitude},${destinationCoords.longitude}&mode=${mode.toLowerCase()}`;
+        const url = `https://ezgoing.app/api/directions?origin=${originCoords.latitude},${originCoords.longitude}&destination=${destinationCoords.latitude},${destinationCoords.longitude}&mode=${mode.toLowerCase()}`;
 
         console.log("URL:", url);
 

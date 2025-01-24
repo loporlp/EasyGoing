@@ -45,7 +45,7 @@ const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTex
         const idToken = await getIdToken(auth);
 
         // Define the API endpoint
-        const apiUrl = `http://ezgoing.app/api/autocomplete?input=${text}`; // Search term is the user inputted that we are auto completeing
+        const apiUrl = `https://ezgoing.app/api/autocomplete?input=${text}`; // Search term is the user inputted that we are auto completeing
 
         // Make the API call
         const response = await fetch(apiUrl, {

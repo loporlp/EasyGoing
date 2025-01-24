@@ -40,7 +40,7 @@ const getRoute = async (origin, destination, mode) => {
         const idToken = await getIdToken(auth);
 
         // Define the API endpoint
-        const apiUrl = `http://ezgoing.app/api/route?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}`;
+        const apiUrl = `https://ezgoing.app/api/route?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}`;
 
         // Make the request
         const response = await fetch(apiUrl, {
