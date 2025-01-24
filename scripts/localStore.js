@@ -1,5 +1,6 @@
 //methods for storing data in async storage, will be stored in JSON format, keys are expected to be strings
 import storage from '@react-native-async-storage/async-storage';
+import {getTrips} from "./databaseInteraction";
 
 //storages data with given key and value
 export const storeData = async (key, value) => {
@@ -41,6 +42,18 @@ export const getData = async (key) => {
         console.error(e);
     }
 };
+
+export const fillLocal = async () => {
+    hasTrips = await storage.getItem("tripIDs"); 
+    if(!hasTrips){
+        trips = await getTrips();
+        tripIDs = Object.keys(trips);
+        await storeData("tripIDs", tripIDs);
+        tripIDs.forEach(ID => {
+            storeData(ID, trips[ID]);
+        });
+    } 
+}
 
 // Helper function to check if a string is valid JSON
 const isJsonString = (str) => {
