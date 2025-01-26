@@ -25,14 +25,29 @@ const EditExistingTripsScreen = () => {
     return (
         <View style={{ flex: 1, flexDirection: "column" }}>
             <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1 }}>
-                { /* Tokyo, Japan trip */}
+                <View>
+                    <Text style={{ marginTop: 50, fontSize: 22, fontWeight: "700" }}>My Trips</Text>
+                </View>
+                
+                { /* New York City trip */}
                 <TouchableOpacity style={styles.tripButtonTokyo} onPress={editTrip}>
-                    <Image style={styles.backgroundImage} source={require("../assets/images/tokyoskyline.jpg")} />
+                    <Image style={styles.backgroundImage} source={require("../assets/images/newyorkcity.jpg")} />
                     <View style={styles.darkOverlay} />
                     <View style={styles.screenContainer}>
-                        <Text style={styles.upcoming}>UPCOMING</Text>
-                        <Text style={styles.destinationName}>Tokyo, Japan</Text>
+                        <Text style={styles.upcoming}>UPCOMING TRIP</Text>
+                        <Text style={styles.destinationName}>New York City, USA</Text>
                         <Text style={styles.dates}>Sat. Jul 13 - Sun. Jul 14</Text>
+                    </View>
+                </TouchableOpacity>
+
+                { /* Tokyo, Japan trip */}
+                <TouchableOpacity style={styles.tripButtonTokyo} onPress={() => { }}>
+                    <Image style={styles.backgroundImage} source={require("../assets/images/tokyoskyline.jpg")} />
+                    <View style={styles.darkOverlayPastTrip} />
+                    <View style={styles.screenContainer}>
+                        <Text style={styles.upcoming}>PAST TRIP</Text>
+                        <Text style={styles.destinationName}>Tokyo, Japan</Text>
+                        <Text style={styles.dates}>Tue. Oct 1 - Fri. Oct 11</Text>
                     </View>
                 </TouchableOpacity>
 
@@ -77,10 +92,20 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(0, 0, 0, 0.5)",
     },
 
+    darkOverlayPastTrip: {
+        position: "absolute",
+        top: 30,
+        left: 0,
+        width: "100%",
+        height: 250,
+        borderRadius: 10,
+        backgroundColor: "rgba(255, 255, 255, 0.5)",
+    },
+
     tripButtonTokyo: {
         width: "100%",
         height: 250,
-        marginTop: 30
+        marginBottom: 10,
     },
 
     backgroundImage: {
