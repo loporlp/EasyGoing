@@ -22,13 +22,21 @@ const EditExistingTripsScreen = () => {
         router.replace("/Account")
     }
 
+    const createNewTrip = () => {
+        console.log("Going to 'Create New Trip'...")
+        router.push("/CreateNewTrip")
+    }
+
     return (
         <View style={{ flex: 1, flexDirection: "column" }}>
             <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1 }}>
-                <View>
-                    <Text style={{ marginTop: 50, fontSize: 22, fontWeight: "700" }}>My Trips</Text>
+                <View style={{flexDirection: "row", justifyContent:"space-between", alignItems: "center", marginTop: 50 }}>
+                    <Text style={{ fontSize: 22, fontWeight: "700" }}>My Trips</Text>
+                    <TouchableOpacity onPress={createNewTrip}>
+                        <Ionicons name="add-circle" size={30} color="#24a6ad" />
+                    </TouchableOpacity>
                 </View>
-                
+
                 { /* New York City trip */}
                 <TouchableOpacity style={styles.tripButtonTokyo} onPress={editTrip}>
                     <Image style={styles.backgroundImage} source={require("../assets/images/newyorkcity.jpg")} />
