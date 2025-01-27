@@ -106,6 +106,67 @@ app.get('/api/directions', verifyFirebaseToken, async (req, res) => {
     }
 });
 
+// textsearch Endpoint
+app.get('/api/place/textsearch', verifyFirebaseToken, async (req, res) => {
+    console.log("textsearch called");
+    try {
+        // Get parameters from the client request
+        const placeName  = req.query.query;
+        // Validate required parameters
+        if (!placeName) {
+            return res.status(400).json({ error: 'Missing required parameters: placeName' });
+        }
+
+        
+        const apiUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
+        
+        // Make the API request
+        const response = await axios.get(apiUrl, {
+            params: {
+                query: placeName,
+                key: GOOGLE_API_KEY, 
+            },
+        });
+
+        // Send back the response from Google Directions API to the client
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching directions:', error.message);
+        res.status(500).json({ error: 'An error occurred while fetching textsearch' });
+    }
+});
+
+// photo endpoint
+app.get('/api/place/photo', verifyFirebaseToken, async (req, res) => {
+    console.log("photo called");
+    try {
+        // Get parameters from the client request
+        const photoReference  = req.query.photo_reference;
+        // Validate required parameters
+        if (!photoReference) {
+            return res.status(400).json({ error: 'Missing required parameters: photo_reference' });
+        }
+
+        
+        const apiUrl = 'https://maps.googleapis.com/maps/api/place/photo';
+        
+        // Make the API request
+        const response = await axios.get(apiUrl, {
+            params: {
+                photo_reference: photoReference,
+                maxwidth: 400,
+                key: GOOGLE_API_KEY, 
+            },
+        });
+
+        // Send back the response from Google Directions API to the client
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching directions:', error.message);
+        res.status(500).json({ error: 'An error occurred while fetching photos' });
+    }
+});
+
 
 // Database Endpoints
 
