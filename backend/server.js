@@ -141,10 +141,10 @@ app.get('/api/place/photo', verifyFirebaseToken, async (req, res) => {
     console.log("photo called");
     try {
         // Get parameters from the client request
-        const photoReference  = req.query.photo_reference;
+        const { photo_reference, maxwidth }  = req.query;
         // Validate required parameters
-        if (!photoReference) {
-            return res.status(400).json({ error: 'Missing required parameters: photo_reference' });
+        if (!photo_reference || !maxwidth) {
+            return res.status(400).json({ error: 'Missing required parameters: photo_reference or maxwidth' });
         }
 
         
@@ -153,8 +153,8 @@ app.get('/api/place/photo', verifyFirebaseToken, async (req, res) => {
         // Make the API request
         const response = await axios.get(apiUrl, {
             params: {
-                photo_reference: photoReference,
-                maxwidth: 400,
+                photo_reference: photo_reference,
+                maxwidth: maxwidth,
                 key: GOOGLE_API_KEY, 
             },
         });
