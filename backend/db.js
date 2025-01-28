@@ -9,6 +9,9 @@ const pool = new Pool({
   database: 'postgres',
   password: '$Mauriceiscute97',
   port: 5432, // Default PostgreSQL port
+  ssl: {
+    rejectUnauthorized: false, // Use false for testing; consider using proper CA certificates in production
+  },
 });
 
 module.exports = pool;
