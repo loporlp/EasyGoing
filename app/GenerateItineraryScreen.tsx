@@ -6,7 +6,7 @@ import RouteMap from '../components/RouteMap';
 import MultiRoutesMap from '../components/MultiRoutesMap';
 import { calculateOptimalRoute } from '../scripts/optimalRoute.js';
 import { Dimensions } from "react-native";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { storeData, getData } from '../scripts/localStore.js';
 
 const { height } = Dimensions.get('window');
@@ -24,21 +24,39 @@ const GenerateItineraryScreen = () => {
       };
 
     type Place = {
-        name: string;
+        alias: string;
         address: string;
-        image: string;
-        duration: number;
         priority: number;
-        route: string;
+        mode: string;
+        transportToNext: string;
+        transportDuration: number;
+        startDateTime: string;
+        duration: number;
         notes: string;
+        dayOrigin: boolean;
+        cost: number;
+        picture: string;
     };
+    
 
-    const origin = { name: 'Mexico City, Mexico', address: 'Mexico City, Mexico' };
-    const transportationModes = ['DRIVING', 'WALKING', 'TRANSIT', 'BICYCLING'];
+    const [origin, setOrigin] = useState<{ name: string; address: string }>();
 
-    // Initial empty destinations
+    // Initial empties
     const [destinations, setDestinations] = useState<Record<string, Place>>({});
     const [optimalRoute, setOptimalRoute] = useState<any[][]>([]);
+    const [transportationModes, setTransportationModes] = useState<string[]>([]);
+    
+    // Extract transportation mode
+    useEffect(() => {
+        if (Object.keys(destinations).length > 1) {
+            // Get transportation modes for all but the last destination
+            const modes = Object.values(destinations)
+                .map(destination => destination.mode || 'DRIVING'); // Default to 'DRIVING' if mode is missing
+
+            setTransportationModes(modes);
+            console.log("Transport Modes", transportationModes);
+        }
+    }, [destinations]);
 
     // Fetch destinations on mount
     useEffect(() => {
@@ -54,32 +72,60 @@ const GenerateItineraryScreen = () => {
 
     // Function to fetch destinations
     const loadDestinations = async () => {
+        const formattedDestinations: Record<string, Place> = {};
         try {
-            // Test to get data
-            const trip = await getData("tripIDs");
-
+            const trip = await getData("8");
+    
             if (trip) {
-              console.log("Trip Data:", trip);
-
-              console.log("Origin:", trip.origin);
-              console.log("Destinations:", trip.destinations);
+                console.log("Trip Data:", trip);
+    
+                // Find the origin (first destination with dayOrigin = true)
+                const originDestination = trip.destinations.find((destination: { dayOrigin: boolean; }) => destination.dayOrigin === true);
+    
+                if (originDestination) {
+                    const parsedPicture = JSON.parse(originDestination.picture);
+                    setOrigin({
+                        name: originDestination.alias,
+                        address: originDestination.address,
+                    });
+    
+                    console.log("Set origin:", originDestination.alias);
+                }
+    
+                // Iterate over destinations and format them into the new structure
+                trip.destinations.forEach((destination: { picture: string; alias: any; address: any; priority: any; mode: any; transportToNext: any; transportDuration: any; startDateTime: any; duration: string; notes: any; dayOrigin: any; cost: any; }, index: { toString: () => string | number; }) => {
+                    const parsedPicture = JSON.parse(destination.picture);
+    
+                    const formattedDestination = {
+                        alias: destination.alias,
+                        address: destination.address,
+                        priority: destination.priority,
+                        mode: destination.mode || 'DRIVING', // default mode is DRIVING
+                        transportToNext: destination.transportToNext ? JSON.stringify(destination.transportToNext) : "", // serialized route
+                        transportDuration: destination.transportDuration,
+                        startDateTime: destination.startDateTime,
+                        duration: parseFloat(destination.duration),
+                        notes: destination.notes,
+                        dayOrigin: destination.dayOrigin || false,
+                        cost: destination.cost,
+                        picture: destination.picture,
+                    };
+    
+                    formattedDestinations[index.toString()] = formattedDestination;
+                });
+    
+                console.log("Formatted Destinations:", formattedDestinations);
+                setDestinations(formattedDestinations); // Update state with the new structure
             } else {
-              console.log("No data found for this trip ID.");
+                console.log("No data found for this trip ID.");
             }
-          } catch (error) {
+        } catch (error) {
             console.error("Error fetching trip data:", error);
         }
+    
+        return formattedDestinations;
+    };    
 
-        const allDestinations: Record<string, Place> = {};
-        for (const key in destinations) {
-            console.log("Key:", key);
-            const destination = await getData(key);
-            if (destination) {
-                allDestinations[key] = destination;
-            }
-        }
-        return allDestinations;
-    };
 
     // Function to save multiple destinations
     const saveDestinations = async (newDestinations: Record<string, Place>) => {
@@ -88,14 +134,28 @@ const GenerateItineraryScreen = () => {
         }
     };
 
+    const prevOptimalRouteRef = useRef<any[][]>([]);
+
     useEffect(() => {
-        if (Object.keys(destinations).length > 0) {
+        if (Object.keys(destinations).length > 0 && origin) {
             const fetchOptimalRoute = async () => {
                 try {
                     const destinationArray = Object.values(destinations);
-                    const mode = 'DRIVING'; // You can modify this to get mode dynamically
-                    const result = await calculateOptimalRoute(destinationArray, origin, mode);
-                    setOptimalRoute(result); // Set optimal route to state
+                    const simplifiedDestinations = destinationArray.map(destination => ({
+                        name: destination.alias,
+                        address: destination.address
+                    }));
+                    console.log("Simplified Destinations Array:", simplifiedDestinations);
+
+                    const mode = 'DRIVING';
+                    const result = await calculateOptimalRoute(simplifiedDestinations, origin, mode);
+
+                    // Check if the result is different from the previous optimal route
+                    if (JSON.stringify(result) !== JSON.stringify(prevOptimalRouteRef.current)) {
+                        setOptimalRoute(result);
+                        // Update ref to current optimal route
+                        prevOptimalRouteRef.current = result;
+                    }
                 } catch (error) {
                     console.error("Failed to get optimal route:", error);
                 }
@@ -103,7 +163,7 @@ const GenerateItineraryScreen = () => {
 
             fetchOptimalRoute();
         }
-    }, [destinations]);
+    }, [destinations, origin]);
 
     const [selectedDestination, setSelectedDestination] = useState<string | null>(null);
     const [transportationText, setTransportationText] = useState("driving");
@@ -119,7 +179,7 @@ const GenerateItineraryScreen = () => {
     const getRouteText = () => {
         if (!selectedDestination) return "";
         const routeDestination = destinations[selectedDestination];
-        return `${transportationText} instructions to ${routeDestination?.name}.`;
+        return `${transportationText} instructions to ${routeDestination?.alias}.`;
     };
 
     const reviewItinerary = () => {
@@ -148,9 +208,9 @@ const GenerateItineraryScreen = () => {
                             </View>
 
                             <View style={styles.destinationContainer}>
-                                <Image style={styles.destinationImage} source={{ uri: destinations[destinationKey].image }} />
+                                <Image style={styles.destinationImage} source={{ uri: destinations[destinationKey].picture }} />
                                 <View style={styles.destinationLabel}>
-                                    <Text style={styles.destinationName}>{destinations[destinationKey].name}</Text>
+                                    <Text style={styles.destinationName}>{destinations[destinationKey].alias}</Text>
                                     <Text style={styles.destinationDetails}>
                                         Duration: {destinations[destinationKey].duration} hrs | Priority: {destinations[destinationKey].priority}
                                     </Text>
