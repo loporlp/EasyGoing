@@ -7,105 +7,131 @@ import MultiRoutesMap from '../components/MultiRoutesMap';
 import { calculateOptimalRoute } from '../scripts/optimalRoute.js';
 import { Dimensions } from "react-native";
 import { useState, useEffect } from "react";
+import { storeData, getData } from '../scripts/localStore.js';
 
 const { height } = Dimensions.get('window');
 
 const GenerateItineraryScreen = () => {
     const router = useRouter();
 
+    // Routes
+    const [polylinesData, setPolylinesData] = useState<any[]>([]);
+    const handlePolylinesReady = (polylines: any[]) => {
+        setPolylinesData(polylines);
+        console.log('Polylines Data:', polylines);
+
+        // TODO: Store this data
+      };
+
     type Place = {
         name: string;
-        coords: {
-            latitude: number;
-            longitude: number;
-        };
-        image: any;
+        address: string;
+        image: string;
+        duration: number;
+        priority: number;
+        route: string;
+        notes: string;
     };
 
     const origin = { name: 'Mexico City, Mexico', address: 'Mexico City, Mexico' };
-    let locations = [
-        { name: 'Chicago', address: 'Chicago, Illinois' },
-        { name: 'Disneyland Park', address: 'Disneyland Park' },
-        { name: 'Caesars Palace', address: '3570 S Las Vegas Blvd, Paradise, NV 89109'},
-        { name: 'Austin', address: 'Austin, Texas' }];
     const transportationModes = ['DRIVING', 'WALKING', 'TRANSIT', 'BICYCLING'];
 
-    /*const origin = { name: 'Tokyo International Airport, Tokyo', address: 'Hanedakuko, Ota City, Tokyo 144-0041, Japan' };
-      let locations = [
-          { name: 'Tokyo Tower, Tokyo', address: '4 Chome-2-8 Shibakoen, Minato City, Tokyo, Japan' },
-          { name: 'Shibuya Scramble Crossing', address: '21 Udagawa-cho, Shibuya, Tokyo, Japan' },
-          { name: 'Akihabara Electric Town', address: '1 Chome-12 Soto-Kanda, Chiyoda City, Tokyo, Japan'} ];
-      const transportationModes = ['TRANSIT', 'TRANSIT', 'TRANSIT'];*/
-
+    // Initial empty destinations
+    const [destinations, setDestinations] = useState<Record<string, Place>>({});
     const [optimalRoute, setOptimalRoute] = useState<any[][]>([]);
+
+    // Fetch destinations on mount
     useEffect(() => {
-        const fetchOptimalRoute = async () => {
-          try {
-            const mode = 'DRIVING';
-            const result = await calculateOptimalRoute(locations, origin, mode);
-            setOptimalRoute(result); // Set optimal route to state
-          } catch (error) {
-            console.error("Failed to get optimal route:", error);
-          }
+        console.log("On GenerateItineraryScreen");
+        const fetchDestinations = async () => {
+            const loadedDestinations = await loadDestinations();
+            console.log("Loaded Destinations:", loadedDestinations);
+            setDestinations(loadedDestinations); // Update state with loaded destinations
         };
 
-        fetchOptimalRoute();
-      }, []);
+        fetchDestinations();
+    }, []);
 
-    const destinations : Record<string, Place> = {
-        akihabara: { name: "Akihabara Electric Town", coords: { latitude: 35.7100, longitude: 139.8107 }, image: require("../assets/images/AkihabaraElectricTown.jpg") },
-        skytree: { name: "Tokyo Skytree", coords: { latitude: 35.7023, longitude: 139.7745 }, image: require("../assets/images/tokyoskytree.jpg") },
-        pokemon: { name: "Pokemon Center", coords: { latitude: 35.6620, longitude: 139.6984 }, image: require("../assets/images/PokemonCenterShibuya.png") },
-        meiji: { name: "Meiji Jingu", coords: { latitude: 35.6764, longitude: 139.6993 }, image: require("../assets/images/MeijiJingu.jpg") },
-        palace: { name: "Imperial Palace", coords: { latitude: 35.6852, longitude: 139.7528 }, image: require("../assets/images/ImperialPalace.jpg") },
+    // Function to fetch destinations
+    const loadDestinations = async () => {
+        try {
+            // Test to get data
+            const trip = await getData("tripIDs");
+
+            if (trip) {
+              console.log("Trip Data:", trip);
+
+              console.log("Origin:", trip.origin);
+              console.log("Destinations:", trip.destinations);
+            } else {
+              console.log("No data found for this trip ID.");
+            }
+          } catch (error) {
+            console.error("Error fetching trip data:", error);
+        }
+
+        const allDestinations: Record<string, Place> = {};
+        for (const key in destinations) {
+            console.log("Key:", key);
+            const destination = await getData(key);
+            if (destination) {
+                allDestinations[key] = destination;
+            }
+        }
+        return allDestinations;
     };
+
+    // Function to save multiple destinations
+    const saveDestinations = async (newDestinations: Record<string, Place>) => {
+        for (const key in newDestinations) {
+            await storeData(key, newDestinations[key]);
+        }
+    };
+
+    useEffect(() => {
+        if (Object.keys(destinations).length > 0) {
+            const fetchOptimalRoute = async () => {
+                try {
+                    const destinationArray = Object.values(destinations);
+                    const mode = 'DRIVING'; // You can modify this to get mode dynamically
+                    const result = await calculateOptimalRoute(destinationArray, origin, mode);
+                    setOptimalRoute(result); // Set optimal route to state
+                } catch (error) {
+                    console.error("Failed to get optimal route:", error);
+                }
+            };
+
+            fetchOptimalRoute();
+        }
+    }, [destinations]);
 
     const [selectedDestination, setSelectedDestination] = useState<string | null>(null);
     const [transportationText, setTransportationText] = useState("driving");
-    const [selectedCoordinates, setSelectedCoordinates] = useState({
-        latitude: 35.652832,
-        longitude: 139.839478,
-    });
 
-    // Determine the route based on the selected destination
-    const getRouteDestination = (destination: string) => {
-        switch (destination) {
-            case "akihabara":
-                return destinations.skytree;
-            case "skytree":
-                return destinations.pokemon;
-            case "pokemon":
-                return destinations.meiji;
-            case "meiji":
-                return destinations.palace;
-            default:
-                return destinations.skytree; // TODO: Change default?
-        }
-        };
-
-    const handlePress = (destination : string) => {
+    const handlePress = (destination: string) => {
         setSelectedDestination(prev => prev === destination ? null : destination);
     };
 
-    const handleModeChange = (text : any) => {
-        // Update the transportation text when a mode button is pressed
+    const handleModeChange = (text: string) => {
         setTransportationText(text);
     };
 
     const getRouteText = () => {
         if (!selectedDestination) return "";
-        const routeDestination = getRouteDestination(selectedDestination);
-        return `${transportationText} instructions to ${routeDestination.name}.`;
+        const routeDestination = destinations[selectedDestination];
+        return `${transportationText} instructions to ${routeDestination?.name}.`;
     };
 
     const reviewItinerary = () => {
         router.push("/ReviewItineraryScreen");
-    }
+    };
 
     return (
         <View style={styles.container}>
             <SafeAreaView style={{ flex: 1 }}>
-                <MultiRoutesMap locations={optimalRoute} transportationModes={transportationModes} />
+            {optimalRoute.length > 0 && (
+                <MultiRoutesMap locations={optimalRoute} transportationModes={transportationModes} onPolylinesReady={handlePolylinesReady} />
+            )}
             </SafeAreaView>
 
             <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
@@ -122,11 +148,12 @@ const GenerateItineraryScreen = () => {
                             </View>
 
                             <View style={styles.destinationContainer}>
-                                <Image style={styles.destinationImage} source={destinations[destinationKey].image} />
+                                <Image style={styles.destinationImage} source={{ uri: destinations[destinationKey].image }} />
                                 <View style={styles.destinationLabel}>
                                     <Text style={styles.destinationName}>{destinations[destinationKey].name}</Text>
-                                    <Text style={styles.destinationDetails}>Duration: {destinationKey === 'akihabara' ? '6 hrs' : '2 hrs'} | Priority: {destinationKey === 'akihabara' ? 1 : 2}</Text> 
-                                     {/*TODO: Make this generic for different priority and stuff*/}
+                                    <Text style={styles.destinationDetails}>
+                                        Duration: {destinations[destinationKey].duration} hrs | Priority: {destinations[destinationKey].priority}
+                                    </Text>
                                 </View>
                             </View>
                         </TouchableOpacity>
@@ -156,6 +183,7 @@ const styles = StyleSheet.create({
     },
 
     map: {
+        flex: 1,
         width: "100%",
         height: 350,
         marginBottom: 0,
