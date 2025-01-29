@@ -1,6 +1,6 @@
 import {getIdToken} from './getFirebaseID'
 import { auth } from '../firebaseConfig';
-import { getData } from './localStore';
+import { deleteData, getData, storeData } from './localStore';
 
 /**
  * 
@@ -47,7 +47,7 @@ export const getTrips = async () => {
  * @param {import('firebase/auth').Auth} auth of signed in user
  * @returns bool if creation was successfull
  */
-export const createTrip = async () => {
+export const createTrip = async (startDate, endDate, budget, origin) => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000); // Set timeout to 5 seconds
   
@@ -64,10 +64,10 @@ export const createTrip = async () => {
             body: JSON.stringify({                  
                 trip_details: {
                   "tripName": "",
-                  "tripStartDate": "",
-                  "tripEndDate": "",
-                  "budget": 0,
-                  "origin": "",
+                  "tripStartDate": startDate,
+                  "tripEndDate": endDate,
+                  "budget": budget,
+                  "origin": origin,
                   "destinations": []
                 }
               }),
@@ -75,11 +75,15 @@ export const createTrip = async () => {
         });
 
         const data = await response.json();
-        console.log(data)
+        console.log(data);
+        tripIDs = await getData("tripIDs");
+        storeData(data.id.toString(), data.trip_details);
+        tripIDs.push(data.id.toString());
+        storeData("currentTrip", data.id)
         return true;
   
     } catch (error) {
-      console.error('Error fetching users trips:', error);
+      console.error('Error creating trip:', error);
       return false;
     } finally {
       clearTimeout(timeout);
@@ -110,6 +114,7 @@ export const deleteTrip = async (tripId) => {
 
       const data = await response.json();
       console.log(data)
+      deleteData(tripId.toString());
       return true;
   
     } catch (error) {
@@ -127,10 +132,10 @@ export const deleteTrip = async (tripId) => {
  * @returns bool if deletion was successfull
  * 
  */
-export const updateTrip = async (tripId) => {
+export const updateTrip = async (tripId, updatedTrip) => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000); // Set timeout to 5 seconds
-
+    await storeData(tripId.toString(), updateTrip)
     tripDetails = await getData(tripId.toString());
 
   
