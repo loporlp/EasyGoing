@@ -17,7 +17,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.easygoing.easygoing",
-      "googleMapsApiKey": "AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI"
+      "googleMapsApiKey": "AIzaSyAQgbWUgdfMozsamfhRi8HrHlRorkFNIEc"
     },
     "android": {
       "adaptiveIcon": {
@@ -26,7 +26,7 @@
       },
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI"
+          "apiKey": "AIzaSyAQgbWUgdfMozsamfhRi8HrHlRorkFNIEc"
         }
       }
     },

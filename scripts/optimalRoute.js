@@ -6,7 +6,7 @@ async function getDistanceMatrix(origin, destinations, mode) {
     const destinationsStr = destinations.map(d => d.address).join('|'); // Between each destination, add this symbol
     console.log("DestStr:" + destinationsStr);
 
-    const apiKey = "AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI";
+    const apiKey = "AIzaSyAQgbWUgdfMozsamfhRi8HrHlRorkFNIEc";
     const originFull = origin.name + ", " + origin.address; //TODO: name + address
     console.log("Origin OptimalRoute: " + originFull);
     // TODO: Convert to getCoords()
