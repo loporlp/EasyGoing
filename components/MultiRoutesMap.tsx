@@ -4,15 +4,17 @@ import MapView, { PROVIDER_GOOGLE, Polyline, Marker } from 'react-native-maps';
 import { getRoutePolyline } from '../scripts/routePolyline';
 import { getCoords } from '../scripts/nameToCoords.js';
 import { useIsFocused } from '@react-navigation/native';
-
-interface MultiRoutesMapProps {
-  locations: string[][]; // An array of origin-destination pairs
-  transportationModes: string[]; // Array of transportation modes
-}
+import { duration } from 'moment';
 
 const stroke_width = 4;
 
-const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportationModes }) => {
+interface MultiRoutesMapProps {
+  locations: string[][];  // An array of origin-destination pairs
+  transportationModes: string[]; // Array of transportation modes
+  onPolylinesReady?: (polylines: any[]) => void; // The list of routes
+}
+
+const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportationModes, onPolylinesReady }) => {
   const [polylines, setPolylines] = useState<any[]>([]); // State to store polylines
   const [transportDurations, setTransportDurations] = useState<any[]>([]) // State to store transport durations
   const [mapRegion, setMapRegion] = useState<any>(null); // State to store the map's region
@@ -20,6 +22,8 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
   const mapRef = useRef<MapView>(null);
   const isFocused = useIsFocused();
   const [mapKey, setMapKey] = useState(Date.now());
+  // Return polylines directly
+  const getAllPolylines = () => polylines;
 
   useEffect(() => {
     // Fetch polylines and markers asynchronously
@@ -47,10 +51,11 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
           // Add polyline data to the list
           polylinesArray.forEach((polyline: any) => {
             allPolylines.push({
-              id: `${origin}-${destination}-${mode}`,
+              id: `${origin}$${destination}$${mode}`,
               coordinates: polyline.path, // Use the path from the response
               strokeColor: polyline.strokeColor,
               strokeWidth: stroke_width, // TODO: Maybe use polyline.strokeWidth but this is optional
+              duration: polyline.duration
             });
 
             // Add duration to the list
@@ -82,6 +87,11 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
       setPolylines(allPolylines);
       setTransportDurations(allTransportDurations)
       setMarkers(allMarkers);
+
+       // If the parent provided a callback, call it with the polylines
+      if (onPolylinesReady) {
+        onPolylinesReady(allPolylines);
+      }
 
       // Set the map region to focus on the route(s)
       if (minLat !== Infinity && maxLat !== -Infinity && minLon !== Infinity && maxLon !== -Infinity) {
