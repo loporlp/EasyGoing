@@ -7,6 +7,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { registerUser } from '@/scripts/databaseInteraction';
 
 type CreateAccountScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -33,6 +34,7 @@ const CreateAccountScreen = () => {
       createUserWithEmailAndPassword(auth, email.trim(), password)
         .then(() => {
           console.log('Account created!');
+          registerUser();
           navigation.replace('Home');
         })
         .catch((error) => {

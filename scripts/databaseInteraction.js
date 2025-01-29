@@ -159,3 +159,29 @@ export const updateTrip = async (tripId) => {
       clearTimeout(timeout); // Clear the timeout once the request completes
     }
   };
+
+export const registerUser = async () => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000); // Set timeout to 5 seconds
+
+  try {
+    const idToken = await getIdToken(auth);
+    const response = await fetch(`https://ezgoing.app/api/register`, {
+      signal: controller.signal,
+      method: "POST",
+      headers: {
+          Authorization: `Bearer ${idToken}`, // Include the ID token in the header
+        },
+    });
+
+    const data = await response.json();
+    console.log(data)
+    return true;
+
+  } catch (error) {
+    console.error('Error registering user:', error);
+    return null;
+  } finally {
+    clearTimeout(timeout); // Clear the timeout once the request completes
+  }
+};
