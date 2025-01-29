@@ -43,6 +43,23 @@ export const getData = async (key) => {
     }
 };
 
+//storages data with given key and value
+export const deleteData = async (key) => {
+    //ensure key is string for proper storage
+    if(!(typeof key === 'string' || key instanceof String))
+    {
+        console.error("KEY ISN'T STRING");
+        return;
+    }   
+    try {
+        await storage.removeItem(key);
+        console.log(`${key} deleted`);
+    } catch (e) {
+        console.error(e);
+    }
+
+};
+
 export const fillLocal = async () => {
     hasTrips = await storage.getItem("tripIDs"); 
     if(!hasTrips){

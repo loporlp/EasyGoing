@@ -6,9 +6,13 @@ import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import CalendarPicker from 'react-native-calendar-picker';
 import moment from "moment";
 import AddEditDestinations from './AddEditDestinations';
+import { createTrip } from '@/scripts/databaseInteraction';
+
+
+
 
 export const head = () => ({
-    title: "Create New Trip"
+    title: "Create New Trip TEST"
 });
 
 const CreateNewTrip = () => {
@@ -22,9 +26,19 @@ const CreateNewTrip = () => {
     const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null); // Explicitly define state type
     const [datesText, setDatesText] = useState("");
     const [selectedPlace, setSelectedPlace] = useState<string>(''); // for place name
+    const [travelers, setTravelers] = useState('');
+    const [budget, setBudget] = useState('');
+
+    // function to check if all required fields have values
+    const isFormValid = 
+        selectedPlace !== '' &&
+        datesText !== '' &&
+        travelers !== '' &&
+        budget !== '';
 
     const startPlanning = () => {
         console.log('Selected place before navigation:', selectedPlace);
+        createTrip(selectedStartDate, selectedEndDate, budget, selectedPlace);
         router.push("/AddEditDestinations");
     }
 
@@ -90,11 +104,11 @@ const CreateNewTrip = () => {
                 </TouchableOpacity>
 
                 <View style={styles.travelersAndBudgetTextField}>
-                    <TextInput placeholder="Travelers" placeholderTextColor="lightgray" keyboardType="numeric" style={styles.travelerInput} />
-                    <TextInput placeholder="Budget" placeholderTextColor="lightgray" keyboardType="numeric" style={styles.budgetInput} />
+                    <TextInput placeholder="Travelers" placeholderTextColor="lightgray" keyboardType="numeric" style={styles.travelerInput} onChangeText={setTravelers}/>
+                    <TextInput placeholder="Budget" placeholderTextColor="lightgray" keyboardType="numeric" style={styles.budgetInput} onChangeText={setBudget}/>
                 </View>
 
-                <TouchableOpacity style={styles.createPlanButton} onPress={startPlanning}>
+                <TouchableOpacity style={[styles.createPlanButton, !isFormValid && {backgroundColor: "gray"}]} onPress={startPlanning} disabled={!isFormValid}>
                     <Text style={styles.startPlanningButtonText}>Start Planning!</Text>
                 </TouchableOpacity>
 

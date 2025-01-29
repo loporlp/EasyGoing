@@ -168,7 +168,7 @@ const HomeScreen = () => {
                 <ScrollView style={styles.container} contentContainerStyle={{ paddingTop: headerHeight, flexGrow: 1 }}>
                     <View style={styles.headerContainer}>
                         <Text style={styles.headerText}>Hello, <Text style={{ color: "#24a6ad" }}>{username}<Text style={{ color: "white" }}>!</Text></Text></Text>
-                        <TouchableOpacity onPress={() => { }} style={styles.notificationButton}>
+                        <TouchableOpacity onPress={() => { getData("tripIDs")}} style={styles.notificationButton}>
                             <Ionicons name="notifications" size={20} color="black" />
                         </TouchableOpacity>
                     </View>
