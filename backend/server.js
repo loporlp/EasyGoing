@@ -2,7 +2,8 @@ const express = require('express');
 const axios = require('axios'); // For making API calls
 const app = express();
 const port = 3000;
-const GOOGLE_API_KEY = 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI';
+// const GOOGLE_API_KEY = 'AIzaSyAQgbWUgdfMozsamfhRi8HrHlRorkFNIEc';
+const GOOGLE_API_KEY = 'AIzaSyAQgbWUgdfMozsamfhRi8HrHlRorkFNIEc'
 const admin = require('firebase-admin');
 
 // Middleware to parse JSON bodies (if needed for POST/PUT requests)

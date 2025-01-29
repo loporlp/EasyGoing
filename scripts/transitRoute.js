@@ -3,7 +3,7 @@ import axios from 'axios'
 export async function getTransitRoute(originCoords, destinationCoords) {
   try {
     // Construct the API URL
-    const apiKey = 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI';
+    const apiKey = 'AIzaSyAQgbWUgdfMozsamfhRi8HrHlRorkFNIEc';
     const apiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${originCoords.latitude},${originCoords.longitude}&destination=${destinationCoords.latitude},${destinationCoords.longitude}&mode=transit&key=${apiKey}`;
     // TEST API FOR TRANSIT
     //const apiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=Draper+Station&destination=University+of+Utah&mode=transit&key=${apiKey}`;
