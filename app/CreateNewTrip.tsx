@@ -8,9 +8,13 @@ import moment from "moment";
 import AddEditDestinations from './AddEditDestinations';
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { createTrip } from '@/scripts/databaseInteraction';
+
+
+
 
 export const head = () => ({
-    title: "Create New Trip"
+    title: "Create New Trip TEST"
 });
 
 const CreateNewTrip = () => {
@@ -25,12 +29,22 @@ const CreateNewTrip = () => {
     const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null); // Explicitly define state type
     const [datesText, setDatesText] = useState("");
     const [selectedPlace, setSelectedPlace] = useState<string>(''); // for place name
+    const [travelers, setTravelers] = useState('');
+    const [budget, setBudget] = useState('');
+
+    // function to check if all required fields have values
+    const isFormValid = 
+        selectedPlace !== '' &&
+        datesText !== '' &&
+        travelers !== '' &&
+        budget !== '';
 
     const [isAutocompleteModalVisible, setAutocompleteModalVisible] = useState(false); // To control modal visibility
     const [selectedAutocompletePlace, setSelectedAutocompletePlace] = useState<string>('');
 
     const startPlanning = () => {
         console.log('Selected place before navigation:', selectedPlace);
+        createTrip(selectedStartDate, selectedEndDate, budget, selectedPlace);
         router.push("/AddEditDestinations");
     }
 
@@ -114,10 +128,10 @@ const CreateNewTrip = () => {
 
                 <TouchableOpacity style={styles.destinationInput}>
                     <Ionicons name="wallet" size={22} color={"#24a6ad"} />
-                    <TextInput placeholder="Budget" placeholderTextColor="lightgray" keyboardType="numeric" style={{ fontSize: 18, paddingLeft: 5, width: "100%" }} returnKeyType="done" />
+                    <TextInput placeholder="Budget" placeholderTextColor="lightgray" keyboardType="numeric" style={{ fontSize: 18, paddingLeft: 5, width: "100%" }} returnKeyType="done" onChangeText={setBudget}/>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.createPlanButton} onPress={startPlanning}>
+                <TouchableOpacity style={[styles.createPlanButton, !isFormValid && {backgroundColor: "gray"}]} onPress={startPlanning} disabled={!isFormValid}>
                     <Text style={styles.startPlanningButtonText}>Start Planning!</Text>
                 </TouchableOpacity>
 
