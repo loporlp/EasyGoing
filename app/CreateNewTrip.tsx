@@ -6,6 +6,8 @@ import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import CalendarPicker from 'react-native-calendar-picker';
 import moment from "moment";
 import AddEditDestinations from './AddEditDestinations';
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 export const head = () => ({
     title: "Create New Trip"
@@ -15,6 +17,7 @@ const CreateNewTrip = () => {
 
     // Sets up navigations
     const router = useRouter();
+    const navigation = useNavigation();
 
     // calendar
     const [isModalVisible, setModalVisible] = useState(false); // To control modal visibility
@@ -22,6 +25,9 @@ const CreateNewTrip = () => {
     const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null); // Explicitly define state type
     const [datesText, setDatesText] = useState("");
     const [selectedPlace, setSelectedPlace] = useState<string>(''); // for place name
+
+    const [isAutocompleteModalVisible, setAutocompleteModalVisible] = useState(false); // To control modal visibility
+    const [selectedAutocompletePlace, setSelectedAutocompletePlace] = useState<string>('');
 
     const startPlanning = () => {
         console.log('Selected place before navigation:', selectedPlace);
@@ -46,6 +52,12 @@ const CreateNewTrip = () => {
         setModalVisible(false);
     };
 
+    const handleAutocompletePlaceSelect = (place: { description: string }) => {
+        setSelectedAutocompletePlace(place.description);
+        setAutocompleteModalVisible(false);
+    };
+
+
     const handlePlaceSelect = (place: { geometry: { location: { lat: any; lng: any; }; }; description: React.SetStateAction<string>; }) => {
         // Extract latitude and longitude from the selected place details
         if (place && place.geometry && place.geometry.location) {
@@ -65,34 +77,45 @@ const CreateNewTrip = () => {
 
             {/* Adds a dark overlay on the screen */}
             <View style={styles.darkOverlay} />
-
+            <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ marginHorizontal: 20, position: "absolute", marginTop: 50 }}>
+                <Ionicons name="arrow-back-outline" size={30} color={"white"} />
+            </TouchableOpacity>
             {/* Other UI elements on the screen */}
             <View style={styles.createTripContainer}>
 
                 <Text style={styles.createTripLabel}>Where are we{" "}
                     <Text style={styles.highlightText}>going</Text>, Traveler?</Text>
 
-                <AutocompleteTextBox
-                    onPlaceSelect={handlePlaceSelect}
-                    placeholder="Destination"
-                    placeholderTextColor="lightgray"
-                    style={styles.destinationInput}
-                />
+                <TouchableOpacity style={styles.destinationInput} onPress={() => setAutocompleteModalVisible(true)}>
+                    <Ionicons name="location" size={22} color={"#24a6ad"} />
+                    <View style={{ flex: 1, marginLeft: 5 }}>
+                        {(selectedAutocompletePlace) ? (
+                            <Text style={{ fontSize: 18 }} numberOfLines={1} ellipsizeMode="tail">
+                                {selectedAutocompletePlace}
+                            </Text>
+                        ) : (
+                            <Text style={{ fontSize: 18, color: "lightgray" }} numberOfLines={1} ellipsizeMode="tail">
+                                Destination
+                            </Text>
+                        )}
+                    </View>
+                </TouchableOpacity>
 
-                <TouchableOpacity style={styles.dateInput} onPress={() => setModalVisible(true)}>
+                <TouchableOpacity style={styles.destinationInput} onPress={() => setModalVisible(true)}>
+                    <Ionicons name="calendar" size={22} color={"#24a6ad"} />
                     <TextInput
                         placeholder="Dates"
                         placeholderTextColor="lightgray"
-                        style={{ color: 'black', fontSize: 16 }}
+                        style={{ color: 'black', fontSize: 18, marginLeft: 5 }}
                         value={datesText}
                         editable={false} // Make the TextInput non-editable, so the user can't manually edit
                     />
                 </TouchableOpacity>
 
-                <View style={styles.travelersAndBudgetTextField}>
-                    <TextInput placeholder="Travelers" placeholderTextColor="lightgray" keyboardType="numeric" style={styles.travelerInput} />
-                    <TextInput placeholder="Budget" placeholderTextColor="lightgray" keyboardType="numeric" style={styles.budgetInput} />
-                </View>
+                <TouchableOpacity style={styles.destinationInput}>
+                    <Ionicons name="wallet" size={22} color={"#24a6ad"} />
+                    <TextInput placeholder="Budget" placeholderTextColor="lightgray" keyboardType="numeric" style={{ fontSize: 18, paddingLeft: 5, width: "100%" }} returnKeyType="done" />
+                </TouchableOpacity>
 
                 <TouchableOpacity style={styles.createPlanButton} onPress={startPlanning}>
                     <Text style={styles.startPlanningButtonText}>Start Planning!</Text>
@@ -104,7 +127,6 @@ const CreateNewTrip = () => {
             <Modal
                 visible={isModalVisible}
                 transparent={true}
-                animationType="slide"
                 onRequestClose={() => setModalVisible(false)}
             >
                 <View style={styles.modalOverlay}>
@@ -126,6 +148,29 @@ const CreateNewTrip = () => {
                     </View>
                 </View>
             </Modal>
+
+            {/* Modal with Autocomplete search */}
+            <Modal
+                visible={isAutocompleteModalVisible}
+                transparent={true}
+                onRequestClose={() => setAutocompleteModalVisible(false)}
+            >
+                <View style={styles.modalAutocompleteOverlay}>
+                    <View style={styles.modalAutocompleteContent}>
+                        <AutocompleteTextBox
+                            onPlaceSelect={handleAutocompletePlaceSelect}
+                            placeholder="Destination"
+                            placeholderTextColor="lightgray"
+                            style={{ width: "100%", paddingRight: 25, borderColor: "black", borderWidth: 1, borderRadius: 10 }}
+                        />
+                        <View style={{ position: "absolute", top: 18, right: 25 }}>
+                            <TouchableOpacity onPress={() => setAutocompleteModalVisible(false)}>
+                                <Ionicons name="close-circle" size={24} color={"#24a6ad"} />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </View >
     );
 };
@@ -138,10 +183,9 @@ const styles = StyleSheet.create({
 
     backgroundImage: {
         width: "100%",
-        height: undefined,
+        height: "100%",
         position: "absolute",
         resizeMode: "cover",
-        aspectRatio: 9 / 18,
     },
 
     darkOverlay: {
@@ -149,8 +193,7 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
         width: "100%",
-        height: undefined,
-        aspectRatio: 9 / 18,
+        height: "100%",
         backgroundColor: "rgba(0, 0, 0, 0.7)",
     },
 
@@ -171,9 +214,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        marginTop: 80,
-        marginLeft: 10,
-        marginRight: 10,
+        marginHorizontal: 20
     },
 
     textFields: {
@@ -197,14 +238,22 @@ const styles = StyleSheet.create({
     },
 
     destinationInput: {
+        flexDirection: "row",
+        backgroundColor: "white",
         height: 40,
-        width: "80%",
+        width: "100%",
+        overflow: "hidden",
         borderColor: '#999',
-        marginBottom: 20,
-        fontSize: 16,
+        marginBottom: 15,
+        paddingLeft: 10,
         borderRadius: 10,
         paddingVertical: 5,
-        alignSelf: 'center',
+        justifyContent: "flex-start",
+        alignItems: "center",
+        shadowColor: "#333333",
+        shadowOffset: { width: 1, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3
     },
 
     dateInput: {
@@ -259,21 +308,21 @@ const styles = StyleSheet.create({
         backgroundColor: "#24a6ad",
         paddingVertical: 15,
         paddingHorizontal: 40,
-        borderRadius: 25,
+        borderRadius: 10,
         marginTop: 20,
         justifyContent: "center",
         alignItems: "center",
         elevation: 5,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
+        shadowColor: "#333333",
+        shadowOffset: { width: 1, height: 2 },
         shadowOpacity: 0.1,
-        shadowRadius: 5,
+        shadowRadius: 3,
         marginBottom: 60,
     },
 
     startPlanningButtonText: {
         color: "white",
-        fontSize: 18,
+        fontSize: 14,
         fontWeight: "bold",
         marginLeft: 40,
         marginRight: 40,
@@ -305,11 +354,29 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
         shadowRadius: 5,
-    }
+    },
+
+    modalAutocompleteOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+
+    modalAutocompleteContent: {
+        width: '100%',
+        height: "40%",
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 10,
+        flexDirection: "column",
+        alignItems: "stretch",
+        justifyContent: "flex-start",
+        paddingTop: 10,
+    },
 });
 
 export default CreateNewTrip;
 
 function setSelectedCoordinates(arg0: { latitude: any; longitude: any; }) {
-    
+
 }

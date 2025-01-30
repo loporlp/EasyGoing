@@ -66,15 +66,8 @@ export default function RootLayout() {
       <Stack.Screen
         name="CreateNewTrip"
         options={{
-          title: "Create New Trip",
-          headerStyle: {
-            backgroundColor: '#24a6ad',
-          },
-          headerTintColor: "white",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
-        }}
+          headerShown: false,
+        }} 
       />
 
       {/*Add / Edit Destinations screen*/}
