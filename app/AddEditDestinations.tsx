@@ -354,7 +354,10 @@ const AddEditDestinations = () => {
                                 />
                                 <Text style={styles.text}>Location:</Text>
                                 <AutocompleteTextBox
-                                    onPlaceSelect={setLocationAddress}
+                                    onPlaceSelect={(place) => {
+                                        setLocationAddress(place.description);
+                                        return place.description; // Explicitly return the string
+                                    }}
                                     placeholder="Address"
                                     placeholderTextColor="gray"
                                     style={styles.textBox}

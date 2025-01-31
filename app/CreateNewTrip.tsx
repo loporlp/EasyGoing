@@ -10,9 +10,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { createTrip } from '@/scripts/databaseInteraction';
 
-
-
-
 export const head = () => ({
     title: "Create New Trip TEST"
 });
@@ -23,28 +20,31 @@ const CreateNewTrip = () => {
     const router = useRouter();
     const navigation = useNavigation();
 
-    // calendar
-    const [isModalVisible, setModalVisible] = useState(false); // To control modal visibility
+    // Calendar State
+    const [isModalVisible, setModalVisible] = useState(false); // Controls date modal visibility
     const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null); // Explicitly define state type
-    const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null); // Explicitly define state type
+    const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
     const [datesText, setDatesText] = useState("");
-    const [selectedPlace, setSelectedPlace] = useState<string>(''); // for place name
+
+    // Budget Input State
     const [budget, setBudget] = useState('');
-    const [isAutocompleteModalVisible, setAutocompleteModalVisible] = useState(false); // To control modal visibility
+
+    // Autocomplete Modal State
+    const [isAutocompleteModalVisible, setAutocompleteModalVisible] = useState(false);
     const [selectedAutocompletePlace, setSelectedAutocompletePlace] = useState<string>('');
+    const [locationAddress, setLocationAddress] = useState<string>(''); // Added state for location address
 
-    // function to check if all required fields have values
-    const isFormValid = 
-        selectedAutocompletePlace !== '' &&
-        datesText !== '' &&
-        budget !== '';
+    // Function to check if all required fields have values
+    const isFormValid = selectedAutocompletePlace !== '' && datesText !== '' && budget !== '';
 
+    // Handles Navigation to Next Screen
     const startPlanning = () => {
-        console.log('Selected place before navigation:', selectedPlace);
-        createTrip(selectedStartDate, selectedEndDate, budget, selectedPlace);
+        console.log('Selected place before navigation:', selectedAutocompletePlace);
+        createTrip(selectedStartDate, selectedEndDate, budget, selectedAutocompletePlace);
         router.push("/AddEditDestinations");
-    }
+    };
 
+    // Handles Date Selection in Calendar
     const handleDateChange = (date: Date, type: 'START_DATE' | 'END_DATE') => {
         if (type === "END_DATE") {
             setSelectedEndDate(date);
@@ -54,6 +54,7 @@ const CreateNewTrip = () => {
         }
     };
 
+    // Updates the Date Text When Done
     const handleDone = () => {
         if (selectedStartDate && selectedEndDate) {
             const startFormatted = moment(selectedStartDate).format("ddd, MMM D");
@@ -63,21 +64,11 @@ const CreateNewTrip = () => {
         setModalVisible(false);
     };
 
+    // Handles Selection from Autocomplete
     const handleAutocompletePlaceSelect = (place: { description: string }) => {
         setSelectedAutocompletePlace(place.description);
+        setLocationAddress(place.description); // Updates location address
         setAutocompleteModalVisible(false);
-    };
-
-
-    const handlePlaceSelect = (place: { geometry: { location: { lat: any; lng: any; }; }; description: React.SetStateAction<string>; }) => {
-        // Extract latitude and longitude from the selected place details
-        if (place && place.geometry && place.geometry.location) {
-            setSelectedCoordinates({
-                latitude: place.geometry.location.lat,
-                longitude: place.geometry.location.lng,
-            });
-        }
-        setSelectedPlace(place.description);
     };
 
     return (
@@ -91,16 +82,18 @@ const CreateNewTrip = () => {
             <TouchableOpacity onPress={() => { navigation.goBack() }} style={{ marginHorizontal: 20, position: "absolute", marginTop: 50 }}>
                 <Ionicons name="arrow-back-outline" size={30} color={"white"} />
             </TouchableOpacity>
+
             {/* Other UI elements on the screen */}
             <View style={styles.createTripContainer}>
 
                 <Text style={styles.createTripLabel}>Where are we{" "}
                     <Text style={styles.highlightText}>going</Text>, Traveler?</Text>
 
+                {/* Autocomplete Input */}
                 <TouchableOpacity style={styles.destinationInput} onPress={() => setAutocompleteModalVisible(true)}>
                     <Ionicons name="location" size={22} color={"#24a6ad"} />
                     <View style={{ flex: 1, marginLeft: 5 }}>
-                        {(selectedAutocompletePlace) ? (
+                        {selectedAutocompletePlace ? (
                             <Text style={{ fontSize: 18 }} numberOfLines={1} ellipsizeMode="tail">
                                 {selectedAutocompletePlace}
                             </Text>
@@ -112,6 +105,7 @@ const CreateNewTrip = () => {
                     </View>
                 </TouchableOpacity>
 
+                {/* Date Selection Input */}
                 <TouchableOpacity style={styles.destinationInput} onPress={() => setModalVisible(true)}>
                     <Ionicons name="calendar" size={22} color={"#24a6ad"} />
                     <TextInput
@@ -123,11 +117,13 @@ const CreateNewTrip = () => {
                     />
                 </TouchableOpacity>
 
+                {/* Budget Input */}
                 <TouchableOpacity style={styles.destinationInput}>
                     <Ionicons name="wallet" size={22} color={"#24a6ad"} />
                     <TextInput placeholder="Budget" placeholderTextColor="lightgray" keyboardType="numeric" style={{ fontSize: 18, paddingLeft: 5, width: "100%" }} returnKeyType="done" onChangeText={setBudget}/>
                 </TouchableOpacity>
 
+                {/* Start Planning Button */}
                 <TouchableOpacity style={[styles.createPlanButton, !isFormValid && {backgroundColor: "gray"}]} onPress={startPlanning} disabled={!isFormValid}>
                     <Text style={styles.startPlanningButtonText}>Start Planning!</Text>
                 </TouchableOpacity>
@@ -135,14 +131,9 @@ const CreateNewTrip = () => {
             </View>
 
             {/* Modal with CalendarPicker */}
-            <Modal
-                visible={isModalVisible}
-                transparent={true}
-                onRequestClose={() => setModalVisible(false)}
-            >
+            <Modal visible={isModalVisible} transparent={true} onRequestClose={() => setModalVisible(false)}>
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
-
                         <CalendarPicker
                             startFromMonday={true}
                             allowRangeSelection={true}
@@ -151,25 +142,22 @@ const CreateNewTrip = () => {
                             selectedDayColor="#24a6ad"
                             dayShape="circle"
                         />
-
                         <TouchableOpacity style={styles.calendarDoneButton} onPress={handleDone}>
                             <Text style={styles.startPlanningButtonText}>Done</Text>
                         </TouchableOpacity>
-
                     </View>
                 </View>
             </Modal>
 
             {/* Modal with Autocomplete search */}
-            <Modal
-                visible={isAutocompleteModalVisible}
-                transparent={true}
-                onRequestClose={() => setAutocompleteModalVisible(false)}
-            >
+            <Modal visible={isAutocompleteModalVisible} transparent={true} onRequestClose={() => setAutocompleteModalVisible(false)}>
                 <View style={styles.modalAutocompleteOverlay}>
                     <View style={styles.modalAutocompleteContent}>
                         <AutocompleteTextBox
-                            onPlaceSelect={handleAutocompletePlaceSelect}
+                            onPlaceSelect={(place) => {
+                                handleAutocompletePlaceSelect(place);
+                                return place.description; // Explicitly return a string
+                            }}
                             placeholder="Destination"
                             placeholderTextColor="lightgray"
                             style={{ width: "100%", paddingRight: 25, borderColor: "black", borderWidth: 1, borderRadius: 10 }}
