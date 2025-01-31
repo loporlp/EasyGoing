@@ -142,10 +142,13 @@ const GenerateItineraryScreen = () => {
             const fetchOptimalRoute = async () => {
                 try {
                     const destinationArray = Object.values(destinations);
-                    const simplifiedDestinations = destinationArray.map(destination => ({
-                        name: destination.alias,
-                        address: destination.address
-                    }));
+                    const simplifiedDestinations = destinationArray
+                        .filter(destination => destination.alias !== origin.name)  // Exclude origin
+                        .map(destination => ({
+                            name: destination.alias,
+                            address: destination.address
+                        }));
+                    // TODO: Remove Origin from simplifiedDestinations (multi days will divide so different format)
                     console.log("Simplified Destinations Array:", simplifiedDestinations);
 
                     const mode = 'DRIVING';
