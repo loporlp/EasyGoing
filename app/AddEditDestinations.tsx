@@ -21,6 +21,15 @@ const test_trip: Trip = {
     tripEndDate: "2025-03-07",
     budget: 2000,
     origin: "123 Main St, New York, NY",
+    destinations: []
+}
+/*
+const test_trip: Trip = {
+    tripName: "New York City Trip",
+    tripStartDate: "2025-03-01",
+    tripEndDate: "2025-03-07",
+    budget: 2000,
+    origin: "123 Main St, New York, NY",
     destinations: [
         {
             destinationID: 0,
