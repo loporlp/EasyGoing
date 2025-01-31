@@ -14,6 +14,7 @@ import moment from "moment";
 import GenerateItineraryScreen from './GenerateItineraryScreen';
 import {Trip} from "../models/TripModel";
 
+//TODO: remove this later, this is SAMPLE data used for testing dynamic storage.
 const test_trip: Trip = {
     tripName: "Japan Trip",
     tripStartDate: "2023-06-01",
@@ -27,7 +28,7 @@ const test_trip: Trip = {
         address: "Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France",
         priority: 1,
         mode: "Flight",
-        transportToNext: "walking",
+        transportToNext: "Mont Saint-Michel",
         transportDuration: "2h",
         startDateTime: "2023-06-02T10:00:00Z",
         duration: "3h",
@@ -42,7 +43,7 @@ const test_trip: Trip = {
         address: "50170 Mont Saint-Michel, France",
         priority: 2,
         mode: "Train",
-        transportToNext: "walking",
+        transportToNext: "Sky Tree",
         transportDuration: "1h",
         startDateTime: "2023-06-03T09:00:00Z",
         duration: "5h",
@@ -53,8 +54,10 @@ const test_trip: Trip = {
       }
       
     ]
-  };
+};
 
+//TODO: rewrite these to simply retrieve/store current trip so that test_trip isn't needed.
+/*
 //stores destination object in local storage with key 'destination'
 async function storeDestination(key: string, destination: any) {
     await storeData(key, destination);
@@ -86,6 +89,7 @@ async function retrieveDestination(key: string) {
         return null;
     }
 }
+*/
 
 const { height } = Dimensions.get('window');
 
@@ -96,15 +100,24 @@ const AddEditDestinations = () => {
     const [visible, setVisible] = useState(false);
     const show = () => setVisible(true);
     const hide = () => setVisible(false);
+    // Track if user is currently editing a destionation (and if so, what index)
+    const [isEditing, setIsEditing] = useState(false);
+    const [editIndex, setEditIndex] = useState<number>(-1); // To store the index of the item being edited, -1 is default as it shouldn't ever be called if isEditing is false
 
     const addLocation = () => {
         // If missing a required field
         let errorMessage = "";
-        if (!locationAddress) {
+        if (!alias) {
+            errorMessage += "Location Alias (shorthand) is required.\n"
+        }
+        if (!location) {
             errorMessage += "Address is required.\n";
         }
         if (!duration) {
             errorMessage += "Duration is required.\n";
+        }
+        if (!priority) {
+            errorMessage += "Priority is required.\n";
         }
         if (errorMessage) {
             alert(errorMessage.trim());
@@ -114,36 +127,54 @@ const AddEditDestinations = () => {
         // Set default priority to -1 (as an integer) if it's empty or invalid
         const priorityValue = priority.trim() === "" || isNaN(Number(priority)) ? -1 : parseInt(priority);
 
-        // If no location is provided, extract the name from the address (before the first comma)
-        /*const name = location || (locationAddress?.description && typeof locationAddress.description === 'string'
-            ? locationAddress.description.split(",")[0]?.trim()
-            : 'Unnamed Location');
-            */
-        //TODO: ^ fix this later
-        const name = 'Unnamed Location';
-        //console.log("Extracted name:", name);
-
         const newDestination = {
-            name: name,
-            address: locationAddress,
-            image: name,
-            duration: duration,
+            destinationID: test_trip.destinations.length, //the ID will be the length (amount of destionation in trip) as the previous ID should be length -1
+            alias: alias,
+            address: location,
             priority: priorityValue,
-            route: "",
-            notes: typedNotes
+            mode: "", //TODO: implement this in app
+            transportToNext: "", //TODO: implement this in app
+            transportDuration: "", //TODO: implement this in app
+            startDateTime: "", //TODO: implement this in app
+            duration: duration,
+            notes: typedNotes,
+            dayOrigin: true, //TODO: figure out how to check if this is the day's origin (will require existing data to compare to)
+            cost: 40, // TODO: implement this in app
+            picture: JSON.stringify({ url: alias })
         };
-
-        setDestinations(prevDestinations => [...prevDestinations, newDestination]);
-
-        console.log(destinations);
-
-        // Store the new destination in AsyncStorage
-        storeDestination("destination", newDestination);
-        retrieveDestination("destination");
+        if(isEditing) {
+            const oldDestination = test_trip.destinations[editIndex];
+            newDestination.destinationID = oldDestination.destinationID;
+            newDestination.mode = oldDestination.mode;
+            newDestination.transportToNext = oldDestination.transportToNext ?? ""; //defaults to empty if there was no value
+            newDestination.transportDuration = oldDestination.transportDuration;
+            newDestination.startDateTime = oldDestination.startDateTime;
+            newDestination.dayOrigin = oldDestination.dayOrigin;
+            newDestination.cost = oldDestination.cost;
+            //replaces existing destination with the newly edited one
+            test_trip.destinations[editIndex] = newDestination; //updates local storage
+            setDestinations(prevDestinations => 
+                prevDestinations.map((destination, index) => 
+                    index === editIndex ? { ...destination, ...newDestination } : destination
+                )
+            );            
+            //disable editing mode now that editing is done
+            setIsEditing(false), setEditIndex(-1);
+        } else {
+            setDestinations(prevDestinations => [...prevDestinations, newDestination]);
+            // Store the new destination as part of a trip in AsyncStorage
+            //TODO: see methods above, must remake
+            /*
+            storeDestination("destination", newDestination);
+            retrieveDestination("destination");
+            */ 
+            test_trip.destinations.push(newDestination)
+        }
+        console.log(newDestination);
 
         // Clear the input fields after adding
+        setAlias("");
         setLocation("");
-        setLocationAddress("");
         setDuration("");
         setPriority("");
         setNotes("");
@@ -152,34 +183,45 @@ const AddEditDestinations = () => {
         hide();
     };
 
+    //sets to editing mode before opening the edit screen, setting relevant values
+    const editLocation = (index: number) => {
+        setIsEditing(true), setEditIndex(index);
+        const oldDestination = test_trip.destinations[index];
+        setAlias(oldDestination.alias);
+        setLocation(oldDestination.address);
+        setDuration(oldDestination.duration);
+        setPriority(oldDestination.priority.toString());
+        setNotes(oldDestination.notes || ""); //defaults notes to empty if it is
+        show()
+    }
+
+    //deletes location from both local storage and the destinations UI element
     const deleteLocation = (index: number) => {
+        test_trip.destinations = test_trip.destinations.filter((_, i) => i !== index);
         setDestinations(prevDestinations => prevDestinations.filter((_, i) => i !== index));
     };
 
-    //TODO: loop through with .map() and make it so the destinations are fully dynamic with what is stored.
-    const [destinations, setDestinations] = useState([
-        {
-            name: test_trip.destinations[0].alias,
-            address: test_trip.destinations[0].address,
-            image: "Central Park",
-            duration: test_trip.destinations[0].duration,
-            priority: test_trip.destinations[0].priority,
-            route: "/HomeScreen_API_Test",
-            notes: test_trip.destinations[0].notes
-        },
-        {
-            name: test_trip.destinations[1].alias,
-            address: test_trip.destinations[1].address,
-            image: "Central Park",
-            duration: test_trip.destinations[1].duration,
-            priority: test_trip.destinations[1].priority,
-            route: "/HomeScreen_API_Test",
-            notes: test_trip.destinations[1].notes
-        },
-    ]);
+    //dynamically displays the destinations stored in this trip (if there are any)
+    const [destinations, setDestinations] = useState(
+        test_trip.destinations.map(destination => ({
+            destinationID: destination.destinationID,
+            alias: destination.alias,
+            address: destination.address,
+            priority: destination.priority,
+            mode: destination.mode,
+            transportToNext: destination.transportToNext,
+            transportDuration: destination.transportDuration,
+            startDateTime: destination.startDateTime,
+            duration: destination.duration,
+            notes: destination.notes,
+            dayOrigin: destination.dayOrigin,
+            cost: destination.cost,
+            picture: destination.picture ? JSON.parse(destination.picture).url : "" //sets blank if no picture URL parsed, might be worth setting a default image here
+        }))
+    );
 
+    const [alias, setAlias] = useState("");
     const [location, setLocation] = useState("");
-    const [locationAddress, setLocationAddress] = useState("");
     const [duration, setDuration] = useState("");
     const [priority, setPriority] = useState("");
     const [typedNotes, setNotes] = useState("");
@@ -225,7 +267,7 @@ const AddEditDestinations = () => {
 
     const renderHiddenItem = ({ item, index }: { item: any; index: number }) => (
         <View style={[styles.hiddenItem, { height: 100 }]}>
-            <TouchableOpacity onPress={() => { }} style={[styles.editButton, { width: Math.abs(rightOpenValue / 2) }]}>
+            <TouchableOpacity onPress={() => { }} style={[styles.editButton, { width: Math.abs(rightOpenValue / 2) }]} onPressIn={() => editLocation(index)}>
                 <Ionicons name="pencil-sharp" size={25} color={"white"} />
             </TouchableOpacity>
 
@@ -245,11 +287,11 @@ const AddEditDestinations = () => {
                 ]}
             >
                 <View style={{ flex: 1, flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
-                    <DynamicImage placeName={item.name} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
+                    <DynamicImage placeName={item.alias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
                     <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10 }}>
                         <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginLeft: -50 }}>
                             <Ionicons name="location" size={20} color={"#24a6ad"} />
-                            <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{item.name}</Text>
+                            <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{item.alias}</Text>
                         </View>
 
                         <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5, marginLeft: -50 }}>
@@ -344,18 +386,19 @@ const AddEditDestinations = () => {
                         <View style={styles.inputContainer}>
                             {/* Text Input For Location, Duration, Priority, and Notes */}
                             <View style={styles.textContainer}>
-                                <Text style={styles.text}>Location:</Text>
+                                <Text style={styles.text}>Alias (Shorthand Name):</Text> 
                                 <TextInput
-                                    style={styles.textBox}
-                                    placeholder="Location"
+                                    style={styles.textBox} //TODO: figure out how we want to make asking for alias more smooth
+                                    placeholder="Grabbing Food" 
                                     placeholderTextColor="gray"
-                                    value={location}
-                                    onChangeText={setLocation}
+                                    value={alias}
+                                    onChangeText={setAlias}
                                 />
-                                <Text style={styles.text}>Location:</Text>
+                                <Text style={styles.text}>Address:</Text>
                                 <AutocompleteTextBox
+                                    value = {location}
                                     onPlaceSelect={(place) => {
-                                        setLocationAddress(place.description);
+                                        setLocation(place.description);
                                         return place.description; // Explicitly return the string
                                     }}
                                     placeholder="Address"
@@ -365,7 +408,7 @@ const AddEditDestinations = () => {
                                 <Text style={styles.text}>Duration (Minutes):</Text>
                                 <TextInput
                                     style={styles.textBox}
-                                    placeholder="1 hr"
+                                    placeholder="30m"
                                     placeholderTextColor="gray"
                                     keyboardType="numeric"
                                     value={duration}
@@ -389,13 +432,13 @@ const AddEditDestinations = () => {
                                     onChangeText={setNotes}
                                 />
                             </View>
-                            {/* Add + Cancel Buttons TODO: figure out why these buttons are overlayed on the text box*/}
+                            {/* Add + Cancel Buttons*/}
                             <View style={styles.buttonContainer}>
                                 <View style={styles.button}>
                                     <Button title="Cancel" onPress={hide} />
                                 </View>
                                 <View style={styles.button}>
-                                    <Button title="Add" onPress={addLocation} />
+                                    <Button title={isEditing ? "Edit" : "Add"} onPress={addLocation} />
                                 </View>
                             </View>
                         </View>
