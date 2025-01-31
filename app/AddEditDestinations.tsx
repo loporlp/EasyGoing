@@ -16,45 +16,59 @@ import {Trip} from "../models/TripModel";
 
 //TODO: remove this later, this is SAMPLE data used for testing dynamic storage.
 const test_trip: Trip = {
-    tripName: "Japan Trip",
-    tripStartDate: "2023-06-01",
-    tripEndDate: "2023-06-15",
-    budget: 3000,
+    tripName: "New York City Trip",
+    tripStartDate: "2025-03-01",
+    tripEndDate: "2025-03-07",
+    budget: 2000,
     origin: "123 Main St, New York, NY",
     destinations: [
-      {
-        destinationID: 0,
-        alias: "Eiffel Tower",
-        address: "Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France",
-        priority: 1,
-        mode: "Flight",
-        transportToNext: "Mont Saint-Michel",
-        transportDuration: "2h",
-        startDateTime: "2023-06-02T10:00:00Z",
-        duration: "3h",
-        notes: "Buy tickets in advance",
-        dayOrigin: true,
-        cost: 50,
-        picture: JSON.stringify({ url: "Central Park" })
-      },
-      {
-        destinationID: 1,
-        alias: "Mont Saint-Michel",
-        address: "50170 Mont Saint-Michel, France",
-        priority: 2,
-        mode: "Train",
-        transportToNext: "Sky Tree",
-        transportDuration: "1h",
-        startDateTime: "2023-06-03T09:00:00Z",
-        duration: "5h",
-        notes: "Check tide schedule for best experience",
-        dayOrigin: false,
-        cost: 25,
-        picture: JSON.stringify({ url: "Central Park" })
-      }
-      
+        {
+            destinationID: 0,
+            alias: "Statue of Liberty",
+            address: "New York, NY 10004, USA",
+            priority: 1,
+            mode: "Ferry",
+            transportToNext: "Central Park",
+            transportDuration: "1h",
+            startDateTime: "2025-03-02T09:00:00Z",
+            duration: "3h",
+            notes: "Book tickets in advance, check for ferry schedule",
+            dayOrigin: true,
+            cost: 40,
+            picture: JSON.stringify({ url: "Statue of Liberty" })
+        },
+        {
+            destinationID: 1,
+            alias: "Central Park",
+            address: "New York, NY 10024, USA",
+            priority: 2,
+            mode: "Walk",
+            transportToNext: "Museum of Modern Art",
+            transportDuration: "20m",
+            startDateTime: "2025-03-02T13:00:00Z",
+            duration: "2h",
+            notes: "Explore the park's famous landmarks like Bethesda Terrace",
+            dayOrigin: false,
+            cost: 0,
+            picture: JSON.stringify({ url: "Central Park" })
+        },
+        {
+            destinationID: 2,
+            alias: "Museum of Modern Art",
+            address: "11 W 53rd St, New York, NY 10019, USA",
+            priority: 3,
+            mode: "Walk",
+            transportToNext: "End of Day",
+            transportDuration: "10m",
+            startDateTime: "2025-03-02T15:00:00Z",
+            duration: "2h",
+            notes: "Check for special exhibitions before your visit",
+            dayOrigin: false,
+            cost: 25,
+            picture: JSON.stringify({ url: "Museum of Modern Art" })
+        }
     ]
-};
+};  
 
 //TODO: rewrite these to simply retrieve/store current trip so that test_trip isn't needed.
 /*
