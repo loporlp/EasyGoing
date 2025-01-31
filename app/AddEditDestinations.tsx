@@ -14,6 +14,7 @@ import moment from "moment";
 import GenerateItineraryScreen from './GenerateItineraryScreen';
 import {Trip} from "../models/TripModel";
 
+//TODO: remove this later, this is SAMPLE data used for testing dynamic storage.
 const test_trip: Trip = {
     tripName: "Japan Trip",
     tripStartDate: "2023-06-01",
@@ -27,7 +28,7 @@ const test_trip: Trip = {
         address: "Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France",
         priority: 1,
         mode: "Flight",
-        transportToNext: "walking",
+        transportToNext: "Mont Saint-Michel",
         transportDuration: "2h",
         startDateTime: "2023-06-02T10:00:00Z",
         duration: "3h",
@@ -42,7 +43,7 @@ const test_trip: Trip = {
         address: "50170 Mont Saint-Michel, France",
         priority: 2,
         mode: "Train",
-        transportToNext: "walking",
+        transportToNext: "Sky Tree",
         transportDuration: "1h",
         startDateTime: "2023-06-03T09:00:00Z",
         duration: "5h",
@@ -55,6 +56,8 @@ const test_trip: Trip = {
     ]
   };
 
+//TODO: rewrite these to simply retrieve/store current trip so that test_trip isn't needed.
+/*
 //stores destination object in local storage with key 'destination'
 async function storeDestination(key: string, destination: any) {
     await storeData(key, destination);
@@ -86,6 +89,7 @@ async function retrieveDestination(key: string) {
         return null;
     }
 }
+*/
 
 const { height } = Dimensions.get('window');
 
@@ -115,31 +119,39 @@ const AddEditDestinations = () => {
         const priorityValue = priority.trim() === "" || isNaN(Number(priority)) ? -1 : parseInt(priority);
 
         // If no location is provided, extract the name from the address (before the first comma)
-        /*const name = location || (locationAddress?.description && typeof locationAddress.description === 'string'
+        const name = location || (locationAddress?.description && typeof locationAddress.description === 'string'
             ? locationAddress.description.split(",")[0]?.trim()
             : 'Unnamed Location');
-            */
-        //TODO: ^ fix this later
-        const name = 'Unnamed Location';
         //console.log("Extracted name:", name);
 
+        //new destination for trip
         const newDestination = {
-            name: name,
+            destinationID: test_trip.destinations.length, //the ID will be the length (amount of destionation in trip) as the previous ID should be length -1
+            alias: name,
             address: locationAddress,
-            image: name,
-            duration: duration,
             priority: priorityValue,
-            route: "",
-            notes: typedNotes
+            mode: "", //TODO: implement this in app
+            transportToNext: "", //TODO: implement this in app
+            transportDuration: "", //TODO: implement this in app
+            startDateTime: "", //TODO: implement this in app
+            duration: duration,
+            notes: typedNotes,
+            dayOrigin: true, //TODO: figure out how to check if this is the day's origin (will require existing data to compare to)
+            cost: 40, // TODO: implement this in app
+            picture: JSON.stringify({ url: name })
         };
 
         setDestinations(prevDestinations => [...prevDestinations, newDestination]);
 
         console.log(destinations);
 
-        // Store the new destination in AsyncStorage
+        // Store the new destination as part of a trip in AsyncStorage
+        //TODO: see methods above
+        /*
         storeDestination("destination", newDestination);
         retrieveDestination("destination");
+        */ 
+        test_trip.destinations.push(newDestination)
 
         // Clear the input fields after adding
         setLocation("");
@@ -156,27 +168,24 @@ const AddEditDestinations = () => {
         setDestinations(prevDestinations => prevDestinations.filter((_, i) => i !== index));
     };
 
-    //TODO: loop through with .map() and make it so the destinations are fully dynamic with what is stored.
-    const [destinations, setDestinations] = useState([
-        {
-            name: test_trip.destinations[0].alias,
-            address: test_trip.destinations[0].address,
-            image: "Central Park",
-            duration: test_trip.destinations[0].duration,
-            priority: test_trip.destinations[0].priority,
-            route: "/HomeScreen_API_Test",
-            notes: test_trip.destinations[0].notes
-        },
-        {
-            name: test_trip.destinations[1].alias,
-            address: test_trip.destinations[1].address,
-            image: "Central Park",
-            duration: test_trip.destinations[1].duration,
-            priority: test_trip.destinations[1].priority,
-            route: "/HomeScreen_API_Test",
-            notes: test_trip.destinations[1].notes
-        },
-    ]);
+    //dynamically displays the destinations stored in this trip (if there are any)
+    const [destinations, setDestinations] = useState(
+        test_trip.destinations.map(destination => ({
+            destinationID: destination.destinationID,
+            alias: destination.alias,
+            address: destination.address,
+            priority: destination.priority,
+            mode: destination.mode,
+            transportToNext: destination.transportToNext,
+            transportDuration: destination.transportDuration,
+            startDateTime: destination.startDateTime,
+            duration: destination.duration,
+            notes: destination.notes,
+            dayOrigin: destination.dayOrigin,
+            cost: destination.cost,
+            picture: destination.picture ? JSON.parse(destination.picture).url : "" //sets blank if no picture URL parsed, might be worth setting a default image here
+        }))
+    );
 
     const [location, setLocation] = useState("");
     const [locationAddress, setLocationAddress] = useState("");
@@ -245,11 +254,11 @@ const AddEditDestinations = () => {
                 ]}
             >
                 <View style={{ flex: 1, flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
-                    <DynamicImage placeName={item.name} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
+                    <DynamicImage placeName={item.alias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
                     <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10 }}>
                         <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginLeft: -50 }}>
                             <Ionicons name="location" size={20} color={"#24a6ad"} />
-                            <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{item.name}</Text>
+                            <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{item.alias}</Text>
                         </View>
 
                         <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5, marginLeft: -50 }}>
