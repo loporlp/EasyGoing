@@ -54,7 +54,7 @@ const test_trip: Trip = {
       }
       
     ]
-  };
+};
 
 //TODO: rewrite these to simply retrieve/store current trip so that test_trip isn't needed.
 /*
@@ -100,6 +100,9 @@ const AddEditDestinations = () => {
     const [visible, setVisible] = useState(false);
     const show = () => setVisible(true);
     const hide = () => setVisible(false);
+    // Track if user is currently editing a destionation (and if so, what index)
+    const [isEditing, setIsEditing] = useState(false);
+    const [editIndex, setEditIndex] = useState<number>(-1); // To store the index of the item being edited, -1 is default as it shouldn't ever be called if isEditing is false
 
     const addLocation = () => {
         // If missing a required field
@@ -124,7 +127,6 @@ const AddEditDestinations = () => {
         // Set default priority to -1 (as an integer) if it's empty or invalid
         const priorityValue = priority.trim() === "" || isNaN(Number(priority)) ? -1 : parseInt(priority);
 
-        //new destination value for trip
         const newDestination = {
             destinationID: test_trip.destinations.length, //the ID will be the length (amount of destionation in trip) as the previous ID should be length -1
             alias: alias,
@@ -140,18 +142,35 @@ const AddEditDestinations = () => {
             cost: 40, // TODO: implement this in app
             picture: JSON.stringify({ url: alias })
         };
-
-        setDestinations(prevDestinations => [...prevDestinations, newDestination]);
-
-        console.log(destinations);
-
-        // Store the new destination as part of a trip in AsyncStorage
-        //TODO: see methods above
-        /*
-        storeDestination("destination", newDestination);
-        retrieveDestination("destination");
-        */ 
-        test_trip.destinations.push(newDestination)
+        if(isEditing) {
+            const oldDestination = test_trip.destinations[editIndex];
+            newDestination.destinationID = oldDestination.destinationID;
+            newDestination.mode = oldDestination.mode;
+            newDestination.transportToNext = oldDestination.transportToNext ?? ""; //defaults to empty if there was no value
+            newDestination.transportDuration = oldDestination.transportDuration;
+            newDestination.startDateTime = oldDestination.startDateTime;
+            newDestination.dayOrigin = oldDestination.dayOrigin;
+            newDestination.cost = oldDestination.cost;
+            //replaces existing destination with the newly edited one
+            test_trip.destinations[editIndex] = newDestination; //updates local storage
+            setDestinations(prevDestinations => 
+                prevDestinations.map((destination, index) => 
+                    index === editIndex ? { ...destination, ...newDestination } : destination
+                )
+            );            
+            //disable editing mode now that editing is done
+            setIsEditing(false), setEditIndex(-1);
+        } else {
+            setDestinations(prevDestinations => [...prevDestinations, newDestination]);
+            // Store the new destination as part of a trip in AsyncStorage
+            //TODO: see methods above, must remake
+            /*
+            storeDestination("destination", newDestination);
+            retrieveDestination("destination");
+            */ 
+            test_trip.destinations.push(newDestination)
+        }
+        console.log(newDestination);
 
         // Clear the input fields after adding
         setAlias("");
@@ -164,7 +183,21 @@ const AddEditDestinations = () => {
         hide();
     };
 
+    //sets to editing mode before opening the edit screen, setting relevant values
+    const editLocation = (index: number) => {
+        setIsEditing(true), setEditIndex(index);
+        const oldDestination = test_trip.destinations[index];
+        setAlias(oldDestination.alias);
+        setLocation(oldDestination.address);
+        setDuration(oldDestination.duration);
+        setPriority(oldDestination.priority.toString());
+        setNotes(oldDestination.notes || ""); //defaults notes to empty if it is
+        show()
+    }
+
+    //deletes location from both local storage and the destinations UI element
     const deleteLocation = (index: number) => {
+        test_trip.destinations = test_trip.destinations.filter((_, i) => i !== index);
         setDestinations(prevDestinations => prevDestinations.filter((_, i) => i !== index));
     };
 
@@ -234,7 +267,7 @@ const AddEditDestinations = () => {
 
     const renderHiddenItem = ({ item, index }: { item: any; index: number }) => (
         <View style={[styles.hiddenItem, { height: 100 }]}>
-            <TouchableOpacity onPress={() => { }} style={[styles.editButton, { width: Math.abs(rightOpenValue / 2) }]}>
+            <TouchableOpacity onPress={() => { }} style={[styles.editButton, { width: Math.abs(rightOpenValue / 2) }]} onPressIn={() => editLocation(index)}>
                 <Ionicons name="pencil-sharp" size={25} color={"white"} />
             </TouchableOpacity>
 
@@ -361,8 +394,9 @@ const AddEditDestinations = () => {
                                     value={alias}
                                     onChangeText={setAlias}
                                 />
-                                <Text style={styles.text}>Location:</Text>
+                                <Text style={styles.text}>Address:</Text>
                                 <AutocompleteTextBox
+                                    value = {location}
                                     onPlaceSelect={(place) => {
                                         setLocation(place.description);
                                         return place.description; // Explicitly return the string
@@ -404,7 +438,7 @@ const AddEditDestinations = () => {
                                     <Button title="Cancel" onPress={hide} />
                                 </View>
                                 <View style={styles.button}>
-                                    <Button title="Add" onPress={addLocation} />
+                                    <Button title={isEditing ? "Edit" : "Add"} onPress={addLocation} />
                                 </View>
                             </View>
                         </View>

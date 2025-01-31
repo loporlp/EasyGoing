@@ -11,10 +11,11 @@ type AutocompleteTextBoxProps = {
     onPlaceSelect?: (address: { description: string; place_id: string }) => string; // Callback when a place is selected
     placeholder?: string;
     placeholderTextColor?: string;
+    value?: string; // Accept a value prop to set the initial value
   };
 
-const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTextColor} : AutocompleteTextBoxProps) => {
-    const [text, setText] = useState('');
+const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTextColor, value = ''} : AutocompleteTextBoxProps) => {
+    const [text, setText] = useState(value);
     const [addresses, setAddresses] = useState<Address[]>([]);
     const [isSelectingAddress, setIsSelectingAddress] = useState(false); // Track if an address is selected
     const [previousText, setPreviousText] = useState(''); // Track previous text
