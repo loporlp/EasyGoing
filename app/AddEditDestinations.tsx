@@ -12,6 +12,48 @@ import { SwipeListView } from 'react-native-swipe-list-view';
 import CalendarPicker from 'react-native-calendar-picker';
 import moment from "moment";
 import GenerateItineraryScreen from './GenerateItineraryScreen';
+import {Trip} from "../models/TripModel";
+
+const test_trip: Trip = {
+    tripName: "Japan Trip",
+    tripStartDate: "2023-06-01",
+    tripEndDate: "2023-06-15",
+    budget: 3000,
+    origin: "123 Main St, New York, NY",
+    destinations: [
+      {
+        destinationID: 0,
+        alias: "Eiffel Tower",
+        address: "Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France",
+        priority: 1,
+        mode: "Flight",
+        transportToNext: "walking",
+        transportDuration: "2h",
+        startDateTime: "2023-06-02T10:00:00Z",
+        duration: "3h",
+        notes: "Buy tickets in advance",
+        dayOrigin: true,
+        cost: 50,
+        picture: JSON.stringify({ url: "Central Park" })
+      },
+      {
+        destinationID: 1,
+        alias: "Mont Saint-Michel",
+        address: "50170 Mont Saint-Michel, France",
+        priority: 2,
+        mode: "Train",
+        transportToNext: "walking",
+        transportDuration: "1h",
+        startDateTime: "2023-06-03T09:00:00Z",
+        duration: "5h",
+        notes: "Check tide schedule for best experience",
+        dayOrigin: false,
+        cost: 25,
+        picture: JSON.stringify({ url: "Central Park" })
+      }
+      
+    ]
+  };
 
 //stores destination object in local storage with key 'destination'
 async function storeDestination(key: string, destination: any) {
@@ -73,9 +115,12 @@ const AddEditDestinations = () => {
         const priorityValue = priority.trim() === "" || isNaN(Number(priority)) ? -1 : parseInt(priority);
 
         // If no location is provided, extract the name from the address (before the first comma)
-        const name = location || (locationAddress?.description && typeof locationAddress.description === 'string'
+        /*const name = location || (locationAddress?.description && typeof locationAddress.description === 'string'
             ? locationAddress.description.split(",")[0]?.trim()
             : 'Unnamed Location');
+            */
+        //TODO: ^ fix this later
+        const name = 'Unnamed Location';
         //console.log("Extracted name:", name);
 
         const newDestination = {
@@ -111,52 +156,26 @@ const AddEditDestinations = () => {
         setDestinations(prevDestinations => prevDestinations.filter((_, i) => i !== index));
     };
 
+    //TODO: loop through with .map() and make it so the destinations are fully dynamic with what is stored.
     const [destinations, setDestinations] = useState([
         {
-            name: "Central Park",
-            address: "",
+            name: test_trip.destinations[0].alias,
+            address: test_trip.destinations[0].address,
             image: "Central Park",
-            duration: "2 hrs",
-            priority: 2,
+            duration: test_trip.destinations[0].duration,
+            priority: test_trip.destinations[0].priority,
             route: "/HomeScreen_API_Test",
-            notes: ""
+            notes: test_trip.destinations[0].notes
         },
         {
-            name: "Empire State Building",
-            address: "",
-            image: "Empire State Building",
-            duration: "2 hrs",
-            priority: 1,
-            route: "",
-            notes: ""
+            name: test_trip.destinations[1].alias,
+            address: test_trip.destinations[1].address,
+            image: "Central Park",
+            duration: test_trip.destinations[1].duration,
+            priority: test_trip.destinations[1].priority,
+            route: "/HomeScreen_API_Test",
+            notes: test_trip.destinations[1].notes
         },
-        {
-            name: "Statue of Liberty",
-            address: "",
-            image: "Statue of Liberty",
-            duration: "3 hrs",
-            priority: 3,
-            route: "",
-            notes: ""
-        },
-        {
-            name: "Times Square",
-            address: "",
-            image: "Times Square",
-            duration: "2 hrs",
-            priority: 3,
-            route: "",
-            notes: ""
-        },
-        {
-            name: "Brooklyn Bridge",
-            address: "",
-            image: "Brooklyn Bridge",
-            duration: "2 hrs",
-            priority: 4,
-            route: "",
-            notes: ""
-        }
     ]);
 
     const [location, setLocation] = useState("");
