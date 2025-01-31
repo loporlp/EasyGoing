@@ -29,18 +29,15 @@ const CreateNewTrip = () => {
     const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null); // Explicitly define state type
     const [datesText, setDatesText] = useState("");
     const [selectedPlace, setSelectedPlace] = useState<string>(''); // for place name
-    const [travelers, setTravelers] = useState('');
     const [budget, setBudget] = useState('');
+    const [isAutocompleteModalVisible, setAutocompleteModalVisible] = useState(false); // To control modal visibility
+    const [selectedAutocompletePlace, setSelectedAutocompletePlace] = useState<string>('');
 
     // function to check if all required fields have values
     const isFormValid = 
-        selectedPlace !== '' &&
+        selectedAutocompletePlace !== '' &&
         datesText !== '' &&
-        travelers !== '' &&
         budget !== '';
-
-    const [isAutocompleteModalVisible, setAutocompleteModalVisible] = useState(false); // To control modal visibility
-    const [selectedAutocompletePlace, setSelectedAutocompletePlace] = useState<string>('');
 
     const startPlanning = () => {
         console.log('Selected place before navigation:', selectedPlace);
