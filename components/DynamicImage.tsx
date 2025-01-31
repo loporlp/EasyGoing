@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Image, Text, StyleSheet, StyleProp, ImageStyle, ViewStyle } from 'react-native';
 import axios from 'axios';
 
-const apiKey = 'AIzaSyCirptcZS6PrgHQphQSvcDEwdLhGRZahf0';
+const apiKey = 'AIzaSyAQgbWUgdfMozsamfhRi8HrHlRorkFNIEc';
 
 type DynamicImageProps = {
   placeName : string;
