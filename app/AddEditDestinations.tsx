@@ -505,7 +505,7 @@ const styles = StyleSheet.create({
     },
 
     travelerInput: {
-        height: 40,
+        height: 50,
         flex: 1,
         borderColor: '#999',
         borderBottomWidth: 1,
@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
     },
 
     budgetInput: {
-        height: 40,
+        height: 50,
         width: "50%",
         borderColor: '#999',
         borderBottomWidth: 1,

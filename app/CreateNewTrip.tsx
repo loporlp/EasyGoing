@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     },
 
     input: {
-        height: 40,
+        height: 50,
         width: "80%",
         borderColor: '#999',
         borderBottomWidth: 1,
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     destinationInput: {
         flexDirection: "row",
         backgroundColor: "white",
-        height: 40,
+        height: 50,
         width: "100%",
         overflow: "hidden",
         borderColor: '#999',
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     },
 
     dateInput: {
-        height: 40,
+        height: 50,
         width: "80%",
         borderColor: '#999',
         borderBottomWidth: 1,
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
     },
 
     travelerInput: {
-        height: 40,
+        height: 50,
         flex: 1,
         borderColor: '#999',
         borderBottomWidth: 1,
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     },
 
     budgetInput: {
-        height: 40,
+        height: 50,
         width: "50%",
         borderColor: '#999',
         borderBottomWidth: 1,
