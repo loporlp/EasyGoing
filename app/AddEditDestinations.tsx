@@ -104,11 +104,17 @@ const AddEditDestinations = () => {
     const addLocation = () => {
         // If missing a required field
         let errorMessage = "";
-        if (!locationAddress) {
+        if (!alias) {
+            errorMessage += "Location Alias (shorthand) is required.\n"
+        }
+        if (!location) {
             errorMessage += "Address is required.\n";
         }
         if (!duration) {
             errorMessage += "Duration is required.\n";
+        }
+        if (!priority) {
+            errorMessage += "Priority is required.\n";
         }
         if (errorMessage) {
             alert(errorMessage.trim());
@@ -118,17 +124,11 @@ const AddEditDestinations = () => {
         // Set default priority to -1 (as an integer) if it's empty or invalid
         const priorityValue = priority.trim() === "" || isNaN(Number(priority)) ? -1 : parseInt(priority);
 
-        // If no location is provided, extract the name from the address (before the first comma)
-        const name = location || (locationAddress?.description && typeof locationAddress.description === 'string'
-            ? locationAddress.description.split(",")[0]?.trim()
-            : 'Unnamed Location');
-        //console.log("Extracted name:", name);
-
-        //new destination for trip
+        //new destination value for trip
         const newDestination = {
             destinationID: test_trip.destinations.length, //the ID will be the length (amount of destionation in trip) as the previous ID should be length -1
-            alias: name,
-            address: locationAddress,
+            alias: alias,
+            address: location,
             priority: priorityValue,
             mode: "", //TODO: implement this in app
             transportToNext: "", //TODO: implement this in app
@@ -138,7 +138,7 @@ const AddEditDestinations = () => {
             notes: typedNotes,
             dayOrigin: true, //TODO: figure out how to check if this is the day's origin (will require existing data to compare to)
             cost: 40, // TODO: implement this in app
-            picture: JSON.stringify({ url: name })
+            picture: JSON.stringify({ url: alias })
         };
 
         setDestinations(prevDestinations => [...prevDestinations, newDestination]);
@@ -154,8 +154,8 @@ const AddEditDestinations = () => {
         test_trip.destinations.push(newDestination)
 
         // Clear the input fields after adding
+        setAlias("");
         setLocation("");
-        setLocationAddress("");
         setDuration("");
         setPriority("");
         setNotes("");
@@ -187,8 +187,8 @@ const AddEditDestinations = () => {
         }))
     );
 
+    const [alias, setAlias] = useState("");
     const [location, setLocation] = useState("");
-    const [locationAddress, setLocationAddress] = useState("");
     const [duration, setDuration] = useState("");
     const [priority, setPriority] = useState("");
     const [typedNotes, setNotes] = useState("");
@@ -353,10 +353,18 @@ const AddEditDestinations = () => {
                         <View style={styles.inputContainer}>
                             {/* Text Input For Location, Duration, Priority, and Notes */}
                             <View style={styles.textContainer}>
+                                <Text style={styles.text}>Alias (Shorthand Name):</Text> 
+                                <TextInput
+                                    style={styles.textBox} //TODO: figure out how we want to make asking for alias more smooth
+                                    placeholder="Grabbing Food" 
+                                    placeholderTextColor="gray"
+                                    value={alias}
+                                    onChangeText={setAlias}
+                                />
                                 <Text style={styles.text}>Location:</Text>
                                 <AutocompleteTextBox
                                     onPlaceSelect={(place) => {
-                                        setLocationAddress(place.description);
+                                        setLocation(place.description);
                                         return place.description; // Explicitly return the string
                                     }}
                                     placeholder="Address"
@@ -366,7 +374,7 @@ const AddEditDestinations = () => {
                                 <Text style={styles.text}>Duration (Minutes):</Text>
                                 <TextInput
                                     style={styles.textBox}
-                                    placeholder="1 hr"
+                                    placeholder="30m"
                                     placeholderTextColor="gray"
                                     keyboardType="numeric"
                                     value={duration}
@@ -390,7 +398,7 @@ const AddEditDestinations = () => {
                                     onChangeText={setNotes}
                                 />
                             </View>
-                            {/* Add + Cancel Buttons TODO: figure out why these buttons are overlayed on the text box*/}
+                            {/* Add + Cancel Buttons*/}
                             <View style={styles.buttonContainer}>
                                 <View style={styles.button}>
                                     <Button title="Cancel" onPress={hide} />
