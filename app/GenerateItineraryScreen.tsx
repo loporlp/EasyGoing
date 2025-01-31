@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import MapMarker from '../components/MapMarker';
 import RouteMap from '../components/RouteMap';
 import MultiRoutesMap from '../components/MultiRoutesMap';
+import DynamicImage from '../components/DynamicImage';
 import { calculateOptimalRoute } from '../scripts/optimalRoute.js';
 import { Dimensions } from "react-native";
 import { useState, useEffect, useRef } from "react";
@@ -37,7 +38,7 @@ const GenerateItineraryScreen = () => {
         cost: number;
         picture: string;
     };
-    
+
 
     const [origin, setOrigin] = useState<{ name: string; address: string }>();
 
@@ -45,7 +46,7 @@ const GenerateItineraryScreen = () => {
     const [destinations, setDestinations] = useState<Record<string, Place>>({});
     const [optimalRoute, setOptimalRoute] = useState<any[][]>([]);
     const [transportationModes, setTransportationModes] = useState<string[]>([]);
-    
+
     // Extract transportation mode
     useEffect(() => {
         if (Object.keys(destinations).length > 1) {
@@ -75,27 +76,27 @@ const GenerateItineraryScreen = () => {
         const formattedDestinations: Record<string, Place> = {};
         try {
             const trip = await getData("8");
-    
+
             if (trip) {
                 console.log("Trip Data:", trip);
-    
+
                 // Find the origin (first destination with dayOrigin = true)
                 const originDestination = trip.destinations.find((destination: { dayOrigin: boolean; }) => destination.dayOrigin === true);
-    
+
                 if (originDestination) {
                     const parsedPicture = JSON.parse(originDestination.picture);
                     setOrigin({
                         name: originDestination.alias,
                         address: originDestination.address,
                     });
-    
+
                     console.log("Set origin:", originDestination.alias);
                 }
-    
+
                 // Iterate over destinations and format them into the new structure
                 trip.destinations.forEach((destination: { picture: string; alias: any; address: any; priority: any; mode: any; transportToNext: any; transportDuration: any; startDateTime: any; duration: string; notes: any; dayOrigin: any; cost: any; }, index: { toString: () => string | number; }) => {
                     const parsedPicture = JSON.parse(destination.picture);
-    
+
                     const formattedDestination = {
                         alias: destination.alias,
                         address: destination.address,
@@ -110,10 +111,10 @@ const GenerateItineraryScreen = () => {
                         cost: destination.cost,
                         picture: destination.picture,
                     };
-    
+
                     formattedDestinations[index.toString()] = formattedDestination;
                 });
-    
+
                 console.log("Formatted Destinations:", formattedDestinations);
                 setDestinations(formattedDestinations); // Update state with the new structure
             } else {
@@ -122,9 +123,9 @@ const GenerateItineraryScreen = () => {
         } catch (error) {
             console.error("Error fetching trip data:", error);
         }
-    
+
         return formattedDestinations;
-    };    
+    };
 
 
     // Function to save multiple destinations
@@ -208,7 +209,7 @@ const GenerateItineraryScreen = () => {
                             </View>
 
                             <View style={styles.destinationContainer}>
-                                <Image style={styles.destinationImage} source={{ uri: destinations[destinationKey].picture }} />
+                                <DynamicImage placeName={destinations[destinationKey].alias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
                                 <View style={styles.destinationLabel}>
                                     <Text style={styles.destinationName}>{destinations[destinationKey].alias}</Text>
                                     <Text style={styles.destinationDetails}>

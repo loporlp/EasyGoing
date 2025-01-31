@@ -17,18 +17,18 @@ const DynamicImage = ({ placeName, containerStyle, imageStyle } : DynamicImagePr
   const fetchDynamicImage = async () => {
     try {
       // Step 1: Get Place Details
-      const placeSearchUrl = `fail`;//`https://maps.googleapis.com/maps/api/place/textsearch/json?query=${placeName}&key=${apiKey}`;
+      const placeSearchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${placeName}&key=${apiKey}`;
       const placeSearchResponse = await axios.get(placeSearchUrl);
 
       const place = placeSearchResponse.data.results[0];
       const photoReference = place.photos[0].photo_reference;
 
       // Step 2: Get Photo URL
-      const photoUrl = `fail`;//`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photoReference}&key=${apiKey}`;
+      const photoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photoReference}&key=${apiKey}`;
 
       setPhotoUrl(photoUrl);
     } catch (err) {
-      setError('Failed to fetch place photo');
+      setError('Unknown Photo');
       console.error(err);
     }
   };
