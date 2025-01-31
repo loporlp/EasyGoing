@@ -8,11 +8,14 @@ import { calculateOptimalRoute } from '../scripts/optimalRoute.js';
 import { Dimensions } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import { storeData, getData } from '../scripts/localStore.js';
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 const { height } = Dimensions.get('window');
 
 const GenerateItineraryScreen = () => {
     const router = useRouter();
+    const navigation = useNavigation();
 
     // Routes
     const [polylinesData, setPolylinesData] = useState<any[]>([]);
@@ -21,7 +24,7 @@ const GenerateItineraryScreen = () => {
         console.log('Polylines Data:', polylines);
 
         // TODO: Store this data
-      };
+    };
 
     type Place = {
         alias: string;
@@ -37,7 +40,7 @@ const GenerateItineraryScreen = () => {
         cost: number;
         picture: string;
     };
-    
+
 
     const [origin, setOrigin] = useState<{ name: string; address: string }>();
 
@@ -45,7 +48,18 @@ const GenerateItineraryScreen = () => {
     const [destinations, setDestinations] = useState<Record<string, Place>>({});
     const [optimalRoute, setOptimalRoute] = useState<any[][]>([]);
     const [transportationModes, setTransportationModes] = useState<string[]>([]);
-    
+
+    const [dates, setDates] = useState([
+        {
+            dropdown: false,
+            date: "Sat, Jul. 13"
+        },
+        {
+            dropdown: false,
+            date: "Sun, Jul. 14"
+        }
+    ]);
+
     // Extract transportation mode
     useEffect(() => {
         if (Object.keys(destinations).length > 1) {
@@ -70,32 +84,40 @@ const GenerateItineraryScreen = () => {
         fetchDestinations();
     }, []);
 
+    const toggleExpand = (index: number) => {
+        setDates((prevDates) =>
+            prevDates.map((item, idx) =>
+                idx === index ? { ...item, dropdown: !item.dropdown } : item
+            )
+        );
+    };
+
     // Function to fetch destinations
     const loadDestinations = async () => {
         const formattedDestinations: Record<string, Place> = {};
         try {
-            const trip = await getData("8");
-    
+            const trip = await getData("createTrip"); // currentTrip
+
             if (trip) {
                 console.log("Trip Data:", trip);
-    
+  
                 // Find the origin (first destination with dayOrigin = true)
                 const originDestination = trip.destinations.find((destination: { dayOrigin: boolean; }) => destination.dayOrigin === true);
-    
+
                 if (originDestination) {
                     const parsedPicture = JSON.parse(originDestination.picture);
                     setOrigin({
                         name: originDestination.alias,
                         address: originDestination.address,
                     });
-    
+
                     console.log("Set origin:", originDestination.alias);
                 }
-    
+
                 // Iterate over destinations and format them into the new structure
                 trip.destinations.forEach((destination: { picture: string; alias: any; address: any; priority: any; mode: any; transportToNext: any; transportDuration: any; startDateTime: any; duration: string; notes: any; dayOrigin: any; cost: any; }, index: { toString: () => string | number; }) => {
                     const parsedPicture = JSON.parse(destination.picture);
-    
+
                     const formattedDestination = {
                         alias: destination.alias,
                         address: destination.address,
@@ -110,10 +132,10 @@ const GenerateItineraryScreen = () => {
                         cost: destination.cost,
                         picture: destination.picture,
                     };
-    
+
                     formattedDestinations[index.toString()] = formattedDestination;
                 });
-    
+
                 console.log("Formatted Destinations:", formattedDestinations);
                 setDestinations(formattedDestinations); // Update state with the new structure
             } else {
@@ -122,9 +144,9 @@ const GenerateItineraryScreen = () => {
         } catch (error) {
             console.error("Error fetching trip data:", error);
         }
-    
+
         return formattedDestinations;
-    };    
+    };
 
 
     // Function to save multiple destinations
@@ -188,16 +210,56 @@ const GenerateItineraryScreen = () => {
 
     return (
         <View style={styles.container}>
-            <SafeAreaView style={{ flex: 1 }}>
-            {optimalRoute.length > 0 && (
-                <MultiRoutesMap locations={optimalRoute} transportationModes={transportationModes} onPolylinesReady={handlePolylinesReady} />
-            )}
+            <TouchableOpacity style={{ marginHorizontal: 20, marginTop: 50, position: "absolute", zIndex: 1 }} onPress={() => { router.back() }}>
+                <Ionicons name="arrow-back-outline" size={30} color={"white"} />
+            </TouchableOpacity>
+            <SafeAreaView style={{ flex: 1, marginTop: -50 }}>
+                <Image source={require("../assets/images/blue.png")} style={{ top: 0, height: "100%" }} />
+                {optimalRoute.length > 0 && (
+                    <MultiRoutesMap locations={optimalRoute} transportationModes={transportationModes} onPolylinesReady={handlePolylinesReady} />
+                )}
             </SafeAreaView>
 
             <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
-                <View style={styles.dateHeader}>
-                    <Text style={styles.dateText}>Sat, Jul. 12   v</Text>
-                </View>
+                {dates.map((dateItem, index) => (
+                    <>
+                        <TouchableOpacity style={styles.dateHeader} onPress={() => toggleExpand(index)}>
+                            <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                <Ionicons name="calendar" size={25} color={"#24a6ad"} />
+                                <Text style={styles.dateText}>{dateItem.date}</Text>
+                            </View>
+
+                            <Ionicons name={dateItem.dropdown ? "caret-up" : "caret-down"} size={25} color={"#24a6ad"} />
+
+                        </TouchableOpacity>
+
+                        {dateItem.dropdown && (
+                            <View style={styles.destination}>
+                                <View style={{ flex: 1, flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                    <Image style={styles.destinationImage} source={require("../assets/images/CentralPark.jpg")} />
+                                    <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10 }}>
+                                        <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginLeft: -50 }}>
+                                            <Ionicons name="location" size={20} color={"#24a6ad"} />
+                                            <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>Central Park</Text>
+                                        </View>
+
+                                        <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5, marginLeft: -50 }}>
+                                            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                                <Ionicons name="time" size={18} color={"#24a6ad"} />
+                                                <Text style={{ marginLeft: 5 }}>2hr</Text>
+                                            </View>
+
+                                            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginRight: 5 }}>
+                                                <MaterialCommunityIcons name="priority-high" size={18} color={"#24a6ad"} />
+                                                <Text style={{ marginLeft: 5 }}>3</Text>
+                                            </View>
+                                        </View>
+                                    </View>
+                                </View>
+                            </View>
+                        )}
+                    </>
+                ))}
 
                 {Object.keys(destinations).map((destinationKey) => (
                     <View key={destinationKey}>
@@ -239,7 +301,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: "column",
-        backgroundColor: '#fff',
+        backgroundColor: '#F4F4F4',
     },
 
     map: {
@@ -304,18 +366,20 @@ const styles = StyleSheet.create({
     scrollViewContainer: {
         flexGrow: 1,
         alignItems: "center",
-        paddingLeft: 10,
-        paddingRight: 10,
-        borderWidth: 2,
-        borderRadius: 10,
-        borderColor: "white",
+        padding: 10,
+        marginTop: 10
     },
 
     scrollView: {
-        maxHeight: height * 0.4,
-        borderRadius: 10,
+        flex: 1,
+        flexDirection: "column",
+        height: "100%",
+        marginTop: -15,
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
         overflow: "hidden",
         marginBottom: 10,
+        backgroundColor: "#F4F4F4",
     },
 
     // ==== GENERATE PLAN BUTTON ==== //
@@ -347,18 +411,23 @@ const styles = StyleSheet.create({
 
     dateHeader: {
         flexDirection: "row",
-        marginTop: 10,
-        backgroundColor: "gray",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 10,
+        backgroundColor: "white",
         color: "white",
         width: "100%",
+        shadowColor: "#333333",
+        shadowOffset: { width: 1, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
     },
 
     dateText: {
-        color: "white",
-        marginLeft: 20,
-        marginTop: 10,
-        marginBottom: 10,
+        color: "black",
         fontSize: 18,
+        fontWeight: "700",
+        marginLeft: 5
     },
 
     additionalInfo: {
@@ -371,6 +440,19 @@ const styles = StyleSheet.create({
     additionalText: {
         fontSize: 16,
         color: "#333",
+    },
+
+    destination: {
+        backgroundColor: "white",
+        width: "100%",
+        height: 100,
+        marginBottom: 10,
+        borderRadius: 10,
+        padding: 10,
+        shadowColor: "#333333",
+        shadowOffset: { width: 1, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
     },
 });
 

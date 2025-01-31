@@ -35,9 +35,7 @@ const CreateNewTrip = () => {
     // function to check if all required fields have values
     const isFormValid = 
         selectedPlace !== '' &&
-        datesText !== '' &&
-        travelers !== '' &&
-        budget !== '';
+        datesText !== '';
 
     const [isAutocompleteModalVisible, setAutocompleteModalVisible] = useState(false); // To control modal visibility
     const [selectedAutocompletePlace, setSelectedAutocompletePlace] = useState<string>('');
@@ -131,7 +129,7 @@ const CreateNewTrip = () => {
                     <TextInput placeholder="Budget" placeholderTextColor="lightgray" keyboardType="numeric" style={{ fontSize: 18, paddingLeft: 5, width: "100%" }} returnKeyType="done" onChangeText={setBudget}/>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={[styles.createPlanButton, !isFormValid && {backgroundColor: "gray"}]} onPress={startPlanning} disabled={!isFormValid}>
+                <TouchableOpacity style={[styles.createPlanButton, !isFormValid && {backgroundColor: "gray"}]} onPress={startPlanning} disabled={isFormValid}>
                     <Text style={styles.startPlanningButtonText}>Start Planning!</Text>
                 </TouchableOpacity>
 
