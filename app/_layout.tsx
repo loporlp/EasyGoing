@@ -96,23 +96,9 @@ export default function RootLayout() {
       <Stack.Screen
         name="GenerateItineraryScreen"
         options={{
-          headerTitle: () => (
-            <View style={styles.titleContainer}>
-              {/* City and Country Name */}
-              <Text style={styles.headerText}>{placeName || 'Tokyo, Japan'}</Text>
-              {/* Country Flag */}
-              <Flag code="JP" style={styles.flag} />
-            </View>
-          ),
-          headerStyle: {
-            backgroundColor: '#24a6ad',
-          },
-          headerTintColor: "white",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
-        }}
-      />
+          headerShown: false,
+          animation: "none"
+        }} />
 
       <Stack.Screen
         name="ReviewItineraryScreen"

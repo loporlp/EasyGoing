@@ -284,11 +284,10 @@ const AddEditDestinations = () => {
 
                 {/* Group of text fields */}
                 <View style={{ marginTop: 15 }}>
-                    <TouchableOpacity style={[styles.input, { flex: 1, flexDirection: "row", alignItems: 'center' }]}>
-                        <Ionicons name="location" size={22} color={"#24a6ad"} />
-                        {/* TODO: switch TextInput with AutocompleteTextBox */}
-                        <AutocompleteTextBox placeholder="Origin" placeholderTextColor="gray" />
-                    </TouchableOpacity>
+                    <View style={{flexDirection: "row", marginBottom: 10, alignItems: "center", backgroundColor: "white", borderRadius: 10}}>
+                        <Ionicons name="location" size={22} color={"#24a6ad"} style={{position: "absolute", zIndex: 1, marginLeft: 10}} />
+                        <AutocompleteTextBox placeholder="Origin" placeholderTextColor="gray" style={{ width: "100%", paddingLeft: 30 }} />
+                    </View>
 
                     <TouchableOpacity style={[styles.input, { flex: 1, flexDirection: "row", alignItems: 'center' }]} onPress={() => setModalVisible(true)}>
                         <Ionicons name="calendar-sharp" size={22} color={"#24a6ad"} />
@@ -338,7 +337,8 @@ const AddEditDestinations = () => {
             </View>
 
             {/* Add destination pop-up */}
-            <Modal animationType="fade" visible={visible} transparent={true} onRequestClose={hide}>
+               {/* Add destination pop-up */}
+               <Modal animationType="fade" visible={visible} transparent={true} onRequestClose={hide}>
                 <View style={styles.popup}>
                     <ImageBackground source={require("../assets/images/blue.png")} style={styles.backgroundImage}>
                         <View style={styles.inputContainer}>
@@ -661,6 +661,7 @@ const styles = StyleSheet.create({
         padding: 20,
         borderRadius: 10,
     },
+
 
     calendarDoneButton: {
         backgroundColor: "#24a6ad",
