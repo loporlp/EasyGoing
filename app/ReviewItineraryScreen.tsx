@@ -1,6 +1,9 @@
 import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { CommonActions } from '@react-navigation/native';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "expo-router";
 
 /**
  *  City Header (picture of city, overlay with text -> City, Country; Dates Visiting; # travelers)
@@ -10,258 +13,258 @@ import { CommonActions } from '@react-navigation/native';
  *  Buttons to 1) Export 2) Share 3) Save + Confirm -> return to Home page 4) Cancel -> send back to Home
  */
 const ReviewItineraryScreen = () => {
-    const navigation = useNavigation();
+    const router = useRouter();
     const goToHome = () => {
-        navigation.dispatch(
-            CommonActions.reset({
-                index: 0, // The first screen in the stack, effectively HomeScreen in this case
-                routes: [{ name: 'HomeScreen' }], // The HomeScreen will be the only route in the stack
-            })
-        );
+        router.replace("/HomeScreen")
     }
 
+    const goBack = () => {
+        console.log(router.canGoBack())
+        router.back()
+    }
+
+    const [date1, setDate1] = useState(false);
+    const [date2, setDate2] = useState(false);
+
     return (
-        <View>
-            <ScrollView style={styles.container}>
+        <View style={styles.container}>
+            <ScrollView style={{ flex: 1, height: "100%" }} contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}>
+                <View style={{ marginTop: 50, marginHorizontal: 20, position: "absolute", zIndex: 10, flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                    {/* Left Arrow */}
+                    <TouchableOpacity onPress={goBack}>
+                        <Ionicons name="arrow-back" size={30} color={"white"} />
+                    </TouchableOpacity>
+
+                    {/* Right Icons (Share and Checkmark) */}
+                    <View style={{ flexDirection: "row", marginRight: 40 }}>
+                        <TouchableOpacity style={{ marginRight: 10 }}>
+                            <Ionicons name="share" size={30} color={"white"} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={goToHome}>
+                            <Ionicons name="checkmark" size={30} color={"white"} />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+
 
                 { /* City Header */}
+                <Image style={styles.backgroundImage} source={require("../assets/images/newyorkcity.jpg")} />
+                <View style={styles.darkOverlay} />
                 <View style={styles.headerContainer}>
-                    <Image style={styles.backgroundImage} source={require("../assets/images/tokyoskyline.jpg")} />
-                    <View style={styles.darkOverlay} />
                     <View style={styles.screenContainer}>
-                        <Text style={styles.greetingText}>Tokyo, Japan</Text>
-                        <Text style={styles.greetingText}>Sat. Jul 13 - Sun. Jul 14</Text>
+                        <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                            <Ionicons name="location" size={30} color={"#24a6ad"} style={{ marginRight: 10 }} />
+                            <View style={{ flexDirection: "column", alignItems: "flex-start" }}>
+                                <Text style={{ fontWeight: "bold", color: "white", fontSize: 25 }}>New York City, USA</Text>
+                                <Text style={{ color: "white", fontSize: 16 }}>Sat, Jul. 13 - Sun. Jul 14</Text>
+                            </View>
+                        </View>
                     </View>
                 </View>
 
                 { /* Bottom window */}
                 <View style={styles.bottomScreen}>
-                    <Text style={styles.textLabel}>Destinations:</Text>
 
-                    { /* List of destinations scroll view */}
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.scrollViewContainerContent}
-                        style={styles.scrollViewContainer}>
-
-                        {/* Example destination items */}
-                        <TouchableOpacity style={styles.destinationInfo}>
-                            <Image style={styles.destinationImage} source={require("../assets/images/AkihabaraElectricTown.jpg")} />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.destinationInfo}>
-                            <Image style={styles.destinationImage} source={require("../assets/images/ImperialPalace.jpg")} />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.destinationInfo}>
-                            <Image style={styles.destinationImage} source={require("../assets/images/MeijiJingu.jpg")} />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.destinationInfo}>
-                            <Image style={styles.destinationImage} source={require("../assets/images/PokemonCenterShibuya.png")} />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.destinationInfo}>
-                            <Image style={styles.destinationImage} source={require("../assets/images/tokyoskytree.jpg")} />
-                        </TouchableOpacity>
-
-                    </ScrollView>
-
-                    <Text style={styles.textLabel}>Restaurants:</Text>
-                    { /* List of restaurants */}
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.scrollViewContainerContent}
-                        style={styles.scrollViewContainer}>
-
-                        {/* Example restaurant items */}
-                        <TouchableOpacity style={styles.destinationInfo}>
-                            <Image style={styles.destinationImage} source={require("../assets/images/unagi_sumiyaki.jpg")} />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.destinationInfo}>
-                            <Image style={styles.destinationImage} source={require("../assets/images/cafe_bar_lusso.jpg")} />
-                        </TouchableOpacity>
-                    </ScrollView>
-
-                    { /* Itinerary */}
+                    { /* Itinerary Day 1 */}
                     <Text style={styles.textLabel}>Itinerary:</Text>
-                    <View style={styles.dateHeader}>
-                        <Text style={styles.dateText}>Sat, Jul. 13 | $202.35 | v</Text>
-                    </View>
-
-                    {/* Akihabara Electric Town */}
-                    <TouchableOpacity style={styles.destinationElement}>
-
-                        {/* Background with opacity */}
-                        <View style={styles.backgroundContainer}>
-                            <View style={styles.backgroundOverlay}></View>
+                    <TouchableOpacity style={styles.dateHeader} onPress={() => setDate1(!date1)} >
+                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                            <Ionicons name="calendar" size={25} color={"#24a6ad"} />
+                            <Text style={styles.dateText}>Sat, Jul. 13</Text>
                         </View>
-
-                        <View style={styles.destinationContainer}>
-                            <Image style={styles.destinationImage} source={require("../assets/images/AkihabaraElectricTown.jpg")} />
-                            <View style={styles.destinationLabel}>
-                                <Text style={styles.destinationName}>Akihabara Electric Town</Text>
-                                <Text style={styles.destinationDetails}>Duration: 6 hrs | 9:30 AM</Text>
-                            </View>
-                        </View>
+                        {(date1) ? (
+                            <Ionicons name={"caret-up"} size={25} color={"#24a6ad"} />
+                        ) : (
+                            <Ionicons name={"caret-down"} size={25} color={"#24a6ad"} />
+                        )}
                     </TouchableOpacity>
 
-                    {/* Restaurant */}
-                    <TouchableOpacity style={styles.destinationElement}>
-                        {/* Background with opacity */}
-                        <View style={styles.backgroundContainer}>
-                            <View style={styles.backgroundOverlay}></View>
-                        </View>
+                    {(date1) ? (
+                        <View style={{ backgroundColor: "white", height: 100 }}>
+                            <TouchableOpacity style={{ height: 50, backgroundColor: "white", borderTopWidth: 1, borderColor: "lightgray" }}>
+                                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 15 }}>
+                                    <Ionicons name={"location"} size={22} color={"#24a6ad"} />
+                                    <Text style={{ fontSize: 16 }}>Origin (Leave at: 9:30 AM)</Text>
+                                </View>
+                            </TouchableOpacity>
 
-                        <View style={styles.destinationContainer}>
-                            <Image style={styles.destinationImage} source={require("../assets/images/unagi_sumiyaki.jpg")} />
-                            <View style={styles.destinationLabel}>
-                                <Text style={styles.destinationName}>Unagi Sumiyaki</Text>
-                                <Text style={styles.destinationDetails}>Unagi restaurant | 4.6 (261)</Text>
-                            </View>
+                            <TouchableOpacity style={{ height: 50, backgroundColor: "white", borderTopWidth: 1, borderColor: "lightgray" }}>
+                                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 15 }}>
+                                    <Ionicons name={"bus"} size={22} color={"#24a6ad"} />
+                                    <Text style={{ fontSize: 16 }}>Transit (20mins)</Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity>
+                                <View style={styles.destination}>
+                                    <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                                        <Image style={styles.destinationImage} source={require("../assets/images/statueofliberty.jpg")} />
+                                        <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10 }}>
+                                            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                                <Ionicons name="location" size={20} color={"#24a6ad"} />
+                                                <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>Statue of Liberty</Text>
+                                            </View>
+
+                                            <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5 }}>
+                                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                                    <Ionicons name="time" size={18} color={"#24a6ad"} />
+                                                    <Text style={{ marginLeft: 5 }}>3hr</Text>
+                                                </View>
+
+                                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginRight: 5 }}>
+                                                    <MaterialCommunityIcons name="priority-high" size={18} color={"#24a6ad"} />
+                                                    <Text style={{ marginLeft: 5 }}>1</Text>
+                                                </View>
+                                            </View>
+                                        </View>
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={{ height: 50, backgroundColor: "white", borderTopWidth: 1, borderColor: "lightgray" }}>
+                                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 15 }}>
+                                    <Ionicons name={"bus"} size={22} color={"#24a6ad"} />
+                                    <Text style={{ fontSize: 16 }}>Transit (57 mins)</Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity>
+                                <View style={styles.destination}>
+                                    <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                                        <Image style={styles.destinationImage} source={require("../assets/images/CentralPark.jpg")} />
+                                        <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10 }}>
+                                            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                                <Ionicons name="location" size={20} color={"#24a6ad"} />
+                                                <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>Central Park</Text>
+                                            </View>
+
+                                            <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5 }}>
+                                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                                    <Ionicons name="time" size={18} color={"#24a6ad"} />
+                                                    <Text style={{ marginLeft: 5 }}>2hr</Text>
+                                                </View>
+
+                                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginRight: 5 }}>
+                                                    <MaterialCommunityIcons name="priority-high" size={18} color={"#24a6ad"} />
+                                                    <Text style={{ marginLeft: 5 }}>2</Text>
+                                                </View>
+                                            </View>
+                                        </View>
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={{ height: 50, backgroundColor: "white", borderTopWidth: 1, borderColor: "lightgray" }}>
+                                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 15 }}>
+                                    <Ionicons name={"walk"} size={22} color={"#24a6ad"} />
+                                    <Text style={{ fontSize: 16 }}>Walk (10 mins)</Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity>
+                                <View style={styles.destination}>
+                                    <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                                        <Image style={styles.destinationImage} source={require("../assets/images/moma.jpg")} />
+                                        <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10 }}>
+                                            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                                <Ionicons name="location" size={20} color={"#24a6ad"} />
+                                                <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>Museum of Modern Art</Text>
+                                            </View>
+
+                                            <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5 }}>
+                                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                                    <Ionicons name="time" size={18} color={"#24a6ad"} />
+                                                    <Text style={{ marginLeft: 5 }}>2hr</Text>
+                                                </View>
+
+                                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginRight: 5 }}>
+                                                    <MaterialCommunityIcons name="priority-high" size={18} color={"#24a6ad"} />
+                                                    <Text style={{ marginLeft: 5 }}>2</Text>
+                                                </View>
+                                            </View>
+                                        </View>
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={{ height: 50, backgroundColor: "white", borderTopWidth: 1, borderColor: "lightgray" }}>
+                                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 15 }}>
+                                    <Ionicons name={"car"} size={22} color={"#24a6ad"} />
+                                    <Text style={{ fontSize: 16 }}>Driving (14mins)</Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity>
+                                <View style={styles.destination}>
+                                    <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                                        <Image style={styles.destinationImage} source={require("../assets/images/grandCentralMarket.jpg")} />
+                                        <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10 }}>
+                                            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                                <Ionicons name="location" size={20} color={"#24a6ad"} />
+                                                <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>Grand Central Market</Text>
+                                            </View>
+
+                                            <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5 }}>
+                                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                                    <Ionicons name="time" size={18} color={"#24a6ad"} />
+                                                    <Text style={{ marginLeft: 5 }}>3hr</Text>
+                                                </View>
+
+                                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginRight: 5 }}>
+                                                    <MaterialCommunityIcons name="priority-high" size={18} color={"#24a6ad"} />
+                                                    <Text style={{ marginLeft: 5 }}>3</Text>
+                                                </View>
+                                            </View>
+                                        </View>
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
                         </View>
+                    ) : (
+                        <TouchableOpacity style={styles.dateHeader} onPress={() => setDate2(!date2)} >
+                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                            <Ionicons name="calendar" size={25} color={"#24a6ad"} />
+                            <Text style={styles.dateText}>Sun, Jul. 14</Text>
+                        </View>
+                        {(date2) ? (
+                            <Ionicons name={"caret-up"} size={25} color={"#24a6ad"} />
+                        ) : (
+                            <Ionicons name={"caret-down"} size={25} color={"#24a6ad"} />
+                        )}
                     </TouchableOpacity>
+                    )}
 
-                    { /* Transportation */}
-                    <TouchableOpacity style={styles.destinationElement}>
-                        <View style={styles.backgroundContainer}>
-                            <View style={styles.backgroundOverlay}></View>
-                        </View>
-
-                        <Text style={styles.destinationDetails}>v   [Transit]   20 mins</Text>
-                    </TouchableOpacity>
-
-                    {/* Tokyo Skytree */}
-                    <TouchableOpacity style={styles.destinationElement} >
-                        {/* Background with opacity */}
-                        <View style={styles.backgroundContainer}>
-                            <View style={styles.backgroundOverlay}></View>
-                        </View>
-
-                        <View style={styles.destinationContainer}>
-                            <Image style={styles.destinationImage} source={require("../assets/images/tokyoskytree.jpg")} />
-                            <View style={styles.destinationLabel}>
-                                <Text style={styles.destinationName}>Tokyo Skytree</Text>
-                                <Text style={styles.destinationDetails}>Duration: 2 hrs | 3:50 PM</Text>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-
-                    { /* Transportation */}
-                    <TouchableOpacity style={styles.destinationElement}>
-                        <View style={styles.backgroundContainer}>
-                            <View style={styles.backgroundOverlay}></View>
-                        </View>
-
-                        <Text style={styles.destinationDetails}>v   [Transit]   41 mins</Text>
-                    </TouchableOpacity>
-
-                    {/* Pokemon Center Shibuya */}
-                    <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
-
-                        {/* Background with opacity */}
-                        <View style={styles.backgroundContainer}>
-                            <View style={styles.backgroundOverlay}></View>
-                        </View>
-
-                        <View style={styles.destinationContainer}>
-                            <Image style={styles.destinationImage} source={require("../assets/images/PokemonCenterShibuya.png")} />
-                            <View style={styles.destinationLabel}>
-                                <Text style={styles.destinationName}>Pokemon Center</Text>
-                                <Text style={styles.destinationDetails}>Duration: 1.5 hrs | 6:31 PM</Text>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-
-                    {/* Restaurant */}
-                    <TouchableOpacity style={styles.destinationElement}>
-                        {/* Background with opacity */}
-                        <View style={styles.backgroundContainer}>
-                            <View style={styles.backgroundOverlay}></View>
-                        </View>
-
-                        <View style={styles.destinationContainer}>
-                            <Image style={styles.destinationImage} source={require("../assets/images/cafe_bar_lusso.jpg")} />
-                            <View style={styles.destinationLabel}>
-                                <Text style={styles.destinationName}>Cafe & Bar Lusso</Text>
-                                <Text style={styles.destinationDetails}>Bar | 4.2 (9)</Text>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-
-                    <View style={styles.dateHeader}>
-                        <Text style={styles.dateText}>Sun, Jul. 14   v</Text>
-                    </View>
-
-                    {/* Meiji Jingu */}
-                    <TouchableOpacity style={styles.destinationElement} >
-
-                        {/* Background with opacity */}
-                        <View style={styles.backgroundContainer}>
-                            <View style={styles.backgroundOverlay}></View>
-                        </View>
-
-                        <View style={styles.destinationContainer}>
-                            <Image style={styles.destinationImage} source={require("../assets/images/MeijiJingu.jpg")} />
-                            <View style={styles.destinationLabel}>
-                                <Text style={styles.destinationName}>Meiji Jingu</Text>
-                                <Text style={styles.destinationDetails}>Duration: 2 hrs | Priority: 3</Text>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-
-                    {/* Imperial Palace */}
-                    <TouchableOpacity style={styles.destinationElement} onPress={() => { }}>
-
-                        {/* Background with opacity */}
-                        <View style={styles.backgroundContainer}>
-                            <View style={styles.backgroundOverlay}></View>
-                        </View>
-
-                        <View style={styles.destinationContainer}>
-                            <Image style={styles.destinationImage} source={require("../assets/images/ImperialPalace.jpg")} />
-                            <View style={styles.destinationLabel}>
-                                <Text style={styles.destinationName}>Imperial Palace</Text>
-                                <Text style={styles.destinationDetails}>Duration: 2 hrs | Priority: 4</Text>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
                 </View>
             </ScrollView >
-
-            {/* Buttons */}
-            < View style={styles.buttonContainer} >
-                <TouchableOpacity style={styles.button}><Text>Export</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.button}><Text>Share</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={goToHome}><Text>Save + Confirm</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={goToHome}><Text>Cancel</Text></TouchableOpacity>
-            </View >
         </View >
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        flexGrow: 1, // Allows ScrollView to grow and be scrollable
-        backgroundColor: '#fff',
-        height: "90%",
+        flex: 1,
+        backgroundColor: '#f4f4f4',
+        marginBottom: 10,
     },
 
     textLabel: {
-        fontSize: 15,
+        fontSize: 22,
+        fontWeight: "700",
+        marginBottom: 10
     },
 
     // ==== CITY HEADER ==== //
     headerContainer: {
-        position: "relative",
+        position: "absolute",
+        zIndex: 1,
+        flexDirection: "column",
+        alignItems: "flex-start"
     },
 
     backgroundImage: {
         width: "100%",
-        height: 200,
+        height: 250,
         resizeMode: "cover",
     },
 
@@ -270,31 +273,21 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
         width: "100%",
-        height: 200,
-        backgroundColor: "rgba(0, 0, 0, 0.4)",
+        height: 250,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
     },
 
     screenContainer: {
-        position: "absolute",
-        top: 70, // Positioning text below the image
-        left: 20,
-        right: 20,
-        zIndex: 1, // Ensures text is above the overlay
-    },
-
-    greetingText: {
-        color: "white",
-        fontWeight: "bold",
-        fontSize: 25,
-        marginTop: 20,
+        marginTop: "50%",
+        marginLeft: 15,
     },
 
     // ==== BOTTOM WINDOW ==== //
     bottomScreen: {
         top: -18,
-        backgroundColor: "white",
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
+        backgroundColor: "#F4F4F4",
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
         padding: 20,
     },
 
@@ -331,10 +324,21 @@ const styles = StyleSheet.create({
         marginRight: 5,
     },
 
+    destination: {
+        backgroundColor: "white",
+        width: "100%",
+        height: 100,
+        borderTopWidth: 1,
+        borderColor: "lightgray"
+    },
+
     destinationImage: {
-        height: 70,
         width: 70,
+        height: 70,
+        resizeMode: "cover",
+        overflow: "hidden",
         borderRadius: 10,
+        marginLeft: 5
     },
 
     buttonContainer: {
@@ -351,20 +355,11 @@ const styles = StyleSheet.create({
         borderRadius: 5,
     },
 
-    dateHeader: {
-        flexDirection: "row",
-        marginTop: 10,
-        backgroundColor: "gray",
-        color: "white",
-        width: "100%",
-    },
-
     dateText: {
-        color: "white",
-        marginLeft: 20,
-        marginTop: 10,
-        marginBottom: 10,
+        color: "black",
         fontSize: 18,
+        fontWeight: "700",
+        marginLeft: 5
     },
 
     backgroundContainer: {
@@ -410,6 +405,21 @@ const styles = StyleSheet.create({
         padding: 5,
         position: "relative",
     },
+
+    dateHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 10,
+        backgroundColor: "white",
+        color: "white",
+        width: "100%",
+        shadowColor: "#333333",
+        shadowOffset: { width: 1, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+    },
+
 });
 
 export default ReviewItineraryScreen;

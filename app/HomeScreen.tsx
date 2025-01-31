@@ -50,6 +50,10 @@ const HomeScreen = () => {
         router.replace("/SearchScreen")
     }
 
+    const editTripsScreen = () => {
+        router.replace("/EditExistingTripsScreen")
+    }
+
     const scrollRef = useRef<ScrollView>(null);
     const recommendedList = [
         {
@@ -184,7 +188,7 @@ const HomeScreen = () => {
                                 </View>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.tripButton}>
+                            <TouchableOpacity style={styles.tripButton} onPress={editTripsScreen}>
                                 <View style={styles.tripButtons}>
                                     <Ionicons name="pencil" size={18} color={"white"} />
                                     <Text style={{ color: "white", fontSize: 16, marginLeft: 10 }}>Edit Trip</Text>
