@@ -354,14 +354,6 @@ const AddEditDestinations = () => {
                             {/* Text Input For Location, Duration, Priority, and Notes */}
                             <View style={styles.textContainer}>
                                 <Text style={styles.text}>Location:</Text>
-                                <TextInput
-                                    style={styles.textBox}
-                                    placeholder="Location"
-                                    placeholderTextColor="gray"
-                                    value={location}
-                                    onChangeText={setLocation}
-                                />
-                                <Text style={styles.text}>Location:</Text>
                                 <AutocompleteTextBox
                                     onPlaceSelect={(place) => {
                                         setLocationAddress(place.description);
