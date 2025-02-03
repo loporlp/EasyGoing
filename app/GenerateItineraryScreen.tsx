@@ -199,36 +199,41 @@ const GenerateItineraryScreen = () => {
             </SafeAreaView>
 
             <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
-                <View style={styles.dateHeader}>
-                    <Text style={styles.dateText}>Sat, Jul. 12   v</Text>
-                </View>
-
-                {Object.keys(destinations).map((destinationKey) => (
-                    <View key={destinationKey}>
-                        <TouchableOpacity style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
-                            {/* Background with opacity */}
-                            <View style={styles.backgroundContainer}>
-                                <View style={styles.backgroundOverlay}></View>
-                            </View>
-
-                            <View style={styles.destinationContainer}>
-                                <DynamicImage placeName={destinations[destinationKey].alias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
-                                <View style={styles.destinationLabel}>
-                                    <Text style={styles.destinationName}>{destinations[destinationKey].alias}</Text>
-                                    <Text style={styles.destinationDetails}>
-                                        Duration: {destinations[destinationKey].duration} hrs | Priority: {destinations[destinationKey].priority}
-                                    </Text>
+                {Object.keys(destinations).map((destinationKey) => {
+                    const destination = destinations[destinationKey];
+                    return (
+                        <View key={destinationKey}>
+                            {destination.dayOrigin && (
+                                <View style={styles.dateHeader}>
+                                    {/* Date header text for each new day */}
+                                    <Text style={styles.dateText}>Sat, Jul. 12   v</Text>
                                 </View>
-                            </View>
-                        </TouchableOpacity>
+                            )}
+                            <TouchableOpacity style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
+                                {/* Background with opacity */}
+                                <View style={styles.backgroundContainer}>
+                                    <View style={styles.backgroundOverlay}></View>
+                                </View>
 
-                        {selectedDestination === destinationKey ? (
-                            <View style={styles.additionalInfo}>
-                                <Text style={styles.additionalText}>{getRouteText()}</Text>
-                            </View>
-                        ) : null}
-                    </View>
-                ))}
+                                <View style={styles.destinationContainer}>
+                                    <DynamicImage placeName={destination.alias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
+                                    <View style={styles.destinationLabel}>
+                                        <Text style={styles.destinationName}>{destination.alias}</Text>
+                                        <Text style={styles.destinationDetails}>
+                                            Duration: {destination.duration} hrs | Priority: {destination.priority}
+                                        </Text>
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
+
+                            {selectedDestination === destinationKey ? (
+                                <View style={styles.additionalInfo}>
+                                    <Text style={styles.additionalText}>{getRouteText()}</Text>
+                                </View>
+                            ) : null}
+                        </View>
+                    );
+                })}
             </ScrollView>
 
             {/* "Review Itinerary" button */}
