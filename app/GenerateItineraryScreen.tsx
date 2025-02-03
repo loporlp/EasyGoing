@@ -44,6 +44,7 @@ const GenerateItineraryScreen = () => {
 
     // Initial empties
     const [destinations, setDestinations] = useState<Record<string, Place>>({});
+    const [groupedDestinations, setGroupedDestinations] = useState<Place[][]>([]);
     const [optimalRoute, setOptimalRoute] = useState<any[][]>([]);
     const [transportationModes, setTransportationModes] = useState<string[]>([]);
 
@@ -74,29 +75,18 @@ const GenerateItineraryScreen = () => {
     // Function to fetch destinations
     const loadDestinations = async () => {
         const formattedDestinations: Record<string, Place> = {};
+        const groupedDestinationsTemp: Place[][] = [];
+        let currentGroup: Place[] = [];
+        let originSet = false;
+
         try {
             const trip = await getData("8");
-
+    
             if (trip) {
                 console.log("Trip Data:", trip);
-
-                // Find the origin (first destination with dayOrigin = true)
-                const originDestination = trip.destinations.find((destination: { dayOrigin: boolean; }) => destination.dayOrigin === true);
-
-                if (originDestination) {
-                    const parsedPicture = JSON.parse(originDestination.picture);
-                    setOrigin({
-                        name: originDestination.alias,
-                        address: originDestination.address,
-                    });
-
-                    console.log("Set origin:", originDestination.alias);
-                }
-
-                // Iterate over destinations and format them into the new structure
+    
+                // Iterate over destinations and format them
                 trip.destinations.forEach((destination: { picture: string; alias: any; address: any; priority: any; mode: any; transportToNext: any; transportDuration: any; startDateTime: any; duration: string; notes: any; dayOrigin: any; cost: any; }, index: { toString: () => string | number; }) => {
-                    const parsedPicture = JSON.parse(destination.picture);
-
                     const formattedDestination = {
                         alias: destination.alias,
                         address: destination.address,
@@ -111,22 +101,53 @@ const GenerateItineraryScreen = () => {
                         cost: destination.cost,
                         picture: destination.picture,
                     };
-
+    
                     formattedDestinations[index.toString()] = formattedDestination;
+    
+                    // If dayOrigin is true, it means a new group starts
+                    if (destination.dayOrigin) {
+                        // Set the FIRST origin
+                        if (!originSet) {
+                            setOrigin({
+                                name: formattedDestination.alias,
+                                address: formattedDestination.address,
+                            });
+                            originSet = true;
+                        }
+    
+                        // Push the current group into the temporary array if it's not empty
+                        if (currentGroup.length > 0) {
+                            groupedDestinationsTemp.push(currentGroup);
+                        }
+    
+                        // Start a new group with the current destination
+                        currentGroup = [formattedDestination];
+                    } else {
+                        // Otherwise, add this destination to the current group
+                        currentGroup.push(formattedDestination);
+                    }
+                    console.log("Current Group: ", currentGroup);
                 });
-
-                console.log("Formatted Destinations:", formattedDestinations);
-                setDestinations(formattedDestinations); // Update state with the new structure
+    
+                // Push the last group if there are any destinations left
+                if (currentGroup.length > 0) {
+                    groupedDestinationsTemp.push(currentGroup);
+                }
+    
+                // Set the grouped destinations state once all destinations are processed
+                setGroupedDestinations(groupedDestinationsTemp);
+                console.log("Grouped Destinations:", groupedDestinationsTemp);
+    
+                setDestinations(formattedDestinations);
             } else {
                 console.log("No data found for this trip ID.");
             }
         } catch (error) {
             console.error("Error fetching trip data:", error);
         }
-
+    
         return formattedDestinations;
     };
-
 
     // Function to save multiple destinations
     const saveDestinations = async (newDestinations: Record<string, Place>) => {
