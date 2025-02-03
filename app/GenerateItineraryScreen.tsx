@@ -237,7 +237,7 @@ const GenerateItineraryScreen = () => {
                                 </View>
 
                                 <View style={styles.destinationContainer}>
-                                    <DynamicImage placeName={destination.alias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
+                                    <Image source={{ uri: destination.picture }} style={styles.destinationImage} />
                                     <View style={styles.destinationLabel}>
                                         <Text style={styles.destinationName}>{destination.alias}</Text>
                                         <Text style={styles.destinationDetails}>
