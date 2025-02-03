@@ -211,6 +211,18 @@ const GenerateItineraryScreen = () => {
         router.push("/ReviewItineraryScreen");
     };
 
+
+    const formatDate = (date: Date) => {
+        const options: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+        return new Intl.DateTimeFormat('en-US', options).format(date);
+    };
+
+    const getNextDay = (currentDate: Date) => {
+        const nextDate = new Date(currentDate);
+        nextDate.setDate(nextDate.getDate() + 1);
+        return nextDate;
+    };
+
     return (
         <View style={styles.container}>
             <SafeAreaView style={{ flex: 1 }}>
@@ -220,38 +232,41 @@ const GenerateItineraryScreen = () => {
             </SafeAreaView>
 
             <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
-                {Object.keys(destinations).map((destinationKey) => {
-                    const destination = destinations[destinationKey];
+                {groupedDestinations.map((group, index) => {
+                    // Get the date for this group (incrementing date for each group)
+                    const dateForThisGroup = index === 0 ? new Date() : getNextDay(new Date(group[0].startDateTime));
+
                     return (
-                        <View key={destinationKey}>
-                            {destination.dayOrigin && (
-                                <View style={styles.dateHeader}>
-                                    {/* Date header text for each new day */}
-                                    <Text style={styles.dateText}>Sat, Jul. 12   v</Text>
-                                </View>
-                            )}
-                            <TouchableOpacity style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
-                                {/* Background with opacity */}
-                                <View style={styles.backgroundContainer}>
-                                    <View style={styles.backgroundOverlay}></View>
-                                </View>
+                        <View key={index}>
+                            {/* Date Header */}
+                            <View style={styles.dateHeader}>
+                                <Text style={styles.dateText}>
+                                    {/* Display the formatted date */}
+                                    {formatDate(dateForThisGroup)}
+                                </Text>
+                            </View>
 
-                                <View style={styles.destinationContainer}>
-                                    <Image source={{ uri: destination.picture }} style={styles.destinationImage} />
-                                    <View style={styles.destinationLabel}>
-                                        <Text style={styles.destinationName}>{destination.alias}</Text>
-                                        <Text style={styles.destinationDetails}>
-                                            Duration: {destination.duration} hrs | Priority: {destination.priority}
-                                        </Text>
-                                    </View>
-                                </View>
-                            </TouchableOpacity>
+                            {group.map((destination, destinationIndex) => {
+                                const destinationKey = `${index}-${destinationIndex}`;
+                                return (
+                                    <TouchableOpacity key={destinationKey} style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
+                                        {/* Background with opacity */}
+                                        <View style={styles.backgroundContainer}>
+                                            <View style={styles.backgroundOverlay}></View>
+                                        </View>
 
-                            {selectedDestination === destinationKey ? (
-                                <View style={styles.additionalInfo}>
-                                    <Text style={styles.additionalText}>{getRouteText()}</Text>
-                                </View>
-                            ) : null}
+                                        <View style={styles.destinationContainer}>
+                                            <Image source={{ uri: destination.picture }} style={styles.destinationImage} />
+                                            <View style={styles.destinationLabel}>
+                                                <Text style={styles.destinationName}>{destination.alias}</Text>
+                                                <Text style={styles.destinationDetails}>
+                                                    Duration: {destination.duration} hrs | Priority: {destination.priority}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    </TouchableOpacity>
+                                );
+                            })}
                         </View>
                     );
                 })}
