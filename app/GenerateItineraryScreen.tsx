@@ -48,6 +48,8 @@ const GenerateItineraryScreen = () => {
     const [optimalRoute, setOptimalRoute] = useState<any[][]>([]);
     const [transportationModes, setTransportationModes] = useState<string[]>([]);
 
+    const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
+
     // Extract transportation mode
     useEffect(() => {
         if (Object.keys(destinations).length > 1) {
@@ -223,61 +225,103 @@ const GenerateItineraryScreen = () => {
         return nextDate;
     };
 
+    const handlePressDate = (index: number) => {
+        setSelectedDayIndex(index);
+        console.log("Selected day index", index);
+    
+        // Get the destinations for this specific day
+        const selectedDestinations = groupedDestinations[index];
+    
+        // Guard against undefined or empty array
+        if (!selectedDestinations || selectedDestinations.length === 0) {
+            console.warn("No destinations available for this day!");
+            return;
+        }
+    
+        // Convert the selectedDestinations into an object with numeric keys
+        const formattedDestinations = selectedDestinations.reduce<{ [key: string]: Place }>((acc, curr, index) => {
+            acc[index.toString()] = curr;
+            return acc;
+        }, {});
+    
+        console.log("Formatted Destinations:", formattedDestinations);
+    
+        // TODO: setOptimalRoute(formattedDestinations);
+    
+        // Update the transportation modes for this day
+        const modesForThisDay = selectedDestinations.map(destination => destination.mode || 'DRIVING');
+        console.log("Modes for this day:", modesForThisDay);
+    
+        // Update the transportation modes state
+        setTransportationModes(modesForThisDay);
+    };    
+    
+
     return (
         <View style={styles.container}>
             <SafeAreaView style={{ flex: 1 }}>
-            {optimalRoute.length > 0 && (
-                <MultiRoutesMap locations={optimalRoute} transportationModes={transportationModes} onPolylinesReady={handlePolylinesReady} />
-            )}
+                {optimalRoute.length > 0 && (
+                    <MultiRoutesMap locations={optimalRoute} transportationModes={transportationModes} onPolylinesReady={handlePolylinesReady} />
+                )}
             </SafeAreaView>
-
+    
             <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
                 {groupedDestinations.map((group, index) => {
                     // Get the date for this group (incrementing date for each group)
                     const dateForThisGroup = index === 0 ? new Date() : getNextDay(new Date(group[0].startDateTime));
-
+    
                     return (
                         <View key={index}>
-                            {/* Date Header */}
-                            <View style={styles.dateHeader}>
+                            {/* Date Header - Clickable */}
+                            <TouchableOpacity onPress={() => handlePressDate(index)} style={styles.dateHeader}>
                                 <Text style={styles.dateText}>
                                     {/* Display the formatted date */}
                                     {formatDate(dateForThisGroup)}
                                 </Text>
-                            </View>
-
+                            </TouchableOpacity>
+    
                             {group.map((destination, destinationIndex) => {
                                 const destinationKey = `${index}-${destinationIndex}`;
                                 return (
-                                    <TouchableOpacity key={destinationKey} style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
-                                        {/* Background with opacity */}
-                                        <View style={styles.backgroundContainer}>
-                                            <View style={styles.backgroundOverlay}></View>
-                                        </View>
-
-                                        <View style={styles.destinationContainer}>
-                                            <Image source={{ uri: destination.picture }} style={styles.destinationImage} />
-                                            <View style={styles.destinationLabel}>
-                                                <Text style={styles.destinationName}>{destination.alias}</Text>
-                                                <Text style={styles.destinationDetails}>
-                                                    Duration: {destination.duration} hrs | Priority: {destination.priority}
-                                                </Text>
+                                    <View key={destinationKey}>
+                                        {/* Destination Clickable */}
+                                        <TouchableOpacity style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
+                                            {/* Background with opacity */}
+                                            <View style={styles.backgroundContainer}>
+                                                <View style={styles.backgroundOverlay}></View>
                                             </View>
-                                        </View>
-                                    </TouchableOpacity>
+    
+                                            <View style={styles.destinationContainer}>
+                                                <Image source={{ uri: destination.picture }} style={styles.destinationImage} />
+                                                <View style={styles.destinationLabel}>
+                                                    <Text style={styles.destinationName}>{destination.alias}</Text>
+                                                    <Text style={styles.destinationDetails}>
+                                                        Duration: {destination.duration} hrs | Priority: {destination.priority}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                        </TouchableOpacity>
+    
+                                        {/* Conditional rendering of additional info */}
+                                        {selectedDestination === destinationKey && (
+                                            <View style={styles.additionalInfo}>
+                                                <Text style={styles.additionalText}>{getRouteText()}</Text>
+                                            </View>
+                                        )}
+                                    </View>
                                 );
                             })}
                         </View>
                     );
                 })}
             </ScrollView>
-
+    
             {/* "Review Itinerary" button */}
             <TouchableOpacity style={styles.reviewItineraryButton} onPress={reviewItinerary}>
                 <Text style={styles.buttonText}>Review Itinerary</Text>
             </TouchableOpacity>
         </View>
-    );
+    );    
 };
 
 const styles = StyleSheet.create({
