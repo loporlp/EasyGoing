@@ -192,6 +192,18 @@ const GenerateItineraryScreen = () => {
         }
     }, [destinations, origin]);
 
+    /*
+    1. Generate optimal route (which triggers this useEffect)
+    2. Use routePolyline to get and store the routes in order
+    3. Use dateDividers to then divide it into groups
+    4. Each group needs to be correlated to each day (probably index for the date header)
+    5. When clicking on a date header, pass that group into MultiRouteMap
+    5.1.MultiRouteMap now takes this route data and plots it rather than calling routePolyline itself
+    */
+    useEffect(() => {
+        // Route Polylines
+    }, [optimalRoute]); 
+
     const [selectedDestination, setSelectedDestination] = useState<string | null>(null);
     const [transportationText, setTransportationText] = useState("driving");
 
