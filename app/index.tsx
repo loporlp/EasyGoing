@@ -11,6 +11,7 @@ import HomeScreen from './HomeScreen';
 import TestHomeScreen from './HomeScreen_API_Test';
 import TestOptScreen from './TestOptimalRouteScreen';
 import GenerateItineraryScreen from './GenerateItineraryScreen';
+import AddEditDestinationsScreen from './AddEditDestinations';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -46,7 +47,7 @@ const Index = () => {
           // User is signed in
           <Stack.Screen
             name="Home"
-            component={HomeScreen}
+            component={AddEditDestinationsScreen}
             options={{ headerShown: false,
               title: "Home"
              }}

@@ -44,8 +44,11 @@ const GenerateItineraryScreen = () => {
 
     // Initial empties
     const [destinations, setDestinations] = useState<Record<string, Place>>({});
+    const [groupedDestinations, setGroupedDestinations] = useState<Place[][]>([]);
     const [optimalRoute, setOptimalRoute] = useState<any[][]>([]);
     const [transportationModes, setTransportationModes] = useState<string[]>([]);
+
+    const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
 
     // Extract transportation mode
     useEffect(() => {
@@ -74,29 +77,18 @@ const GenerateItineraryScreen = () => {
     // Function to fetch destinations
     const loadDestinations = async () => {
         const formattedDestinations: Record<string, Place> = {};
+        const groupedDestinationsTemp: Place[][] = [];
+        let currentGroup: Place[] = [];
+        let originSet = false;
+
         try {
             const trip = await getData("8");
-
+    
             if (trip) {
                 console.log("Trip Data:", trip);
-
-                // Find the origin (first destination with dayOrigin = true)
-                const originDestination = trip.destinations.find((destination: { dayOrigin: boolean; }) => destination.dayOrigin === true);
-
-                if (originDestination) {
-                    const parsedPicture = JSON.parse(originDestination.picture);
-                    setOrigin({
-                        name: originDestination.alias,
-                        address: originDestination.address,
-                    });
-
-                    console.log("Set origin:", originDestination.alias);
-                }
-
-                // Iterate over destinations and format them into the new structure
+    
+                // Iterate over destinations and format them
                 trip.destinations.forEach((destination: { picture: string; alias: any; address: any; priority: any; mode: any; transportToNext: any; transportDuration: any; startDateTime: any; duration: string; notes: any; dayOrigin: any; cost: any; }, index: { toString: () => string | number; }) => {
-                    const parsedPicture = JSON.parse(destination.picture);
-
                     const formattedDestination = {
                         alias: destination.alias,
                         address: destination.address,
@@ -111,22 +103,53 @@ const GenerateItineraryScreen = () => {
                         cost: destination.cost,
                         picture: destination.picture,
                     };
-
+    
                     formattedDestinations[index.toString()] = formattedDestination;
+    
+                    // If dayOrigin is true, it means a new group starts
+                    if (destination.dayOrigin) {
+                        // Set the FIRST origin
+                        if (!originSet) {
+                            setOrigin({
+                                name: formattedDestination.alias,
+                                address: formattedDestination.address,
+                            });
+                            originSet = true;
+                        }
+    
+                        // Push the current group into the temporary array if it's not empty
+                        if (currentGroup.length > 0) {
+                            groupedDestinationsTemp.push(currentGroup);
+                        }
+    
+                        // Start a new group with the current destination
+                        currentGroup = [formattedDestination];
+                    } else {
+                        // Otherwise, add this destination to the current group
+                        currentGroup.push(formattedDestination);
+                    }
+                    console.log("Current Group: ", currentGroup);
                 });
-
-                console.log("Formatted Destinations:", formattedDestinations);
-                setDestinations(formattedDestinations); // Update state with the new structure
+    
+                // Push the last group if there are any destinations left
+                if (currentGroup.length > 0) {
+                    groupedDestinationsTemp.push(currentGroup);
+                }
+    
+                // Set the grouped destinations state once all destinations are processed
+                setGroupedDestinations(groupedDestinationsTemp);
+                console.log("Grouped Destinations:", groupedDestinationsTemp);
+    
+                setDestinations(formattedDestinations);
             } else {
                 console.log("No data found for this trip ID.");
             }
         } catch (error) {
             console.error("Error fetching trip data:", error);
         }
-
+    
         return formattedDestinations;
     };
-
 
     // Function to save multiple destinations
     const saveDestinations = async (newDestinations: Record<string, Place>) => {
@@ -190,53 +213,115 @@ const GenerateItineraryScreen = () => {
         router.push("/ReviewItineraryScreen");
     };
 
+
+    const formatDate = (date: Date) => {
+        const options: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+        return new Intl.DateTimeFormat('en-US', options).format(date);
+    };
+
+    const getNextDay = (currentDate: Date) => {
+        const nextDate = new Date(currentDate);
+        nextDate.setDate(nextDate.getDate() + 1);
+        return nextDate;
+    };
+
+    const handlePressDate = (index: number) => {
+        setSelectedDayIndex(index);
+        console.log("Selected day index", index);
+    
+        // Get the destinations for this specific day
+        const selectedDestinations = groupedDestinations[index];
+    
+        // Guard against undefined or empty array
+        if (!selectedDestinations || selectedDestinations.length === 0) {
+            console.warn("No destinations available for this day!");
+            return;
+        }
+    
+        // Convert the selectedDestinations into an object with numeric keys
+        const formattedDestinations = selectedDestinations.reduce<{ [key: string]: Place }>((acc, curr, index) => {
+            acc[index.toString()] = curr;
+            return acc;
+        }, {});
+    
+        console.log("Formatted Destinations:", formattedDestinations);
+    
+        // TODO: setOptimalRoute(formattedDestinations);
+    
+        // Update the transportation modes for this day
+        const modesForThisDay = selectedDestinations.map(destination => destination.mode || 'DRIVING');
+        console.log("Modes for this day:", modesForThisDay);
+    
+        // Update the transportation modes state
+        setTransportationModes(modesForThisDay);
+    };    
+    
+
     return (
         <View style={styles.container}>
             <SafeAreaView style={{ flex: 1 }}>
-            {optimalRoute.length > 0 && (
-                <MultiRoutesMap locations={optimalRoute} transportationModes={transportationModes} onPolylinesReady={handlePolylinesReady} />
-            )}
+                {optimalRoute.length > 0 && (
+                    <MultiRoutesMap locations={optimalRoute} transportationModes={transportationModes} onPolylinesReady={handlePolylinesReady} />
+                )}
             </SafeAreaView>
-
+    
             <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
-                <View style={styles.dateHeader}>
-                    <Text style={styles.dateText}>Sat, Jul. 12   v</Text>
-                </View>
-
-                {Object.keys(destinations).map((destinationKey) => (
-                    <View key={destinationKey}>
-                        <TouchableOpacity style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
-                            {/* Background with opacity */}
-                            <View style={styles.backgroundContainer}>
-                                <View style={styles.backgroundOverlay}></View>
-                            </View>
-
-                            <View style={styles.destinationContainer}>
-                                <DynamicImage placeName={destinations[destinationKey].alias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
-                                <View style={styles.destinationLabel}>
-                                    <Text style={styles.destinationName}>{destinations[destinationKey].alias}</Text>
-                                    <Text style={styles.destinationDetails}>
-                                        Duration: {destinations[destinationKey].duration} hrs | Priority: {destinations[destinationKey].priority}
-                                    </Text>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-
-                        {selectedDestination === destinationKey ? (
-                            <View style={styles.additionalInfo}>
-                                <Text style={styles.additionalText}>{getRouteText()}</Text>
-                            </View>
-                        ) : null}
-                    </View>
-                ))}
+                {groupedDestinations.map((group, index) => {
+                    // Get the date for this group (incrementing date for each group)
+                    const dateForThisGroup = index === 0 ? new Date() : getNextDay(new Date(group[0].startDateTime));
+    
+                    return (
+                        <View key={index}>
+                            {/* Date Header - Clickable */}
+                            <TouchableOpacity onPress={() => handlePressDate(index)} style={styles.dateHeader}>
+                                <Text style={styles.dateText}>
+                                    {/* Display the formatted date */}
+                                    {formatDate(dateForThisGroup)}
+                                </Text>
+                            </TouchableOpacity>
+    
+                            {group.map((destination, destinationIndex) => {
+                                const destinationKey = `${index}-${destinationIndex}`;
+                                return (
+                                    <View key={destinationKey}>
+                                        {/* Destination Clickable */}
+                                        <TouchableOpacity style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
+                                            {/* Background with opacity */}
+                                            <View style={styles.backgroundContainer}>
+                                                <View style={styles.backgroundOverlay}></View>
+                                            </View>
+    
+                                            <View style={styles.destinationContainer}>
+                                                <Image source={{ uri: destination.picture }} style={styles.destinationImage} />
+                                                <View style={styles.destinationLabel}>
+                                                    <Text style={styles.destinationName}>{destination.alias}</Text>
+                                                    <Text style={styles.destinationDetails}>
+                                                        Duration: {destination.duration} hrs | Priority: {destination.priority}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                        </TouchableOpacity>
+    
+                                        {/* Conditional rendering of additional info */}
+                                        {selectedDestination === destinationKey && (
+                                            <View style={styles.additionalInfo}>
+                                                <Text style={styles.additionalText}>{getRouteText()}</Text>
+                                            </View>
+                                        )}
+                                    </View>
+                                );
+                            })}
+                        </View>
+                    );
+                })}
             </ScrollView>
-
+    
             {/* "Review Itinerary" button */}
             <TouchableOpacity style={styles.reviewItineraryButton} onPress={reviewItinerary}>
                 <Text style={styles.buttonText}>Review Itinerary</Text>
             </TouchableOpacity>
         </View>
-    );
+    );    
 };
 
 const styles = StyleSheet.create({
