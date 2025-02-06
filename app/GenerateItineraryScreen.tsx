@@ -289,7 +289,8 @@ const GenerateItineraryScreen = () => {
 
                 console.log("Temp Grouped Destinations:", tempGroupedDestinations);
               
-                setGroupedDestinations(tempGroupedDestinations);
+                // TODO: tempGroupedDestinations is currently still WIP
+                //setGroupedDestinations(tempGroupedDestinations);
               };
               groupDestinationsByDay(groupedDays as { [key: number]: number }, optimalRoute);
 
