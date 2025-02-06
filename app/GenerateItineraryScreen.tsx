@@ -244,29 +244,40 @@ const GenerateItineraryScreen = () => {
             // This returns a dictionary with indices as the ID for range of locations (i.e. "0:2" means from location 0 to location 2)
             console.log("Updated Durations:", updatedDurations);
             let groupedDays = await divideLocationsIntoGroups(updatedDurations, dateRange);
+            groupedDays = (groupedDays || {}) as { [key: number]: number };
             console.log("Grouped Days:", groupedDays);
 
             // Set the groups
-            const groupDestinationsByDay = (groupedDays, destinations) => {
+            const groupDestinationsByDay = (groupedDays: { [key: number]: number }, destinations: any[]) => {
                 const tempGroupedDestinations: any[] | ((prevState: { alias: string; address: string; priority: number; mode: string; transportToNext: string; transportDuration: number; startDateTime: string; duration: number; notes: string; dayOrigin: boolean; cost: number; picture: string; }[][]) => { alias: string; address: string; priority: number; mode: string; transportToNext: string; transportDuration: number; startDateTime: string; duration: number; notes: string; dayOrigin: boolean; cost: number; picture: string; }[][]) = [];
               
+                console.log("Grouped Days:", groupedDays);
+                console.log("Destinations:", destinations);
+
                 // Iterate over the groupedDays object
                 Object.keys(groupedDays).forEach((startIndex) => {
-                  const start = parseInt(startIndex); // Start index
-                  const end = groupedDays[start]; // End index
+                    const start = parseInt(startIndex); // Start index
+                    const end = groupedDays[start]; // End index
+
+                    console.log("Processing group:", startIndex);
+                    console.log("Start Index:", start, "End Index:", end);
               
-                  // Extract the corresponding destinations for this day
-                  const groupForThisDay = destinations.slice(start, end + 1);
+                    // Extract the corresponding destinations for this day
+                    const groupForThisDay = destinations.slice(start, end + 1);
+
+                    console.log("Group for this day:", groupForThisDay);
               
-                  // Add the group to the groupedDestinations array
-                  tempGroupedDestinations.push(groupForThisDay);
+                    // Add the group to the groupedDestinations array
+                    tempGroupedDestinations.push(groupForThisDay);
+
+                    console.log("Updated Temp Grouped Destinations:", tempGroupedDestinations);
                 });
 
                 console.log("Temp Grouped Destinations:", tempGroupedDestinations);
               
                 //setGroupedDestinations(tempGroupedDestinations);
               };
-              groupDestinationsByDay(groupedDays, optimalRoute);
+              groupDestinationsByDay(groupedDays as { [key: number]: number }, optimalRoute);
 
             // TODO: We should probably return the id to use as an index for which sets of polyroutes to send to MultiRoutesMap when a date is clicked
         }
