@@ -143,3 +143,69 @@ export async function divideLocationsIntoGroups(locationAndDurations, date_range
     // Return the dictionary mapping days to locations
     return days_dictionary;
 }
+
+
+export function calculateTotalTime(locationAndDurations) {
+    console.log("Starting calculateTotalTime function");
+
+    // Extract durations from locations and transport
+    const origin_duration = locationAndDurations.map(route => route.locationDuration);
+    const transport_durations = locationAndDurations.map(route => {
+        const duration = route.duration;
+
+        console.log(`Processing transport duration for route: ${duration}`);
+
+        // Skip the last transport duration (should be null)
+        // No need to process the last transport duration
+        if (duration == null) {
+            return null;
+        }
+
+        if (duration.includes('hour') || duration.includes('hrs')) {
+            let totalHours = 0;
+
+            // Check for both hours and minutes in the duration
+            const hoursMatch = duration.match(/(\d+)\s*(hrs?|hour)/);
+            const minutesMatch = duration.match(/(\d+)\s*mins/);
+
+            // Parse hours if present
+            if (hoursMatch) {
+                totalHours += parseInt(hoursMatch[1]);
+                console.log(`Parsed ${hoursMatch[1]} hours`);
+            }
+
+            // Parse minutes if present
+            if (minutesMatch) {
+                totalHours += parseInt(minutesMatch[1]) / 60;
+                console.log(`Parsed ${minutesMatch[1]} minutes`);
+            }
+
+            console.log(`Total transport duration: ${totalHours} hours`);
+            return totalHours;  // Return total transport duration in hours
+        }
+
+        if (duration.includes('min')) {
+            const minutes = parseInt(duration.replace(' mins', ''));
+            const hours = minutes / 60;
+            console.log(`Converted ${minutes} minutes to ${hours} hours`);
+            return hours;  // Convert minutes to hours
+        }
+
+        throw new Error("Invalid duration format: " + duration);
+    });
+
+    console.log("Origin durations: ", origin_duration);
+    console.log("Transport durations: ", transport_durations);
+
+    // Calculate the total time for all activities
+    let totalLocationTime = origin_duration.reduce((acc, cur) => acc + cur, 0);
+    let totalTransportTime = transport_durations.reduce((acc, cur) => acc + (cur || 0), 0);
+
+    console.log(`Total Location Time: ${totalLocationTime} hours`);
+    console.log(`Total Transport Time: ${totalTransportTime} hours`);
+
+    const totalTime = totalLocationTime + totalTransportTime;
+    console.log(`Total Time (Location + Transport): ${totalTime} hours`);
+
+    return totalTime;
+}

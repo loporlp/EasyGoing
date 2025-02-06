@@ -164,6 +164,20 @@ const GenerateItineraryScreen = () => {
 
     useEffect(() => {
         if (Object.keys(destinations).length > 0 && origin) {
+            /*
+            TODO:
+            
+            Before fetching the official optimal route, calculate total time and budget.
+            If there is not enough time and/or budget, this is where the Priority system comes in.
+            
+            In order to do this, first use the calculateTotalTime in dateDividers.js using what we already have (optimalRoute + locationDurations)
+
+            If there is not enough time, use a new script to get a new list of locations based on priority
+
+            This new list needs to be saved (We need to warn the user if they are fine with removal of those extras first)
+            Then we run that new list through optimized list
+            Save this new optimized list
+            */
             const fetchOptimalRoute = async () => {
                 try {
                     const destinationArray = Object.values(destinations);
