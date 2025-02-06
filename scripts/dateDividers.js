@@ -22,13 +22,6 @@ export async function divideLocationsIntoGroups(locationAndDurations, date_range
             return null;  // No need to process the last transport duration
         }
 
-        if (duration.includes('min')) {
-            const minutes = parseInt(duration.replace(' mins', ''));
-            const hours = minutes / 60;
-            console.log(`Converted ${minutes} minutes to ${hours} hours`);
-            return hours;  // Convert minutes to hours
-        }
-        
         if (duration.includes('hour') || duration.includes('hrs')) {
             let totalHours = 0;
         
@@ -50,7 +43,14 @@ export async function divideLocationsIntoGroups(locationAndDurations, date_range
         
             console.log(`Total duration: ${totalHours} hours`);
             return totalHours;  // Return total duration in hours
-        }        
+        }
+        
+        if (duration.includes('min')) {
+            const minutes = parseInt(duration.replace(' mins', ''));
+            const hours = minutes / 60;
+            console.log(`Converted ${minutes} minutes to ${hours} hours`);
+            return hours;  // Convert minutes to hours
+        }            
 
         throw new Error("Invalid duration format: " + duration);
     });
