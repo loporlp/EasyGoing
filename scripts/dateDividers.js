@@ -28,12 +28,29 @@ export async function divideLocationsIntoGroups(locationAndDurations, date_range
             console.log(`Converted ${minutes} minutes to ${hours} hours`);
             return hours;  // Convert minutes to hours
         }
-
-        if (duration.includes('hour')) {
-            const hours = parseFloat(duration.replace(' hour', '').replace(' hours', '').trim());
-            console.log(`Parsed transport duration as: ${hours} hours`);
-            return hours;
-        }
+        
+        if (duration.includes('hour') || duration.includes('hrs')) {
+            let totalHours = 0;
+        
+            // Check for both hours and minutes in the duration
+            const hoursMatch = duration.match(/(\d+)\s*(hrs?|hour)/);  // Match hours or hrs
+            const minutesMatch = duration.match(/(\d+)\s*mins/);  // Match mins
+        
+            // Parse hours if present
+            if (hoursMatch) {
+                totalHours += parseInt(hoursMatch[1]);
+                console.log(`Parsed ${hoursMatch[1]} hours`);
+            }
+        
+            // Parse minutes if present
+            if (minutesMatch) {
+                totalHours += parseInt(minutesMatch[1]) / 60;
+                console.log(`Parsed ${minutesMatch[1]} minutes`);
+            }
+        
+            console.log(`Total duration: ${totalHours} hours`);
+            return totalHours;  // Return total duration in hours
+        }        
 
         throw new Error("Invalid duration format: " + duration);
     });
