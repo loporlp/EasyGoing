@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Polyline, Marker } from 'react-native-maps';
-import { fetchPolylinesAndDurations } from '../scripts/routeHelpers'; // Import the helper function
+import { fetchPolylinesAndDurations } from '../scripts/routeHelpers';
 import { useIsFocused } from '@react-navigation/native';
 
 const stroke_width = 4;
