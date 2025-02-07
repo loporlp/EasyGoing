@@ -1,6 +1,5 @@
 //a 'destination' is one of many destinations in a trip, import Trip to import this as well
 export interface Destination {
-  destinationID: number;
   alias: string; // the written address
   address: string; // the lat/long address
   priority: number; // priority
