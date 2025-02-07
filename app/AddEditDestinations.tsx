@@ -1,5 +1,5 @@
 // AddEditDestinations.tsx
-import { useState, useLayoutEffect } from 'react';
+import { useState, useLayoutEffect, useEffect } from 'react';
 import { View, Image, StyleSheet, TextInput, Text, TouchableOpacity, ScrollView, Dimensions, Modal, ImageBackground, Button } from "react-native";
 import { useRouter } from "expo-router";
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
@@ -14,106 +14,6 @@ import moment from "moment";
 import GenerateItineraryScreen from './GenerateItineraryScreen';
 import {Trip} from "../models/TripModel";
 
-//TODO: remove this later, this is SAMPLE data used for testing dynamic storage.
-const test_trip: Trip = {
-    tripName: "New York City Trip",
-    tripStartDate: "2025-03-01",
-    tripEndDate: "2025-03-07",
-    budget: 2000,
-    origin: "123 Main St, New York, NY",
-    destinations: []
-}
-/*
-const test_trip: Trip = {
-    tripName: "New York City Trip",
-    tripStartDate: "2025-03-01",
-    tripEndDate: "2025-03-07",
-    budget: 2000,
-    origin: "123 Main St, New York, NY",
-    destinations: [
-        {
-            destinationID: 0,
-            alias: "Statue of Liberty",
-            address: "New York, NY 10004, USA",
-            priority: 1,
-            mode: "Ferry",
-            transportToNext: "Central Park",
-            transportDuration: "1h",
-            startDateTime: "2025-03-02T09:00:00Z",
-            duration: "3h",
-            notes: "Book tickets in advance, check for ferry schedule",
-            dayOrigin: true,
-            cost: 40,
-            picture: JSON.stringify({ url: "Statue of Liberty" })
-        },
-        {
-            destinationID: 1,
-            alias: "Central Park",
-            address: "New York, NY 10024, USA",
-            priority: 2,
-            mode: "Walk",
-            transportToNext: "Museum of Modern Art",
-            transportDuration: "20m",
-            startDateTime: "2025-03-02T13:00:00Z",
-            duration: "2h",
-            notes: "Explore the park's famous landmarks like Bethesda Terrace",
-            dayOrigin: false,
-            cost: 0,
-            picture: JSON.stringify({ url: "Central Park" })
-        },
-        {
-            destinationID: 2,
-            alias: "Museum of Modern Art",
-            address: "11 W 53rd St, New York, NY 10019, USA",
-            priority: 3,
-            mode: "Walk",
-            transportToNext: "End of Day",
-            transportDuration: "10m",
-            startDateTime: "2025-03-02T15:00:00Z",
-            duration: "2h",
-            notes: "Check for special exhibitions before your visit",
-            dayOrigin: false,
-            cost: 25,
-            picture: JSON.stringify({ url: "Museum of Modern Art" })
-        }
-    ]
-};  
-
-//TODO: rewrite these to simply retrieve/store current trip so that test_trip isn't needed.
-/*
-//stores destination object in local storage with key 'destination'
-async function storeDestination(key: string, destination: any) {
-    await storeData(key, destination);
-    console.log(`New Destination stored as ${key} with values: 
-        Name - ${destination.name}, 
-        Address - ${destination.address}, 
-        Image - ${destination.image}, 
-        Duration - ${destination.duration}, 
-        Priority - ${destination.priority}, 
-        Route - ${destination.route}, 
-        Notes - ${destination.notes}`);
-}
-
-//retrieves destination object in local storage with key provided
-async function retrieveDestination(key: string) {
-    try {
-        const destination = await getData(key);
-        console.log(`Retrieved ${key} with values: 
-            Name - ${destination.name}, 
-            Address - ${destination.address}, 
-            Image - ${destination.image}, 
-            Duration - ${destination.duration}, 
-            Priority - ${destination.priority}, 
-            Route - ${destination.route}, 
-            Notes - ${destination.notes}`);
-        return destination; // Return the destination object as it was stored originally
-    } catch (e) {
-        console.error(`Error retrieving ${key}:`, e);
-        return null;
-    }
-}
-*/
-
 const { height } = Dimensions.get('window');
 
 const AddEditDestinations = () => {
@@ -126,8 +26,44 @@ const AddEditDestinations = () => {
     // Track if user is currently editing a destionation (and if so, what index)
     const [isEditing, setIsEditing] = useState(false);
     const [editIndex, setEditIndex] = useState<number>(-1); // To store the index of the item being edited, -1 is default as it shouldn't ever be called if isEditing is false
+    // Sets trip data
+    const [trip, setTrip] = useState<any>(null);
+    const [tripId, setTripId] = useState<string | null>(null);
+    const [destinations, setDestinations] = useState<any[]>([]); // Store destinations for rendering
 
+    //load existing trip data and set it as 'trip'
+    useEffect(() => {
+        const loadTrip = async () => {
+            try {
+                const currentTripID = await getData("currentTrip"); // Fetch the current trip ID from storage
+                if (currentTripID) {
+                    const tripDetails = await getData(currentTripID.toString());
+                    console.log("Loaded trip data:", tripDetails); // Log the full trip details
+    
+                    // Check if the trip details include 'id' correctly
+                    if (tripDetails) {
+                        setTripId(currentTripID);  // Store only the trip id
+                        setTrip(tripDetails);  // Store the full trip data
+                        console.log("Trip ID Set:", currentTripID);
+                    } else {
+                        console.error("Trip data is invalid, missing trip details");
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading trip data:", error);
+            }
+        };
+    
+        loadTrip(); // Load trip data when the component mounts
+    }, []);
+    
     const addLocation = () => {
+        // Ensure that trip data and tripId are available
+        if (!trip || !tripId) {
+            console.error("Trip or trip.id is not available.");
+            return;
+        }
+    
         // If missing a required field
         let errorMessage = "";
         if (!alias) {
@@ -146,12 +82,12 @@ const AddEditDestinations = () => {
             alert(errorMessage.trim());
             return;
         }
-
+    
         // Set default priority to -1 (as an integer) if it's empty or invalid
         const priorityValue = priority.trim() === "" || isNaN(Number(priority)) ? -1 : parseInt(priority);
-
+    
         const newDestination = {
-            destinationID: test_trip.destinations.length, //the ID will be the length (amount of destionation in trip) as the previous ID should be length -1
+            destinationID: trip.destinations.length, //the ID will be the length (amount of destination in trip) as the previous ID should be length -1
             alias: alias,
             address: location,
             priority: priorityValue,
@@ -165,8 +101,9 @@ const AddEditDestinations = () => {
             cost: 40, // TODO: implement this in app
             picture: JSON.stringify({ url: alias })
         };
-        if(isEditing) {
-            const oldDestination = test_trip.destinations[editIndex];
+    
+        if (isEditing) {
+            const oldDestination = trip.destinations[editIndex];
             newDestination.destinationID = oldDestination.destinationID;
             newDestination.mode = oldDestination.mode;
             newDestination.transportToNext = oldDestination.transportToNext ?? ""; //defaults to empty if there was no value
@@ -174,42 +111,35 @@ const AddEditDestinations = () => {
             newDestination.startDateTime = oldDestination.startDateTime;
             newDestination.dayOrigin = oldDestination.dayOrigin;
             newDestination.cost = oldDestination.cost;
-            //replaces existing destination with the newly edited one
-            test_trip.destinations[editIndex] = newDestination; //updates local storage
-            setDestinations(prevDestinations => 
-                prevDestinations.map((destination, index) => 
-                    index === editIndex ? { ...destination, ...newDestination } : destination
-                )
-            );            
-            //disable editing mode now that editing is done
+            // Replaces existing destination with the newly edited one
+            trip.destinations.push(newDestination);
+            setDestinations([...trip.destinations]);
+            storeData(tripId.toString(), trip); // Ensure tripId is used here
             setIsEditing(false), setEditIndex(-1);
         } else {
-            setDestinations(prevDestinations => [...prevDestinations, newDestination]);
-            // Store the new destination as part of a trip in AsyncStorage
-            //TODO: see methods above, must remake
-            /*
-            storeDestination("destination", newDestination);
-            retrieveDestination("destination");
-            */ 
-            test_trip.destinations.push(newDestination)
+            // Add the new destination to the trip's destinations
+            trip.destinations.push(newDestination);
+            setDestinations([...trip.destinations]);
+            storeData(tripId.toString(), trip); // Ensure tripId is used here
         }
+    
         console.log(newDestination);
-
+    
         // Clear the input fields after adding
         setAlias("");
         setLocation("");
         setDuration("");
         setPriority("");
         setNotes("");
-
+    
         // Re-hides input screen
         hide();
-    };
+    };    
 
     //sets to editing mode before opening the edit screen, setting relevant values
     const editLocation = (index: number) => {
         setIsEditing(true), setEditIndex(index);
-        const oldDestination = test_trip.destinations[index];
+        const oldDestination = trip.destinations[index];
         setAlias(oldDestination.alias);
         setLocation(oldDestination.address);
         setDuration(oldDestination.duration);
@@ -220,29 +150,19 @@ const AddEditDestinations = () => {
 
     //deletes location from both local storage and the destinations UI element
     const deleteLocation = (index: number) => {
-        test_trip.destinations = test_trip.destinations.filter((_, i) => i !== index);
-        setDestinations(prevDestinations => prevDestinations.filter((_, i) => i !== index));
+        // Check if tripId is valid before proceeding
+        if (!tripId) {
+            console.error("tripId is null, cannot delete location.");
+            return;
+        } else {
+            trip.destinations = trip.destinations.filter((_: any, i: number) => i !== index);
+            setDestinations([...trip.destinations]);
+            storeData(tripId.toString(), trip);
+        }
     };
 
-    //dynamically displays the destinations stored in this trip (if there are any)
-    const [destinations, setDestinations] = useState(
-        test_trip.destinations.map(destination => ({
-            destinationID: destination.destinationID,
-            alias: destination.alias,
-            address: destination.address,
-            priority: destination.priority,
-            mode: destination.mode,
-            transportToNext: destination.transportToNext,
-            transportDuration: destination.transportDuration,
-            startDateTime: destination.startDateTime,
-            duration: destination.duration,
-            notes: destination.notes,
-            dayOrigin: destination.dayOrigin,
-            cost: destination.cost,
-            picture: destination.picture ? JSON.parse(destination.picture).url : "" //sets blank if no picture URL parsed, might be worth setting a default image here
-        }))
-    );
 
+    // Setting add values
     const [alias, setAlias] = useState("");
     const [location, setLocation] = useState("");
     const [duration, setDuration] = useState("");
@@ -255,6 +175,7 @@ const AddEditDestinations = () => {
     const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null); // Explicitly define state type
     const [datesText, setDatesText] = useState("");
 
+    // Handle changed date
     const handleDateChange = (date: Date, type: 'START_DATE' | 'END_DATE') => {
         if (type === "END_DATE") {
             setSelectedEndDate(date);
