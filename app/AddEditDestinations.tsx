@@ -44,6 +44,7 @@ const AddEditDestinations = () => {
                     if (tripDetails) {
                         setTripId(currentTripID);  // Store only the trip id
                         setTrip(tripDetails);  // Store the full trip data
+                        setDestinations(tripDetails.destinations); // Immediately update the destinations so they load on screen
                         console.log("Trip ID Set:", currentTripID);
                     } else {
                         console.error("Trip data is invalid, missing trip details");
@@ -55,7 +56,7 @@ const AddEditDestinations = () => {
         };
     
         loadTrip(); // Load trip data when the component mounts
-    }, []);
+    }, []); // Empty dependency array ensures this runs only once    
     
     const addLocation = () => {
         // Ensure that trip data and tripId are available
