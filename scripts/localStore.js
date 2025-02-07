@@ -64,7 +64,7 @@ export const fillLocal = async () => {
     console.log("called fill localStorage")
     hasTrips = await storage.getItem("tripIDs"); 
     console.log(`HasTrips: ${hasTrips}`)
-    if(!hasTrips){
+    if(!hasTrips || JSON.parse(hasTrips).length === 0){
         trips = await getTrips();
         tripIDs = Object.keys(trips);
         await storeData("tripIDs", tripIDs);
@@ -73,7 +73,9 @@ export const fillLocal = async () => {
         });
         console.log(`Storing new: ${hasTrips}`)
     }
-    console.log(`Already has trips: ${hasTrips}`)
+    else {
+        console.log(`Already has trips: ${hasTrips}`)
+    }
 }
 
 // Helper function to check if a string is valid JSON

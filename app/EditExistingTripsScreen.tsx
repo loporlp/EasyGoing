@@ -14,8 +14,6 @@ const EditExistingTripsScreen = () => {
     // Load trips when the component mounts
     useEffect(() => {
         const loadTrips = async () => {
-            // First, ensure local storage is filled with trips if necessary
-            await fillLocal();
             // Get the list of trip IDs from local storage
             const tripIDs = await getData("tripIDs");
             if (tripIDs && tripIDs.length > 0) {
@@ -95,7 +93,7 @@ const EditExistingTripsScreen = () => {
                         <Text style={styles.dates}>Sat. Jul 13 - Sun. Jul 14</Text>
                     </View>
                 </TouchableOpacity>
-                
+
             </ScrollView>
             <View style={styles.navBar}>
                 <TouchableOpacity style={{ padding: 10, marginLeft: 20 }} onPress={homeScreen}>
