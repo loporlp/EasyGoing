@@ -91,10 +91,10 @@ const AddEditDestinations = () => {
             alias: alias,
             address: location,
             priority: priorityValue,
-            mode: "", //TODO: implement this in app
+            mode: "driving", //TODO: implement this in app
             transportToNext: "", //TODO: implement this in app
             transportDuration: "", //TODO: implement this in app
-            startDateTime: "", //TODO: implement this in app
+            startDateTime: new Date().toISOString(), //TODO: implement this in app
             duration: duration,
             notes: typedNotes,
             dayOrigin: true, //TODO: figure out how to check if this is the day's origin (will require existing data to compare to)
