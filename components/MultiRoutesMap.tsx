@@ -1,10 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Polyline, Marker } from 'react-native-maps';
-import { getRoutePolyline } from '../scripts/routePolyline';
-import { getCoords } from '../scripts/nameToCoords.js';
+import { fetchPolylinesAndDurations } from '../scripts/routeHelpers';
 import { useIsFocused } from '@react-navigation/native';
-import { duration } from 'moment';
 
 const stroke_width = 4;
 
@@ -22,109 +20,53 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
   const mapRef = useRef<MapView>(null);
   const isFocused = useIsFocused();
   const [mapKey, setMapKey] = useState(Date.now());
-  // Return polylines directly
-  const getAllPolylines = () => polylines;
 
   useEffect(() => {
-    // Fetch polylines and markers asynchronously
-    const fetchPolylinesAndMarkers = async () => {
-      const allPolylines: any[] = [];
-      const allTransportDurations: any[] = [];
+    const loadPolylines = async () => {
+      if (isFocused) {
+        console.log("Screen is focused, fetching polylines, markers, and durations...");
+        setMapKey(Date.now()); // Update key when screen is focused
 
-      let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
-      const allMarkers: any[] = [];
+        // Use the helper function to fetch polylines, markers, and durations
+        const { polylines: fetchedPolylines, transportDurations: fetchedDurations, markers: fetchedMarkers, bounds } = await fetchPolylinesAndDurations(locations, transportationModes);
 
-      for (let i = 0; i < locations.length; i++) {
-        const [origin, destination] = locations[i];
-        const mode = transportationModes[i];
+        // Update state with the fetched data
+        setPolylines(fetchedPolylines);
+        setTransportDurations(fetchedDurations);
+        setMarkers(fetchedMarkers);
 
-        // Fetch coordinates for origin and destination
-        const originCoords = await getCoords({ description: origin, place_id: '' });
-        const destinationCoords = await getCoords({ description: destination, place_id: '' });
-
-        // Get the polyline for the route
-        const routePolyline = await getRoutePolyline(origin, originCoords, destination, destinationCoords, mode);
-
-        if (routePolyline) {
-          const polylinesArray = Array.isArray(routePolyline) ? routePolyline : [routePolyline];
-
-          // Add polyline data to the list
-          polylinesArray.forEach((polyline: any) => {
-            allPolylines.push({
-              id: `${origin}$${destination}$${mode}`,
-              coordinates: polyline.path, // Use the path from the response
-              strokeColor: polyline.strokeColor,
-              strokeWidth: stroke_width, // TODO: Maybe use polyline.strokeWidth but this is optional
-              duration: polyline.duration
-            });
-
-            // Add duration to the list
-            allTransportDurations.push({
-              origin,
-              destination,
-              mode,
-              duration: polyline.duration, // Store the duration
-            });
-
-            // Update the bounds for each polyline
-            polyline.path.forEach((coord: { latitude: number, longitude: number }) => {
-              minLat = Math.min(minLat, coord.latitude);
-              maxLat = Math.max(maxLat, coord.latitude);
-              minLon = Math.min(minLon, coord.longitude);
-              maxLon = Math.max(maxLon, coord.longitude);
-            });
-          });
+        // If the parent provided a callback, call it with the polylines
+        if (onPolylinesReady) {
+          onPolylinesReady(fetchedPolylines);
         }
 
-        // Store markers
-        allMarkers.push({
-          origin: originCoords,
-          destination: destinationCoords,
-        });
-      }
+        // Set the map region to focus on the route(s)
+        if (bounds.minLat !== Infinity && bounds.maxLat !== -Infinity && bounds.minLon !== Infinity && bounds.maxLon !== -Infinity) {
+          const padding = 0.05; // Adjust padding to give some space around the routes
+          const newRegion = {
+            latitude: (bounds.minLat + bounds.maxLat) / 2,
+            longitude: (bounds.minLon + bounds.maxLon) / 2,
+            latitudeDelta: bounds.maxLat - bounds.minLat + padding,
+            longitudeDelta: bounds.maxLon - bounds.minLon + padding,
+          };
 
-      // Update state with polylines, durations, and markers
-      setPolylines(allPolylines);
-      setTransportDurations(allTransportDurations)
-      setMarkers(allMarkers);
+          setMapRegion(newRegion);
 
-       // If the parent provided a callback, call it with the polylines
-      if (onPolylinesReady) {
-        onPolylinesReady(allPolylines);
-      }
-
-      // Set the map region to focus on the route(s)
-      if (minLat !== Infinity && maxLat !== -Infinity && minLon !== Infinity && maxLon !== -Infinity) {
-        const padding = 0.05; // Adjust padding to give some space around the routes
-        const newRegion = {
-          latitude: (minLat + maxLat) / 2,
-          longitude: (minLon + maxLon) / 2,
-          latitudeDelta: maxLat - minLat + padding,
-          longitudeDelta: maxLon - minLon + padding,
-        };
-
-        setMapRegion(newRegion);
-
-        // Smoothly transition to the new region
-        if (mapRef.current && newRegion) {
-          mapRef.current.animateToRegion(newRegion, 1000);
+          // Smoothly transition to the new region
+          if (mapRef.current && newRegion) {
+            mapRef.current.animateToRegion(newRegion, 1000);
+          }
         }
+      } else {
+        // Optionally reset polylines, markers, and durations when screen is unfocused
+        setPolylines([]);
+        setMarkers([]);
+        setTransportDurations([]);
+        setMapRegion(null);
       }
     };
 
-    if (isFocused) {
-        console.log("Screen is focused, fetching polylines, markers, and durations...");
-        setMapKey(Date.now()); // Update key when screen is focused
-        fetchPolylinesAndMarkers();
-    } else {
-        // Optionally reset polylines, markers and durations when screen is unfocused
-        setPolylines([]);
-        setMarkers([]);
-        setTransportDurations([])
-        setMapRegion(null);
-    }
-
-    console.log("Plotting polylines, fetching markers and storing durations are done");
+    loadPolylines();
   }, [locations, transportationModes, isFocused]);
 
   return (
@@ -148,24 +90,20 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportati
         ))}
 
         {/* Render markers for each origin and destination */}
-        {markers.map((marker, index) => {
-            return (
-            <>
-              <Marker
-                key={`origin-${index}-${marker.origin.latitude}-${marker.origin.longitude}`}
-                coordinate={{ latitude: marker.origin.latitude, longitude: marker.origin.longitude }}
-                title={locations[index][0][0]}
-                zIndex={10}
-              />
-              <Marker
-                key={`destination-${index}-${marker.destination.latitude}-${marker.destination.longitude}`}
-                coordinate={{ latitude: marker.destination.latitude, longitude: marker.destination.longitude }}
-                title={locations[index][1][0]}
-                zIndex={10}
-              />
-            </>
-          );
-        })}
+        {markers.map((marker, index) => (
+          <React.Fragment key={index}>
+            <Marker
+              coordinate={{ latitude: marker.origin.latitude, longitude: marker.origin.longitude }}
+              title={locations[index][0][0]} // Origin title
+              zIndex={10}
+            />
+            <Marker
+              coordinate={{ latitude: marker.destination.latitude, longitude: marker.destination.longitude }}
+              title={locations[index][1][0]} // Destination title
+              zIndex={10}
+            />
+          </React.Fragment>
+        ))}
 
         {/* Render route durations above the routes */}
         {transportDurations.map((route, index) => (
@@ -241,7 +179,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
     color: '#333',
-  }
+  },
 });
 
 export default MultiRoutesMap;

@@ -4,11 +4,13 @@ import { useRouter } from "expo-router";
 import MapMarker from '../components/MapMarker';
 import RouteMap from '../components/RouteMap';
 import MultiRoutesMap from '../components/MultiRoutesMap';
-import DynamicImage from '../components/DynamicImage';
+import { fetchPolylinesAndDurations } from '../scripts/routeHelpers';
 import { calculateOptimalRoute } from '../scripts/optimalRoute.js';
 import { Dimensions } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import { storeData, getData } from '../scripts/localStore.js';
+import { divideLocationsIntoGroups } from '../scripts/dateDividers.js';
+import moment from 'moment';
 
 const { height } = Dimensions.get('window');
 
@@ -162,6 +164,20 @@ const GenerateItineraryScreen = () => {
 
     useEffect(() => {
         if (Object.keys(destinations).length > 0 && origin) {
+            /*
+            TODO:
+            
+            Before fetching the official optimal route, calculate total time and budget.
+            If there is not enough time and/or budget, this is where the Priority system comes in.
+            
+            In order to do this, first use the calculateTotalTime in dateDividers.js using what we already have (optimalRoute + locationDurations)
+
+            If there is not enough time, use a new script to get a new list of locations based on priority
+
+            This new list needs to be saved (We need to warn the user if they are fine with removal of those extras first)
+            Then we run that new list through optimized list
+            Save this new optimized list
+            */
             const fetchOptimalRoute = async () => {
                 try {
                     const destinationArray = Object.values(destinations);
@@ -191,6 +207,97 @@ const GenerateItineraryScreen = () => {
             fetchOptimalRoute();
         }
     }, [destinations, origin]);
+
+    /*
+    1. Generate optimal route (which triggers this useEffect)
+    2. Use routePolyline to get and store the routes in order
+    3. Use dateDividers to then divide it into groups
+    4. Each group needs to be correlated to each day (probably index for the date header)
+    5. When clicking on a date header, pass that group into MultiRouteMap
+    5.1.MultiRouteMap now takes this route data and plots it rather than calling routePolyline itself
+    */
+    useEffect(() => {
+        // (2) Route Polylines
+        const getDurationAndPolylines = async () => {
+            const { polylines: fetchedPolylines, transportDurations: fetchedDurations, markers: fetchedMarkers, bounds } = await fetchPolylinesAndDurations(optimalRoute, transportationModes);
+
+            // Location Duration in Dictionary. exp: "New York": 3600
+            const locationDurations = Object.values(destinations).reduce((acc, destination) => {
+                acc[destination.alias] = destination.duration;
+                return acc;
+              }, {} as { [key: string]: number });
+              
+              console.log("Location Durations 1:", locationDurations);              
+            
+            // Contains origin, destination, mode, transportDuration (duration), and locationDuration
+            const updatedDurations = fetchedDurations.map(route => {
+                const originAlias = route.origin[0]; // Assuming alias is the first item
+                const locationDuration = locationDurations[originAlias] || 0; // Default to 3600 (1 hour) if no locationDuration is found
+                return { ...route, locationDuration };
+            });
+
+            // Need to add the last location
+            const lastLocation = fetchedDurations[fetchedDurations.length - 1];
+            const lastLocationAlias = lastLocation.destination[0];
+            //console.log("Last Location Alias:", lastLocationAlias);
+            const lastLocationDuration = locationDurations[lastLocationAlias] || 0;
+            //console.log("Last Location Duration:", lastLocationDuration);
+            const lastLocationEntry = {
+                origin: lastLocationAlias,
+                destination: null,
+                mode: null,
+                duration: null,
+                locationDuration: lastLocationDuration
+            };
+            updatedDurations.push(lastLocationEntry);
+            console.log("Updated Durations with last entry:", updatedDurations);
+
+            // (3) Date Dividers
+            // Uses fetchedDurations for this (as well as the loaded durations per location)
+            const dateRange = [moment().format('MM-DD-YYYY'), moment().format('MM-DD-YYYY')]; // TODO: Use actual sent date rather than today
+            // This returns a dictionary with indices as the ID for range of locations (i.e. "0:2" means from location 0 to location 2)
+            console.log("Updated Durations:", updatedDurations);
+            let groupedDays = await divideLocationsIntoGroups(updatedDurations, dateRange);
+            groupedDays = (groupedDays || {}) as { [key: number]: number };
+            console.log("Grouped Days:", groupedDays);
+
+            // Set the groups
+            const groupDestinationsByDay = (groupedDays: { [key: number]: number }, destinations: any[]) => {
+                const tempGroupedDestinations: any[] | ((prevState: { alias: string; address: string; priority: number; mode: string; transportToNext: string; transportDuration: number; startDateTime: string; duration: number; notes: string; dayOrigin: boolean; cost: number; picture: string; }[][]) => { alias: string; address: string; priority: number; mode: string; transportToNext: string; transportDuration: number; startDateTime: string; duration: number; notes: string; dayOrigin: boolean; cost: number; picture: string; }[][]) = [];
+              
+                console.log("Grouped Days:", groupedDays);
+                console.log("Destinations:", destinations);
+
+                // Iterate over the groupedDays object
+                Object.keys(groupedDays).forEach((startIndex) => {
+                    const start = parseInt(startIndex); // Start index
+                    const end = groupedDays[start]; // End index
+
+                    console.log("Processing group:", startIndex);
+                    console.log("Start Index:", start, "End Index:", end);
+              
+                    // Extract the corresponding destinations for this day
+                    const groupForThisDay = destinations.slice(start, end + 1);
+
+                    console.log("Group for this day:", groupForThisDay);
+              
+                    // Add the group to the groupedDestinations array
+                    tempGroupedDestinations.push(groupForThisDay);
+
+                    console.log("Updated Temp Grouped Destinations:", tempGroupedDestinations);
+                });
+
+                console.log("Temp Grouped Destinations:", tempGroupedDestinations);
+              
+                // TODO: tempGroupedDestinations is currently still WIP
+                //setGroupedDestinations(tempGroupedDestinations);
+              };
+              groupDestinationsByDay(groupedDays as { [key: number]: number }, optimalRoute);
+
+            // TODO: We should probably return the id to use as an index for which sets of polyroutes to send to MultiRoutesMap when a date is clicked
+        }
+        getDurationAndPolylines();
+    }, [optimalRoute]); 
 
     const [selectedDestination, setSelectedDestination] = useState<string | null>(null);
     const [transportationText, setTransportationText] = useState("driving");
