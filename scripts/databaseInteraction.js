@@ -132,7 +132,7 @@ export const deleteTrip = async (tripId) => {
  * @returns bool if deletion was successfull
  * 
  */
-export const updateTrip = async (tripId, updatedTrip) => {
+export const updateTrip = async (tripId) => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000); // Set timeout to 5 seconds
     await storeData(tripId.toString(), updateTrip)

@@ -4,6 +4,7 @@ import { View, StyleSheet, TextInput, Text, TouchableOpacity, Dimensions, Modal,
 import { useRouter } from "expo-router";
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import { storeData, getData } from '../scripts/localStore.js';
+import { updateTrip } from '../scripts/databaseInteraction.js';
 import DynamicImage from '../components/DynamicImage';
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -316,6 +317,7 @@ const AddEditDestinations = () => {
                 </TouchableOpacity>
                 <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={() => { 
                         if (destinations.length > 0) {
+                            updateTrip(tripId)
                             router.push("/GenerateItineraryScreen")
                         } else {
                             alert("You must add at least 1 destination.")
