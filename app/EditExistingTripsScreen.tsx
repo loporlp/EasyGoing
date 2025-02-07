@@ -2,11 +2,41 @@
 import { ScrollView, Image, StyleSheet, TouchableOpacity, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
+import { useState, useEffect } from "react";
+import { getData, storeData, fillLocal } from '../scripts/localStore';
 
 const EditExistingTripsScreen = () => {
     const router = useRouter();
 
-    const editTrip = () => {
+    // State to store the trips
+    const [trips, setTrips] = useState<any[]>([]);
+
+    // Load trips when the component mounts
+    useEffect(() => {
+        const loadTrips = async () => {
+            // Get the list of trip IDs from local storage
+            const tripIDs = await getData("tripIDs");
+            if (tripIDs && tripIDs.length > 0) {
+                const loadedTrips = [];
+                // Loop through each trip ID and fetch the trip details from local storage
+                for (const tripID of tripIDs) {
+                    const tripDetails = await getData(tripID);
+                    if (tripDetails) {
+                        loadedTrips.push({ id: tripID, details: tripDetails });
+                    }
+                }
+                // Update the state with the loaded trips
+                setTrips(loadedTrips);
+            } else {
+                console.log("No trips available in local storage.");
+            }
+        };
+        loadTrips();
+    }, []);
+
+    const editTrip = async (tripId: string) => {
+        //set current trip before going to edit
+        await storeData("currentTrip", tripId);
         router.push("/AddEditDestinations");
     }
 
@@ -37,6 +67,30 @@ const EditExistingTripsScreen = () => {
                     </TouchableOpacity>
                 </View>
 
+
+                {/* Map through the trips and dynamically display them */}
+                {trips.length > 0 ? (
+                    trips.map((trip) => (
+                        <TouchableOpacity
+                            key={trip.id}  // Ensure each trip has a unique key
+                            style={styles.tripButtonTokyo} 
+                            onPress={() => editTrip(trip.id)} // Pass the tripId to the edit function
+                        >
+                            <Image 
+                                style={styles.backgroundImage} 
+                                source={require("../assets/images/newyorkcity.jpg")} 
+                            />
+                            <View style={styles.darkOverlay} />
+                            <View style={styles.screenContainer}>
+                                <Text style={styles.upcoming}>UPCOMING TRIP</Text>
+                                <Text style={styles.destinationName}>{trip.details.tripName}</Text> {/* Access tripName from details */}
+                                <Text style={styles.dates}>{trip.details.tripStartDate} - {trip.details.tripEndDate}</Text> {/* Access dates from details */}
+                            </View>
+                        </TouchableOpacity>
+                    ))
+                ) : (
+                    <Text style={{ textAlign: 'center', fontSize: 16 }}>No trips available. Please create a new one.</Text>
+                )}
                 { /* New York City trip */}
                 <TouchableOpacity style={styles.tripButtonTokyo} onPress={editTrip}>
                     <Image style={styles.backgroundImage} source={require("../assets/images/newyorkcity.jpg")} />
@@ -45,17 +99,6 @@ const EditExistingTripsScreen = () => {
                         <Text style={styles.upcoming}>UPCOMING TRIP</Text>
                         <Text style={styles.destinationName}>New York City, USA</Text>
                         <Text style={styles.dates}>Sat. Jul 13 - Sun. Jul 14</Text>
-                    </View>
-                </TouchableOpacity>
-
-                { /* Tokyo, Japan trip */}
-                <TouchableOpacity style={styles.tripButtonTokyo} onPress={() => { }}>
-                    <Image style={styles.backgroundImage} source={require("../assets/images/tokyoskyline.jpg")} />
-                    <View style={styles.darkOverlayPastTrip} />
-                    <View style={styles.screenContainer}>
-                        <Text style={styles.upcoming}>PAST TRIP</Text>
-                        <Text style={styles.destinationName}>Tokyo, Japan</Text>
-                        <Text style={styles.dates}>Tue. Oct 1 - Fri. Oct 11</Text>
                     </View>
                 </TouchableOpacity>
 

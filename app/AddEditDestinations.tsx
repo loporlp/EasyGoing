@@ -1,6 +1,6 @@
 // AddEditDestinations.tsx
-import { useState, useLayoutEffect, useEffect } from 'react';
-import { View, Image, StyleSheet, TextInput, Text, TouchableOpacity, ScrollView, Dimensions, Modal, ImageBackground, Button } from "react-native";
+import { useState, useEffect } from 'react';
+import { View, StyleSheet, TextInput, Text, TouchableOpacity, Dimensions, Modal, ImageBackground, Button } from "react-native";
 import { useRouter } from "expo-router";
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import { storeData, getData } from '../scripts/localStore.js';
@@ -11,8 +11,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import CalendarPicker from 'react-native-calendar-picker';
 import moment from "moment";
-import GenerateItineraryScreen from './GenerateItineraryScreen';
-import {Trip} from "../models/TripModel";
 
 const { height } = Dimensions.get('window');
 
