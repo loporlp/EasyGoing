@@ -33,7 +33,7 @@ const GenerateItineraryScreen = () => {
         mode: string;
         transportToNext: string;
         transportDuration: number;
-        startDateTime: string;
+        startDateTime: Date;
         duration: number;
         notes: string;
         dayOrigin: boolean;
@@ -84,7 +84,11 @@ const GenerateItineraryScreen = () => {
         let originSet = false;
 
         try {
-            const trip = await getData("8");
+            const tripID = await getData("currentTrip");
+            if(!tripID) {
+                throw new Error("No trip ID");
+            }
+            const trip = await getData(tripID.toString());
     
             if (trip) {
                 console.log("Trip Data:", trip);
@@ -263,7 +267,7 @@ const GenerateItineraryScreen = () => {
 
             // Set the groups
             const groupDestinationsByDay = (groupedDays: { [key: number]: number }, destinations: any[]) => {
-                const tempGroupedDestinations: any[] | ((prevState: { alias: string; address: string; priority: number; mode: string; transportToNext: string; transportDuration: number; startDateTime: string; duration: number; notes: string; dayOrigin: boolean; cost: number; picture: string; }[][]) => { alias: string; address: string; priority: number; mode: string; transportToNext: string; transportDuration: number; startDateTime: string; duration: number; notes: string; dayOrigin: boolean; cost: number; picture: string; }[][]) = [];
+                const tempGroupedDestinations: any[] | ((prevState: { alias: string; address: string; priority: number; mode: string; transportToNext: string; transportDuration: number; startDateTime: Date; duration: number; notes: string; dayOrigin: boolean; cost: number; picture: string; }[][]) => { alias: string; address: string; priority: number; mode: string; transportToNext: string; transportDuration: number; startDateTime: Date; duration: number; notes: string; dayOrigin: boolean; cost: number; picture: string; }[][]) = [];
               
                 console.log("Grouped Days:", groupedDays);
                 console.log("Destinations:", destinations);
