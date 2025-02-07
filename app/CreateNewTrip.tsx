@@ -38,10 +38,16 @@ const CreateNewTrip = () => {
     const isFormValid = selectedAutocompletePlace !== '' && datesText !== '' && budget !== '';
 
     // Handles Navigation to Next Screen
-    const startPlanning = () => {
+    const startPlanning = async () => {
         console.log('Selected place before navigation:', selectedAutocompletePlace);
-        createTrip(selectedStartDate, selectedEndDate, budget, selectedAutocompletePlace);
-        router.push("/AddEditDestinations");
+        //makes sure that trip is finished being made (so currentID is properly being set)
+        const isTripCreated = await createTrip(selectedStartDate, selectedEndDate, budget, selectedAutocompletePlace);
+        //only proceed if the trip was successfully created
+        if (isTripCreated) {
+            router.push("/AddEditDestinations");
+        } else {
+            console.error("Trip creation failed");
+        }
     };
 
     // Handles Date Selection in Calendar
