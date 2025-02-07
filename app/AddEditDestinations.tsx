@@ -88,7 +88,6 @@ const AddEditDestinations = () => {
         const priorityValue = priority.trim() === "" || isNaN(Number(priority)) ? -1 : parseInt(priority);
     
         const newDestination = {
-            destinationID: trip.destinations.length, //the ID will be the length (amount of destination in trip) as the previous ID should be length -1
             alias: alias,
             address: location,
             priority: priorityValue,
@@ -105,7 +104,6 @@ const AddEditDestinations = () => {
     
         if (isEditing) {
             const oldDestination = trip.destinations[editIndex];
-            newDestination.destinationID = oldDestination.destinationID;
             newDestination.mode = oldDestination.mode;
             newDestination.transportToNext = oldDestination.transportToNext ?? ""; //defaults to empty if there was no value
             newDestination.transportDuration = oldDestination.transportDuration;
