@@ -34,8 +34,9 @@ const EditExistingTripsScreen = () => {
         loadTrips();
     }, []);
 
-
-    const editTrip = () => {
+    const editTrip = async (tripId: string) => {
+        //set current trip before going to edit
+        await storeData("currentTrip", tripId);
         router.push("/AddEditDestinations");
     }
 
@@ -70,13 +71,20 @@ const EditExistingTripsScreen = () => {
                 {/* Map through the trips and dynamically display them */}
                 {trips.length > 0 ? (
                     trips.map((trip) => (
-                        <TouchableOpacity style={styles.tripButtonTokyo} onPress={editTrip}>
-                            <Image style={styles.backgroundImage} source={require("../assets/images/newyorkcity.jpg")} /> {/*TODO: make this a picture from trip itself */}
+                        <TouchableOpacity
+                            key={trip.id}  // Ensure each trip has a unique key
+                            style={styles.tripButtonTokyo} 
+                            onPress={() => editTrip(trip.id)} // Pass the tripId to the edit function
+                        >
+                            <Image 
+                                style={styles.backgroundImage} 
+                                source={require("../assets/images/newyorkcity.jpg")} 
+                            />
                             <View style={styles.darkOverlay} />
                             <View style={styles.screenContainer}>
                                 <Text style={styles.upcoming}>UPCOMING TRIP</Text>
-                                <Text style={styles.destinationName}>{trip.tripName}</Text>
-                                <Text style={styles.dates}>{trip.tripStartDate} - {trip.tripEndDate}</Text>
+                                <Text style={styles.destinationName}>{trip.details.tripName}</Text> {/* Access tripName from details */}
+                                <Text style={styles.dates}>{trip.details.tripStartDate} - {trip.details.tripEndDate}</Text> {/* Access dates from details */}
                             </View>
                         </TouchableOpacity>
                     ))
