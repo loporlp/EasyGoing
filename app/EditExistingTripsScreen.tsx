@@ -91,16 +91,6 @@ const EditExistingTripsScreen = () => {
                 ) : (
                     <Text style={{ textAlign: 'center', fontSize: 16 }}>No trips available. Please create a new one.</Text>
                 )}
-                { /* New York City trip */}
-                <TouchableOpacity style={styles.tripButtonTokyo} onPress={editTrip}>
-                    <Image style={styles.backgroundImage} source={require("../assets/images/newyorkcity.jpg")} />
-                    <View style={styles.darkOverlay} />
-                    <View style={styles.screenContainer}>
-                        <Text style={styles.upcoming}>UPCOMING TRIP</Text>
-                        <Text style={styles.destinationName}>New York City, USA</Text>
-                        <Text style={styles.dates}>Sat. Jul 13 - Sun. Jul 14</Text>
-                    </View>
-                </TouchableOpacity>
 
             </ScrollView>
             <View style={styles.navBar}>
