@@ -334,7 +334,7 @@ const GenerateItineraryScreen = () => {
                 });
               
                 // TODO: tempGroupedDestinations is currently still WIP
-                //setGroupedDestinations(tempGroupedDestinations);
+                setGroupedDestinations(tempGroupedDestinations);
               };
               groupDestinationsByDay(groupedDays as { [key: number]: number }, optimalRoute);
 
@@ -428,10 +428,13 @@ const GenerateItineraryScreen = () => {
     
             <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
                 {optimalRoute.map((routeGroup, routeGroupIndex) => {
-                    return routeGroup.map((destination, destinationIndex) => {
+                    return routeGroup.map((destinationArray, destinationIndex) => {
                         const destinationKey = `${routeGroupIndex}-${destinationIndex}`;
                         const dateForThisGroup = routeGroupIndex === 0 ? new Date() : getNextDay(new Date(routeGroup[0].startDateTime));
-
+    
+                        // Extract the name of the destination (first item in the array)
+                        const destinationName = destinationArray[0];
+    
                         return (
                             <View key={destinationKey}>
                                 {/* Date Header - Clickable */}
@@ -443,25 +446,25 @@ const GenerateItineraryScreen = () => {
                                         </Text>
                                     </TouchableOpacity>
                                 )}
-
+    
                                 {/* Destination Clickable */}
                                 <TouchableOpacity style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
                                     {/* Background with opacity */}
                                     <View style={styles.backgroundContainer}>
                                         <View style={styles.backgroundOverlay}></View>
                                     </View>
-
+    
                                     <View style={styles.destinationContainer}>
-                                        <Image source={{ uri: destination.picture }} style={styles.destinationImage} />
+                                        <Image source={{ uri: destinationArray[1] }} style={styles.destinationImage} /> {/* destinationArray[1] is the address */}
                                         <View style={styles.destinationLabel}>
-                                            <Text style={styles.destinationName}>{destination.alias}</Text>
+                                            <Text style={styles.destinationName}>{destinationName}</Text> {/* Display destination name */}
                                             <Text style={styles.destinationDetails}>
-                                                Duration: {destination.duration} hrs | Priority: {destination.priority}
+                                                Duration: {destinationArray.duration} hrs | Priority: {destinationArray.priority}
                                             </Text>
                                         </View>
                                     </View>
                                 </TouchableOpacity>
-
+    
                                 {/* Conditional rendering of additional info */}
                                 {selectedDestination === destinationKey && (
                                     <View style={styles.additionalInfo}>
