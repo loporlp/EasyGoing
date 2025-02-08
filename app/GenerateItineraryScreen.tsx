@@ -225,40 +225,70 @@ const GenerateItineraryScreen = () => {
         const getDurationAndPolylines = async () => {
             const { polylines: fetchedPolylines, transportDurations: fetchedDurations, markers: fetchedMarkers, bounds } = await fetchPolylinesAndDurations(optimalRoute, transportationModes);
 
-            // Location Duration in Dictionary. exp: "New York": 3600
-            const locationDurations = Object.values(destinations).reduce((acc, destination) => {
-                acc[destination.alias] = destination.duration;
+            // Get the ordered list of locations
+            const originLocations = optimalRoute.map(route => route[0][0]);
+            const lastDestination = optimalRoute[optimalRoute.length - 1][1][0];
+            const orderedLocations = [...originLocations, lastDestination];
+            console.log("Ordered Origins with Last Destination:", orderedLocations);
+
+            // TODO: URGENT - Use orderedLocations to correctly get the updatedDurations
+            // TODO TODO TODO TODO 
+
+            // Create a map of ordered locations for quick lookup
+            const orderedLocationsMap = orderedLocations.reduce((acc, location, index) => {
+                acc[location] = index;
                 return acc;
-              }, {} as { [key: string]: number });
+            }, {});
+
+            // Sort groupedDestinations based on orderedLocationsMap
+            const sortedGroupedDestinations = groupedDestinations.map(group => {
+                return group.sort((a, b) => {
+                    const indexA = orderedLocationsMap[a.alias];
+                    const indexB = orderedLocationsMap[b.alias];
+                    return indexA - indexB;
+                });
+            });
+
+            // Set the sorted destinations to state
+            setGroupedDestinations(sortedGroupedDestinations);
+
+            // Location Duration in Dictionary. exp: "New York": 3600
+            const locationDurations = Object.values(destinations).map(destination => ({
+                name: destination.alias,
+                duration: destination.duration
+            }));
               
               console.log("Location Durations 1:", locationDurations);              
             
             // Contains origin, destination, mode, transportDuration (duration), and locationDuration
             const updatedDurations = fetchedDurations.map(route => {
-                const originAlias = route.origin[0]; // Assuming alias is the first item
-                const locationDuration = locationDurations[originAlias] || 0; // Default to 3600 (1 hour) if no locationDuration is found
+                const originAlias = route.origin[0];
+                const locationEntry = locationDurations.find(entry => entry.name === originAlias);
+                const locationDuration = locationEntry ? locationEntry.duration : 3600; // Default to 3600 (1 hour) if no locationDuration is found
                 return { ...route, locationDuration };
             });
+
 
             // Need to add the last location
             const lastLocation = fetchedDurations[fetchedDurations.length - 1];
             const lastLocationAlias = lastLocation.destination[0];
             //console.log("Last Location Alias:", lastLocationAlias);
-            const lastLocationDuration = locationDurations[lastLocationAlias] || 0;
+            const lastLocationEntry = locationDurations.find(entry => entry.name === lastLocationAlias);
+            const lastLocationDuration = lastLocationEntry ? lastLocationEntry.duration : 3600;
             //console.log("Last Location Duration:", lastLocationDuration);
-            const lastLocationEntry = {
+            const lastLocationEntryObj = {
                 origin: lastLocationAlias,
                 destination: null,
                 mode: null,
                 duration: null,
                 locationDuration: lastLocationDuration
             };
-            updatedDurations.push(lastLocationEntry);
+            updatedDurations.push(lastLocationEntryObj);
             console.log("Updated Durations with last entry:", updatedDurations);
 
             // (3) Date Dividers
             // Uses fetchedDurations for this (as well as the loaded durations per location)
-            const dateRange = [moment().format('MM-DD-YYYY'), moment().format('MM-DD-YYYY')]; // TODO: Use actual sent date rather than today
+            const dateRange = [moment().format("ddd, MMM D"), moment().format("ddd, MMM D")]; // TODO: Use actual sent date rather than today
             // This returns a dictionary with indices as the ID for range of locations (i.e. "0:2" means from location 0 to location 2)
             console.log("Updated Durations:", updatedDurations);
             let groupedDays = await divideLocationsIntoGroups(updatedDurations, dateRange);
@@ -288,13 +318,23 @@ const GenerateItineraryScreen = () => {
                     // Add the group to the groupedDestinations array
                     tempGroupedDestinations.push(groupForThisDay);
 
-                    console.log("Updated Temp Grouped Destinations:", tempGroupedDestinations);
+                    console.log("Updated Temp Grouped Destinations Length:", tempGroupedDestinations.length);
                 });
 
                 console.log("Temp Grouped Destinations:", tempGroupedDestinations);
+                // Looping through the structure
+                tempGroupedDestinations.forEach((group, i) => {
+                    console.log(`Group ${i + 1}:`);
+                    group.forEach((subGroup: any[], j: number) => {
+                        console.log(`  Sub-group ${j + 1}:`);
+                        subGroup.forEach((array, k) => {
+                            console.log(`    Array ${k + 1}:`, array);
+                        });
+                    });
+                });
               
                 // TODO: tempGroupedDestinations is currently still WIP
-                //setGroupedDestinations(tempGroupedDestinations);
+                setGroupedDestinations(tempGroupedDestinations);
               };
               groupDestinationsByDay(groupedDays as { [key: number]: number }, optimalRoute);
 
@@ -326,15 +366,25 @@ const GenerateItineraryScreen = () => {
 
 
     const formatDate = (date: Date) => {
+        if (isNaN(date.getTime())) {
+            console.error("Invalid Date passed to formatDate:", date);
+            return "Invalid Date"; // Return a fallback value for invalid dates
+        }
         const options: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
         return new Intl.DateTimeFormat('en-US', options).format(date);
-    };
+    };    
 
     const getNextDay = (currentDate: Date) => {
+        // Check if the currentDate is a valid Date
+        if (isNaN(currentDate.getTime())) {
+            console.error("Invalid Date passed to getNextDay:", currentDate);
+            return new Date(); // Return null or a default date if invalid
+        }
+    
         const nextDate = new Date(currentDate);
         nextDate.setDate(nextDate.getDate() + 1);
         return nextDate;
-    };
+    };    
 
     const handlePressDate = (index: number) => {
         setSelectedDayIndex(index);
@@ -377,53 +427,53 @@ const GenerateItineraryScreen = () => {
             </SafeAreaView>
     
             <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
-                {groupedDestinations.map((group, index) => {
-                    // Get the date for this group (incrementing date for each group)
-                    const dateForThisGroup = index === 0 ? new Date() : getNextDay(new Date(group[0].startDateTime));
+                {optimalRoute.map((routeGroup, routeGroupIndex) => {
+                    return routeGroup.map((destinationArray, destinationIndex) => {
+                        const destinationKey = `${routeGroupIndex}-${destinationIndex}`;
+                        const dateForThisGroup = routeGroupIndex === 0 ? new Date() : getNextDay(new Date(routeGroup[0].startDateTime));
     
-                    return (
-                        <View key={index}>
-                            {/* Date Header - Clickable */}
-                            <TouchableOpacity onPress={() => handlePressDate(index)} style={styles.dateHeader}>
-                                <Text style={styles.dateText}>
-                                    {/* Display the formatted date */}
-                                    {formatDate(dateForThisGroup)}
-                                </Text>
-                            </TouchableOpacity>
+                        // Extract the name of the destination (first item in the array)
+                        const destinationName = destinationArray[0];
     
-                            {group.map((destination, destinationIndex) => {
-                                const destinationKey = `${index}-${destinationIndex}`;
-                                return (
-                                    <View key={destinationKey}>
-                                        {/* Destination Clickable */}
-                                        <TouchableOpacity style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
-                                            {/* Background with opacity */}
-                                            <View style={styles.backgroundContainer}>
-                                                <View style={styles.backgroundOverlay}></View>
-                                            </View>
+                        return (
+                            <View key={destinationKey}>
+                                {/* Date Header - Clickable */}
+                                {destinationIndex === 0 && (
+                                    <TouchableOpacity onPress={() => handlePressDate(routeGroupIndex)} style={styles.dateHeader}>
+                                        <Text style={styles.dateText}>
+                                            {/* Display the formatted date */}
+                                            {formatDate(dateForThisGroup)}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
     
-                                            <View style={styles.destinationContainer}>
-                                                <Image source={{ uri: destination.picture }} style={styles.destinationImage} />
-                                                <View style={styles.destinationLabel}>
-                                                    <Text style={styles.destinationName}>{destination.alias}</Text>
-                                                    <Text style={styles.destinationDetails}>
-                                                        Duration: {destination.duration} hrs | Priority: {destination.priority}
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                        </TouchableOpacity>
-    
-                                        {/* Conditional rendering of additional info */}
-                                        {selectedDestination === destinationKey && (
-                                            <View style={styles.additionalInfo}>
-                                                <Text style={styles.additionalText}>{getRouteText()}</Text>
-                                            </View>
-                                        )}
+                                {/* Destination Clickable */}
+                                <TouchableOpacity style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
+                                    {/* Background with opacity */}
+                                    <View style={styles.backgroundContainer}>
+                                        <View style={styles.backgroundOverlay}></View>
                                     </View>
-                                );
-                            })}
-                        </View>
-                    );
+    
+                                    <View style={styles.destinationContainer}>
+                                        <Image source={{ uri: destinationArray[1] }} style={styles.destinationImage} /> {/* destinationArray[1] is the address */}
+                                        <View style={styles.destinationLabel}>
+                                            <Text style={styles.destinationName}>{destinationName}</Text> {/* Display destination name */}
+                                            <Text style={styles.destinationDetails}>
+                                                Duration: {destinationArray.duration} hrs | Priority: {destinationArray.priority}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                </TouchableOpacity>
+    
+                                {/* Conditional rendering of additional info */}
+                                {selectedDestination === destinationKey && (
+                                    <View style={styles.additionalInfo}>
+                                        <Text style={styles.additionalText}>{getRouteText()}</Text>
+                                    </View>
+                                )}
+                            </View>
+                        );
+                    });
                 })}
             </ScrollView>
     
