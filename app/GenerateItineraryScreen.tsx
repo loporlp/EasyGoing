@@ -10,8 +10,8 @@ import { Dimensions } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import { storeData, getData } from '../scripts/localStore.js';
 import { divideLocationsIntoGroups } from '../scripts/dateDividers.js';
-import groupDestinationsByDay from '../scripts/groupDestinationsByDay.tsx';
-import processGroupedDestinations from '../scripts/processGroupedDestinations.tsx';
+import groupDestinationsByDay from '../scripts/groupDestinationsByDay';
+import processGroupedDestinations from '../scripts/processGroupedDestinations';
 import moment from 'moment';
 
 const { height } = Dimensions.get('window');
@@ -144,10 +144,6 @@ const GenerateItineraryScreen = () => {
                     groupedDestinationsTemp.push(currentGroup);
                 }
     
-                // Set the grouped destinations state once all destinations are processed
-                setGroupedDestinations(groupedDestinationsTemp);
-                console.log("Grouped Destinations:", groupedDestinationsTemp);
-    
                 setDestinations(formattedDestinations);
             } else {
                 console.log("No data found for this trip ID.");
@@ -250,10 +246,71 @@ const GenerateItineraryScreen = () => {
             groupedDays = (groupedDays || {}) as { [key: number]: number };
             console.log("Grouped Days Indices Dict:", groupedDays);
 
-            // Set the groups
-            const tempGroupedDestinations = groupDestinationsByDay(groupedDays as { [key: number]: number }, orderedLocations);
-            setGroupedDestinations(tempGroupedDestinations);
-            console.log("Temp Grouped Destinations Result:", tempGroupedDestinations);
+            // (4) Set the groups
+            const resultingGroupedDestinations = groupDestinationsByDay(groupedDays as { [key: number]: number }, orderedLocations);
+            setGroupedDestinations(resultingGroupedDestinations);
+            console.log("Resulting Grouped Destinations Result:", resultingGroupedDestinations);
+
+            //console.log("Fetched Polylines:", fetchedPolylines);
+
+            // START: STORES THE ROUTES TO THE GROUPED ORDERS
+
+            // Helper function to find the object corresponding to the destination
+            const getPolylineObject = (destination) => {
+                //console.log("Dest Destination:", destination);
+
+                const polyline = fetchedPolylines.find(polyline => {
+                    // Get the substring before the first comma which has the alias
+                    const firstPartOfId = polyline.id.split(',')[0];
+                    return firstPartOfId === destination;
+                });
+
+                // Since there's no polyline, we check the updatedDurations for the last destination
+                if (!polyline) {
+                    // Find the last destination's data in updatedDurations
+                    const lastDestination = updatedDurations[updatedDurations.length - 1];
+
+                    if (lastDestination && lastDestination.destination === null) {
+                        return {
+                            id: destination,
+                            duration: lastDestination.duration || "No travel duration",
+                            locationDuration: lastDestination.locationDuration || 0,
+                        };
+                    }
+
+                    // Default fallback if no polyline and no last destination
+                    return {
+                        id: destination,
+                        duration: "Unknown",
+                        locationDuration: 0,
+                    };
+                }
+
+                return polyline || null;
+            };
+
+            // Mapping destinations to polyline objects
+            const updatedGroupedDestinations = resultingGroupedDestinations.map((group, groupIndex) => {
+                return group.map((destination, subIndex) => {
+                    // Get the corresponding polyline object for the destination
+                    const polyline = getPolylineObject(destination);
+
+                    // console.log
+                    if (subIndex === group.length - 1) {
+                        // If it's the last destination in the group
+                        console.log(`Group ${groupIndex + 1}: Last destination "${destination.alias}", no polyline (or null):`, polyline ? polyline.id : "null");
+                    } else {
+                        // If it's not the last destination
+                        console.log(`Group ${groupIndex + 1}: Mapped destination "${destination.alias}" to polyline:`, polyline.id);
+                    }
+
+                    return polyline;
+                });
+            });
+
+            // END: STORES THE ROUTES TO THE GROUPED ORDERS
+
+            console.log("Grouped Objects in Order:", updatedGroupedDestinations);
 
             // TODO: We should probably return the id to use as an index for which sets of polyroutes to send to MultiRoutesMap when a date is clicked
         }
