@@ -10,6 +10,7 @@ import { Dimensions } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import { storeData, getData } from '../scripts/localStore.js';
 import { divideLocationsIntoGroups } from '../scripts/dateDividers.js';
+import { updateDestinationsWithTransport } from '../scripts/updateTransportDests.js';
 import groupDestinationsByDay from '../scripts/groupDestinationsByDay';
 import processGroupedDestinations from '../scripts/processGroupedDestinations';
 import moment from 'moment';
@@ -155,10 +156,31 @@ const GenerateItineraryScreen = () => {
         return formattedDestinations;
     };
 
-    // Function to save multiple destinations
-    const saveDestinations = async (newDestinations: Record<string, Place>) => {
-        for (const key in newDestinations) {
-            await storeData(key, newDestinations[key]);
+    // Helper function to reorder destinations based on orderedLocations
+    const reorderDestinations = (orderedLocations: any[]) => {
+        //console.log("DestDest:", destinations);
+
+        const orderedDestinations = orderedLocations.map(location => {
+            // location is an alias
+            // Find the destination object where the alias matches
+            const destination = Object.values(destinations).find(dest => dest.alias === location);
+
+            //console.log("DestLoc:", destination); 
+            return destination; 
+        });
+
+        //console.log("OrDest:", orderedDestinations);
+        return orderedDestinations;
+    };
+
+    const saveOrderedDestinations = async (orderedDestinations: any) => {
+        try {
+            // Assuming you want to store the entire ordered destinations under the trip ID
+            const tripID = "currentTrip";
+            await storeData(tripID, orderedDestinations);
+            console.log("Ordered destinations saved.");
+        } catch (error) {
+            console.error("Error saving ordered destinations:", error);
         }
     };
 
@@ -312,7 +334,14 @@ const GenerateItineraryScreen = () => {
 
             console.log("Grouped Objects in Order:", updatedGroupedDestinations);
             setGroupedDestinations(updatedGroupedDestinations);
-            // TODO: Store the updated Routes and TransportTime in local storage
+            
+            // Store the updated Routes and TransportTime in local storage
+            //console.log("orderedLocations:", orderedLocations);
+            const newDests = reorderDestinations(orderedLocations);
+            const updatedDests = updateDestinationsWithTransport(newDests, updatedGroupedDestinations);
+            //console.log("newDests:", newDests);
+            //console.log("upDests:", updatedDests);
+            saveOrderedDestinations(updatedDests);
 
             // TODO: We should probably return the id to use as an index for which sets of polyroutes to send to MultiRoutesMap when a date is clicked
         }
