@@ -10,6 +10,8 @@ import { Dimensions } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import { storeData, getData } from '../scripts/localStore.js';
 import { divideLocationsIntoGroups } from '../scripts/dateDividers.js';
+import groupDestinationsByDay from '../scripts/groupDestinationsByDay.tsx';
+import processGroupedDestinations from '../scripts/processGroupedDestinations.tsx';
 import moment from 'moment';
 
 const { height } = Dimensions.get('window');
@@ -21,7 +23,7 @@ const GenerateItineraryScreen = () => {
     const [polylinesData, setPolylinesData] = useState<any[]>([]);
     const handlePolylinesReady = (polylines: any[]) => {
         setPolylinesData(polylines);
-        console.log('Polylines Data:', polylines);
+        //console.log('Polylines Data:', polylines);
 
         // TODO: Store this data
       };
@@ -231,60 +233,13 @@ const GenerateItineraryScreen = () => {
             const orderedLocations = [...originLocations, lastDestination];
             console.log("Ordered Origins with Last Destination:", orderedLocations);
 
-            // TODO: URGENT - Use orderedLocations to correctly get the updatedDurations
-            // TODO TODO TODO TODO 
+            // TODO: We need a new script that takes in Group Indices and Ordered Locations
+            // This script will be specifically for the ScrollView
+
+            // TODO: With that same script above, use it to call another script to get back the list of locations for ONE DAY to display
 
             // Create a map of ordered locations for quick lookup
-            const orderedLocationsMap = orderedLocations.reduce((acc, location, index) => {
-                acc[location] = index;
-                return acc;
-            }, {});
-
-            // Sort groupedDestinations based on orderedLocationsMap
-            const sortedGroupedDestinations = groupedDestinations.map(group => {
-                return group.sort((a, b) => {
-                    const indexA = orderedLocationsMap[a.alias];
-                    const indexB = orderedLocationsMap[b.alias];
-                    return indexA - indexB;
-                });
-            });
-
-            // Set the sorted destinations to state
-            setGroupedDestinations(sortedGroupedDestinations);
-
-            // Location Duration in Dictionary. exp: "New York": 3600
-            const locationDurations = Object.values(destinations).map(destination => ({
-                name: destination.alias,
-                duration: destination.duration
-            }));
-              
-              console.log("Location Durations 1:", locationDurations);              
-            
-            // Contains origin, destination, mode, transportDuration (duration), and locationDuration
-            const updatedDurations = fetchedDurations.map(route => {
-                const originAlias = route.origin[0];
-                const locationEntry = locationDurations.find(entry => entry.name === originAlias);
-                const locationDuration = locationEntry ? locationEntry.duration : 3600; // Default to 3600 (1 hour) if no locationDuration is found
-                return { ...route, locationDuration };
-            });
-
-
-            // Need to add the last location
-            const lastLocation = fetchedDurations[fetchedDurations.length - 1];
-            const lastLocationAlias = lastLocation.destination[0];
-            //console.log("Last Location Alias:", lastLocationAlias);
-            const lastLocationEntry = locationDurations.find(entry => entry.name === lastLocationAlias);
-            const lastLocationDuration = lastLocationEntry ? lastLocationEntry.duration : 3600;
-            //console.log("Last Location Duration:", lastLocationDuration);
-            const lastLocationEntryObj = {
-                origin: lastLocationAlias,
-                destination: null,
-                mode: null,
-                duration: null,
-                locationDuration: lastLocationDuration
-            };
-            updatedDurations.push(lastLocationEntryObj);
-            console.log("Updated Durations with last entry:", updatedDurations);
+            const updatedDurations = processGroupedDestinations(orderedLocations, groupedDestinations, destinations, fetchedDurations, setGroupedDestinations);
 
             // (3) Date Dividers
             // Uses fetchedDurations for this (as well as the loaded durations per location)
@@ -293,50 +248,12 @@ const GenerateItineraryScreen = () => {
             console.log("Updated Durations:", updatedDurations);
             let groupedDays = await divideLocationsIntoGroups(updatedDurations, dateRange);
             groupedDays = (groupedDays || {}) as { [key: number]: number };
-            console.log("Grouped Days:", groupedDays);
+            console.log("Grouped Days Indices Dict:", groupedDays);
 
             // Set the groups
-            const groupDestinationsByDay = (groupedDays: { [key: number]: number }, destinations: any[]) => {
-                const tempGroupedDestinations: any[] | ((prevState: { alias: string; address: string; priority: number; mode: string; transportToNext: string; transportDuration: number; startDateTime: Date; duration: number; notes: string; dayOrigin: boolean; cost: number; picture: string; }[][]) => { alias: string; address: string; priority: number; mode: string; transportToNext: string; transportDuration: number; startDateTime: Date; duration: number; notes: string; dayOrigin: boolean; cost: number; picture: string; }[][]) = [];
-              
-                console.log("Grouped Days:", groupedDays);
-                console.log("Destinations:", destinations);
-
-                // Iterate over the groupedDays object
-                Object.keys(groupedDays).forEach((startIndex) => {
-                    const start = parseInt(startIndex); // Start index
-                    const end = groupedDays[start]; // End index
-
-                    console.log("Processing group:", startIndex);
-                    console.log("Start Index:", start, "End Index:", end);
-              
-                    // Extract the corresponding destinations for this day
-                    const groupForThisDay = destinations.slice(start, end + 1);
-
-                    console.log("Group for this day:", groupForThisDay);
-              
-                    // Add the group to the groupedDestinations array
-                    tempGroupedDestinations.push(groupForThisDay);
-
-                    console.log("Updated Temp Grouped Destinations Length:", tempGroupedDestinations.length);
-                });
-
-                console.log("Temp Grouped Destinations:", tempGroupedDestinations);
-                // Looping through the structure
-                tempGroupedDestinations.forEach((group, i) => {
-                    console.log(`Group ${i + 1}:`);
-                    group.forEach((subGroup: any[], j: number) => {
-                        console.log(`  Sub-group ${j + 1}:`);
-                        subGroup.forEach((array, k) => {
-                            console.log(`    Array ${k + 1}:`, array);
-                        });
-                    });
-                });
-              
-                // TODO: tempGroupedDestinations is currently still WIP
-                setGroupedDestinations(tempGroupedDestinations);
-              };
-              groupDestinationsByDay(groupedDays as { [key: number]: number }, optimalRoute);
+            const tempGroupedDestinations = groupDestinationsByDay(groupedDays as { [key: number]: number }, orderedLocations);
+            setGroupedDestinations(tempGroupedDestinations);
+            console.log("Temp Grouped Destinations Result:", tempGroupedDestinations);
 
             // TODO: We should probably return the id to use as an index for which sets of polyroutes to send to MultiRoutesMap when a date is clicked
         }
@@ -377,7 +294,7 @@ const GenerateItineraryScreen = () => {
     const getNextDay = (currentDate: Date) => {
         // Check if the currentDate is a valid Date
         if (isNaN(currentDate.getTime())) {
-            console.error("Invalid Date passed to getNextDay:", currentDate);
+            //console.error("Invalid Date passed to getNextDay:", currentDate);
             return new Date(); // Return null or a default date if invalid
         }
     
