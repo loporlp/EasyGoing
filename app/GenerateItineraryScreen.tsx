@@ -311,6 +311,8 @@ const GenerateItineraryScreen = () => {
             // END: STORES THE ROUTES TO THE GROUPED ORDERS
 
             console.log("Grouped Objects in Order:", updatedGroupedDestinations);
+            setGroupedDestinations(updatedGroupedDestinations);
+            // TODO: Store the updated Routes and TransportTime in local storage
 
             // TODO: We should probably return the id to use as an index for which sets of polyroutes to send to MultiRoutesMap when a date is clicked
         }
@@ -389,8 +391,8 @@ const GenerateItineraryScreen = () => {
     
         // Update the transportation modes state
         setTransportationModes(modesForThisDay);
-    };    
-    
+    };
+
 
     return (
         <View style={styles.container}>
@@ -399,64 +401,64 @@ const GenerateItineraryScreen = () => {
                     <MultiRoutesMap locations={optimalRoute} transportationModes={transportationModes} onPolylinesReady={handlePolylinesReady} />
                 )}
             </SafeAreaView>
-    
+
             <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
                 {optimalRoute.map((routeGroup, routeGroupIndex) => {
-                    return routeGroup.map((destinationArray, destinationIndex) => {
-                        const destinationKey = `${routeGroupIndex}-${destinationIndex}`;
-                        const dateForThisGroup = routeGroupIndex === 0 ? new Date() : getNextDay(new Date(routeGroup[0].startDateTime));
-    
-                        // Extract the name of the destination (first item in the array)
-                        const destinationName = destinationArray[0];
-    
-                        return (
-                            <View key={destinationKey}>
-                                {/* Date Header - Clickable */}
-                                {destinationIndex === 0 && (
-                                    <TouchableOpacity onPress={() => handlePressDate(routeGroupIndex)} style={styles.dateHeader}>
-                                        <Text style={styles.dateText}>
-                                            {/* Display the formatted date */}
-                                            {formatDate(dateForThisGroup)}
-                                        </Text>
-                                    </TouchableOpacity>
-                                )}
-    
-                                {/* Destination Clickable */}
-                                <TouchableOpacity style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
-                                    {/* Background with opacity */}
-                                    <View style={styles.backgroundContainer}>
-                                        <View style={styles.backgroundOverlay}></View>
-                                    </View>
-    
-                                    <View style={styles.destinationContainer}>
-                                        <Image source={{ uri: destinationArray[1] }} style={styles.destinationImage} /> {/* destinationArray[1] is the address */}
-                                        <View style={styles.destinationLabel}>
-                                            <Text style={styles.destinationName}>{destinationName}</Text> {/* Display destination name */}
-                                            <Text style={styles.destinationDetails}>
-                                                Duration: {destinationArray.duration} hrs | Priority: {destinationArray.priority}
-                                            </Text>
+                    const destinationGroupKey = `group-${routeGroupIndex}`; // Unique key for each routeGroup
+                    const dateForThisGroup = routeGroupIndex === 0 ? new Date() : getNextDay(new Date(routeGroup[0].startDateTime)); // The date for the current group
+
+                    return (
+                        <View key={destinationGroupKey}>
+                            {/* Date Header - Clickable */}
+                            <TouchableOpacity onPress={() => handlePressDate(routeGroupIndex)} style={styles.dateHeader}>
+                                <Text style={styles.dateText}>
+                                    {/* Display the formatted date */}
+                                    {formatDate(dateForThisGroup)}
+                                </Text>
+                            </TouchableOpacity>
+
+                            {/* Loop through each destination in the current routeGroup */}
+                            {routeGroup.map((destinationArray, destinationIndex) => {
+                                const destinationKey = `${destinationGroupKey}-${destinationIndex}`;
+                                const destinationName = destinationArray[0]; // Name of the destination (first item in the array)
+
+                                return (
+                                    <TouchableOpacity key={destinationKey} style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
+                                        {/* Background with opacity */}
+                                        <View style={styles.backgroundContainer}>
+                                            <View style={styles.backgroundOverlay}></View>
                                         </View>
-                                    </View>
-                                </TouchableOpacity>
-    
-                                {/* Conditional rendering of additional info */}
-                                {selectedDestination === destinationKey && (
-                                    <View style={styles.additionalInfo}>
-                                        <Text style={styles.additionalText}>{getRouteText()}</Text>
-                                    </View>
-                                )}
-                            </View>
-                        );
-                    });
+
+                                        <View style={styles.destinationContainer}>
+                                            <Image source={{ uri: destinationArray[1] }} style={styles.destinationImage} /> {/* destinationArray[1] is the address */}
+                                            <View style={styles.destinationLabel}>
+                                                <Text style={styles.destinationName}>{destinationName}</Text> {/* Display destination name */}
+                                                <Text style={styles.destinationDetails}>
+                                                    Duration: {destinationArray.duration} hrs | Priority: {destinationArray.priority}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    </TouchableOpacity>
+                                );
+                            })}
+
+                            {/* Conditional rendering of additional info */}
+                            {selectedDestination === destinationGroupKey && (
+                                <View style={styles.additionalInfo}>
+                                    <Text style={styles.additionalText}>{getRouteText()}</Text>
+                                </View>
+                            )}
+                        </View>
+                    );
                 })}
             </ScrollView>
-    
+
             {/* "Review Itinerary" button */}
             <TouchableOpacity style={styles.reviewItineraryButton} onPress={reviewItinerary}>
                 <Text style={styles.buttonText}>Review Itinerary</Text>
             </TouchableOpacity>
         </View>
-    );    
+    );
 };
 
 const styles = StyleSheet.create({
