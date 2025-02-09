@@ -9,7 +9,10 @@ export async function divideLocationsIntoGroups(locationAndDurations, date_range
     console.log(`Total days available: ${days}`);
 
     // Extract durations from locations and transport
-    const origin_duration = locationAndDurations.map(route => route.locationDuration);
+    let origin_duration = locationAndDurations.map(route => route.locationDuration);
+    // Divide each item in origin_duration by 60 to convert minutes to hours
+    origin_duration = origin_duration.map(duration => duration / 60);
+
     const transport_durations = locationAndDurations.map(route => {
         const duration = route.duration;
 
@@ -22,11 +25,11 @@ export async function divideLocationsIntoGroups(locationAndDurations, date_range
             return null;  // No need to process the last transport duration
         }
 
-        if (duration.includes('hour') || duration.includes('hrs')) {
+        if (duration.includes('hour') || duration.includes('hrs') || duration.includes('hours')) {
             let totalHours = 0;
         
             // Check for both hours and minutes in the duration
-            const hoursMatch = duration.match(/(\d+)\s*(hrs?|hour)/);  // Match hours or hrs
+            const hoursMatch = duration.match(/(\d+)\s*(hrs?|hour|hours)/);  // Match hours or hrs
             const minutesMatch = duration.match(/(\d+)\s*mins/);  // Match mins
         
             // Parse hours if present
@@ -45,7 +48,7 @@ export async function divideLocationsIntoGroups(locationAndDurations, date_range
             return totalHours;  // Return total duration in hours
         }
         
-        if (duration.includes('min')) {
+        if (duration.includes('mins')) {
             const minutes = parseInt(duration.replace(' mins', ''));
             const hours = minutes / 60;
             console.log(`Converted ${minutes} minutes to ${hours} hours`);
@@ -75,8 +78,10 @@ export async function divideLocationsIntoGroups(locationAndDurations, date_range
         
         console.log(`Checking location ${index + 1}: Duration = ${location} hours`);
 
+        console.log(location);
+
         if (location > available_hours) {
-            throw new Error("Not enough time in a day for this solo activity");
+            console.log("Not enough time in a day for this solo activity");
         }
 
         // Handle new day when remaining hours are not enough
@@ -92,7 +97,7 @@ export async function divideLocationsIntoGroups(locationAndDurations, date_range
                 start_index = index;
                 remaining_hours = available_hours;
             } else {
-                throw new Error("Not enough days available for all activities");
+                console.log("Not enough days available for all activities");
             }
         }
 
