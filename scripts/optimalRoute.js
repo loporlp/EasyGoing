@@ -44,7 +44,7 @@ async function getDistanceMatrix(origin, destinations, mode) {
     const distances = data.rows[0].elements.map((element, index) => ({
         destinationAddress: data.destination_addresses[index], // address
         originalLocationName: destinations[index].name, // location name
-        locationDuration: destinations[index].duration, // location duration
+        duration: destinations[index].duration, // location duration
         priority: destinations[index].priority, // location priority
         distance: element.distance.value,  // in meters
         transportDuration: element.duration.value,  // in seconds (transport)
@@ -71,8 +71,8 @@ export async function calculateOptimalRoute(locations, origin, mode) {
 
         // Add the current origin and destination to the route
         optimalRoute.push([
-            [currentOrigin.name, currentOrigin.address, currentOrigin.locationDuration, currentOrigin.priority],
-            [destination.originalLocationName, destination.destinationAddress, destination.locationDuration, destination.priority]
+            [currentOrigin.name, currentOrigin.address, currentOrigin.duration, currentOrigin.priority],
+            [destination.originalLocationName, destination.destinationAddress, destination.duration, destination.priority]
         ]);         
 
         // Update the current origin to the chosen destination
