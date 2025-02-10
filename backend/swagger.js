@@ -1,4 +1,4 @@
-export const swaggerOptions = {
+const swaggerOptions = {
     definition: {
       openapi: "3.0.0",
       info: {
@@ -19,3 +19,4 @@ export const swaggerOptions = {
     apis: ["server.js"], 
   };
   
+  module.exports = { swaggerOptions };

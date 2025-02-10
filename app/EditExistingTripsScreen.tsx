@@ -68,13 +68,13 @@ const EditExistingTripsScreen = () => {
                 </View>
 
 
-                {/* Map through the trips and dynamically display them */}
+                
                 {trips.length > 0 ? (
                     trips.map((trip) => (
                         <TouchableOpacity
-                            key={trip.id}  // Ensure each trip has a unique key
+                            key={trip.id}  
                             style={styles.tripButtonTokyo} 
-                            onPress={() => editTrip(trip.id)} // Pass the tripId to the edit function
+                            onPress={() => editTrip(trip.id)} 
                         >
                             <Image 
                                 style={styles.backgroundImage} 
@@ -83,8 +83,11 @@ const EditExistingTripsScreen = () => {
                             <View style={styles.darkOverlay} />
                             <View style={styles.screenContainer}>
                                 <Text style={styles.upcoming}>UPCOMING TRIP</Text>
-                                <Text style={styles.destinationName}>{String(trip.details.tripName)}</Text> {/* Access tripName from details */}
-                                <Text style={styles.dates}>{String(trip.details.tripStartDate)} - {String(trip.details.tripEndDate)}</Text> {/* Access dates from details */}
+                                <Text style={styles.destinationName}>{trip.details?.tripName ? String(trip.details.tripName) : "Unnamed Trip"}</Text>
+                                <Text style={styles.dates}>{trip.details?.tripStartDate && trip.details?.tripEndDate
+                                    ? `${String(trip.details.tripStartDate)} - ${String(trip.details.tripEndDate)}`
+                                    : "Dates Unavailable"}
+                                </Text> 
                             </View>
                         </TouchableOpacity>
                     ))
