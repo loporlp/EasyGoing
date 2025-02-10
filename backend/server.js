@@ -1,7 +1,24 @@
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: https
+ *       scheme: bearer
+ *       bearerFormat: UUID
+ *       description: "Use the logged-in user's Firebase User ID as the Bearer token"
+ */
+
 const express = require('express');
 const axios = require('axios'); // For making API calls
 const app = express();
 const port = 3000;
+
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+const { swaggerOptions } = require('./swagger.js');
+
+
 // const GOOGLE_API_KEY = 'AIzaSyAQgbWUgdfMozsamfhRi8HrHlRorkFNIEc';
 const GOOGLE_API_KEY = 'AIzaSyAQgbWUgdfMozsamfhRi8HrHlRorkFNIEc'
 const admin = require('firebase-admin');
@@ -9,9 +26,13 @@ const admin = require('firebase-admin');
 // Middleware to parse JSON bodies (if needed for POST/PUT requests)
 app.use(express.json());
 
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
 admin.initializeApp({
   credential: admin.credential.cert(require('./admin.json'))
 });
+
 
 // Middleware to verify firebase token
 const verifyFirebaseToken = async (req, res, next) => {
@@ -39,6 +60,28 @@ const verifyFirebaseToken = async (req, res, next) => {
   }
 };
 
+/**
+ * @swagger
+ * /api/autocomplete:
+ *   get:
+ *     summary: Fetch autocomplete suggestions from Google Places API
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: input
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The search input query
+ *     responses:
+ *       200:
+ *         description: A list of autocomplete suggestions
+ *       400:
+ *         description: Missing required parameter 'input'
+ *       403:
+ *         description: Unauthorized request. Ensure you are sending a valid User ID as Bearer token.
+ */
 
 app.get('/api/autocomplete', verifyFirebaseToken, async (req, res) => {
   try {
@@ -73,7 +116,38 @@ app.get('/api/autocomplete', verifyFirebaseToken, async (req, res) => {
   }
 });
 
-// Route Endpoint
+/**
+ * @swagger
+ * /api/directions:
+ *   get:
+ *     summary: Get directions between two locations
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: origin
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: destination
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: mode
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [driving, walking, bicycling, transit]
+ *     responses:
+ *       200:
+ *         description: Returns route details
+ *       400:
+ *         description: Missing required parameters
+ *       500:
+ *         description: Internal server error
+ */
 app.get('/api/directions', verifyFirebaseToken, async (req, res) => {
     console.log("directions called");
     try {
@@ -107,7 +181,28 @@ app.get('/api/directions', verifyFirebaseToken, async (req, res) => {
     }
 });
 
-// textsearch Endpoint
+/**
+ * @swagger
+ * /api/place/textsearch:
+ *   get:
+ *     summary: Search for a place using text input
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The place name or keyword to search for.
+ *     responses:
+ *       200:
+ *         description: Returns search results from Google Places API
+ *       400:
+ *         description: Missing required parameter 'query'
+ *       500:
+ *         description: Internal server error
+ */
 app.get('/api/place/textsearch', verifyFirebaseToken, async (req, res) => {
     console.log("textsearch called");
     try {
@@ -137,7 +232,32 @@ app.get('/api/place/textsearch', verifyFirebaseToken, async (req, res) => {
     }
 });
 
-// photo endpoint
+/**
+ * @swagger
+ * /api/place/photo:
+ *   get:
+ *     summary: Retrieve a place photo from Google Places API
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: photo_reference
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: maxwidth
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Returns the requested place photo
+ *       400:
+ *         description: Missing required parameters
+ *       500:
+ *         description: Internal server error
+ */
 app.get('/api/place/photo', verifyFirebaseToken, async (req, res) => {
     console.log("photo called");
     try {
@@ -169,16 +289,34 @@ app.get('/api/place/photo', verifyFirebaseToken, async (req, res) => {
 });
 
 
-// Database Endpoints
-
-// Status endpoint
+/**
+ * @swagger
+ * /api/serverstatus:
+ *   get:
+ *     summary: Check if the server is running
+ *     responses:
+ *       200:
+ *         description: Server is running
+ */
 app.get('/api/serverstatus', (req, res) => {
     res.json({ message: 'Server is Running' });
 });
 
 const pool = require('./db'); // Import DB connection
 
-// Register user in the database
+/**
+ * @swagger
+ * /api/register:
+ *   post:
+ *     summary: Register a new user
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User registered successfully
+ *       500:
+ *         description: Database error
+ */
 app.post('/api/register', verifyFirebaseToken, async (req, res) => {
     const { uid, email } = req.user;
 
@@ -194,7 +332,19 @@ app.post('/api/register', verifyFirebaseToken, async (req, res) => {
     }
 });
 
-// Get all trips from a specific user
+/**
+ * @swagger
+ * /api/trips:
+ *   get:
+ *     summary: Retrieve all trips for an authenticated user
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: A list of trips belonging to the authenticated user
+ *       403:
+ *         description: Unauthorized access. Ensure you are sending the Firebase User ID as the Bearer token.
+ */
 app.get('/api/trips', verifyFirebaseToken, async (req, res) => {
     const { uid } = req.user;
 
@@ -207,7 +357,29 @@ app.get('/api/trips', verifyFirebaseToken, async (req, res) => {
     }
 });
 
-// Create and add trip to database
+/**
+ * @swagger
+ * /api/trips:
+ *   post:
+ *     summary: Create a new trip
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               trip_details:
+ *                 type: object
+ *                 description: JSON object containing trip details
+ *     responses:
+ *       201:
+ *         description: Trip successfully created
+ *       403:
+ *         description: Unauthorized. Ensure you are using a valid User ID as Bearer token.
+ */
 app.post('/api/trips', verifyFirebaseToken, async (req, res) => {
     const { trip_details } = req.body;
     const { uid } = req.user;
@@ -224,7 +396,57 @@ app.post('/api/trips', verifyFirebaseToken, async (req, res) => {
     }
 });
 
-//Update the trip details on specific trip
+
+/**
+ * @swagger
+ * /api/trips/{id}:
+ *   put:
+ *     summary: Update a trip's details
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique ID of the trip to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               trip_details:
+ *                 type: object
+ *                 description: Updated trip details
+ *     responses:
+ *       200:
+ *         description: Trip updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Trip updated successfully"
+ *                 trip:
+ *                   type: object
+ *                   description: The updated trip details
+ *       400:
+ *         description: Missing trip_details in the request body
+ *       403:
+ *         description: Unauthorized request. Ensure you are using the correct Bearer token (User ID).
+ *       404:
+ *         description: Trip not found
+ *       500:
+ *         description: Database error
+ */
 app.put('/api/trips/:id', verifyFirebaseToken, async (req, res) => {
     const { id } = req.params;
     const { trip_details } = req.body;
@@ -251,7 +473,28 @@ app.put('/api/trips/:id', verifyFirebaseToken, async (req, res) => {
     }
 });
 
-// Delete a trip from the database
+/**
+ * @swagger
+ * /api/trips/{id}:
+ *   delete:
+ *     summary: Delete a trip
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the trip to delete
+ *     responses:
+ *       200:
+ *         description: Trip deleted successfully
+ *       404:
+ *         description: Trip not found
+ *       403:
+ *         description: Unauthorized. Ensure you are using a valid User ID as Bearer token.
+ */
 app.delete('/api/trips/:id', verifyFirebaseToken, async (req, res) => {
     const { id } = req.params;
     const { uid } = req.user;
