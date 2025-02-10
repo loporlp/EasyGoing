@@ -45,7 +45,7 @@ const GenerateItineraryScreen = () => {
     };
 
 
-    const [origin, setOrigin] = useState<{ name: string; address: string }>();
+    const [origin, setOrigin] = useState<{ name: string; address: string; duration: number; priority: number}>();
 
     // Initial empties
     const [destinations, setDestinations] = useState<Record<string, Place>>({});
@@ -122,6 +122,8 @@ const GenerateItineraryScreen = () => {
                             setOrigin({
                                 name: formattedDestination.alias,
                                 address: formattedDestination.address,
+                                duration: formattedDestination.duration,
+                                priority: formattedDestination.priority
                             });
                             originSet = true;
                         }
@@ -205,14 +207,19 @@ const GenerateItineraryScreen = () => {
             const fetchOptimalRoute = async () => {
                 try {
                     const destinationArray = Object.values(destinations);
+                    console.log("Pre DestArray:", origin);
                     const simplifiedDestinations = destinationArray
                         .filter(destination => destination.alias !== origin.name)  // Exclude origin
                         .map(destination => ({
                             name: destination.alias,
-                            address: destination.address
+                            address: destination.address,
+                            duration: destination.duration,
+                            priority: destination.priority
                         }));
                     // TODO: Remove Origin from simplifiedDestinations (multi days will divide so different format)
                     console.log("Simplified Destinations Array:", simplifiedDestinations);
+
+                    console.log("Current Origin (GI):", origin);
 
                     const mode = 'DRIVING';
                     const result = await calculateOptimalRoute(simplifiedDestinations, origin, mode);
@@ -450,6 +457,7 @@ const GenerateItineraryScreen = () => {
                             {routeGroup.map((destinationArray, destinationIndex) => {
                                 const destinationKey = `${destinationGroupKey}-${destinationIndex}`;
                                 const destinationName = destinationArray[0]; // Name of the destination (first item in the array)
+                                console.log("DestArray:", destinationArray);
 
                                 return (
                                     <TouchableOpacity key={destinationKey} style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
@@ -463,7 +471,7 @@ const GenerateItineraryScreen = () => {
                                             <View style={styles.destinationLabel}>
                                                 <Text style={styles.destinationName}>{destinationName}</Text> {/* Display destination name */}
                                                 <Text style={styles.destinationDetails}>
-                                                    Duration: {destinationArray.duration} hrs | Priority: {destinationArray.priority}
+                                                    Duration: {destinationArray[2]} hrs | Priority: {destinationArray[3]}
                                                 </Text>
                                             </View>
                                         </View>
