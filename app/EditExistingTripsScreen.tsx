@@ -83,8 +83,8 @@ const EditExistingTripsScreen = () => {
                             <View style={styles.darkOverlay} />
                             <View style={styles.screenContainer}>
                                 <Text style={styles.upcoming}>UPCOMING TRIP</Text>
-                                <Text style={styles.destinationName}>{trip.details.tripName}</Text> {/* Access tripName from details */}
-                                <Text style={styles.dates}>{trip.details.tripStartDate} - {trip.details.tripEndDate}</Text> {/* Access dates from details */}
+                                <Text style={styles.destinationName}>{String(trip.details.tripName)}</Text> {/* Access tripName from details */}
+                                <Text style={styles.dates}>{String(trip.details.tripStartDate)} - {String(trip.details.tripEndDate)}</Text> {/* Access dates from details */}
                             </View>
                         </TouchableOpacity>
                     ))

@@ -6,6 +6,7 @@ import { auth } from '../firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
 import { CommonActions, useNavigation } from '@react-navigation/native';
 import { useRouter } from "expo-router";
+import { clearLocal } from '@/scripts/localStore';
 
 const Account = () => {
 
@@ -38,11 +39,12 @@ const Account = () => {
             routes: [{ name: "index" }] // redirects user to the "Sign In" page
           })
         );
+
       })
       .catch((error) => {
         console.error('Sign out error:', error);
       });
-
+      clearLocal()
   };
 
   /**
