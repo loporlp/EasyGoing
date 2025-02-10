@@ -61,7 +61,7 @@ export const deleteData = async (key) => {
 };
 
 export const fillLocal = async () => {
-    console.log("called fill localStorage")
+    console.log("called fill localStorage");
     hasTrips = await storage.getItem("tripIDs"); 
     console.log(`HasTrips: ${hasTrips}`)
     if(!hasTrips || JSON.parse(hasTrips).length === 0){
@@ -76,6 +76,11 @@ export const fillLocal = async () => {
     else {
         console.log(`Already has trips: ${hasTrips}`)
     }
+}
+
+export const clearLocal = async () => {
+    console.log("called clear localStorage");
+    await storage.clear();
 }
 
 // Helper function to check if a string is valid JSON
