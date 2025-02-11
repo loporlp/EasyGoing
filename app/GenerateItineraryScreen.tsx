@@ -20,6 +20,9 @@ const { height } = Dimensions.get('window');
 const GenerateItineraryScreen = () => {
     const router = useRouter();
 
+    // Tracks if map is loading
+    const [isLoading, setIsLoading] = useState(true);  
+
     // Routes
     const [polylinesData, setPolylinesData] = useState<any[]>([]);
     const [transportDurations, setTransportDurations] = useState<any[]>([]);
@@ -443,6 +446,7 @@ const GenerateItineraryScreen = () => {
                         transportDurations={transportDurations}
                         markers={markers}
                         bounds={bounds}
+                        onPolylinesReady={() => setIsLoading(false)}
                     />
                 )}
             </SafeAreaView>
@@ -500,7 +504,11 @@ const GenerateItineraryScreen = () => {
             </ScrollView>
 
             {/* "Review Itinerary" button */}
-            <TouchableOpacity style={styles.reviewItineraryButton} onPress={reviewItinerary}>
+            <TouchableOpacity
+                style={[styles.reviewItineraryButton, isLoading && styles.disabledButton]}  // Apply styles to disable button
+                onPress={reviewItinerary}
+                disabled={isLoading}  // Disable the button when map is loading
+            >
                 <Text style={styles.buttonText}>Review Itinerary</Text>
             </TouchableOpacity>
         </View>
@@ -643,6 +651,9 @@ const styles = StyleSheet.create({
     additionalText: {
         fontSize: 16,
         color: "#333",
+    },
+    disabledButton: {
+        backgroundColor: '#cccccc',
     },
 });
 

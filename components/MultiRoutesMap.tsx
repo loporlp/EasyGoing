@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Polyline, Marker } from 'react-native-maps';
 import { useIsFocused } from '@react-navigation/native';
 
@@ -25,6 +25,7 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({
   onPolylinesReady,
 }) => {
   const [mapRegion, setMapRegion] = useState<any>(null); // State to store the map's region
+  const [isLoading, setIsLoading] = useState(true); // State to track loading status
   const mapRef = useRef<MapView>(null);
   const isFocused = useIsFocused();
   const [mapKey, setMapKey] = useState(Date.now());
@@ -59,66 +60,78 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({
 
       updateRegion();
     }
+
+    // When all data has loaded, stop loading
+    if (polylines.length > 0 && markers.length > 0 && transportDurations.length > 0 && bounds) {
+      setIsLoading(false);
+    }
   }, [polylines, transportDurations, markers, bounds, isFocused, onPolylinesReady]);
 
   return (
     <View style={styles.container}>
-      <MapView
-        key={mapKey}
-        provider={PROVIDER_GOOGLE}
-        style={styles.map}
-        ref={mapRef}
-        region={mapRegion}
-        showsUserLocation={true} // Optional: Show user's location
-      >
-        {/* Render polylines on the map */}
-        {polylines.map((polyline, index) => (
-          <Polyline
-            key={polyline.id}
-            coordinates={polyline.coordinates}
-            strokeColor={polyline.strokeColor}
-            strokeWidth={polyline.strokeWidth}
-          />
-        ))}
-
-        {/* Render markers for each origin and destination */}
-        {markers.map((marker, index) => (
-          <React.Fragment key={index}>
-            <Marker
-              coordinate={{ latitude: marker.origin.latitude, longitude: marker.origin.longitude }}
-              title={locations[index][0][0]} // Origin title
-              zIndex={10}
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text style={styles.loadingText}>LOADING...</Text>
+        </View>
+      ) : (
+        <MapView
+          key={mapKey}
+          provider={PROVIDER_GOOGLE}
+          style={styles.map}
+          ref={mapRef}
+          region={mapRegion}
+          showsUserLocation={true} // Optional: Show user's location
+        >
+          {/* Render polylines on the map */}
+          {polylines.map((polyline, index) => (
+            <Polyline
+              key={polyline.id}
+              coordinates={polyline.coordinates}
+              strokeColor={polyline.strokeColor}
+              strokeWidth={polyline.strokeWidth}
             />
+          ))}
+
+          {/* Render markers for each origin and destination */}
+          {markers.map((marker, index) => (
+            <React.Fragment key={index}>
+              <Marker
+                coordinate={{ latitude: marker.origin.latitude, longitude: marker.origin.longitude }}
+                title={locations[index][0][0]} // Origin title
+                zIndex={10}
+              />
+              <Marker
+                coordinate={{ latitude: marker.destination.latitude, longitude: marker.destination.longitude }}
+                title={locations[index][1][0]} // Destination title
+                zIndex={10}
+              />
+            </React.Fragment>
+          ))}
+
+          {/* Render route durations above the routes */}
+          {transportDurations.map((route, index) => (
             <Marker
-              coordinate={{ latitude: marker.destination.latitude, longitude: marker.destination.longitude }}
-              title={locations[index][1][0]} // Destination title
-              zIndex={10}
-            />
-          </React.Fragment>
-        ))}
-
-        {/* Render route durations above the routes */}
-        {transportDurations.map((route, index) => (
-          <Marker
-            key={index}
-            coordinate={{
-              latitude: markers[index]?.origin?.latitude && markers[index]?.destination?.latitude
-                ? (markers[index].origin.latitude + markers[index].destination.latitude) / 2
-                : 0, // Default to 0 if undefined
-              longitude: markers[index]?.origin?.longitude && markers[index]?.destination?.longitude
-                ? (markers[index].origin.longitude + markers[index].destination.longitude) / 2
-                : 0, // Default to 0 if undefined
-            }}
-          >
-            <View style={styles.routeInfoContainer}>
-              <Text style={styles.routeText}>
-                {`${route.mode}: ${route.duration}`}
-              </Text>
-            </View>
-          </Marker>
-        ))}
-
-      </MapView>
+              key={index}
+              coordinate={{
+                latitude: markers[index]?.origin?.latitude && markers[index]?.destination?.latitude
+                  ? (markers[index].origin.latitude + markers[index].destination.latitude) / 2
+                  : 0, // Default to 0 if undefined
+                longitude: markers[index]?.origin?.longitude && markers[index]?.destination?.longitude
+                  ? (markers[index].origin.longitude + markers[index].destination.longitude) / 2
+                  : 0, // Default to 0 if undefined
+              }}
+            >
+              <View style={styles.routeInfoContainer}>
+                <Text style={styles.routeText}>
+                  {`${route.mode}: ${route.duration}`}
+                </Text>
+              </View>
+            </Marker>
+          ))}
+        </MapView>
+        
+      )}
 
       {/*<Text style={styles.subTitle}>Locations:</Text>
       {locations.map((location, index) => (
@@ -160,6 +173,16 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '50%',
     marginTop: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 18,
+    color: '#0000ff',
   },
   routeInfoContainer: {
     position: 'absolute',
