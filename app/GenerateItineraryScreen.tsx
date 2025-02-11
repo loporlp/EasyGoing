@@ -346,7 +346,7 @@ const GenerateItineraryScreen = () => {
 
             console.log("Grouped Objects in Order:", updatedGroupedDestinations);
             setGroupedDestinations(updatedGroupedDestinations);
-            
+
             // Store the updated Routes and TransportTime in local storage
             //console.log("orderedLocations:", orderedLocations);
             const newDests = reorderDestinations(orderedLocations);
@@ -358,7 +358,7 @@ const GenerateItineraryScreen = () => {
             // TODO: We should probably return the id to use as an index for which sets of polyroutes to send to MultiRoutesMap when a date is clicked
         }
         getDurationAndPolylines();
-    }, [optimalRoute]); 
+    }, [optimalRoute]);
 
     const [selectedDestination, setSelectedDestination] = useState<string | null>(null);
     const [transportationText, setTransportationText] = useState("driving");
@@ -389,7 +389,7 @@ const GenerateItineraryScreen = () => {
         }
         const options: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
         return new Intl.DateTimeFormat('en-US', options).format(date);
-    };    
+    };
 
     const getNextDay = (currentDate: Date) => {
         // Check if the currentDate is a valid Date
@@ -397,39 +397,39 @@ const GenerateItineraryScreen = () => {
             //console.error("Invalid Date passed to getNextDay:", currentDate);
             return new Date(); // Return null or a default date if invalid
         }
-    
+
         const nextDate = new Date(currentDate);
         nextDate.setDate(nextDate.getDate() + 1);
         return nextDate;
-    };    
+    };
 
     const handlePressDate = (index: number) => {
         setSelectedDayIndex(index);
         console.log("Selected day index", index);
-    
+
         // Get the destinations for this specific day
         const selectedDestinations = groupedDestinations[index];
-    
+
         // Guard against undefined or empty array
         if (!selectedDestinations || selectedDestinations.length === 0) {
             console.warn("No destinations available for this day!");
             return;
         }
-    
+
         // Convert the selectedDestinations into an object with numeric keys
         const formattedDestinations = selectedDestinations.reduce<{ [key: string]: Place }>((acc, curr, index) => {
             acc[index.toString()] = curr;
             return acc;
         }, {});
-    
+
         console.log("Formatted Destinations:", formattedDestinations);
-    
+
         // TODO: setOptimalRoute(formattedDestinations);
-    
+
         // Update the transportation modes for this day
         const modesForThisDay = selectedDestinations.map(destination => destination.mode || 'DRIVING');
         console.log("Modes for this day:", modesForThisDay);
-    
+
         // Update the transportation modes state
         setTransportationModes(modesForThisDay);
     };
@@ -453,8 +453,15 @@ const GenerateItineraryScreen = () => {
 
             <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
                 {optimalRoute.map((routeGroup, routeGroupIndex) => {
-                    const destinationGroupKey = `group-${routeGroupIndex}`; // Unique key for each routeGroup
-                    const dateForThisGroup = routeGroupIndex === 0 ? new Date() : getNextDay(new Date(routeGroup[0].startDateTime)); // The date for the current group
+                    const destinationGroupKey = `group-${routeGroupIndex}`;
+                    let dateForThisGroup;
+                    if (routeGroupIndex === 0) {
+                        dateForThisGroup = new Date(destinations[routeGroupIndex].startDateTime);
+                    } else {
+                        const previousGroupDate = new Date(destinations[routeGroupIndex - 1].startDateTime);
+                        dateForThisGroup = getNextDay(previousGroupDate);
+                    }
+                    console.log('Date for this group:', dateForThisGroup);
 
                     return (
                         <View key={destinationGroupKey}>
