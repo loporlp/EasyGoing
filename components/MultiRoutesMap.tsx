@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Polyline, Marker } from 'react-native-maps';
-import { fetchPolylinesAndDurations } from '../scripts/routeHelpers';
 import { useIsFocused } from '@react-navigation/native';
 
 const stroke_width = 4;
@@ -9,65 +8,58 @@ const stroke_width = 4;
 interface MultiRoutesMapProps {
   locations: string[][];  // An array of origin-destination pairs
   transportationModes: string[]; // Array of transportation modes
-  onPolylinesReady?: (polylines: any[]) => void; // The list of routes
+  polylines: any[]; 
+  transportDurations: any[];
+  markers: any[];
+  bounds: any; // Bounds for the map region
+  onPolylinesReady?: (polylines: any[]) => void; // Optional callback when polylines are ready
 }
 
-const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({ locations, transportationModes, onPolylinesReady }) => {
-  const [polylines, setPolylines] = useState<any[]>([]); // State to store polylines
-  const [transportDurations, setTransportDurations] = useState<any[]>([]) // State to store transport durations
+const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({
+  locations,
+  transportationModes,
+  polylines,
+  transportDurations,
+  markers,
+  bounds,
+  onPolylinesReady,
+}) => {
   const [mapRegion, setMapRegion] = useState<any>(null); // State to store the map's region
-  const [markers, setMarkers] = useState<any[]>([]); // State to store marker data
   const mapRef = useRef<MapView>(null);
   const isFocused = useIsFocused();
   const [mapKey, setMapKey] = useState(Date.now());
 
   useEffect(() => {
-    const loadPolylines = async () => {
-      if (isFocused) {
-        console.log("Screen is focused, fetching polylines, markers, and durations...");
-        setMapKey(Date.now()); // Update key when screen is focused
+    const updateRegion = () => {
+      if (bounds.minLat !== Infinity && bounds.maxLat !== -Infinity && bounds.minLon !== Infinity && bounds.maxLon !== -Infinity) {
+        const padding = 0.05; // Adjust padding to give some space around the routes
+        const newRegion = {
+          latitude: (bounds.minLat + bounds.maxLat) / 2,
+          longitude: (bounds.minLon + bounds.maxLon) / 2,
+          latitudeDelta: bounds.maxLat - bounds.minLat + padding,
+          longitudeDelta: bounds.maxLon - bounds.minLon + padding,
+        };
 
-        // Use the helper function to fetch polylines, markers, and durations
-        const { polylines: fetchedPolylines, transportDurations: fetchedDurations, markers: fetchedMarkers, bounds } = await fetchPolylinesAndDurations(locations, transportationModes);
+        setMapRegion(newRegion);
 
-        // Update state with the fetched data
-        setPolylines(fetchedPolylines);
-        setTransportDurations(fetchedDurations);
-        setMarkers(fetchedMarkers);
-
-        // If the parent provided a callback, call it with the polylines
-        if (onPolylinesReady) {
-          onPolylinesReady(fetchedPolylines);
+        // Smoothly transition to the new region
+        if (mapRef.current && newRegion) {
+          mapRef.current.animateToRegion(newRegion, 1000);
         }
-
-        // Set the map region to focus on the route(s)
-        if (bounds.minLat !== Infinity && bounds.maxLat !== -Infinity && bounds.minLon !== Infinity && bounds.maxLon !== -Infinity) {
-          const padding = 0.05; // Adjust padding to give some space around the routes
-          const newRegion = {
-            latitude: (bounds.minLat + bounds.maxLat) / 2,
-            longitude: (bounds.minLon + bounds.maxLon) / 2,
-            latitudeDelta: bounds.maxLat - bounds.minLat + padding,
-            longitudeDelta: bounds.maxLon - bounds.minLon + padding,
-          };
-
-          setMapRegion(newRegion);
-
-          // Smoothly transition to the new region
-          if (mapRef.current && newRegion) {
-            mapRef.current.animateToRegion(newRegion, 1000);
-          }
-        }
-      } else {
-        // Optionally reset polylines, markers, and durations when screen is unfocused
-        setPolylines([]);
-        setMarkers([]);
-        setTransportDurations([]);
-        setMapRegion(null);
       }
     };
 
-    loadPolylines();
-  }, [locations, transportationModes, isFocused]);
+    if (isFocused) {
+      setMapKey(Date.now()); // Update key when screen is focused
+
+      // Call the onPolylinesReady if provided
+      if (onPolylinesReady) {
+        onPolylinesReady(polylines);
+      }
+
+      updateRegion();
+    }
+  }, [polylines, transportDurations, markers, bounds, isFocused, onPolylinesReady]);
 
   return (
     <View style={styles.container}>

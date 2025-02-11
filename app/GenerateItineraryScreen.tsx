@@ -22,12 +22,9 @@ const GenerateItineraryScreen = () => {
 
     // Routes
     const [polylinesData, setPolylinesData] = useState<any[]>([]);
-    const handlePolylinesReady = (polylines: any[]) => {
-        setPolylinesData(polylines);
-        //console.log('Polylines Data:', polylines);
-
-        // TODO: Store this data
-      };
+    const [transportDurations, setTransportDurations] = useState<any[]>([]);
+    const [markers, setMarkers] = useState<any[]>([]);
+    const [bounds, setBounds] = useState<any>({});
 
     type Place = {
         alias: string;
@@ -252,6 +249,11 @@ const GenerateItineraryScreen = () => {
         const getDurationAndPolylines = async () => {
             const { polylines: fetchedPolylines, transportDurations: fetchedDurations, markers: fetchedMarkers, bounds } = await fetchPolylinesAndDurations(optimalRoute, transportationModes);
 
+            setPolylinesData(fetchedPolylines);
+            setTransportDurations(fetchedDurations);
+            setMarkers(fetchedMarkers);
+            setBounds(bounds);
+
             // Get the ordered list of locations
             const originLocations = optimalRoute.map(route => route[0][0]);
             const lastDestination = optimalRoute[optimalRoute.length - 1][1][0];
@@ -434,7 +436,14 @@ const GenerateItineraryScreen = () => {
         <View style={styles.container}>
             <SafeAreaView style={{ flex: 1 }}>
                 {optimalRoute.length > 0 && (
-                    <MultiRoutesMap locations={optimalRoute} transportationModes={transportationModes} onPolylinesReady={handlePolylinesReady} />
+                    <MultiRoutesMap
+                        locations={optimalRoute}
+                        transportationModes={transportationModes}
+                        polylines={polylinesData}
+                        transportDurations={transportDurations}
+                        markers={markers}
+                        bounds={bounds}
+                    />
                 )}
             </SafeAreaView>
 
