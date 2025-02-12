@@ -30,6 +30,7 @@ const GenerateItineraryScreen = () => {
     const [markers, setMarkers] = useState<any[]>([]);
     const [bounds, setBounds] = useState<any>({});
     const [allRoutesData, setAllRoutesData] = useState<any[]>([]);
+    const [toSaveData, setToSaveData] = useState<any[]>([]);
 
     const [isDateSelected, setIsDateSelected] = useState(false);
 
@@ -357,12 +358,8 @@ const GenerateItineraryScreen = () => {
             // Store the updated Routes and TransportTime in local storage
             //console.log("orderedLocations:", orderedLocations);
             const newDests = reorderDestinations(orderedLocations);
-            let updatedDests = updateDestinationsWithTransport(newDests, updatedGroupedDestinations);
-            console.log("Something happened?", grouped2DDestinations);
-            updatedDests = updateDayOrigin(updatedDests, grouped2DDestinations);
-            //console.log("newDests:", newDests);
-            //console.log("upDests:", updatedDests);
-            saveOrderedDestinations(updatedDests);
+            const updatedDests = updateDestinationsWithTransport(newDests, updatedGroupedDestinations);
+            setToSaveData(updatedDests);
         }
         getDurationAndPolylines();
     }, [optimalRoute]);
@@ -372,7 +369,17 @@ const GenerateItineraryScreen = () => {
 
     useEffect(() => {
         console.log("Updated grouped2DDestinations:", grouped2DDestinations);
-    }, [grouped2DDestinations]);    
+
+        // SAVING
+        const updatedDests = updateDayOrigin(toSaveData, grouped2DDestinations);
+        //console.log("newDests:", newDests);
+        //console.log("upDests:", updatedDests);
+        saveOrderedDestinations(updatedDests);
+
+        // Reload list
+        setDestinations(updatedDests);
+
+    }, [grouped2DDestinations, toSaveData]);    
 
     const handlePress = (destination: string) => {
         setSelectedDestination(prev => prev === destination ? null : destination);
@@ -553,7 +560,6 @@ const GenerateItineraryScreen = () => {
                                     name={isSelected ? "chevron-up" : "chevron-down"}
                                     size={18}
                                     color="#000"
-                                    style={styles.icon}
                                 />
                             </TouchableOpacity>
 
