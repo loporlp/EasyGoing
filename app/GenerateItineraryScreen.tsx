@@ -359,6 +359,7 @@ const GenerateItineraryScreen = () => {
             //console.log("orderedLocations:", orderedLocations);
             const newDests = reorderDestinations(orderedLocations);
             const updatedDests = updateDestinationsWithTransport(newDests, updatedGroupedDestinations);
+            console.log("Updated Dests (final):", updatedDests);
             setToSaveData(updatedDests);
         }
         getDurationAndPolylines();
@@ -581,7 +582,7 @@ const GenerateItineraryScreen = () => {
                                             <View style={styles.destinationLabel}>
                                                 <Text style={styles.destinationName}>{destinationName}</Text> {/* Display destination name */}
                                                 <Text style={styles.destinationDetails}>
-                                                    Duration: {destinationArray[2]} hrs | Priority: {destinationArray[3]}
+                                                    Duration: {Math.floor(destinationArray[2] / 60)} hrs {destinationArray[2] % 60} mins | Priority: {destinationArray[3]}
                                                 </Text>
                                             </View>
                                         </View>
