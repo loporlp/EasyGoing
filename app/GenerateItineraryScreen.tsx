@@ -10,7 +10,7 @@ import { Dimensions } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import { storeData, getData } from '../scripts/localStore.js';
 import { divideLocationsIntoGroups } from '../scripts/dateDividers.js';
-import { updateDestinationsWithTransport } from '../scripts/updateTransportDests.js';
+import { updateDestinationsWithTransport, updateDayOrigin } from '../scripts/updateTransportDests.js';
 import groupDestinationsByDay from '../scripts/groupDestinationsByDay';
 import processGroupedDestinations from '../scripts/processGroupedDestinations';
 import { Ionicons } from '@expo/vector-icons';
@@ -357,18 +357,22 @@ const GenerateItineraryScreen = () => {
             // Store the updated Routes and TransportTime in local storage
             //console.log("orderedLocations:", orderedLocations);
             const newDests = reorderDestinations(orderedLocations);
-            const updatedDests = updateDestinationsWithTransport(newDests, updatedGroupedDestinations);
+            let updatedDests = updateDestinationsWithTransport(newDests, updatedGroupedDestinations);
+            console.log("Something happened?", grouped2DDestinations);
+            updatedDests = updateDayOrigin(updatedDests, grouped2DDestinations);
             //console.log("newDests:", newDests);
             //console.log("upDests:", updatedDests);
             saveOrderedDestinations(updatedDests);
-
-            // TODO: We should probably return the id to use as an index for which sets of polyroutes to send to MultiRoutesMap when a date is clicked
         }
         getDurationAndPolylines();
     }, [optimalRoute]);
 
     const [selectedDestination, setSelectedDestination] = useState<string | null>(null);
     const [transportationText, setTransportationText] = useState("driving");
+
+    useEffect(() => {
+        console.log("Updated grouped2DDestinations:", grouped2DDestinations);
+    }, [grouped2DDestinations]);    
 
     const handlePress = (destination: string) => {
         setSelectedDestination(prev => prev === destination ? null : destination);

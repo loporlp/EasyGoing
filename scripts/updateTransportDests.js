@@ -4,7 +4,7 @@ const flattenGroupedObjects = (groupedObjects) => {
 };
 
 // Function to update destinations with transport info
-const updateDestinationsWithTransport = (newDest, updatedGroupedDestinations) => {
+export const updateDestinationsWithTransport = (newDest, updatedGroupedDestinations) => {
     // Flatten the grouped destinations into a 1D array
     const flattenedDestinations = flattenGroupedObjects(updatedGroupedDestinations);
     //console.log("Flattened destinations:", flattenedDestinations);
@@ -47,4 +47,31 @@ const updateDestinationsWithTransport = (newDest, updatedGroupedDestinations) =>
     return newDest;
 };
 
-module.exports = { updateDestinationsWithTransport };
+// Function to update dayOrigin for each destination in updatedDestinations
+export const updateDayOrigin = (updatedDests, grouped2DDestinations) => {
+    console.log('Updated Destinations (UTD):', updatedDests);
+    console.log('Grouped Destinations (UTD):', grouped2DDestinations);
+
+    return updatedDests.map(destination => {
+        console.log(`Processing destination: ${destination.alias}`);
+
+        // Extract the alias
+        const aliasBeforeComma = destination.alias.split(',')[0].trim();
+
+        // Check if this destination is the first element in any group
+        const isDayOrigin = grouped2DDestinations.some(group => {
+            console.log(`Checking group: ${JSON.stringify(group)}`);
+            // Compare alias with the first element's alias in the group
+            const firstAliasInGroup = group[0]?.split(',')[0].trim();
+            console.log(`Is ${aliasBeforeComma} the first in this group? ${firstAliasInGroup === aliasBeforeComma}`);
+            return firstAliasInGroup === aliasBeforeComma;
+        });
+
+        console.log(`Is ${destination.alias} the day origin? ${isDayOrigin}`);
+
+        return {
+            ...destination,
+            dayOrigin: isDayOrigin 
+        };
+    });
+};
