@@ -533,21 +533,20 @@ const GenerateItineraryScreen = () => {
                         dateForThisGroup = getNextDay(previousGroupDate);
                     }
                     console.log('Date for this group:', dateForThisGroup);
+                    const isSelected = selectedDayIndex === routeGroupIndex;
 
                     return (
                         <View key={destinationGroupKey}>
                             {/* Date Header - Clickable */}
                             <TouchableOpacity
                                 onPress={() => handlePressDate(routeGroupIndex)}
-                                style={[styles.dateHeader, isDateSelected && styles.selectedDateHeader]} // Add dynamic styles
+                                style={[styles.dateHeader, isSelected && styles.selectedDateHeader]}
                             >
-                                <Text style={[styles.dateText, isDateSelected && styles.selectedDateText]}>
-                                    {/* Display the formatted date */}
+                                <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>
                                     {formatDate(dateForThisGroup)}
                                 </Text>
-                                {/* Rotating arrow icon for visual feedback */}
                                 <Ionicons
-                                    name={isDateSelected ? "chevron-up" : "chevron-down"}
+                                    name={isSelected ? "chevron-up" : "chevron-down"}
                                     size={18}
                                     color="#000"
                                     style={styles.icon}
@@ -727,6 +726,12 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginBottom: 10,
         fontSize: 18,
+    },
+    selectedDateHeader: {
+        backgroundColor: '#dcdcdc',
+    },
+    selectedDateText: {
+        color: '#007aff',
     },
 
     additionalInfo: {
