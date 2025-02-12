@@ -10,7 +10,7 @@ import { Dimensions } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import { storeData, getData } from '../scripts/localStore.js';
 import { divideLocationsIntoGroups } from '../scripts/dateDividers.js';
-import { updateDestinationsWithTransport } from '../scripts/updateTransportDests.js';
+import { updateDestinationsWithTransport, updateDayOrigin } from '../scripts/updateTransportDests.js';
 import groupDestinationsByDay from '../scripts/groupDestinationsByDay';
 import processGroupedDestinations from '../scripts/processGroupedDestinations';
 import { Ionicons } from '@expo/vector-icons';
@@ -30,6 +30,7 @@ const GenerateItineraryScreen = () => {
     const [markers, setMarkers] = useState<any[]>([]);
     const [bounds, setBounds] = useState<any>({});
     const [allRoutesData, setAllRoutesData] = useState<any[]>([]);
+    const [toSaveData, setToSaveData] = useState<any[]>([]);
 
     const [isDateSelected, setIsDateSelected] = useState(false);
 
@@ -358,17 +359,27 @@ const GenerateItineraryScreen = () => {
             //console.log("orderedLocations:", orderedLocations);
             const newDests = reorderDestinations(orderedLocations);
             const updatedDests = updateDestinationsWithTransport(newDests, updatedGroupedDestinations);
-            //console.log("newDests:", newDests);
-            //console.log("upDests:", updatedDests);
-            saveOrderedDestinations(updatedDests);
-
-            // TODO: We should probably return the id to use as an index for which sets of polyroutes to send to MultiRoutesMap when a date is clicked
+            setToSaveData(updatedDests);
         }
         getDurationAndPolylines();
     }, [optimalRoute]);
 
     const [selectedDestination, setSelectedDestination] = useState<string | null>(null);
     const [transportationText, setTransportationText] = useState("driving");
+
+    useEffect(() => {
+        console.log("Updated grouped2DDestinations:", grouped2DDestinations);
+
+        // SAVING
+        const updatedDests = updateDayOrigin(toSaveData, grouped2DDestinations);
+        //console.log("newDests:", newDests);
+        //console.log("upDests:", updatedDests);
+        saveOrderedDestinations(updatedDests);
+
+        // Reload list
+        setDestinations(updatedDests);
+
+    }, [grouped2DDestinations, toSaveData]);    
 
     const handlePress = (destination: string) => {
         setSelectedDestination(prev => prev === destination ? null : destination);
@@ -533,24 +544,22 @@ const GenerateItineraryScreen = () => {
                         dateForThisGroup = getNextDay(previousGroupDate);
                     }
                     console.log('Date for this group:', dateForThisGroup);
+                    const isSelected = selectedDayIndex === routeGroupIndex;
 
                     return (
                         <View key={destinationGroupKey}>
                             {/* Date Header - Clickable */}
                             <TouchableOpacity
                                 onPress={() => handlePressDate(routeGroupIndex)}
-                                style={[styles.dateHeader, isDateSelected && styles.selectedDateHeader]} // Add dynamic styles
+                                style={[styles.dateHeader, isSelected && styles.selectedDateHeader]}
                             >
-                                <Text style={[styles.dateText, isDateSelected && styles.selectedDateText]}>
-                                    {/* Display the formatted date */}
+                                <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>
                                     {formatDate(dateForThisGroup)}
                                 </Text>
-                                {/* Rotating arrow icon for visual feedback */}
                                 <Ionicons
-                                    name={isDateSelected ? "chevron-up" : "chevron-down"}
+                                    name={isSelected ? "chevron-up" : "chevron-down"}
                                     size={18}
                                     color="#000"
-                                    style={styles.icon}
                                 />
                             </TouchableOpacity>
 
@@ -727,6 +736,12 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginBottom: 10,
         fontSize: 18,
+    },
+    selectedDateHeader: {
+        backgroundColor: '#dcdcdc',
+    },
+    selectedDateText: {
+        color: '#007aff',
     },
 
     additionalInfo: {
