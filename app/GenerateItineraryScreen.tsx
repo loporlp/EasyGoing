@@ -50,6 +50,7 @@ const GenerateItineraryScreen = () => {
     // Initial empties
     const [destinations, setDestinations] = useState<Record<string, Place>>({});
     const [groupedDestinations, setGroupedDestinations] = useState<Place[][]>([]);
+    const [grouped2DDestinations, setGrouped2DDestinations] = useState<Place[][]>([]);
     const [optimalRoute, setOptimalRoute] = useState<any[][]>([]);
     const [transportationModes, setTransportationModes] = useState<string[]>([]);
 
@@ -283,6 +284,7 @@ const GenerateItineraryScreen = () => {
             // (4) Set the groups
             const resultingGroupedDestinations = groupDestinationsByDay(groupedDays as { [key: number]: number }, orderedLocations);
             setGroupedDestinations(resultingGroupedDestinations);
+            setGrouped2DDestinations(resultingGroupedDestinations);
             console.log("Resulting Grouped Destinations Result:", resultingGroupedDestinations);
 
             //console.log("Fetched Polylines:", fetchedPolylines);
@@ -406,34 +408,78 @@ const GenerateItineraryScreen = () => {
     const handlePressDate = (index: number) => {
         setSelectedDayIndex(index);
         console.log("Selected day index", index);
-
+    
         // Get the destinations for this specific day
         const selectedDestinations = groupedDestinations[index];
-
+        console.log("Selected Dests Date:", selectedDestinations);
+    
         // Guard against undefined or empty array
         if (!selectedDestinations || selectedDestinations.length === 0) {
             console.warn("No destinations available for this day!");
             return;
         }
-
+    
         // Convert the selectedDestinations into an object with numeric keys
         const formattedDestinations = selectedDestinations.reduce<{ [key: string]: Place }>((acc, curr, index) => {
             acc[index.toString()] = curr;
             return acc;
         }, {});
-
-        console.log("Formatted Destinations:", formattedDestinations);
-
+    
+        console.log("Formatted Destinations (Date):", formattedDestinations);
+    
         // TODO: setOptimalRoute(formattedDestinations);
-
+    
+        // Array to store the polyline data
+        const matchedPolylinesData: any[] = [];
+    
+        // Loop through each destination in grouped2DDestinations[index]
+        grouped2DDestinations[index].forEach(destinationName => {
+            let matched = false;
+    
+            // Loop through the formattedDestinations
+            for (const key in formattedDestinations) {
+                if (formattedDestinations.hasOwnProperty(key)) {
+                    const destination = formattedDestinations[key];
+    
+                    // Check if the substring before ',' in the 'id' matches the destination name
+                    const routeNames = destination.id.split('$').map(route => route.split(',')[0].trim());
+                    if (routeNames.includes(destinationName)) {
+                        matched = true;
+                        console.log(`Matched destination: ${destinationName} with id: ${destination.id}`);
+    
+                        // Store the matched polyline data (coordinates, duration, etc.)
+                        matchedPolylinesData.push({
+                            coordinates: destination.coordinates,
+                            duration: destination.duration,
+                            strokeColor: destination.strokeColor,
+                            strokeWidth: destination.strokeWidth
+                        });
+                        break; // Break once we find the match
+                    }
+                }
+            }
+    
+            if (!matched) {
+                console.log(`No match found for: ${destinationName}`);
+            }
+        });
+    
+        // After processing all destinations, update the polyline data
+        if (matchedPolylinesData.length > 0) {
+            console.log("Updating global polylines data:", matchedPolylinesData);
+            setPolylinesData(matchedPolylinesData);  // Update the global polyline data
+        } else {
+            console.warn("No polyline data to update.");
+        }
+    
         // Update the transportation modes for this day
         const modesForThisDay = selectedDestinations.map(destination => destination.mode || 'DRIVING');
         console.log("Modes for this day:", modesForThisDay);
-
-        // Update the transportation modes state
+    
+        // Update transportation modes state
         setTransportationModes(modesForThisDay);
     };
-
+    
 
     return (
         <View style={styles.container}>
