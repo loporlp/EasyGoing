@@ -13,6 +13,7 @@ import { divideLocationsIntoGroups } from '../scripts/dateDividers.js';
 import { updateDestinationsWithTransport } from '../scripts/updateTransportDests.js';
 import groupDestinationsByDay from '../scripts/groupDestinationsByDay';
 import processGroupedDestinations from '../scripts/processGroupedDestinations';
+import { Ionicons } from '@expo/vector-icons';
 import moment from 'moment';
 
 const { height } = Dimensions.get('window');
@@ -28,6 +29,9 @@ const GenerateItineraryScreen = () => {
     const [transportDurations, setTransportDurations] = useState<any[]>([]);
     const [markers, setMarkers] = useState<any[]>([]);
     const [bounds, setBounds] = useState<any>({});
+    const [allRoutesData, setAllRoutesData] = useState<any[]>([]);
+
+    const [isDateSelected, setIsDateSelected] = useState(false);
 
     type Place = {
         alias: string;
@@ -252,6 +256,7 @@ const GenerateItineraryScreen = () => {
         // (2) Route Polylines
         const getDurationAndPolylines = async () => {
             const { polylines: fetchedPolylines, transportDurations: fetchedDurations, markers: fetchedMarkers, bounds } = await fetchPolylinesAndDurations(optimalRoute, transportationModes);
+            setAllRoutesData(fetchedPolylines);
 
             setPolylinesData(fetchedPolylines);
             setTransportDurations(fetchedDurations);
@@ -406,6 +411,26 @@ const GenerateItineraryScreen = () => {
     };
 
     const handlePressDate = (index: number) => {
+        // Toggle selection state
+        setIsDateSelected(prevState => !prevState);
+
+        // Check if the same day index is selected again
+        const isSameDateSelected = index === selectedDayIndex;
+
+        if (isSameDateSelected) {
+            // If the same date is selected again, revert to showing all routes
+            console.log("Same day selected. Reverting to show all routes.");
+            setPolylinesData(allRoutesData);
+
+            // Reset transportation modes for all routes (or set defaults)
+            const allModes = allRoutesData.map(route => route.mode || 'DRIVING');
+            setTransportationModes(allModes);
+
+            // Reset the selected day index to null
+            setSelectedDayIndex(null);
+            return;
+        }
+
         setSelectedDayIndex(index);
         console.log("Selected day index", index);
     
@@ -512,11 +537,21 @@ const GenerateItineraryScreen = () => {
                     return (
                         <View key={destinationGroupKey}>
                             {/* Date Header - Clickable */}
-                            <TouchableOpacity onPress={() => handlePressDate(routeGroupIndex)} style={styles.dateHeader}>
-                                <Text style={styles.dateText}>
+                            <TouchableOpacity
+                                onPress={() => handlePressDate(routeGroupIndex)}
+                                style={[styles.dateHeader, isDateSelected && styles.selectedDateHeader]} // Add dynamic styles
+                            >
+                                <Text style={[styles.dateText, isDateSelected && styles.selectedDateText]}>
                                     {/* Display the formatted date */}
                                     {formatDate(dateForThisGroup)}
                                 </Text>
+                                {/* Rotating arrow icon for visual feedback */}
+                                <Ionicons
+                                    name={isDateSelected ? "chevron-up" : "chevron-down"}
+                                    size={18}
+                                    color="#000"
+                                    style={styles.icon}
+                                />
                             </TouchableOpacity>
 
                             {/* Loop through each destination in the current routeGroup */}
