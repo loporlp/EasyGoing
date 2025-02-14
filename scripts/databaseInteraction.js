@@ -46,6 +46,8 @@ export const getTrips = async () => {
  * 
  * @param {import('firebase/auth').Auth} auth of signed in user
  * @returns bool if creation was successfull
+ * Creates a trip in the database and in local storage with specified information then 
+ * sets the current trip to that trip
  */
 export const createTrip = async (startDate, endDate, budget, origin) => {
     const controller = new AbortController();
@@ -79,7 +81,8 @@ export const createTrip = async (startDate, endDate, budget, origin) => {
         tripIDs = await getData("tripIDs");
         storeData(data.id.toString(), data.trip_details);
         tripIDs.push(data.id.toString());
-        storeData("currentTrip", data.id)
+        storeData("currentTrip", data.id);
+        storeData("tripIDs", tripIDs);
         return true;
   
     } catch (error) {
@@ -132,10 +135,10 @@ export const deleteTrip = async (tripId) => {
  * @returns bool if deletion was successfull
  * 
  */
-export const updateTrip = async (tripId) => {
+export const updateTrip = async (tripId, updatedTrip) => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000); // Set timeout to 5 seconds
-    await storeData(tripId.toString(), updateTrip)
+    await storeData(tripId.toString(), updatedTrip)
     tripDetails = await getData(tripId.toString());
 
   
