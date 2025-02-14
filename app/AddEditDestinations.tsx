@@ -317,7 +317,7 @@ const AddEditDestinations = () => {
                 </TouchableOpacity>
                 <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={() => { 
                         if (destinations.length > 0) {
-                            updateTrip(tripId)
+                            updateTrip(tripId, trip)
                             router.push("/GenerateItineraryScreen")
                         } else {
                             alert("You must add at least 1 destination.")
