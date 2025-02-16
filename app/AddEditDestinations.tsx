@@ -1,13 +1,13 @@
 // AddEditDestinations.tsx
-import { useState, useEffect } from 'react';
-import { View, StyleSheet, TextInput, Text, TouchableOpacity, Dimensions, Modal, ImageBackground, Button } from "react-native";
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, TextInput, Text, TouchableOpacity, Dimensions, Modal, ImageBackground, Button, Image } from "react-native";
 import { useRouter } from "expo-router";
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import { storeData, getData } from '../scripts/localStore.js';
 import { updateTrip } from '../scripts/databaseInteraction.js';
 import DynamicImage from '../components/DynamicImage';
 import { useNavigation } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import CalendarPicker from 'react-native-calendar-picker';
@@ -38,7 +38,7 @@ const AddEditDestinations = () => {
                 if (currentTripID) {
                     const tripDetails = await getData(currentTripID.toString());
                     console.log("Loaded trip data:", tripDetails); // Log the full trip details
-    
+
                     // Check if the trip details include 'id' correctly
                     if (tripDetails) {
                         setTripId(currentTripID);  // Store only the trip id
@@ -53,17 +53,17 @@ const AddEditDestinations = () => {
                 console.error("Error loading trip data:", error);
             }
         };
-    
+
         loadTrip(); // Load trip data when the component mounts
     }, []); // Empty dependency array ensures this runs only once    
-    
+
     const addLocation = () => {
         // Ensure that trip data and tripId are available
         if (!trip || !tripId) {
             console.error("Trip or trip.id is not available.");
             return;
         }
-    
+
         // If missing a required field
         let errorMessage = "";
         if (!alias) {
@@ -82,10 +82,10 @@ const AddEditDestinations = () => {
             alert(errorMessage.trim());
             return;
         }
-    
+
         // Set default priority to -1 (as an integer) if it's empty or invalid
         const priorityValue = priority.trim() === "" || isNaN(Number(priority)) ? -1 : parseInt(priority);
-    
+
         const newDestination = {
             alias: alias,
             address: location,
@@ -100,7 +100,7 @@ const AddEditDestinations = () => {
             cost: 40, // TODO: implement this in app
             picture: JSON.stringify({ url: alias })
         };
-    
+
         if (isEditing) {
             const oldDestination = trip.destinations[editIndex];
             newDestination.mode = oldDestination.mode;
@@ -120,19 +120,19 @@ const AddEditDestinations = () => {
             setDestinations([...trip.destinations]);
             storeData(tripId.toString(), trip); // Ensure tripId is used here
         }
-    
+
         console.log(newDestination);
-    
+
         // Clear the input fields after adding
         setAlias("");
         setLocation("");
         setDuration("");
         setPriority("");
         setNotes("");
-    
+
         // Re-hides input screen
         hide();
-    };    
+    };
 
     //sets to editing mode before opening the edit screen, setting relevant values
     const editLocation = (index: number) => {
@@ -268,8 +268,8 @@ const AddEditDestinations = () => {
 
                 {/* Group of text fields */}
                 <View style={{ marginTop: 15 }}>
-                    <View style={{flexDirection: "row", marginBottom: 10, alignItems: "center", backgroundColor: "white", borderRadius: 10}}>
-                        <Ionicons name="location" size={22} color={"#24a6ad"} style={{position: "absolute", zIndex: 1, marginLeft: 10}} />
+                    <View style={{ flexDirection: "row", marginBottom: 10, alignItems: "center", backgroundColor: "white", borderRadius: 10 }}>
+                        <Ionicons name="location" size={22} color={"#24a6ad"} style={{ position: "absolute", zIndex: 1, marginLeft: 10 }} />
                         <AutocompleteTextBox placeholder="Origin" placeholderTextColor="gray" style={{ width: "100%", paddingLeft: 30 }} />
                     </View>
 
@@ -315,83 +315,89 @@ const AddEditDestinations = () => {
                 <TouchableOpacity style={{ padding: 10 }}>
                     <MaterialCommunityIcons name="application-import" size={30} color={"#24a6ad"} />
                 </TouchableOpacity>
-                <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={() => { 
-                        if (destinations.length > 0) {
-                            updateTrip(tripId, trip)
-                            router.push("/GenerateItineraryScreen")
-                        } else {
-                            alert("You must add at least 1 destination.")
-                        }
-                    }}>
+                <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={() => {
+                    if (destinations.length > 0) {
+                        updateTrip(tripId, trip)
+                        router.push("/GenerateItineraryScreen")
+                    } else {
+                        alert("You must add at least 1 destination.")
+                    }
+                }}>
                     <Ionicons name="arrow-forward-circle-sharp" size={30} color={"#24a6ad"} />
                 </TouchableOpacity>
             </View>
 
             {/* Add destination pop-up */}
-               {/* Add destination pop-up */}
-               <Modal animationType="fade" visible={visible} transparent={true} onRequestClose={hide}>
-                <View style={styles.popup}>
-                    <ImageBackground source={require("../assets/images/blue.png")} style={styles.backgroundImage}>
-                        <View style={styles.inputContainer}>
-                            {/* Text Input For Location, Duration, Priority, and Notes */}
-                            <View style={styles.textContainer}>
-                                <Text style={styles.text}>Alias (Shorthand Name):</Text> 
-                                <TextInput
-                                    style={styles.textBox} //TODO: figure out how we want to make asking for alias more smooth
-                                    placeholder="Grabbing Food" 
-                                    placeholderTextColor="gray"
-                                    value={alias}
-                                    onChangeText={setAlias}
-                                />
-                                <Text style={styles.text}>Address:</Text>
-                                <AutocompleteTextBox
-                                    value = {location}
-                                    onPlaceSelect={(place) => {
-                                        setLocation(place.description);
-                                        return place.description; // Explicitly return the string
-                                    }}
-                                    placeholder="Address"
-                                    placeholderTextColor="gray"
-                                    style={styles.textBox}
-                                />
-                                <Text style={styles.text}>Duration (Minutes):</Text>
-                                <TextInput
-                                    style={styles.textBox}
-                                    placeholder="30m"
-                                    placeholderTextColor="gray"
-                                    keyboardType="numeric"
-                                    value={duration}
-                                    onChangeText={setDuration}
-                                />
-                                <Text style={styles.text}>Priority:</Text>
-                                <TextInput
-                                    style={styles.textBox}
-                                    placeholder="1"
-                                    placeholderTextColor="gray"
-                                    keyboardType="numeric"
-                                    value={priority}
-                                    onChangeText={setPriority}
-                                />
-                                <Text style={styles.text}>Notes:</Text>
-                                <TextInput
-                                    style={styles.textBox}
-                                    placeholder="Notes"
-                                    placeholderTextColor="gray"
-                                    value={typedNotes}
-                                    onChangeText={setNotes}
-                                />
-                            </View>
-                            {/* Add + Cancel Buttons*/}
-                            <View style={styles.buttonContainer}>
-                                <View style={styles.button}>
-                                    <Button title="Cancel" onPress={hide} />
+            {/* Add destination pop-up */}
+            <Modal animationType="fade" visible={visible} transparent={true} onRequestClose={hide}>
+                <View style={styles.modalOverlay}>
+                    <View style={{
+                        width: '100%',
+                        backgroundColor: '#F4F4F4',
+                        padding: 20,
+                        borderRadius: 10,
+                        height: "70%"
+                    }}
+                    >
+                        <Text style={{ color: "black", fontWeight: "700", fontSize: 22 }}>Add Destination</Text>
+                        <View style={[styles.destination, { marginTop: 5, flexDirection: "row", alignItems: "center" }]}>
+                            <Image source={require("../assets/images/blue.png")} style={[styles.destinationImage, { marginLeft: 0 }]} />
+                            <View style={{ flexDirection: "column", justifyContent: "flex-start", gap: 15, marginLeft: 10 }}>
+                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                    <Ionicons name="location" size={20} color={"#24a6ad"} />
+                                    <Text style={{ fontSize: 20, fontWeight: "700", marginLeft: 5 }}>Destination</Text>
                                 </View>
-                                <View style={styles.button}>
-                                    <Button title={isEditing ? "Edit" : "Add"} onPress={addLocation} />
+
+                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5, gap: 15 }}>
+                                    <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                        <Ionicons name="time" size={18} color={"#24a6ad"} />
+                                        { (duration == "") ? (
+                                            <Text style={{ marginLeft: 5 }}>Duration</Text>
+                                        ) : (
+                                            <Text style={{ marginLeft: 5 }}>{duration} hrs</Text>
+                                        )}  
+                                    </View>
+
+                                    <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginRight: 5 }}>
+                                        <MaterialCommunityIcons name="priority-high" size={18} color={"#24a6ad"} />
+                                        <Text style={{ marginLeft: 5 }}>Priority</Text>
+                                    </View>
                                 </View>
                             </View>
                         </View>
-                    </ImageBackground>
+
+                        <View style={{ flexDirection: "column", marginTop: 10 }}>
+                            <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
+                                <Ionicons name={"location"} color={"#24a6ad"} />
+                                <Text>Destination:</Text>
+                            </View>
+                            <AutocompleteTextBox></AutocompleteTextBox>
+                        </View>
+
+                        <View style={{ flexDirection: "column", marginTop: 15 }}>
+                            <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
+                                <MaterialCommunityIcons name={"label"} color={"#24a6ad"} />
+                                <Text>Label:</Text>
+                            </View>
+                            <TextInput style={styles.addDestinationTextInputs}></TextInput>
+                        </View>
+
+                        <View style={{ flexDirection: "column", marginTop: 15 }}>
+                            <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
+                                <MaterialCommunityIcons name={"timer"} color={"#24a6ad"} />
+                                <Text>Duration:</Text>
+                            </View>
+                            <TextInput style={styles.addDestinationTextInputs} value={duration}  onChangeText={(text) => setDuration(text)} ></TextInput>
+                        </View>
+
+                        <View style={{ flexDirection: "column", marginTop: 15 }}>
+                            <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
+                                <MaterialIcons name={"priority-high"} color={"#24a6ad"} />
+                                <Text>Priority:</Text>
+                            </View>
+                            <TextInput style={styles.addDestinationTextInputs}></TextInput>
+                        </View>
+                    </View>
                 </View>
             </Modal>
 
@@ -677,6 +683,13 @@ const styles = StyleSheet.create({
         marginLeft: 40,
         marginRight: 40,
     },
+
+    addDestinationTextInputs: {
+        height: 40,
+        backgroundColor: "white",
+        borderRadius: 10,
+        fontSize: 18
+    }
 });
 
 export default AddEditDestinations;
