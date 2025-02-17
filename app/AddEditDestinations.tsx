@@ -336,31 +336,53 @@ const AddEditDestinations = () => {
                         backgroundColor: '#F4F4F4',
                         padding: 20,
                         borderRadius: 10,
-                        height: "70%"
+                        height: "62%"
                     }}
                     >
                         <Text style={{ color: "black", fontWeight: "700", fontSize: 22 }}>Add Destination</Text>
-                        <View style={[styles.destination, { marginTop: 5, flexDirection: "row", alignItems: "center" }]}>
-                            <Image source={require("../assets/images/blue.png")} style={[styles.destinationImage, { marginLeft: 0 }]} />
-                            <View style={{ flexDirection: "column", justifyContent: "flex-start", gap: 15, marginLeft: 10 }}>
+                        <View style={[styles.destination, { marginTop: 10, flexDirection: "row", alignItems: "center" }]}>
+                            {(location == "") ? (
+                                <Image source={require("../assets/images/blue.png")} style={[styles.destinationImage, { marginLeft: 0 }]} />
+                            ) : (
+                                <DynamicImage placeName={location} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
+                            )}
+                            <View style={{ flexDirection: "column", justifyContent: "flex-start", gap: 5, marginLeft: 10, paddingRight: 140 }}>
                                 <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                                     <Ionicons name="location" size={20} color={"#24a6ad"} />
-                                    <Text style={{ fontSize: 20, fontWeight: "700", marginLeft: 5 }}>Destination</Text>
+                                    {(location == "") ? (
+                                        <Text style={{ fontSize: 20, fontWeight: "700", marginLeft: 5 }}>Destination</Text>
+                                    ) : (
+                                        <Text numberOfLines={1} ellipsizeMode="tail" style={{ fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{location}</Text>
+                                    )}
+                                </View>
+
+
+                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginLeft: 5 }}>
+                                    <MaterialCommunityIcons name={"label"} color={"#24a6ad"} />
+                                    {(alias == "") ? (
+                                        <Text style={{ marginLeft: 5, color: "gray", marginTop: -5 }}>Label</Text>
+                                    ) : (
+                                        <Text style={{ marginLeft: 5, color: "gray", marginTop: -5 }}>{alias}</Text>
+                                    )}
                                 </View>
 
                                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5, gap: 15 }}>
                                     <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                                         <Ionicons name="time" size={18} color={"#24a6ad"} />
-                                        { (duration == "") ? (
+                                        {(duration == "") ? (
                                             <Text style={{ marginLeft: 5 }}>Duration</Text>
                                         ) : (
                                             <Text style={{ marginLeft: 5 }}>{duration} hrs</Text>
-                                        )}  
+                                        )}
                                     </View>
 
                                     <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginRight: 5 }}>
                                         <MaterialCommunityIcons name="priority-high" size={18} color={"#24a6ad"} />
-                                        <Text style={{ marginLeft: 5 }}>Priority</Text>
+                                        {(priority == "") ? (
+                                            <Text style={{ marginLeft: 5 }}>Priority</Text>
+                                        ) : (
+                                            <Text style={{ marginLeft: 5 }}>Priority: {priority}</Text>
+                                        )}
                                     </View>
                                 </View>
                             </View>
@@ -371,7 +393,10 @@ const AddEditDestinations = () => {
                                 <Ionicons name={"location"} color={"#24a6ad"} />
                                 <Text>Destination:</Text>
                             </View>
-                            <AutocompleteTextBox></AutocompleteTextBox>
+                            <AutocompleteTextBox value={location} onPlaceSelect={(place) => {
+                                setLocation(place.description);
+                                return place.description;
+                            }} />
                         </View>
 
                         <View style={{ flexDirection: "column", marginTop: 15 }}>
@@ -379,23 +404,34 @@ const AddEditDestinations = () => {
                                 <MaterialCommunityIcons name={"label"} color={"#24a6ad"} />
                                 <Text>Label:</Text>
                             </View>
-                            <TextInput style={styles.addDestinationTextInputs}></TextInput>
+                            <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5 }]} value={alias} onChangeText={setAlias}></TextInput>
                         </View>
 
                         <View style={{ flexDirection: "column", marginTop: 15 }}>
                             <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
-                                <MaterialCommunityIcons name={"timer"} color={"#24a6ad"} />
+                                <Ionicons name={"time"} color={"#24a6ad"} />
                                 <Text>Duration:</Text>
                             </View>
-                            <TextInput style={styles.addDestinationTextInputs} value={duration}  onChangeText={(text) => setDuration(text)} ></TextInput>
+                            <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5 }]} value={duration} onChangeText={(text) => setDuration(text)} ></TextInput>
                         </View>
 
                         <View style={{ flexDirection: "column", marginTop: 15 }}>
                             <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
-                                <MaterialIcons name={"priority-high"} color={"#24a6ad"} />
+                                <MaterialCommunityIcons name={"priority-high"} color={"#24a6ad"} />
                                 <Text>Priority:</Text>
                             </View>
-                            <TextInput style={styles.addDestinationTextInputs}></TextInput>
+                            <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5 }]} value={priority} onChangeText={(text) => setPriority(text)}></TextInput>
+                        </View>
+
+
+                        <View style={{ flexDirection: "row", justifyContent: "flex-end", gap: 30, marginTop: 15 }}>
+                            <TouchableOpacity onPress={hide} style={[styles.modalButton, {backgroundColor: "red"}]}>
+                                <Text style={{color: "white", fontWeight: "700", fontSize: 12}}>CANCEL</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={addLocation} style={[styles.modalButton, {backgroundColor: "#24a6ad"}]}>
+                                <Text style={{color: "white", fontWeight: "700", fontSize: 12}}>{isEditing ? "EDIT" : "ADD"}</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </View>
@@ -428,7 +464,7 @@ const AddEditDestinations = () => {
                     </View>
                 </View>
             </Modal>
-        </View>
+        </View >
 
     );
 }
@@ -689,6 +725,18 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         borderRadius: 10,
         fontSize: 18
+    },
+
+    modalButton: {
+        height: 35,
+        width: 70,
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 10,
+        shadowColor: "#333333",
+        shadowOffset: { width: 1, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
     }
 });
 
