@@ -1,8 +1,7 @@
-export async function divideLocationsIntoGroups(locationAndDurations, date_range) {
+export async function divideLocationsIntoGroups(locationAndDurations, days) {
     console.log("Starting divideLocationsIntoGroups function");
 
     // Convert date_range to number of days
-    days = 3; // TODO: date_range (wait for connectivity before using CalendarPicker)
     available_hours = 16.0; // TODO: Change later based on input times
     
     console.log(`Available hours per day: ${available_hours}`);

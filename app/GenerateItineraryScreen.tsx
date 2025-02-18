@@ -51,6 +51,8 @@ const GenerateItineraryScreen = () => {
 
 
     const [origin, setOrigin] = useState<{ name: string; address: string; duration: number; priority: number}>();
+    const [startDate, setStartDate] = useState<Date>();
+    const [endDate, setEndDate] = useState<Date>();
 
     // Initial empties
     const [destinations, setDestinations] = useState<Record<string, Place>>({});
@@ -101,6 +103,9 @@ const GenerateItineraryScreen = () => {
     
             if (trip) {
                 console.log("Trip Data:", trip);
+
+                setStartDate(trip.tripStartDate);
+                setEndDate(trip.tripEndDate);
     
                 // Iterate over destinations and format them
                 trip.destinations.forEach((destination: { picture: string; alias: any; address: any; priority: any; mode: any; transportToNext: any; transportDuration: any; startDateTime: any; duration: string; notes: any; dayOrigin: any; cost: any; }, index: { toString: () => string | number; }) => {
@@ -280,10 +285,17 @@ const GenerateItineraryScreen = () => {
 
             // (3) Date Dividers
             // Uses fetchedDurations for this (as well as the loaded durations per location)
-            const dateRange = [moment().format("ddd, MMM D"), moment().format("ddd, MMM D")]; // TODO: Use actual sent date rather than today
+            let numberOfDays;
+            console.log("Start Date:", startDate);
+            console.log("End Date:", endDate);
+            if (startDate && endDate) {
+                numberOfDays = (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24);
+            } else {
+                numberOfDays = 7; // Default 7 days
+            }
             // This returns a dictionary with indices as the ID for range of locations (i.e. "0:2" means from location 0 to location 2)
             console.log("Updated Durations:", updatedDurations);
-            let groupedDays = await divideLocationsIntoGroups(updatedDurations, dateRange);
+            let groupedDays = await divideLocationsIntoGroups(updatedDurations, numberOfDays);
             groupedDays = (groupedDays || {}) as { [key: number]: number };
             console.log("Grouped Days Indices Dict:", groupedDays);
 
