@@ -1,6 +1,6 @@
 // SignInScreen.tsx
-import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, Image, TouchableOpacity, Text } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, TextInput, StyleSheet, Image, TouchableOpacity, Text, TouchableWithoutFeedback } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -48,7 +48,8 @@ const SignInScreen = () => {
   }
 };
 
-
+const emailInputRef = useRef(null);
+const passwordInputRef = useRef(null);
 
   return (
     <View style={styles.container}>
@@ -61,6 +62,7 @@ const SignInScreen = () => {
 
       {/* Username */}
       <View style={styles.inputUserPass}>
+        <TouchableWithoutFeedback onPress={() => emailInputRef.current.focus()}>
         <View style={styles.userPassTextInput}>
           <Ionicons name="person" size={18} color={"#24a6ad"}/>
           <TextInput
@@ -72,12 +74,15 @@ const SignInScreen = () => {
             autoCapitalize="none"
             keyboardType="email-address"
             textContentType="emailAddress"
+            ref={emailInputRef}
           />
         </View>
+        </TouchableWithoutFeedback>
       </View>
 
       {/* Password */}
       <View style={styles.inputUserPass}>
+        <TouchableWithoutFeedback onPress={() => passwordInputRef.current.focus()}>
         <View style={styles.userPassTextInput}>
           <Ionicons name="lock-closed" size={18} color={"#24a6ad"}/>
           <TextInput
@@ -88,8 +93,10 @@ const SignInScreen = () => {
             style={{ fontSize: 18, marginHorizontal: 15 }}
             secureTextEntry
             textContentType="password"
+            ref={passwordInputRef}
           />
         </View>
+        </TouchableWithoutFeedback>
       </View>
 
       {/* Sign In Button */}
