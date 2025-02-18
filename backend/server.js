@@ -19,8 +19,8 @@ const swaggerUi = require("swagger-ui-express");
 const { swaggerOptions } = require('./swagger.js');
 
 
-// const GOOGLE_API_KEY = 'AIzaSyAQgbWUgdfMozsamfhRi8HrHlRorkFNIEc';
-const GOOGLE_API_KEY = 'AIzaSyAQgbWUgdfMozsamfhRi8HrHlRorkFNIEc'
+// const GOOGLE_API_KEY = 'AIzaSyAQgbWUgdfMozsamfhRi8HrHlRorkFNIEc'; //Masons Key
+const GOOGLE_API_KEY = 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI'; // Solis Key
 const admin = require('firebase-admin');
 
 // Middleware to parse JSON bodies (if needed for POST/PUT requests)
