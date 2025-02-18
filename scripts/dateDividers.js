@@ -9,8 +9,7 @@ export async function divideLocationsIntoGroups(locationAndDurations, days) {
     console.log(`Available hours per day: ${available_hours}`);
     console.log(`Total days available: ${days}`);
 
-    // Extract durations from locations and transport
-    // TODO: Also pull priority
+    // Extract durations from locations, transport and priorities
     let origin_duration = locationAndDurations.map(route => route.locationDuration);
     // Divide each item in origin_duration by 60 to convert minutes to hours
     origin_duration = origin_duration.map(duration => duration / 60);
@@ -60,8 +59,13 @@ export async function divideLocationsIntoGroups(locationAndDurations, days) {
         throw new Error("Invalid duration format: " + duration);
     });
 
-    console.log("Origin durations: ", origin_duration);
-    console.log("Transport durations: ", transport_durations);
+    const priorities = locationAndDurations.map(item => {
+        return item.destination ? item.destination[item.destination.length - 1] : -1;
+    }); 
+
+    console.log("Origin durations:", origin_duration);
+    console.log("Transport durations:", transport_durations);
+    console.log("Priorities:", priorities);
 
     // Check if the lengths of origin_duration and transport_durations are consistent
     if (origin_duration.length !== transport_durations.length) {

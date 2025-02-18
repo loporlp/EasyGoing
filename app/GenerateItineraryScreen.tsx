@@ -289,12 +289,14 @@ const GenerateItineraryScreen = () => {
             console.log("End Date:", endDate);
             try {
                 if (startDate && endDate) {
-                    numberOfDays = (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24);
+                    const actualEndDate = new Date(endDate);
+                    const actualStartDate = new Date(startDate);
+                    numberOfDays = (actualEndDate.getTime() - actualStartDate.getTime()) / (1000 * 3600 * 24);
                 } else {
                     numberOfDays = 7; // Default 7 days
                 }
             } catch (error) {
-                console.log("error:", error);
+                console.log("Error in GI - Date Dividers:", error);
             }
             // This returns a dictionary with indices as the ID for range of locations (i.e. "0:2" means from location 0 to location 2)
             console.log("Updated Durations:", updatedDurations);
