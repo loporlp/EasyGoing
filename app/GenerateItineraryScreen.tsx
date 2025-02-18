@@ -59,6 +59,7 @@ const GenerateItineraryScreen = () => {
     const [groupedDestinations, setGroupedDestinations] = useState<Place[][]>([]);
     const [grouped2DDestinations, setGrouped2DDestinations] = useState<Place[][]>([]);
     const [optimalRoute, setOptimalRoute] = useState<any[][]>([]);
+    const [resultRoute, setResultRoute] = useState<any[][]>([]);
     const [transportationModes, setTransportationModes] = useState<string[]>([]);
 
     const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
@@ -286,10 +287,14 @@ const GenerateItineraryScreen = () => {
             let numberOfDays;
             console.log("Start Date:", startDate);
             console.log("End Date:", endDate);
-            if (startDate && endDate) {
-                numberOfDays = (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24);
-            } else {
-                numberOfDays = 7; // Default 7 days
+            try {
+                if (startDate && endDate) {
+                    numberOfDays = (endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24);
+                } else {
+                    numberOfDays = 7; // Default 7 days
+                }
+            } catch (error) {
+                console.log("error:", error);
             }
             // This returns a dictionary with indices as the ID for range of locations (i.e. "0:2" means from location 0 to location 2)
             console.log("Updated Durations:", updatedDurations);
@@ -387,6 +392,9 @@ const GenerateItineraryScreen = () => {
         //console.log("upDests:", updatedDests);
         saveOrderedDestinations(updatedDests);
 
+        // Update for the ScrollList
+        setResultRoute(optimalRoute);
+
         // Reload list
         setDestinations(updatedDests);
 
@@ -474,8 +482,6 @@ const GenerateItineraryScreen = () => {
     
         console.log("Formatted Destinations (Date):", formattedDestinations);
     
-        // TODO: setOptimalRoute(formattedDestinations);
-    
         // Array to store the polyline data
         const matchedPolylinesData: any[] = [];
     
@@ -531,9 +537,9 @@ const GenerateItineraryScreen = () => {
     return (
         <View style={styles.container}>
             <SafeAreaView style={{ flex: 1 }}>
-                {optimalRoute.length > 0 && (
+                {resultRoute.length > 0 && (
                     <MultiRoutesMap
-                        locations={optimalRoute}
+                        locations={resultRoute}
                         transportationModes={transportationModes}
                         polylines={polylinesData}
                         transportDurations={transportDurations}
@@ -545,7 +551,7 @@ const GenerateItineraryScreen = () => {
             </SafeAreaView>
 
             <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
-                {optimalRoute.map((routeGroup, routeGroupIndex) => {
+                {resultRoute.map((routeGroup, routeGroupIndex) => {
                     const destinationGroupKey = `group-${routeGroupIndex}`;
                     let dateForThisGroup;
                     if (routeGroupIndex === 0) {
