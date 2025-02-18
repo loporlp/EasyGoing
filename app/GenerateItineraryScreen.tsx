@@ -278,8 +278,6 @@ const GenerateItineraryScreen = () => {
             // TODO: We need a new script that takes in Group Indices and Ordered Locations
             // This script will be specifically for the ScrollView
 
-            // TODO: With that same script above, use it to call another script to get back the list of locations for ONE DAY to display
-
             // Create a map of ordered locations for quick lookup
             const updatedDurations = processGroupedDestinations(orderedLocations, groupedDestinations, destinations, fetchedDurations, setGroupedDestinations);
 

@@ -1,6 +1,8 @@
 export async function divideLocationsIntoGroups(locationAndDurations, days) {
     console.log("Starting divideLocationsIntoGroups function");
 
+    console.log("Locations & Durations:", locationAndDurations);
+
     // Convert date_range to number of days
     available_hours = 16.0; // TODO: Change later based on input times
     
@@ -8,6 +10,7 @@ export async function divideLocationsIntoGroups(locationAndDurations, days) {
     console.log(`Total days available: ${days}`);
 
     // Extract durations from locations and transport
+    // TODO: Also pull priority
     let origin_duration = locationAndDurations.map(route => route.locationDuration);
     // Divide each item in origin_duration by 60 to convert minutes to hours
     origin_duration = origin_duration.map(duration => duration / 60);
