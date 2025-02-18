@@ -1,6 +1,6 @@
 // CreateAccountScreen.tsx
-import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, TouchableOpacity, Image, Text } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, TextInput, Button, StyleSheet, TouchableOpacity, Image, Text, TouchableWithoutFeedback } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -52,6 +52,10 @@ const CreateAccountScreen = () => {
     return false;
   };
 
+  const emailInputRef = useRef(null);
+  const passwordInputRef = useRef(null);
+  const passwordConfirmInputRef = useRef(null);
+
   return (
     <View style={styles.container}>
       {/* Background image */}
@@ -63,6 +67,7 @@ const CreateAccountScreen = () => {
 
       {/* Username */}
       <View style={styles.inputUserPass}>
+        <TouchableWithoutFeedback onPress={() => emailInputRef.current.focus()}>
         <View style={styles.userPassTextInput}>
           <Ionicons name="person" size={18} color={"#24a6ad"} />
           <TextInput
@@ -74,12 +79,15 @@ const CreateAccountScreen = () => {
             autoCapitalize="none"
             keyboardType="email-address"
             textContentType="emailAddress"
+            ref={emailInputRef}
           />
         </View>
+        </TouchableWithoutFeedback>
       </View>
 
       {/* Password */}
       <View style={styles.inputUserPass}>
+        <TouchableWithoutFeedback onPress={() => passwordInputRef.current.focus()}>
         <View style={styles.userPassTextInput}>
           <Ionicons name="lock-closed" size={18} color={"#24a6ad"} style={{ marginRight: 15 }} />
           { (viewPassword) ? (
@@ -90,6 +98,7 @@ const CreateAccountScreen = () => {
             onChangeText={setPassword}
             style={{ fontSize: 18, marginRight: 55 }}
             textContentType="password"
+            ref={passwordInputRef}
           />
           ) : (
             <TextInput
@@ -100,6 +109,7 @@ const CreateAccountScreen = () => {
             style={{ fontSize: 18, marginRight: 55 }}
             secureTextEntry
             textContentType="password"
+            ref={passwordInputRef}
           />
           )}
           
@@ -111,10 +121,12 @@ const CreateAccountScreen = () => {
             )}
           </TouchableOpacity>
         </View>
+        </TouchableWithoutFeedback>
       </View>
 
       {/* Confirm Password */}
       <View style={styles.inputUserPass}>
+        <TouchableWithoutFeedback onPress={() => passwordConfirmInputRef.current.focus()}>
         <View style={styles.userPassTextInput}>
           <Ionicons name="lock-closed" size={18} color={"#24a6ad"} style={{ marginRight: 15 }} />
           { (viewConfirmedPassword) ? (
@@ -125,6 +137,7 @@ const CreateAccountScreen = () => {
             onChangeText={setConfirmPassword}
             style={{ fontSize: 18, marginRight: 55 }}
             textContentType="password"
+            ref={passwordConfirmInputRef}
           />
           ) : (
             <TextInput
@@ -135,6 +148,7 @@ const CreateAccountScreen = () => {
             style={{ fontSize: 18, marginRight: 55 }}
             secureTextEntry
             textContentType="password"
+            ref={passwordConfirmInputRef}
           />
           )}
 
@@ -146,6 +160,7 @@ const CreateAccountScreen = () => {
             )}
           </TouchableOpacity>
         </View>
+        </TouchableWithoutFeedback>
       </View>
 
       {/* Sign Up Button */}
