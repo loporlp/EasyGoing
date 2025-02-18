@@ -217,6 +217,7 @@ const GenerateItineraryScreen = () => {
             Save this new optimized list
             */
             const fetchOptimalRoute = async () => {
+
                 try {
                     const destinationArray = Object.values(destinations);
                     console.log("Pre DestArray:", origin);
@@ -300,12 +301,14 @@ const GenerateItineraryScreen = () => {
             }
             // This returns a dictionary with indices as the ID for range of locations (i.e. "0:2" means from location 0 to location 2)
             console.log("Updated Durations:", updatedDurations);
-            let groupedDays = await divideLocationsIntoGroups(updatedDurations, numberOfDays);
+            let [groupedDays, newOrderedLocations] = await divideLocationsIntoGroups(updatedDurations, numberOfDays, orderedLocations);
+            console.log("Grouped Days Indices Dict 1:", groupedDays);
+            console.log("New Ordered Locations:", newOrderedLocations);
             groupedDays = (groupedDays || {}) as { [key: number]: number };
-            console.log("Grouped Days Indices Dict:", groupedDays);
+            console.log("Grouped Days Indices Dict 2:", groupedDays);
 
             // (4) Set the groups
-            const resultingGroupedDestinations = groupDestinationsByDay(groupedDays as { [key: number]: number }, orderedLocations);
+            const resultingGroupedDestinations = groupDestinationsByDay(groupedDays as { [key: number]: number }, newOrderedLocations);
             setGroupedDestinations(resultingGroupedDestinations);
             setGrouped2DDestinations(resultingGroupedDestinations);
             console.log("Resulting Grouped Destinations Result:", resultingGroupedDestinations);
@@ -373,8 +376,8 @@ const GenerateItineraryScreen = () => {
             setGroupedDestinations(updatedGroupedDestinations);
 
             // Store the updated Routes and TransportTime in local storage
-            //console.log("orderedLocations:", orderedLocations);
-            const newDests = reorderDestinations(orderedLocations);
+            //console.log("newOrderedLocations:", newOrderedLocations);
+            const newDests = reorderDestinations(newOrderedLocations);
             const updatedDests = updateDestinationsWithTransport(newDests, updatedGroupedDestinations);
             console.log("Updated Dests (final):", updatedDests);
             setToSaveData(updatedDests);
@@ -396,9 +399,6 @@ const GenerateItineraryScreen = () => {
 
         // Update for the ScrollList
         setResultRoute(optimalRoute);
-
-        // Reload list
-        setDestinations(updatedDests);
 
     }, [grouped2DDestinations, toSaveData]);    
 
@@ -556,11 +556,18 @@ const GenerateItineraryScreen = () => {
                 {resultRoute.map((routeGroup, routeGroupIndex) => {
                     const destinationGroupKey = `group-${routeGroupIndex}`;
                     let dateForThisGroup;
-                    if (routeGroupIndex === 0) {
-                        dateForThisGroup = new Date(destinations[routeGroupIndex].startDateTime);
-                    } else {
-                        const previousGroupDate = new Date(destinations[routeGroupIndex - 1].startDateTime);
-                        dateForThisGroup = getNextDay(previousGroupDate);
+                    try {
+                        if (routeGroupIndex === 0) {
+                            dateForThisGroup = new Date(destinations[routeGroupIndex].startDateTime);
+                        } else {
+                            const previousGroupDate = new Date(destinations[routeGroupIndex - 1].startDateTime);
+                            dateForThisGroup = getNextDay(previousGroupDate);
+                        }
+                    } catch (error) {
+                        console.log("ScrollView - StartDateTime Error:", error);
+                        console.log("destinations[routeGroupIndex]:", destinations[routeGroupIndex]);
+                        console.log("destinations:", destinations);
+                        dateForThisGroup = new Date(); // TODO: Fix this bug
                     }
                     console.log('Date for this group:', dateForThisGroup);
                     const isSelected = selectedDayIndex === routeGroupIndex;

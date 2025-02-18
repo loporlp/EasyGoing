@@ -1,4 +1,4 @@
-export async function divideLocationsIntoGroups(locationAndDurations, days) {
+export async function divideLocationsIntoGroups(locationAndDurations, days, orderedLocations) {
     console.log("Starting divideLocationsIntoGroups function");
 
     console.log("Locations & Durations:", locationAndDurations);
@@ -14,7 +14,7 @@ export async function divideLocationsIntoGroups(locationAndDurations, days) {
     // Divide each item in origin_duration by 60 to convert minutes to hours
     origin_duration = origin_duration.map(duration => duration / 60);
 
-    const transport_durations = locationAndDurations.map(route => {
+    let transport_durations = locationAndDurations.map(route => {
         const duration = route.duration;
 
         console.log(`Processing transport duration for route: ${duration}`);
@@ -54,12 +54,19 @@ export async function divideLocationsIntoGroups(locationAndDurations, days) {
             const hours = minutes / 60;
             console.log(`Converted ${minutes} minutes to ${hours} hours`);
             return hours;  // Convert minutes to hours
-        }            
+        }    
+        
+        if (duration.includes('min')) {
+            const minute = parseInt(duration.replace(' min', ''));
+            const hours = minute / 60;
+            console.log(`Converted ${minute} minute to ${hours} hours`);
+            return hours;  // Convert minute to hours
+        }
 
         throw new Error("Invalid duration format: " + duration);
     });
 
-    const priorities = locationAndDurations.map(item => {
+    let priorities = locationAndDurations.map(item => {
         return item.destination ? item.destination[item.destination.length - 1] : -1;
     }); 
 
@@ -72,10 +79,42 @@ export async function divideLocationsIntoGroups(locationAndDurations, days) {
         throw new Error(`Transport durations should be the same as origin durations (because of the "null" in transport).\nLocations: ${origin_duration.length}\nTransport: ${transport_durations.length}`);
     }
 
+    // TODO: First calculate the total time the trip will take
+    // If it's greater than the amount of available time, start removing locations based on priority
+    // Once the amount of time is <= to available time, then run the below algorithm
+    let total_time = calculateTotalTime(locationAndDurations);
+    const available_time = available_hours * days;
+    let days_dictionary = {};
+
+    // If not enough time, remove locations starting from the lowest priority
+    while (total_time > available_time) {
+        console.log("Not enough time for all activities, removing location with lowest priority...");
+
+        try {
+            // Find the index of the location with the lowest priority (starting with -1 which is turned into infinity)
+            priorities = priorities.map(value => value === -1 ? Infinity : value);
+            let maxPriorityIndex = priorities.indexOf(Math.max(...priorities));
+
+            console.log("Removing ", orderedLocations[maxPriorityIndex]);
+
+            // Remove the location and its associated durations
+            locationAndDurations.splice(maxPriorityIndex, 1);
+            origin_duration.splice(maxPriorityIndex, 1);
+            transport_durations.splice(maxPriorityIndex, 1);
+            priorities.splice(maxPriorityIndex, 1);
+            orderedLocations.splice(maxPriorityIndex, 1);
+
+            // Recalculate the total time after removing the location
+            total_time = calculateTotalTime(locationAndDurations);            
+        } catch (error) {
+            console.log("Error in Priority Removal:", error);
+        }
+        console.log(`Updated total time: ${total_time} hours`);
+    }
+
     let remaining_hours = available_hours;
     let start_index = 0;
     let end_index = -1;
-    const days_dictionary = {};
     
     console.log("Starting the day division process...");
 
@@ -150,9 +189,10 @@ export async function divideLocationsIntoGroups(locationAndDurations, days) {
 
     console.log("Finished dividing locations into days");
     console.log("Final divisions:", days_dictionary);
+    console.log("DD.js - Ordered Locations:", orderedLocations);
 
     // Return the dictionary mapping days to locations
-    return days_dictionary;
+    return [days_dictionary, orderedLocations];
 }
 
 
@@ -160,7 +200,7 @@ export function calculateTotalTime(locationAndDurations) {
     console.log("Starting calculateTotalTime function");
 
     // Extract durations from locations and transport
-    const origin_duration = locationAndDurations.map(route => route.locationDuration);
+    const origin_duration = locationAndDurations.map(route => route.locationDuration / 60); // Minutes -> Hours
     const transport_durations = locationAndDurations.map(route => {
         const duration = route.duration;
 
@@ -195,11 +235,18 @@ export function calculateTotalTime(locationAndDurations) {
             return totalHours;  // Return total transport duration in hours
         }
 
-        if (duration.includes('min')) {
+        if (duration.includes('mins')) {
             const minutes = parseInt(duration.replace(' mins', ''));
             const hours = minutes / 60;
             console.log(`Converted ${minutes} minutes to ${hours} hours`);
             return hours;  // Convert minutes to hours
+        }
+
+        if (duration.includes('min')) {
+            const minute = parseInt(duration.replace(' min', ''));
+            const hours = minute / 60;
+            console.log(`Converted ${minute} minute to ${hours} hours`);
+            return hours;  // Convert minute to hours
         }
 
         throw new Error("Invalid duration format: " + duration);
