@@ -97,7 +97,7 @@ const AddEditDestinations = () => {
             startDateTime: new Date().toISOString(), //TODO: implement this in app
             duration: duration,
             notes: typedNotes,
-            dayOrigin: true, //TODO: figure out how to check if this is the day's origin (will require existing data to compare to)
+            dayOrigin: false, //TODO: figure out how to check if this is the day's origin (will require existing data to compare to)
             cost: 40, // TODO: implement this in app
             picture: JSON.stringify({ url: alias })
         };
