@@ -301,14 +301,14 @@ const GenerateItineraryScreen = () => {
             }
             // This returns a dictionary with indices as the ID for range of locations (i.e. "0:2" means from location 0 to location 2)
             console.log("Updated Durations:", updatedDurations);
-            let [groupedDays, newOrderedLocations] = await divideLocationsIntoGroups(updatedDurations, numberOfDays, orderedLocations);
+            let groupedDays = await divideLocationsIntoGroups(updatedDurations, numberOfDays);
             console.log("Grouped Days Indices Dict 1:", groupedDays);
-            console.log("New Ordered Locations:", newOrderedLocations);
+            console.log("New Ordered Locations:", orderedLocations);
             groupedDays = (groupedDays || {}) as { [key: number]: number };
             console.log("Grouped Days Indices Dict 2:", groupedDays);
 
             // (4) Set the groups
-            const resultingGroupedDestinations = groupDestinationsByDay(groupedDays as { [key: number]: number }, newOrderedLocations);
+            const resultingGroupedDestinations = groupDestinationsByDay(groupedDays as { [key: number]: number }, orderedLocations);
             setGroupedDestinations(resultingGroupedDestinations);
             setGrouped2DDestinations(resultingGroupedDestinations);
             console.log("Resulting Grouped Destinations Result:", resultingGroupedDestinations);
@@ -376,8 +376,9 @@ const GenerateItineraryScreen = () => {
             setGroupedDestinations(updatedGroupedDestinations);
 
             // Store the updated Routes and TransportTime in local storage
-            //console.log("newOrderedLocations:", newOrderedLocations);
-            const newDests = reorderDestinations(newOrderedLocations);
+            console.log("orderedLocations:", orderedLocations);
+            // TODO: Set optimalRoute to the orderedLocations (in optimalRoute's format)
+            const newDests = reorderDestinations(orderedLocations);
             const updatedDests = updateDestinationsWithTransport(newDests, updatedGroupedDestinations);
             console.log("Updated Dests (final):", updatedDests);
             setToSaveData(updatedDests);

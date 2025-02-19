@@ -1,198 +1,171 @@
-export async function divideLocationsIntoGroups(locationAndDurations, days, orderedLocations) {
+export async function divideLocationsIntoGroups(locationAndDurations, days) {
     console.log("Starting divideLocationsIntoGroups function");
 
-    console.log("Locations & Durations:", locationAndDurations);
+    try {
+        console.log("Locations & Durations:", locationAndDurations);
 
-    // Convert date_range to number of days
-    available_hours = 16.0; // TODO: Change later based on input times
-    
-    console.log(`Available hours per day: ${available_hours}`);
-    console.log(`Total days available: ${days}`);
-
-    // Extract durations from locations, transport and priorities
-    let origin_duration = locationAndDurations.map(route => route.locationDuration);
-    // Divide each item in origin_duration by 60 to convert minutes to hours
-    origin_duration = origin_duration.map(duration => duration / 60);
-
-    let transport_durations = locationAndDurations.map(route => {
-        const duration = route.duration;
-
-        console.log(`Processing transport duration for route: ${duration}`);
-
-        // Skip the last transport duration (should be null)
-        // NOTE: The LAST TIME SHOULD ALWAYS BE NULL
-        // This is because it's just the last location (so here's no transport time)
-        if (duration == null) {
-            return null;  // No need to process the last transport duration
-        }
-
-        if (duration.includes('hour') || duration.includes('hrs') || duration.includes('hours')) {
-            let totalHours = 0;
+        // Convert date_range to number of days
+        const available_hours = 16.0; // TODO: Change later based on input times
         
-            // Check for both hours and minutes in the duration
-            const hoursMatch = duration.match(/(\d+)\s*(hrs?|hour|hours)/);  // Match hours or hrs
-            const minutesMatch = duration.match(/(\d+)\s*mins/);  // Match mins
-        
-            // Parse hours if present
-            if (hoursMatch) {
-                totalHours += parseInt(hoursMatch[1]);
-                console.log(`Parsed ${hoursMatch[1]} hours`);
+        console.log(`Available hours per day: ${available_hours}`);
+        console.log(`Total days available: ${days}`);
+
+        // Extract durations from locations, transport and priorities
+        let origin_duration = locationAndDurations.map(route => route.locationDuration);
+        // Divide each item in origin_duration by 60 to convert minutes to hours
+        origin_duration = origin_duration.map(duration => duration / 60);
+
+        let transport_durations = locationAndDurations.map(route => {
+            const duration = route.duration;
+
+            console.log(`Processing transport duration for route: ${duration}`);
+
+            // Skip the last transport duration (should be null)
+            // NOTE: The LAST TIME SHOULD ALWAYS BE NULL
+            // This is because it's just the last location (so here's no transport time)
+            if (duration == null) {
+                return null;  // No need to process the last transport duration
             }
-        
-            // Parse minutes if present
-            if (minutesMatch) {
-                totalHours += parseInt(minutesMatch[1]) / 60;
-                console.log(`Parsed ${minutesMatch[1]} minutes`);
+
+            if (duration.includes('hour') || duration.includes('hrs') || duration.includes('hours')) {
+                let totalHours = 0;
+            
+                // Check for both hours and minutes in the duration
+                const hoursMatch = duration.match(/(\d+)\s*(hrs?|hour|hours)/);  // Match hours or hrs
+                const minutesMatch = duration.match(/(\d+)\s*mins/);  // Match mins
+            
+                // Parse hours if present
+                if (hoursMatch) {
+                    totalHours += parseInt(hoursMatch[1]);
+                    console.log(`Parsed ${hoursMatch[1]} hours`);
+                }
+            
+                // Parse minutes if present
+                if (minutesMatch) {
+                    totalHours += parseInt(minutesMatch[1]) / 60;
+                    console.log(`Parsed ${minutesMatch[1]} minutes`);
+                }
+            
+                console.log(`Total duration: ${totalHours} hours`);
+                return totalHours;  // Return total duration in hours
             }
-        
-            console.log(`Total duration: ${totalHours} hours`);
-            return totalHours;  // Return total duration in hours
-        }
-        
-        if (duration.includes('mins')) {
-            const minutes = parseInt(duration.replace(' mins', ''));
-            const hours = minutes / 60;
-            console.log(`Converted ${minutes} minutes to ${hours} hours`);
-            return hours;  // Convert minutes to hours
-        }    
-        
-        if (duration.includes('min')) {
-            const minute = parseInt(duration.replace(' min', ''));
-            const hours = minute / 60;
-            console.log(`Converted ${minute} minute to ${hours} hours`);
-            return hours;  // Convert minute to hours
-        }
-
-        throw new Error("Invalid duration format: " + duration);
-    });
-
-    let priorities = locationAndDurations.map(item => {
-        return item.destination ? item.destination[item.destination.length - 1] : -1;
-    }); 
-
-    console.log("Origin durations:", origin_duration);
-    console.log("Transport durations:", transport_durations);
-    console.log("Priorities:", priorities);
-
-    // Check if the lengths of origin_duration and transport_durations are consistent
-    if (origin_duration.length !== transport_durations.length) {
-        throw new Error(`Transport durations should be the same as origin durations (because of the "null" in transport).\nLocations: ${origin_duration.length}\nTransport: ${transport_durations.length}`);
-    }
-
-    // TODO: First calculate the total time the trip will take
-    // If it's greater than the amount of available time, start removing locations based on priority
-    // Once the amount of time is <= to available time, then run the below algorithm
-    let total_time = calculateTotalTime(locationAndDurations);
-    const available_time = available_hours * days;
-    let days_dictionary = {};
-
-    // If not enough time, remove locations starting from the lowest priority
-    while (total_time > available_time) {
-        console.log("Not enough time for all activities, removing location with lowest priority...");
-
-        try {
-            // Find the index of the location with the lowest priority (starting with -1 which is turned into infinity)
-            priorities = priorities.map(value => value === -1 ? Infinity : value);
-            let maxPriorityIndex = priorities.indexOf(Math.max(...priorities));
-
-            console.log("Removing ", orderedLocations[maxPriorityIndex]);
-
-            // Remove the location and its associated durations
-            locationAndDurations.splice(maxPriorityIndex, 1);
-            origin_duration.splice(maxPriorityIndex, 1);
-            transport_durations.splice(maxPriorityIndex, 1);
-            priorities.splice(maxPriorityIndex, 1);
-            orderedLocations.splice(maxPriorityIndex, 1);
-
-            // Recalculate the total time after removing the location
-            total_time = calculateTotalTime(locationAndDurations);            
-        } catch (error) {
-            console.log("Error in Priority Removal:", error);
-        }
-        console.log(`Updated total time: ${total_time} hours`);
-    }
-
-    let remaining_hours = available_hours;
-    let start_index = 0;
-    let end_index = -1;
-    
-    console.log("Starting the day division process...");
-
-    for (let index = 0; index < origin_duration.length; index++) {
-        const location = origin_duration[index];
-        
-        console.log(`Checking location ${index + 1}: Duration = ${location} hours`);
-
-        console.log(location);
-
-        if (location > available_hours) {
-            console.log("Not enough time in a day for this solo activity");
-        }
-
-        // Handle new day when remaining hours are not enough
-        if (remaining_hours - location < 0) {
-            console.log(`Not enough remaining hours for this location. Starting a new day...`);
-
-            if (days > 0) {
-                days -= 1;
-                end_index = index;
-                days_dictionary[start_index] = end_index;
-                console.log(`Added day with locations from index ${start_index} to ${end_index}`);
-                console.log("Days Dictionary: ", days_dictionary);
-                start_index = index;
-                remaining_hours = available_hours;
-            } else {
-                console.log("Not enough days available for all activities");
+            
+            if (duration.includes('mins')) {
+                const minutes = parseInt(duration.replace(' mins', ''));
+                const hours = minutes / 60;
+                console.log(`Converted ${minutes} minutes to ${hours} hours`);
+                return hours;  // Convert minutes to hours
+            }    
+            
+            if (duration.includes('min')) {
+                const minute = parseInt(duration.replace(' min', ''));
+                const hours = minute / 60;
+                console.log(`Converted ${minute} minute to ${hours} hours`);
+                return hours;  // Convert minute to hours
             }
+
+            throw new Error("Invalid duration format: " + duration);
+        });
+
+        let priorities = locationAndDurations.map(item => {
+            return item.destination ? item.destination[item.destination.length - 1] : -1;
+        }); 
+
+        console.log("Origin durations:", origin_duration);
+        console.log("Transport durations:", transport_durations);
+        console.log("Priorities:", priorities);
+
+        // Check if the lengths of origin_duration and transport_durations are consistent
+        if (origin_duration.length !== transport_durations.length) {
+            throw new Error(`Transport durations should be the same as origin durations (because of the "null" in transport).\nLocations: ${origin_duration.length}\nTransport: ${transport_durations.length}`);
         }
 
-        // Deduct location time from remaining hours
-        remaining_hours -= location;
-        console.log(`Remaining hours after visiting location: ${remaining_hours}`);
+        let days_dictionary = {};
 
-        // If this is not the last location, consider transport time to next location
-        if (index !== origin_duration.length - 1) {
-            const travel_time = transport_durations[index];
+        let remaining_hours = available_hours;
+        let start_index = 0;
+        let end_index = -1;
+        
+        console.log("Starting the day division process...");
 
-            console.log(`Checking transport time to next location: ${travel_time} hours`);
+        for (let index = 0; index < origin_duration.length; index++) {
+            const location = origin_duration[index];
+            
+            console.log(`Checking location ${index + 1}: Duration = ${location} hours`);
 
-            // Handle transport to the next location, if not enough time, move to next day
-            if (remaining_hours - travel_time < 0) {
-                console.log("Not enough remaining hours for travel. Starting a new day...");
+            console.log(location);
+
+            if (location > available_hours) {
+                console.log("Not enough time in a day for this solo activity");
+            }
+
+            // Handle new day when remaining hours are not enough
+            if (remaining_hours - location < 0) {
+                console.log(`Not enough remaining hours for this location. Starting a new day...`);
+
                 if (days > 0) {
                     days -= 1;
-                    const end_index = index;
+                    end_index = index;
                     days_dictionary[start_index] = end_index;
                     console.log(`Added day with locations from index ${start_index} to ${end_index}`);
                     console.log("Days Dictionary: ", days_dictionary);
                     start_index = index;
                     remaining_hours = available_hours;
                 } else {
-                    throw new Error("Not enough days available for all activities");
+                    console.log("Not enough days available for all activities");
                 }
             }
 
-            // Deduct travel time
-            remaining_hours -= travel_time;
-            console.log(`Remaining hours after travel: ${remaining_hours}`);
+            // Deduct location time from remaining hours
+            remaining_hours -= location;
+            console.log(`Remaining hours after visiting location: ${remaining_hours}`);
+
+            // If this is not the last location, consider transport time to next location
+            if (index !== origin_duration.length - 1) {
+                const travel_time = transport_durations[index];
+
+                console.log(`Checking transport time to next location: ${travel_time} hours`);
+
+                // Handle transport to the next location, if not enough time, move to next day
+                if (remaining_hours - travel_time < 0) {
+                    console.log("Not enough remaining hours for travel. Starting a new day...");
+                    if (days > 0) {
+                        days -= 1;
+                        const end_index = index;
+                        days_dictionary[start_index] = end_index;
+                        console.log(`Added day with locations from index ${start_index} to ${end_index}`);
+                        console.log("Days Dictionary: ", days_dictionary);
+                        start_index = index;
+                        remaining_hours = available_hours;
+                    } else {
+                        throw new Error("Not enough days available for all activities");
+                    }
+                }
+
+                // Deduct travel time
+                remaining_hours -= travel_time;
+                console.log(`Remaining hours after travel: ${remaining_hours}`);
+            }
         }
+
+        // Case: Only one day was spent
+        if (start_index == 0 && Object.entries(days_dictionary).length === 0) {
+            console.log("No days spent");
+            end_index = origin_duration.length - 1;
+            days_dictionary[start_index] = end_index;
+            console.log(`Added day with locations from index ${start_index} to ${end_index}`);
+            console.log("Days Dictionary: ", days_dictionary);
+        }
+
+        console.log("Finished dividing locations into days");
+        console.log("Final divisions:", days_dictionary);
+
+        // Return the dictionary mapping days to locations
+        return days_dictionary;
+
+    } catch (error) {
+        console.log("Error in divideLocationsIntoGroups:", error);
     }
-
-    // Case: Only one day was spent
-    if (start_index == 0 && Object.entries(days_dictionary).length === 0) {
-        console.log("No days spent");
-        end_index = origin_duration.length - 1;
-        days_dictionary[start_index] = end_index;
-        console.log(`Added day with locations from index ${start_index} to ${end_index}`);
-        console.log("Days Dictionary: ", days_dictionary);
-    }
-
-    console.log("Finished dividing locations into days");
-    console.log("Final divisions:", days_dictionary);
-    console.log("DD.js - Ordered Locations:", orderedLocations);
-
-    // Return the dictionary mapping days to locations
-    return [days_dictionary, orderedLocations];
 }
 
 
