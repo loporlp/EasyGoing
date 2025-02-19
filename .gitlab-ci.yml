@@ -1,0 +1,12 @@
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  script:
+    - cd /home/ubuntu/easy-going/backend
+    - git pull origin main
+    - npm install
+    - pm2 restart server
+  only:
+    - main
