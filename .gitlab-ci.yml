@@ -12,3 +12,4 @@ deploy:
     - main
   tags:
     - deploy
+    
