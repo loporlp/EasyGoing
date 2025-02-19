@@ -10,3 +10,5 @@ deploy:
     - pm2 restart server
   only:
     - main
+  tags:
+    - deploy
