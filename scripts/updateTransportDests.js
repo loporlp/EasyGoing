@@ -9,6 +9,8 @@ export const updateDestinationsWithTransport = (newDest, updatedGroupedDestinati
     const flattenedDestinations = flattenGroupedObjects(updatedGroupedDestinations);
     //console.log("Flattened destinations:", flattenedDestinations);
 
+    // TODO: If not in newDest, remove from updatedGroupedDestinations
+
     // Iterate through each destination in the newDest array
     for (let i = 0; i < newDest.length; i++) {
         const destination = newDest[i];

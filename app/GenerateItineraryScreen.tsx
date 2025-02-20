@@ -11,6 +11,7 @@ import { useState, useEffect, useRef } from "react";
 import { storeData, getData } from '../scripts/localStore.js';
 import { divideLocationsIntoGroups } from '../scripts/dateDividers.js';
 import { updateDestinationsWithTransport, updateDayOrigin } from '../scripts/updateTransportDests.js';
+import { launchPrioritySystem} from '../scripts/prioritySystem.js';
 import groupDestinationsByDay from '../scripts/groupDestinationsByDay';
 import processGroupedDestinations from '../scripts/processGroupedDestinations';
 import { Ionicons } from '@expo/vector-icons';
@@ -51,15 +52,20 @@ const GenerateItineraryScreen = () => {
 
 
     const [origin, setOrigin] = useState<{ name: string; address: string; duration: number; priority: number}>();
+    const [startDate, setStartDate] = useState<Date>();
+    const [endDate, setEndDate] = useState<Date>();
 
     // Initial empties
     const [destinations, setDestinations] = useState<Record<string, Place>>({});
     const [groupedDestinations, setGroupedDestinations] = useState<Place[][]>([]);
     const [grouped2DDestinations, setGrouped2DDestinations] = useState<Place[][]>([]);
     const [optimalRoute, setOptimalRoute] = useState<any[][]>([]);
+    const [resultRoute, setResultRoute] = useState<any[][]>([]);
     const [transportationModes, setTransportationModes] = useState<string[]>([]);
 
     const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
+
+    const [timeChecked, setTimeChecked] = useState<boolean>(false);
 
     // Extract transportation mode
     useEffect(() => {
@@ -101,6 +107,9 @@ const GenerateItineraryScreen = () => {
     
             if (trip) {
                 console.log("Trip Data:", trip);
+
+                setStartDate(trip.tripStartDate);
+                setEndDate(trip.tripEndDate);
     
                 // Iterate over destinations and format them
                 trip.destinations.forEach((destination: { picture: string; alias: any; address: any; priority: any; mode: any; transportToNext: any; transportDuration: any; startDateTime: any; duration: string; notes: any; dayOrigin: any; cost: any; }, index: { toString: () => string | number; }) => {
@@ -186,6 +195,7 @@ const GenerateItineraryScreen = () => {
             // Assuming you want to store the entire ordered destinations under the trip ID
             const tripID = "currentTrip";
             await storeData(tripID, orderedDestinations);
+            // TODO: updateTrip function in localStore.js
             console.log("Ordered destinations saved.");
         } catch (error) {
             console.error("Error saving ordered destinations:", error);
@@ -196,21 +206,11 @@ const GenerateItineraryScreen = () => {
 
     useEffect(() => {
         if (Object.keys(destinations).length > 0 && origin) {
-            /*
-            TODO:
-            
-            Before fetching the official optimal route, calculate total time and budget.
-            If there is not enough time and/or budget, this is where the Priority system comes in.
-            
-            In order to do this, first use the calculateTotalTime in dateDividers.js using what we already have (optimalRoute + locationDurations)
-
-            If there is not enough time, use a new script to get a new list of locations based on priority
-
-            This new list needs to be saved (We need to warn the user if they are fine with removal of those extras first)
-            Then we run that new list through optimized list
-            Save this new optimized list
-            */
+            // This should only run twice max:
+            // - 1. Upon load
+            // - 2. After removing places with priority if not enough time
             const fetchOptimalRoute = async () => {
+
                 try {
                     const destinationArray = Object.values(destinations);
                     console.log("Pre DestArray:", origin);
@@ -273,19 +273,81 @@ const GenerateItineraryScreen = () => {
             // TODO: We need a new script that takes in Group Indices and Ordered Locations
             // This script will be specifically for the ScrollView
 
-            // TODO: With that same script above, use it to call another script to get back the list of locations for ONE DAY to display
-
             // Create a map of ordered locations for quick lookup
             const updatedDurations = processGroupedDestinations(orderedLocations, groupedDestinations, destinations, fetchedDurations, setGroupedDestinations);
+            console.log("GI - Updated Durations (Map)", updatedDurations);
+
+            // Get number of days
+            let numberOfDays;
+            console.log("Start Date:", startDate);
+            console.log("End Date:", endDate);
+            try {
+                if (startDate && endDate) {
+                    const actualEndDate = new Date(endDate);
+                    const actualStartDate = new Date(startDate);
+                    numberOfDays = (actualEndDate.getTime() - actualStartDate.getTime()) / (1000 * 3600 * 24);
+                } else {
+                    numberOfDays = 7; // Default 7 days
+                }
+            } catch (error) {
+                console.log("Error in Date", error);
+            }
+
+            // Used to rerun fetchOptimalRoute to get the new ordered list given the old list (after removing locations that don't fit due to time)
+            if (!timeChecked) {
+                /*
+                TODO:
+                
+                Before fetching the official optimal route, calculate total time and budget.
+                If there is not enough time and/or budget, this is where the Priority system comes in.
+                
+                In order to do this, first use the calculateTotalTime in dateDividers.js using what we already have (optimalRoute + locationDurations)
+
+                If there is not enough time, use a new script to get a new list of locations based on priority
+
+                This new list needs to be saved (We need to warn the user if they are fine with removal of those extras first)
+                Then we run that new list through optimized list
+                Save this new optimized list
+                */
+
+                // This is the ONLY place timeChecked should change (otherwise, infinite loop)
+                const [timeExceeded, priorityOrderedList] = await launchPrioritySystem(updatedDurations, numberOfDays);
+                // Nothing happens if time isn't exceeded
+                if (timeExceeded) {
+                    setTimeChecked(true);
+
+                    // This will re-trigger fetchOptimalRoute (so be careful to avoid infinite API calls)
+                    if (priorityOrderedList) {
+                        console.log("Prio - Destinations:", destinations);
+                        console.log("Prio - priorityOrderedList:", priorityOrderedList)
+                        // TODO: For each location in priorityOrderedList, pull the respective location from destinations and store in newListOfDestinations
+
+                        // Convert priorityOrderedList into a set of aliases for quick lookup
+                        const validDestinationsSet = new Set(priorityOrderedList.map((item: any[]) => item[0]));
+
+                        // Filter out destinations that match alias only
+                        const filteredDestinations = Object.fromEntries(
+                            Object.entries(destinations).filter(([key, destination]) => 
+                                validDestinationsSet.has(destination.alias)
+                            )
+                        );
+
+                        console.log("FilteredDestinations Check:", filteredDestinations);
+
+                        setDestinations(filteredDestinations)
+                    }
+                }
+            }
 
             // (3) Date Dividers
             // Uses fetchedDurations for this (as well as the loaded durations per location)
-            const dateRange = [moment().format("ddd, MMM D"), moment().format("ddd, MMM D")]; // TODO: Use actual sent date rather than today
             // This returns a dictionary with indices as the ID for range of locations (i.e. "0:2" means from location 0 to location 2)
             console.log("Updated Durations:", updatedDurations);
-            let groupedDays = await divideLocationsIntoGroups(updatedDurations, dateRange);
+            let groupedDays = await divideLocationsIntoGroups(updatedDurations, numberOfDays);
+            console.log("Grouped Days Indices Dict 1:", groupedDays);
+            console.log("New Ordered Locations:", orderedLocations);
             groupedDays = (groupedDays || {}) as { [key: number]: number };
-            console.log("Grouped Days Indices Dict:", groupedDays);
+            console.log("Grouped Days Indices Dict 2:", groupedDays);
 
             // (4) Set the groups
             const resultingGroupedDestinations = groupDestinationsByDay(groupedDays as { [key: number]: number }, orderedLocations);
@@ -356,7 +418,8 @@ const GenerateItineraryScreen = () => {
             setGroupedDestinations(updatedGroupedDestinations);
 
             // Store the updated Routes and TransportTime in local storage
-            //console.log("orderedLocations:", orderedLocations);
+            console.log("orderedLocations:", orderedLocations);
+            // TODO: Set optimalRoute to the orderedLocations (in optimalRoute's format)
             const newDests = reorderDestinations(orderedLocations);
             const updatedDests = updateDestinationsWithTransport(newDests, updatedGroupedDestinations);
             console.log("Updated Dests (final):", updatedDests);
@@ -377,8 +440,8 @@ const GenerateItineraryScreen = () => {
         //console.log("upDests:", updatedDests);
         saveOrderedDestinations(updatedDests);
 
-        // Reload list
-        setDestinations(updatedDests);
+        // Update for the ScrollList
+        setResultRoute(optimalRoute);
 
     }, [grouped2DDestinations, toSaveData]);    
 
@@ -464,8 +527,6 @@ const GenerateItineraryScreen = () => {
     
         console.log("Formatted Destinations (Date):", formattedDestinations);
     
-        // TODO: setOptimalRoute(formattedDestinations);
-    
         // Array to store the polyline data
         const matchedPolylinesData: any[] = [];
     
@@ -521,9 +582,9 @@ const GenerateItineraryScreen = () => {
     return (
         <View style={styles.container}>
             <SafeAreaView style={{ flex: 1 }}>
-                {optimalRoute.length > 0 && (
+                {resultRoute.length > 0 && (
                     <MultiRoutesMap
-                        locations={optimalRoute}
+                        locations={resultRoute}
                         transportationModes={transportationModes}
                         polylines={polylinesData}
                         transportDurations={transportDurations}
@@ -535,14 +596,21 @@ const GenerateItineraryScreen = () => {
             </SafeAreaView>
 
             <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
-                {optimalRoute.map((routeGroup, routeGroupIndex) => {
+                {resultRoute.map((routeGroup, routeGroupIndex) => {
                     const destinationGroupKey = `group-${routeGroupIndex}`;
                     let dateForThisGroup;
-                    if (routeGroupIndex === 0) {
-                        dateForThisGroup = new Date(destinations[routeGroupIndex].startDateTime);
-                    } else {
-                        const previousGroupDate = new Date(destinations[routeGroupIndex - 1].startDateTime);
-                        dateForThisGroup = getNextDay(previousGroupDate);
+                    try {
+                        if (routeGroupIndex === 0) {
+                            dateForThisGroup = new Date(destinations[routeGroupIndex].startDateTime);
+                        } else {
+                            const previousGroupDate = new Date(destinations[routeGroupIndex - 1].startDateTime);
+                            dateForThisGroup = getNextDay(previousGroupDate);
+                        }
+                    } catch (error) {
+                        console.log("ScrollView - StartDateTime Error:", error);
+                        console.log("destinations[routeGroupIndex]:", destinations[routeGroupIndex]);
+                        console.log("destinations:", destinations);
+                        dateForThisGroup = new Date(); // TODO: Fix this bug
                     }
                     console.log('Date for this group:', dateForThisGroup);
                     const isSelected = selectedDayIndex === routeGroupIndex;

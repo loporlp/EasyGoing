@@ -117,7 +117,7 @@ const AddEditDestinations = () => {
             startDateTime: new Date().toISOString(), //TODO: implement this in app
             duration: tempDuration,
             notes: typedNotes,
-            dayOrigin: true, //TODO: figure out how to check if this is the day's origin (will require existing data to compare to)
+            dayOrigin: false, //TODO: figure out how to check if this is the day's origin (will require existing data to compare to)
             cost: 40, // TODO: implement this in app
             picture: JSON.stringify({ url: alias })
         };
@@ -390,14 +390,14 @@ const AddEditDestinations = () => {
                 <TouchableOpacity style={{ padding: 10 }}>
                     <MaterialCommunityIcons name="application-import" size={30} color={"#24a6ad"} />
                 </TouchableOpacity>
-                <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={() => {
-                    if (destinations.length > 0) {
-                        updateTrip(tripId, trip)
-                        router.push("/GenerateItineraryScreen")
-                    } else {
-                        alert("You must add at least 1 destination.")
-                    }
-                }}>
+                <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={() => { 
+                        if (destinations.length > 1) {
+                            updateTrip(tripId, trip)
+                            router.push("/GenerateItineraryScreen")
+                        } else {
+                            alert("You must add at least 1 destination (excluding origin).")
+                        }
+                    }}>
                     <Ionicons name="arrow-forward-circle-sharp" size={30} color={"#24a6ad"} />
                 </TouchableOpacity>
             </View>
