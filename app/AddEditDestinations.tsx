@@ -1,13 +1,13 @@
 // AddEditDestinations.tsx
-import { useState, useEffect } from 'react';
-import { View, StyleSheet, TextInput, Text, TouchableOpacity, Dimensions, Modal, ImageBackground, Button } from "react-native";
+import React, { useState, useEffect, useRef } from 'react';
+import { View, StyleSheet, TextInput, Text, TouchableOpacity, Dimensions, Modal, TouchableWithoutFeedback, Button, Image } from "react-native";
 import { useRouter } from "expo-router";
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import { storeData, getData } from '../scripts/localStore.js';
 import { updateTrip } from '../scripts/databaseInteraction.js';
 import DynamicImage from '../components/DynamicImage';
 import { useNavigation } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import CalendarPicker from 'react-native-calendar-picker';
@@ -21,7 +21,27 @@ const AddEditDestinations = () => {
     // Modal (Pop-up)
     const [visible, setVisible] = useState(false);
     const show = () => setVisible(true);
-    const hide = () => setVisible(false);
+    const hide = () => {
+        setTempAlias("")
+        setTempDuration("")
+        setTempLocation("")
+        setTempPriority("")
+        setVisible(false);
+    }
+
+    // Setting add values
+    const [alias, setAlias] = useState("");
+    const [location, setLocation] = useState("");
+    const [duration, setDuration] = useState("");
+    const [priority, setPriority] = useState("");
+    const [typedNotes, setNotes] = useState("");
+
+    // temporary storage
+    const [tempAlias, setTempAlias] = useState("");
+    const [tempLocation, setTempLocation] = useState("");
+    const [tempDuration, setTempDuration] = useState("");
+    const [tempPriority, setTempPriority] = useState("");
+
     // Track if user is currently editing a destionation (and if so, what index)
     const [isEditing, setIsEditing] = useState(false);
     const [editIndex, setEditIndex] = useState<number>(-1); // To store the index of the item being edited, -1 is default as it shouldn't ever be called if isEditing is false
@@ -54,54 +74,54 @@ const AddEditDestinations = () => {
                 console.error("Error loading trip data:", error);
             }
         };
-    
+
         loadTrip(); // Load trip data when the component mounts
     }, []); // Empty dependency array ensures this runs only once    
-    
+
     const addLocation = () => {
         // Ensure that trip data and tripId are available
         if (!trip || !tripId) {
             console.error("Trip or trip.id is not available.");
             return;
         }
-    
+
         // If missing a required field
         let errorMessage = "";
-        if (!alias) {
+        if (!tempAlias) {
             errorMessage += "Location Alias (shorthand) is required.\n"
         }
-        if (!location) {
+        if (!tempLocation) {
             errorMessage += "Address is required.\n";
         }
-        if (!duration) {
+        if (!tempDuration) {
             errorMessage += "Duration is required.\n";
         }
-        if (!priority) {
+        if (!tempPriority) {
             errorMessage += "Priority is required.\n";
         }
         if (errorMessage) {
             alert(errorMessage.trim());
             return;
         }
-    
+
         // Set default priority to -1 (as an integer) if it's empty or invalid
-        const priorityValue = priority.trim() === "" || isNaN(Number(priority)) ? -1 : parseInt(priority);
-    
+        const priorityValue = tempPriority.trim() === "" || isNaN(Number(tempPriority)) ? -1 : parseInt(tempPriority);
+
         const newDestination = {
-            alias: alias,
-            address: location,
+            alias: tempAlias,
+            address: tempLocation,
             priority: priorityValue,
             mode: "driving", //TODO: implement this in app
             transportToNext: "", //TODO: implement this in app
             transportDuration: "", //TODO: implement this in app
             startDateTime: new Date().toISOString(), //TODO: implement this in app
-            duration: duration,
+            duration: tempDuration,
             notes: typedNotes,
             dayOrigin: true, //TODO: figure out how to check if this is the day's origin (will require existing data to compare to)
             cost: 40, // TODO: implement this in app
             picture: JSON.stringify({ url: alias })
         };
-    
+
         if (isEditing) {
             const oldDestination = trip.destinations[editIndex];
             newDestination.mode = oldDestination.mode;
@@ -121,19 +141,19 @@ const AddEditDestinations = () => {
             setDestinations([...trip.destinations]);
             storeData(tripId.toString(), trip); // Ensure tripId is used here
         }
-    
+
         console.log(newDestination);
-    
+
         // Clear the input fields after adding
         setAlias("");
         setLocation("");
         setDuration("");
         setPriority("");
         setNotes("");
-    
+
         // Re-hides input screen
         hide();
-    };    
+    };
 
     //sets to editing mode before opening the edit screen, setting relevant values
     const editLocation = (index: number) => {
@@ -215,6 +235,8 @@ const AddEditDestinations = () => {
     const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null); // Explicitly define state type
     const [datesText, setDatesText] = useState("");
 
+    const infoInputRef = useRef(null);
+
     // Handle changed date
     const handleDateChange = (date: Date, type: 'START_DATE' | 'END_DATE') => {
         if (type === "END_DATE") {
@@ -278,13 +300,18 @@ const AddEditDestinations = () => {
             >
                 <View style={{ flex: 1, flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                     <DynamicImage placeName={item.alias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
-                    <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10 }}>
-                        <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginLeft: -50 }}>
+                    <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10, marginLeft: 5 }}>
+                        <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                             <Ionicons name="location" size={20} color={"#24a6ad"} />
                             <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{item.alias}</Text>
                         </View>
 
-                        <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5, marginLeft: -50 }}>
+                        <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginLeft: 5 }}>
+                            <MaterialCommunityIcons name={"label"} color={"#24a6ad"} />
+                            <Text numberOfLines={1} ellipsizeMode="tail" style={{ marginLeft: 5, color: "gray", marginTop: -5 }}>{item.address}</Text>
+                        </View>
+
+                        <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5 }}>
                             <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                                 <Ionicons name="time" size={18} color={"#24a6ad"} />
                                 <Text style={{ marginLeft: 5 }}>{item.duration}</Text>
@@ -363,83 +390,133 @@ const AddEditDestinations = () => {
                 <TouchableOpacity style={{ padding: 10 }}>
                     <MaterialCommunityIcons name="application-import" size={30} color={"#24a6ad"} />
                 </TouchableOpacity>
-                <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={() => { 
-                        if (destinations.length > 0) {
-                            updateTrip(tripId, trip)
-                            router.push("/GenerateItineraryScreen")
-                        } else {
-                            alert("You must add at least 1 destination.")
-                        }
-                    }}>
+                <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={() => {
+                    if (destinations.length > 0) {
+                        updateTrip(tripId, trip)
+                        router.push("/GenerateItineraryScreen")
+                    } else {
+                        alert("You must add at least 1 destination.")
+                    }
+                }}>
                     <Ionicons name="arrow-forward-circle-sharp" size={30} color={"#24a6ad"} />
                 </TouchableOpacity>
             </View>
 
             {/* Add destination pop-up */}
-               {/* Add destination pop-up */}
-               <Modal animationType="fade" visible={visible} transparent={true} onRequestClose={hide}>
-                <View style={styles.popup}>
-                    <ImageBackground source={require("../assets/images/blue.png")} style={styles.backgroundImage}>
-                        <View style={styles.inputContainer}>
-                            {/* Text Input For Location, Duration, Priority, and Notes */}
-                            <View style={styles.textContainer}>
-                                <Text style={styles.text}>Alias (Shorthand Name):</Text> 
-                                <TextInput
-                                    style={styles.textBox} //TODO: figure out how we want to make asking for alias more smooth
-                                    placeholder="Grabbing Food" 
-                                    placeholderTextColor="gray"
-                                    value={alias}
-                                    onChangeText={setAlias}
-                                />
-                                <Text style={styles.text}>Address:</Text>
-                                <AutocompleteTextBox
-                                    value = {location}
-                                    onPlaceSelect={(place) => {
-                                        setLocation(place.description);
-                                        return place.description; // Explicitly return the string
-                                    }}
-                                    placeholder="Address"
-                                    placeholderTextColor="gray"
-                                    style={styles.textBox}
-                                />
-                                <Text style={styles.text}>Duration (Minutes):</Text>
-                                <TextInput
-                                    style={styles.textBox}
-                                    placeholder="30m"
-                                    placeholderTextColor="gray"
-                                    keyboardType="numeric"
-                                    value={duration}
-                                    onChangeText={setDuration}
-                                />
-                                <Text style={styles.text}>Priority:</Text>
-                                <TextInput
-                                    style={styles.textBox}
-                                    placeholder="1"
-                                    placeholderTextColor="gray"
-                                    keyboardType="numeric"
-                                    value={priority}
-                                    onChangeText={setPriority}
-                                />
-                                <Text style={styles.text}>Notes:</Text>
-                                <TextInput
-                                    style={styles.textBox}
-                                    placeholder="Notes"
-                                    placeholderTextColor="gray"
-                                    value={typedNotes}
-                                    onChangeText={setNotes}
-                                />
-                            </View>
-                            {/* Add + Cancel Buttons*/}
-                            <View style={styles.buttonContainer}>
-                                <View style={styles.button}>
-                                    <Button title="Cancel" onPress={hide} />
+            <Modal animationType="fade" visible={visible} transparent={true} onRequestClose={hide}>
+
+                <View style={styles.modalOverlay}>
+                    <View style={{
+                        width: '100%',
+                        backgroundColor: '#F4F4F4',
+                        padding: 20,
+                        borderRadius: 10,
+                        height: "55%",
+                        marginTop: -100
+                    }}
+                    >
+                        <Text style={{ color: "black", fontWeight: "700", fontSize: 22 }}>Add Destination</Text>
+                        <View style={[styles.destination, { marginTop: 10, flexDirection: "row", alignItems: "center" }]}>
+                            {(tempAlias == "") ? (
+                                <Image source={require("../assets/images/blue.png")} style={[styles.destinationImage, { marginLeft: 0 }]} />
+                            ) : (
+                                <DynamicImage placeName={tempAlias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
+                            )}
+                            <View style={{ flexDirection: "column", justifyContent: "flex-start", gap: 5, marginLeft: 10, paddingRight: 140 }}>
+                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                    <Ionicons name="location" size={20} color={"#24a6ad"} />
+                                    {(tempAlias == "") ? (
+                                        <Text style={{ fontSize: 20, fontWeight: "700", marginLeft: 5 }}>Destination</Text>
+                                    ) : (
+                                        <Text numberOfLines={1} ellipsizeMode="tail" style={{ fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{tempAlias}</Text>
+                                    )}
                                 </View>
-                                <View style={styles.button}>
-                                    <Button title={isEditing ? "Edit" : "Add"} onPress={addLocation} />
+
+
+                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginLeft: 5 }}>
+                                    <MaterialCommunityIcons name={"label"} color={"#24a6ad"} />
+                                    {(tempLocation == "") ? (
+                                        <Text style={{ marginLeft: 5, color: "gray", marginTop: -5 }}>Address</Text>
+                                    ) : (
+                                        <Text numberOfLines={1} ellipsizeMode="tail" style={{ marginLeft: 5, color: "gray", marginTop: -5 }}>{tempLocation}</Text>
+                                    )}
+                                </View>
+
+                                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5, gap: 15 }}>
+                                    <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                        <Ionicons name="time" size={18} color={"#24a6ad"} />
+                                        {(tempDuration == "") ? (
+                                            <Text style={{ marginLeft: 5 }}>Duration</Text>
+                                        ) : (
+                                            <Text style={{ marginLeft: 5 }}>{tempDuration} hrs</Text>
+                                        )}
+                                    </View>
+
+                                    <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginRight: 5 }}>
+                                        <MaterialCommunityIcons name="priority-high" size={18} color={"#24a6ad"} />
+                                        {(tempPriority == "") ? (
+                                            <Text style={{ marginLeft: 5 }}>Priority</Text>
+                                        ) : (
+                                            <Text style={{ marginLeft: 5 }}>Priority: {tempPriority}</Text>
+                                        )}
+                                    </View>
                                 </View>
                             </View>
                         </View>
-                    </ImageBackground>
+
+                        <TouchableWithoutFeedback onPress={() => infoInputRef.current.focus()}>
+                            <View style={{ flexDirection: "column", marginTop: 15 }}>
+                                <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
+                                    <Ionicons name={"location"} color={"#24a6ad"} />
+                                    <Text>Destination:</Text>
+                                </View>
+                                <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5 }]} value={tempAlias} onChangeText={setTempAlias} ref={infoInputRef}></TextInput>
+                            </View>
+                        </TouchableWithoutFeedback>
+
+                        <View style={{ flexDirection: "column", marginTop: 10 }}>
+                            <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
+                                <MaterialCommunityIcons name={"label"} color={"#24a6ad"} />
+                                <Text>Address:</Text>
+                            </View>
+                            <AutocompleteTextBox value={tempLocation} onPlaceSelect={(place) => {
+                                setTempLocation(place.description);
+                                return place.description;
+                            }} />
+                        </View>
+
+                        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                            <TouchableWithoutFeedback onPress={() => infoInputRef.current.focus()}>
+                                <View style={{ flexDirection: "column", marginTop: 15, width: "45%" }}>
+                                    <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
+                                        <Ionicons name={"time"} color={"#24a6ad"} />
+                                        <Text>Duration:</Text>
+                                    </View>
+                                    <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5 }]} value={tempDuration} onChangeText={setTempDuration} keyboardType="numeric" ref={infoInputRef} returnKeyType="done"></TextInput>
+                                </View>
+                            </TouchableWithoutFeedback>
+
+                            <TouchableWithoutFeedback onPress={() => infoInputRef.current.focus()}>
+                                <View style={{ flexDirection: "column", marginTop: 15, width: "45%" }}>
+                                    <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
+                                        <MaterialCommunityIcons name={"priority-high"} color={"#24a6ad"} />
+                                        <Text>Priority:</Text>
+                                    </View>
+                                    <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5 }]} value={tempPriority} keyboardType="numeric" onChangeText={setTempPriority} ref={infoInputRef} returnKeyType="done"></TextInput>
+                                </View>
+                            </TouchableWithoutFeedback>
+                        </View>
+
+                        <View style={{ flexDirection: "row", justifyContent: "flex-end", gap: 30, marginTop: 30 }}>
+                            <TouchableOpacity onPress={hide} style={[styles.modalButton, { backgroundColor: "red" }]}>
+                                <Text style={{ color: "white", fontWeight: "700", fontSize: 12 }}>CANCEL</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={addLocation} style={[styles.modalButton, { backgroundColor: "#24a6ad" }]}>
+                                <Text style={{ color: "white", fontWeight: "700", fontSize: 12 }}>{isEditing ? "EDIT" : "ADD"}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                 </View>
             </Modal>
 
@@ -470,7 +547,7 @@ const AddEditDestinations = () => {
                     </View>
                 </View>
             </Modal>
-        </View>
+        </View >
 
     );
 }
@@ -725,6 +802,25 @@ const styles = StyleSheet.create({
         marginLeft: 40,
         marginRight: 40,
     },
+
+    addDestinationTextInputs: {
+        height: 40,
+        backgroundColor: "white",
+        borderRadius: 10,
+        fontSize: 18
+    },
+
+    modalButton: {
+        height: 35,
+        width: 70,
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 10,
+        shadowColor: "#333333",
+        shadowOffset: { width: 1, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+    }
 });
 
 export default AddEditDestinations;
