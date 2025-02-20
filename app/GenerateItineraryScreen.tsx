@@ -1,5 +1,5 @@
 // GenerateItineraryScreen.tsx
-import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image, SafeAreaView } from "react-native";
+import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image, SafeAreaView, Modal, Button } from "react-native";
 import { useRouter } from "expo-router";
 import MapMarker from '../components/MapMarker';
 import RouteMap from '../components/RouteMap';
@@ -7,6 +7,7 @@ import MultiRoutesMap from '../components/MultiRoutesMap';
 import { fetchPolylinesAndDurations } from '../scripts/routeHelpers';
 import { calculateOptimalRoute } from '../scripts/optimalRoute.js';
 import { Dimensions } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { useState, useEffect, useRef } from "react";
 import { storeData, getData } from '../scripts/localStore.js';
 import { divideLocationsIntoGroups } from '../scripts/dateDividers.js';
@@ -22,6 +23,7 @@ const { height } = Dimensions.get('window');
 
 const GenerateItineraryScreen = () => {
     const router = useRouter();
+    const navigation = useNavigation();
 
     // Tracks if map is loading
     const [isLoading, setIsLoading] = useState(true);  
@@ -67,6 +69,30 @@ const GenerateItineraryScreen = () => {
     const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
 
     const [timeChecked, setTimeChecked] = useState<boolean>(false);
+
+    // Pop-Up for Priority 
+    const [modalVisible, setModalVisible] = useState(false);
+    const confirmAction = (): Promise<boolean> => {
+        return new Promise((resolve) => {
+            setModalVisible(true);
+
+            // Handle Yes button click
+            const handleYes = () => {
+                setModalVisible(false);
+                resolve(true);
+                console.log("Yes");
+            };
+
+            // Handle No button click
+            const handleNo = () => {
+                setModalVisible(false);
+                resolve(false);
+                console.log("No");
+            };
+
+            return { handleYes, handleNo };
+        });
+    };
 
     // Extract transportation mode
     useEffect(() => {
@@ -318,11 +344,18 @@ const GenerateItineraryScreen = () => {
                 if (timeExceeded) {
                     setTimeChecked(true);
 
+                    // See if the user is fine with removing locations
+                    const userResponse = await confirmAction();
+                    if (!userResponse) {
+                        // Go back a screen if the answer is no
+                        console.log("User selected No. Going back to AED Screen.");
+                        navigation.goBack();
+                    }
+
                     // This will re-trigger fetchOptimalRoute (so be careful to avoid infinite API calls)
                     if (priorityOrderedList) {
                         console.log("Prio - Destinations:", destinations);
                         console.log("Prio - priorityOrderedList:", priorityOrderedList)
-                        // TODO: For each location in priorityOrderedList, pull the respective location from destinations and store in newListOfDestinations
 
                         // Convert priorityOrderedList into a set of aliases for quick lookup
                         const validDestinationsSet = new Set(priorityOrderedList.map((item: any[]) => item[0]));
@@ -583,6 +616,43 @@ const GenerateItineraryScreen = () => {
 
     return (
         <View style={styles.container}>
+            {/* Pop-Up for Priority Confirmation */}
+            <Modal
+                visible={modalVisible}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalText}>
+                            Amount of locations exceeded available time. Remove lowest priority locations?
+                        </Text>
+                        <View style={styles.buttonContainer}>
+                            <Button
+                                title="Yes"
+                                onPress={() => {
+                                    confirmAction().then(() => {
+                                        console.log("User allowed priority to remove locations.");
+                                    });
+                                    setModalVisible(false);  // Close the modal after action
+                                }}
+                            />
+                            <Button
+                                title="No"
+                                onPress={() => {
+                                    setModalVisible(false);
+                                    confirmAction().then(() => {
+                                        console.log("User selected No, going back a screen.");
+                                        navigation.goBack();
+                                    });
+                                }}
+                            />
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+            
             <SafeAreaView style={{ flex: 1 }}>
                 {resultRoute.length > 0 && (
                     <MultiRoutesMap
@@ -828,6 +898,30 @@ const styles = StyleSheet.create({
     },
     disabledButton: {
         backgroundColor: '#cccccc',
+    },
+
+    // Pop-Up
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 10,
+        width: '80%',
+        alignItems: 'center',
+    },
+    modalText: {
+        fontSize: 16,
+        marginBottom: 20,
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        width: '100%',
     },
 });
 
