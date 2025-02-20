@@ -25,6 +25,10 @@ const Account = () => {
     router.replace("/SearchScreen")
   }
 
+  const savedDestinations = () => {
+    router.replace("/SavedDestinationsScreen")
+}
+
   /**
    * Signs the user out of their account. 
    */
@@ -44,7 +48,7 @@ const Account = () => {
       .catch((error) => {
         console.error('Sign out error:', error);
       });
-      clearLocal()
+    clearLocal()
   };
 
   /**
@@ -81,6 +85,9 @@ const Account = () => {
       <View style={styles.navBar}>
         <TouchableOpacity style={{ padding: 10, marginLeft: 20 }} onPress={homeScreen}>
           <Ionicons name="home" size={30} color={"lightgray"} />
+        </TouchableOpacity>
+        <TouchableOpacity style={{ padding: 10 }} onPress={savedDestinations}>
+          <Ionicons name="bookmark" size={30} color={"lightgray"} />
         </TouchableOpacity>
         <TouchableOpacity style={{ padding: 10 }} onPress={searchScreen}>
           <Ionicons name="search" size={30} color={"lightgray"} />

@@ -54,6 +54,10 @@ const HomeScreen = () => {
         router.replace("/EditExistingTripsScreen")
     }
 
+    const savedDestinations = () => {
+        router.replace("/SavedDestinationsScreen")
+    }
+
     const scrollRef = useRef<ScrollView>(null);
     const recommendedList = [
         {
@@ -332,6 +336,9 @@ const HomeScreen = () => {
                 <View style={styles.navBar}>
                     <TouchableOpacity style={{ padding: 10, marginLeft: 20 }}>
                         <Ionicons name="home" size={30} color={"#24a6ad"} />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{ padding: 10 }} onPress={savedDestinations}>
+                        <Ionicons name="bookmark" size={30} color={"lightgray"} />
                     </TouchableOpacity>
                     <TouchableOpacity style={{ padding: 10 }} onPress={searchScreen}>
                         <Ionicons name="search" size={30} color={"lightgray"} />

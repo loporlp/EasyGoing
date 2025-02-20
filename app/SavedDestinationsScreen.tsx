@@ -1,10 +1,10 @@
 // SearchScreen.tsx
-import { View, Text, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router'
 import AutocompleteTextBox from '@/components/AutoCompleteTextBox';
 
-const SearchScreen = () => {
+const SavedDestinationsScreen = () => {
     const router = useRouter();
 
     /**
@@ -28,28 +28,29 @@ const SearchScreen = () => {
         router.replace("/Account")
     }
 
-    const savedDestinations = () => {
-        router.replace("/SavedDestinationsScreen")
+    const searchScreen = () => {
+        router.replace("/SearchScreen")
     }
 
     return (
+
         <View style={{ flex: 1, flexDirection: "column" }}>
-            <View style={styles.searchSection}>
-                <View style={styles.searchBar}>
-                    <Ionicons name="search" size={20} style={{}} color={"black"} />
-                    <AutocompleteTextBox placeholder="Search..." placeholderTextColor="#d6d6d6" style={styles.destinationInput} />
+            <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1 }}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 50 }}>
+                    <Text style={{ fontSize: 22, fontWeight: "700" }}>My Trips</Text>
                 </View>
-            </View>
+
+            </ScrollView>
 
             <View style={styles.navBar}>
                 <TouchableOpacity style={{ padding: 10, marginLeft: 20 }} onPress={homeScreen}>
                     <Ionicons name="home" size={30} color={"lightgray"} />
                 </TouchableOpacity>
-                <TouchableOpacity style={{ padding: 10 }} onPress={savedDestinations}>
-                    <Ionicons name="bookmark" size={30} color={"lightgray"} />
-                </TouchableOpacity>
                 <TouchableOpacity style={{ padding: 10 }}>
-                    <Ionicons name="search" size={30} color={"#24a6ad"} />
+                    <Ionicons name="bookmark" size={30} color={"#24a6ad"} />
+                </TouchableOpacity>
+                <TouchableOpacity style={{ padding: 10 }} onPress={searchScreen}>
+                    <Ionicons name="search" size={30} color={"lightgray"} />
                 </TouchableOpacity>
                 <TouchableOpacity style={{ padding: 10 }} onPress={viewTrips}>
                     <Ionicons name="calendar" size={30} color={"lightgray"} />
@@ -64,8 +65,10 @@ const SearchScreen = () => {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        flexDirection: "column",
+        flexGrow: 1, // Allows ScrollView to grow and be scrollable
+        backgroundColor: '#fff',
+        height: "100%",
+        paddingHorizontal: 20
     },
 
     searchSection: {
@@ -115,4 +118,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default SearchScreen;
+export default SavedDestinationsScreen;
