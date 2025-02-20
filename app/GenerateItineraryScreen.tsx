@@ -11,6 +11,7 @@ import { useState, useEffect, useRef } from "react";
 import { storeData, getData } from '../scripts/localStore.js';
 import { divideLocationsIntoGroups } from '../scripts/dateDividers.js';
 import { updateDestinationsWithTransport, updateDayOrigin } from '../scripts/updateTransportDests.js';
+import { launchPrioritySystem} from '../scripts/prioritySystem.js';
 import groupDestinationsByDay from '../scripts/groupDestinationsByDay';
 import processGroupedDestinations from '../scripts/processGroupedDestinations';
 import { Ionicons } from '@expo/vector-icons';
@@ -63,6 +64,8 @@ const GenerateItineraryScreen = () => {
     const [transportationModes, setTransportationModes] = useState<string[]>([]);
 
     const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
+
+    const [timeChecked, setTimeChecked] = useState<boolean>(false);
 
     // Extract transportation mode
     useEffect(() => {
@@ -192,6 +195,7 @@ const GenerateItineraryScreen = () => {
             // Assuming you want to store the entire ordered destinations under the trip ID
             const tripID = "currentTrip";
             await storeData(tripID, orderedDestinations);
+            // TODO: updateTrip function in localStore.js
             console.log("Ordered destinations saved.");
         } catch (error) {
             console.error("Error saving ordered destinations:", error);
@@ -202,20 +206,9 @@ const GenerateItineraryScreen = () => {
 
     useEffect(() => {
         if (Object.keys(destinations).length > 0 && origin) {
-            /*
-            TODO:
-            
-            Before fetching the official optimal route, calculate total time and budget.
-            If there is not enough time and/or budget, this is where the Priority system comes in.
-            
-            In order to do this, first use the calculateTotalTime in dateDividers.js using what we already have (optimalRoute + locationDurations)
-
-            If there is not enough time, use a new script to get a new list of locations based on priority
-
-            This new list needs to be saved (We need to warn the user if they are fine with removal of those extras first)
-            Then we run that new list through optimized list
-            Save this new optimized list
-            */
+            // This should only run twice max:
+            // - 1. Upon load
+            // - 2. After removing places with priority if not enough time
             const fetchOptimalRoute = async () => {
 
                 try {
@@ -282,9 +275,9 @@ const GenerateItineraryScreen = () => {
 
             // Create a map of ordered locations for quick lookup
             const updatedDurations = processGroupedDestinations(orderedLocations, groupedDestinations, destinations, fetchedDurations, setGroupedDestinations);
+            console.log("GI - Updated Durations (Map)", updatedDurations);
 
-            // (3) Date Dividers
-            // Uses fetchedDurations for this (as well as the loaded durations per location)
+            // Get number of days
             let numberOfDays;
             console.log("Start Date:", startDate);
             console.log("End Date:", endDate);
@@ -297,8 +290,57 @@ const GenerateItineraryScreen = () => {
                     numberOfDays = 7; // Default 7 days
                 }
             } catch (error) {
-                console.log("Error in GI - Date Dividers:", error);
+                console.log("Error in Date", error);
             }
+
+            // Used to rerun fetchOptimalRoute to get the new ordered list given the old list (after removing locations that don't fit due to time)
+            if (!timeChecked) {
+                /*
+                TODO:
+                
+                Before fetching the official optimal route, calculate total time and budget.
+                If there is not enough time and/or budget, this is where the Priority system comes in.
+                
+                In order to do this, first use the calculateTotalTime in dateDividers.js using what we already have (optimalRoute + locationDurations)
+
+                If there is not enough time, use a new script to get a new list of locations based on priority
+
+                This new list needs to be saved (We need to warn the user if they are fine with removal of those extras first)
+                Then we run that new list through optimized list
+                Save this new optimized list
+                */
+
+                // This is the ONLY place timeChecked should change (otherwise, infinite loop)
+                const [timeExceeded, priorityOrderedList] = await launchPrioritySystem(updatedDurations, numberOfDays);
+                // Nothing happens if time isn't exceeded
+                if (timeExceeded) {
+                    setTimeChecked(true);
+
+                    // This will re-trigger fetchOptimalRoute (so be careful to avoid infinite API calls)
+                    if (priorityOrderedList) {
+                        console.log("Prio - Destinations:", destinations);
+                        console.log("Prio - priorityOrderedList:", priorityOrderedList)
+                        // TODO: For each location in priorityOrderedList, pull the respective location from destinations and store in newListOfDestinations
+
+                        // Convert priorityOrderedList into a set of aliases for quick lookup
+                        const validDestinationsSet = new Set(priorityOrderedList.map((item: any[]) => item[0]));
+
+                        // Filter out destinations that match alias only
+                        const filteredDestinations = Object.fromEntries(
+                            Object.entries(destinations).filter(([key, destination]) => 
+                                validDestinationsSet.has(destination.alias)
+                            )
+                        );
+
+                        console.log("FilteredDestinations Check:", filteredDestinations);
+
+                        setDestinations(filteredDestinations)
+                    }
+                }
+            }
+
+            // (3) Date Dividers
+            // Uses fetchedDurations for this (as well as the loaded durations per location)
             // This returns a dictionary with indices as the ID for range of locations (i.e. "0:2" means from location 0 to location 2)
             console.log("Updated Durations:", updatedDurations);
             let groupedDays = await divideLocationsIntoGroups(updatedDurations, numberOfDays);

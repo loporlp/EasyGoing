@@ -1,83 +1,21 @@
+const { processDurations } = require('./prioritySystem.js');
+
 export async function divideLocationsIntoGroups(locationAndDurations, days) {
     console.log("Starting divideLocationsIntoGroups function");
 
     try {
         console.log("Locations & Durations:", locationAndDurations);
 
-        // Convert date_range to number of days
         const available_hours = 16.0; // TODO: Change later based on input times
-        
+
         console.log(`Available hours per day: ${available_hours}`);
         console.log(`Total days available: ${days}`);
 
-        // Extract durations from locations, transport and priorities
-        let origin_duration = locationAndDurations.map(route => route.locationDuration);
-        // Divide each item in origin_duration by 60 to convert minutes to hours
-        origin_duration = origin_duration.map(duration => duration / 60);
-
-        let transport_durations = locationAndDurations.map(route => {
-            const duration = route.duration;
-
-            console.log(`Processing transport duration for route: ${duration}`);
-
-            // Skip the last transport duration (should be null)
-            // NOTE: The LAST TIME SHOULD ALWAYS BE NULL
-            // This is because it's just the last location (so here's no transport time)
-            if (duration == null) {
-                return null;  // No need to process the last transport duration
-            }
-
-            if (duration.includes('hour') || duration.includes('hrs') || duration.includes('hours')) {
-                let totalHours = 0;
-            
-                // Check for both hours and minutes in the duration
-                const hoursMatch = duration.match(/(\d+)\s*(hrs?|hour|hours)/);  // Match hours or hrs
-                const minutesMatch = duration.match(/(\d+)\s*mins/);  // Match mins
-            
-                // Parse hours if present
-                if (hoursMatch) {
-                    totalHours += parseInt(hoursMatch[1]);
-                    console.log(`Parsed ${hoursMatch[1]} hours`);
-                }
-            
-                // Parse minutes if present
-                if (minutesMatch) {
-                    totalHours += parseInt(minutesMatch[1]) / 60;
-                    console.log(`Parsed ${minutesMatch[1]} minutes`);
-                }
-            
-                console.log(`Total duration: ${totalHours} hours`);
-                return totalHours;  // Return total duration in hours
-            }
-            
-            if (duration.includes('mins')) {
-                const minutes = parseInt(duration.replace(' mins', ''));
-                const hours = minutes / 60;
-                console.log(`Converted ${minutes} minutes to ${hours} hours`);
-                return hours;  // Convert minutes to hours
-            }    
-            
-            if (duration.includes('min')) {
-                const minute = parseInt(duration.replace(' min', ''));
-                const hours = minute / 60;
-                console.log(`Converted ${minute} minute to ${hours} hours`);
-                return hours;  // Convert minute to hours
-            }
-
-            throw new Error("Invalid duration format: " + duration);
-        });
-
-        let priorities = locationAndDurations.map(item => {
-            return item.destination ? item.destination[item.destination.length - 1] : -1;
-        }); 
-
-        console.log("Origin durations:", origin_duration);
-        console.log("Transport durations:", transport_durations);
-        console.log("Priorities:", priorities);
+        const { origin_duration, transport_durations, priorities } = processDurations(locationAndDurations);
 
         // Check if the lengths of origin_duration and transport_durations are consistent
         if (origin_duration.length !== transport_durations.length) {
-            throw new Error(`Transport durations should be the same as origin durations (because of the "null" in transport).\nLocations: ${origin_duration.length}\nTransport: ${transport_durations.length}`);
+            console.log(`Transport durations should be the same as origin durations (because of the "null" in transport).\nLocations: ${origin_duration.length}\nTransport: ${transport_durations.length}`);
         }
 
         let days_dictionary = {};
@@ -167,7 +105,6 @@ export async function divideLocationsIntoGroups(locationAndDurations, days) {
         console.log("Error in divideLocationsIntoGroups:", error);
     }
 }
-
 
 export function calculateTotalTime(locationAndDurations) {
     console.log("Starting calculateTotalTime function");
