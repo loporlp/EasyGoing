@@ -221,14 +221,6 @@ const AddEditDestinations = () => {
         console.log("New Origin Added:", newOriginDestination);
     };
 
-
-    // Setting add values
-    const [alias, setAlias] = useState("");
-    const [location, setLocation] = useState("");
-    const [duration, setDuration] = useState("");
-    const [priority, setPriority] = useState("");
-    const [typedNotes, setNotes] = useState("");
-
     // Calendar Modal
     const [isModalVisible, setModalVisible] = useState(false); // To control modal visibility
     const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null); // Explicitly define state type
