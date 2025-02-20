@@ -12,6 +12,7 @@ import { storeData, getData } from '../scripts/localStore.js';
 import { divideLocationsIntoGroups } from '../scripts/dateDividers.js';
 import { updateDestinationsWithTransport, updateDayOrigin } from '../scripts/updateTransportDests.js';
 import { launchPrioritySystem} from '../scripts/prioritySystem.js';
+import { updateTrip } from '../scripts/databaseInteraction.js';
 import groupDestinationsByDay from '../scripts/groupDestinationsByDay';
 import processGroupedDestinations from '../scripts/processGroupedDestinations';
 import { Ionicons } from '@expo/vector-icons';
@@ -195,7 +196,8 @@ const GenerateItineraryScreen = () => {
             // Assuming you want to store the entire ordered destinations under the trip ID
             const tripID = "currentTrip";
             await storeData(tripID, orderedDestinations);
-            // TODO: updateTrip function in localStore.js
+            // TODO: Link this to its own useEffect where a user has to click "Save" button to save
+            //await updateTrip(tripID, orderedDestinations);
             console.log("Ordered destinations saved.");
         } catch (error) {
             console.error("Error saving ordered destinations:", error);
