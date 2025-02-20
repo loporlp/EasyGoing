@@ -11,7 +11,13 @@ export async function divideLocationsIntoGroups(locationAndDurations, days) {
         console.log(`Available hours per day: ${available_hours}`);
         console.log(`Total days available: ${days}`);
 
-        const { origin_duration, transport_durations, priorities } = processDurations(locationAndDurations);
+        const { locationDuration, transportDurations, priorities } = processDurations(locationAndDurations);
+
+        const origin_duration = locationDuration;
+        const transport_durations = transportDurations;
+
+        console.log("DD - Origin Duration:", origin_duration);
+        console.log("DD - Transport Duration:", transport_durations);
 
         // Check if the lengths of origin_duration and transport_durations are consistent
         if (origin_duration.length !== transport_durations.length) {
