@@ -28,18 +28,25 @@ const SearchScreen = () => {
         router.replace("/Account")
     }
 
+    const savedDestinations = () => {
+        router.replace("/SavedDestinationsScreen")
+    }
+
     return (
         <View style={{ flex: 1, flexDirection: "column" }}>
             <View style={styles.searchSection}>
                 <View style={styles.searchBar}>
-                    <Ionicons name="search" size={20} style={{  }} color={"black"} />
-                    <AutocompleteTextBox placeholder="Search..." placeholderTextColor="#d6d6d6" style={styles.destinationInput}/>
+                    <Ionicons name="search" size={20} style={{}} color={"black"} />
+                    <AutocompleteTextBox placeholder="Search..." placeholderTextColor="#d6d6d6" style={styles.destinationInput} />
                 </View>
             </View>
 
             <View style={styles.navBar}>
                 <TouchableOpacity style={{ padding: 10, marginLeft: 20 }} onPress={homeScreen}>
                     <Ionicons name="home" size={30} color={"lightgray"} />
+                </TouchableOpacity>
+                <TouchableOpacity style={{ padding: 10 }} onPress={savedDestinations}>
+                    <Ionicons name="bookmark" size={30} color={"lightgray"} />
                 </TouchableOpacity>
                 <TouchableOpacity style={{ padding: 10 }}>
                     <Ionicons name="search" size={30} color={"#24a6ad"} />

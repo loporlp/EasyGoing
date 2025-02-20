@@ -57,10 +57,14 @@ const EditExistingTripsScreen = () => {
         router.push("/CreateNewTrip")
     }
 
+    const savedDestinations = () => {
+        router.replace("/SavedDestinationsScreen")
+    }
+
     return (
         <View style={{ flex: 1, flexDirection: "column" }}>
             <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1 }}>
-                <View style={{flexDirection: "row", justifyContent:"space-between", alignItems: "center", marginTop: 50 }}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 50 }}>
                     <Text style={{ fontSize: 22, fontWeight: "700" }}>My Trips</Text>
                     <TouchableOpacity onPress={createNewTrip}>
                         <Ionicons name="add-circle" size={30} color="#24a6ad" />
@@ -68,17 +72,17 @@ const EditExistingTripsScreen = () => {
                 </View>
 
 
-                
+
                 {trips.length > 0 ? (
                     trips.map((trip) => (
                         <TouchableOpacity
-                            key={trip.id}  
-                            style={styles.tripButtonTokyo} 
-                            onPress={() => editTrip(trip.id)} 
+                            key={trip.id}
+                            style={styles.tripButtonTokyo}
+                            onPress={() => editTrip(trip.id)}
                         >
-                            <Image 
-                                style={styles.backgroundImage} 
-                                source={require("../assets/images/newyorkcity.jpg")} 
+                            <Image
+                                style={styles.backgroundImage}
+                                source={require("../assets/images/newyorkcity.jpg")}
                             />
                             <View style={styles.darkOverlay} />
                             <View style={styles.screenContainer}>
@@ -87,7 +91,7 @@ const EditExistingTripsScreen = () => {
                                 <Text style={styles.dates}>{trip.details?.tripStartDate && trip.details?.tripEndDate
                                     ? `${String(trip.details.tripStartDate)} - ${String(trip.details.tripEndDate)}`
                                     : "Dates Unavailable"}
-                                </Text> 
+                                </Text>
                             </View>
                         </TouchableOpacity>
                     ))
@@ -99,6 +103,9 @@ const EditExistingTripsScreen = () => {
             <View style={styles.navBar}>
                 <TouchableOpacity style={{ padding: 10, marginLeft: 20 }} onPress={homeScreen}>
                     <Ionicons name="home" size={30} color={"lightgray"} />
+                </TouchableOpacity>
+                <TouchableOpacity style={{ padding: 10 }} onPress={savedDestinations}>
+                    <Ionicons name="bookmark" size={30} color={"lightgray"} />
                 </TouchableOpacity>
                 <TouchableOpacity style={{ padding: 10 }} onPress={searchScreen}>
                     <Ionicons name="search" size={30} color={"lightgray"} />
@@ -122,8 +129,7 @@ const styles = StyleSheet.create({
         flexGrow: 1, // Allows ScrollView to grow and be scrollable
         backgroundColor: '#fff',
         height: "100%",
-        paddingLeft: 25,
-        paddingRight: 25,
+        paddingHorizontal: 20
     },
 
     darkOverlay: {

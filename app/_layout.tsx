@@ -67,7 +67,16 @@ export default function RootLayout() {
         name="CreateNewTrip"
         options={{
           headerShown: false,
-        }} 
+        }}
+      />
+
+      {/* Saved Desstinations screen */}
+      <Stack.Screen 
+        name = "SavedDestinationsScreen"
+        options={{
+          headerShown: false,
+          animation: "none"
+        }}
       />
 
       {/*Add / Edit Destinations screen*/}
@@ -75,7 +84,7 @@ export default function RootLayout() {
         name="AddEditDestinations"
         options={{
           headerShown: false,
-        }} 
+        }}
       />
 
       {/*Connection to server failed screen*/}
