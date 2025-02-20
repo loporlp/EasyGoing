@@ -85,7 +85,8 @@ const HomeScreen = () => {
             time: "3h",
             amount: "$25",
             review: "4.7",
-            reviewAmt: "105k"
+            reviewAmt: "105k",
+            saved: false
         },
         {
             destination: "The Metropolitan Meuseum of Art",
@@ -93,7 +94,8 @@ const HomeScreen = () => {
             time: "4h",
             amount: "$30",
             review: "4.8",
-            reviewAmt: "84k"
+            reviewAmt: "84k",
+            saved: false
         },
         {
             destination: "Grand Central Market",
@@ -101,7 +103,8 @@ const HomeScreen = () => {
             time: "1h",
             amount: "$$$",
             review: "4.5",
-            reviewAmt: "1468"
+            reviewAmt: "1468",
+            saved: false
         },
         {
             destination: "Joe's Shanghai",
@@ -109,7 +112,8 @@ const HomeScreen = () => {
             time: "N/A",
             amount: "$$",
             review: "4.2",
-            reviewAmt: "5705"
+            reviewAmt: "5705",
+            saved: false
         },
         {
             destination: "Central Park",
@@ -117,7 +121,8 @@ const HomeScreen = () => {
             time: "2h",
             amount: "$0",
             review: "4.8",
-            reviewAmt: "278k"
+            reviewAmt: "278k",
+            saved: false
         },
     ];
 
@@ -137,7 +142,8 @@ const HomeScreen = () => {
             time: "3h",
             amount: "$25",
             review: "4.7",
-            reviewAmt: "105k"
+            reviewAmt: "105k",
+            saved: false
         },
         {
             destination: "The Metropolitan Meuseum of Art",
@@ -145,7 +151,8 @@ const HomeScreen = () => {
             time: "4h",
             amount: "$30",
             review: "4.8",
-            reviewAmt: "84k"
+            reviewAmt: "84k",
+            saved: false
         },
         {
             destination: "Tokyo Skytree",
@@ -153,7 +160,8 @@ const HomeScreen = () => {
             time: "3h",
             amount: "$13.49",
             review: "4.4",
-            reviewAmt: "94k"
+            reviewAmt: "94k",
+            saved: true
         }
     ];
     // Gets the username
@@ -250,7 +258,7 @@ const HomeScreen = () => {
                                             <View style={styles.destImageWrapper}>
                                                 <Image style={styles.destImage} source={imageMap[item.image]} />
                                                 <TouchableOpacity style={styles.saveIconWrapper}>
-                                                    <Ionicons name="bookmark" size={22} color={"white"} />
+                                                    <Ionicons name="bookmark" size={22} color={item.saved ? "#FFD700" : "white"} />
                                                 </TouchableOpacity>
                                             </View>
 
@@ -299,7 +307,8 @@ const HomeScreen = () => {
                                             <View style={styles.destImageWrapper}>
                                                 <Image style={styles.destImage} source={imageMap[item.image]} />
                                                 <TouchableOpacity style={styles.saveIconWrapper}>
-                                                    <Ionicons name="bookmark" size={22} color={"white"} />
+
+                                                    <Ionicons name="bookmark" size={22} color={item.saved ? "#FFD700" : "white"} />
                                                 </TouchableOpacity>
                                             </View>
 
