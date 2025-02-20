@@ -99,7 +99,7 @@ const SavedDestinationsScreen = () => {
                             <Text style={{ marginLeft: 5 }}>{item.duration}</Text>
                         </View>
 
-                        <View style={{ flex: 1, flexDirection: "row", alignItems: "center"}}>
+                        <View style={{ flexDirection: "row", alignItems: "center"}}>
                             <Ionicons name="star" size={18} color={"gold"} />
                             <Text>{item.review}</Text>
                         </View>
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: 10,
         width: "100%",
-        marginBottom: 20,
+        marginBottom: 10,
     },
 
     deleteButton: {
