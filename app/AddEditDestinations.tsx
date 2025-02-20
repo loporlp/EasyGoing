@@ -50,6 +50,7 @@ const AddEditDestinations = () => {
     const [tripId, setTripId] = useState<string | null>(null);
     const [destinations, setDestinations] = useState<any[]>([]); // Store destinations for rendering
 
+
     //load existing trip data and set it as 'trip'
     useEffect(() => {
         const loadTrip = async () => {
@@ -58,7 +59,7 @@ const AddEditDestinations = () => {
                 if (currentTripID) {
                     const tripDetails = await getData(currentTripID.toString());
                     console.log("Loaded trip data:", tripDetails); // Log the full trip details
-
+     
                     // Check if the trip details include 'id' correctly
                     if (tripDetails) {
                         setTripId(currentTripID);  // Store only the trip id
@@ -179,6 +180,55 @@ const AddEditDestinations = () => {
         }
     };
 
+
+    const handleOriginSelect = (address: { description: string; place_id: string }) => {
+        if (!trip || !tripId) {
+            console.error("Trip data is not loaded yet.");
+            return;
+        }
+    
+        
+        const newOriginDestination = {
+            alias: "Origin",
+            address: address.description,
+            priority: 0, // Set priority for origin
+            mode: "driving",
+            transportToNext: "",
+            transportDuration: "",
+            startDateTime: new Date().toISOString(),
+            duration: "0",
+            notes: "",
+            dayOrigin: true,
+            cost: 0,
+            picture: ""
+        };
+    
+        // Ensure trip.destinations is not null before modifying
+        if (!trip.destinations) {
+            trip.destinations = [];
+        }
+    
+        // Add the new origin at the beginning of the destinations list
+        const updatedDestinations = [newOriginDestination, ...trip.destinations];
+    
+        // Update the state
+        setDestinations(updatedDestinations);
+        setTrip({ ...trip, destinations: updatedDestinations });
+    
+        // Persist updated trip data to local storage
+        //storeData(tripId.toString(), { ...trip, destinations: updatedDestinations });
+    
+        console.log("New Origin Added:", newOriginDestination);
+    };
+
+
+    // Setting add values
+    const [alias, setAlias] = useState("");
+    const [location, setLocation] = useState("");
+    const [duration, setDuration] = useState("");
+    const [priority, setPriority] = useState("");
+    const [typedNotes, setNotes] = useState("");
+
     // Calendar Modal
     const [isModalVisible, setModalVisible] = useState(false); // To control modal visibility
     const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null); // Explicitly define state type
@@ -204,6 +254,12 @@ const AddEditDestinations = () => {
             setDatesText(`${startFormatted} - ${endFormatted}`);
         }
         setModalVisible(false);
+    };
+
+
+    const updateBudget = (text: string) => {
+        const updatedTrip = { ...trip, budget: text };
+        setTrip(updatedTrip);
     };
 
     // Swipable List components
@@ -287,9 +343,9 @@ const AddEditDestinations = () => {
 
                 {/* Group of text fields */}
                 <View style={{ marginTop: 15 }}>
-                    <View style={{ flexDirection: "row", marginBottom: 10, alignItems: "center", backgroundColor: "white", borderRadius: 10 }}>
-                        <Ionicons name="location" size={22} color={"#24a6ad"} style={{ position: "absolute", zIndex: 1, marginLeft: 10 }} />
-                        <AutocompleteTextBox placeholder="Origin" placeholderTextColor="gray" style={{ width: "100%", paddingLeft: 30 }} />
+                    <View style={{flexDirection: "row", marginBottom: 10, alignItems: "center", backgroundColor: "white", borderRadius: 10}}>
+                        <Ionicons name="location" size={22} color={"#24a6ad"} style={{position: "absolute", zIndex: 1, marginLeft: 10}} />
+                        <AutocompleteTextBox placeholder="Origin" placeholderTextColor="gray" onPlaceSelect={handleOriginSelect} style={{ width: "100%", paddingLeft: 30 }} />
                     </View>
 
                     <TouchableOpacity style={[styles.input, { flex: 1, flexDirection: "row", alignItems: 'center' }]} onPress={() => setModalVisible(true)}>
@@ -305,7 +361,7 @@ const AddEditDestinations = () => {
 
                         <TouchableOpacity style={[styles.budgetInput, { flex: 1, flexDirection: "row", alignItems: 'center' }]}>
                             <Ionicons name="wallet" size={22} color={"#24a6ad"} />
-                            <TextInput placeholder="$1,700" placeholderTextColor="black" keyboardType="numeric" style={{ fontSize: 18, marginLeft: 5 }} />
+                            <TextInput value={trip?.budget ? trip.budget.toString() : "Enter budget"} placeholderTextColor="black" keyboardType="numeric" onChangeText={updateBudget} style={{ fontSize: 18, marginLeft: 5 }} />
                         </TouchableOpacity>
                     </View>
                 </View>
