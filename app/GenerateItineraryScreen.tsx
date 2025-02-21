@@ -9,7 +9,7 @@ import { calculateOptimalRoute } from '../scripts/optimalRoute.js';
 import { Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useState, useEffect, useRef } from "react";
-import { storeData, getData } from '../scripts/localStore.js';
+import { getData } from '../scripts/localStore.js';
 import { divideLocationsIntoGroups } from '../scripts/dateDividers.js';
 import { updateDestinationsWithTransport, updateDayOrigin } from '../scripts/updateTransportDests.js';
 import { launchPrioritySystem} from '../scripts/prioritySystem.js';
@@ -219,10 +219,29 @@ const GenerateItineraryScreen = () => {
         try {
             // Assuming you want to store the entire ordered destinations under the trip ID
             const tripID = "currentTrip";
-            await storeData(tripID, orderedDestinations);
-            // TODO: Link this to its own useEffect where a user has to click "Save" button to save
-            //await updateTrip(tripID, orderedDestinations);
-            console.log("Ordered destinations saved.");
+            //await storeData(tripID, orderedDestinations);
+            const currentTripID = await getData(tripID);
+            if (!currentTripID) {
+                console.log(" no tripid");
+                throw new Error("Fail trip save");
+            }
+            console.log("currentTripID:", currentTripID);
+
+            // Overrride/replace destinations with orderedDestinations
+            // updateTrip with that new variable
+            if(typeof currentTripID === 'number') {
+                // It's just the trip ID
+                const tripToStore = await getData(currentTripID.toString());
+                console.log("tripToStore Upon Load", tripToStore);
+                tripToStore.destinations = orderedDestinations;
+                console.log("tripToStore After Replacing Destinations:", tripToStore);
+                const succeededToSave = await updateTrip(tripID, tripToStore);
+                if (succeededToSave) {
+                    console.log("GI: Managed to save trip to the database");
+                } else {
+                    console.log("GI: FAILED to save trip to the database");
+                }
+            }
         } catch (error) {
             console.error("Error saving ordered destinations:", error);
         }
@@ -476,7 +495,7 @@ const GenerateItineraryScreen = () => {
         // Update for the ScrollList
         setResultRoute(optimalRoute);
 
-    }, [grouped2DDestinations, toSaveData]);    
+    }, [toSaveData]);    
 
     const handlePress = (destination: string) => {
         setSelectedDestination(prev => prev === destination ? null : destination);
