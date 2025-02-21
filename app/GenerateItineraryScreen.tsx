@@ -217,7 +217,6 @@ const GenerateItineraryScreen = () => {
 
     const saveOrderedDestinations = async (orderedDestinations: any) => {
         try {
-            // Assuming you want to store the entire ordered destinations under the trip ID
             const tripID = "currentTrip";
             //await storeData(tripID, orderedDestinations);
             const currentTripID = await getData(tripID);
@@ -235,7 +234,7 @@ const GenerateItineraryScreen = () => {
                 console.log("tripToStore Upon Load", tripToStore);
                 tripToStore.destinations = orderedDestinations;
                 console.log("tripToStore After Replacing Destinations:", tripToStore);
-                const succeededToSave = await updateTrip(tripID, tripToStore);
+                const succeededToSave = await updateTrip(currentTripID, tripToStore);
                 if (succeededToSave) {
                     console.log("GI: Managed to save trip to the database");
                 } else {
