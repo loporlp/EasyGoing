@@ -1,5 +1,5 @@
 // GenerateItineraryScreen.tsx
-import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image, SafeAreaView, Modal, Button } from "react-native";
+import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image, SafeAreaView, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import MapMarker from '../components/MapMarker';
 import RouteMap from '../components/RouteMap';
@@ -71,28 +71,26 @@ const GenerateItineraryScreen = () => {
     const [timeChecked, setTimeChecked] = useState<boolean>(false);
 
     // Pop-Up for Priority 
-    const [modalVisible, setModalVisible] = useState(false);
-    const confirmAction = (): Promise<boolean> => {
-        return new Promise((resolve) => {
-            setModalVisible(true);
-
-            // Handle Yes button click
-            const handleYes = () => {
-                setModalVisible(false);
-                resolve(true);
-                console.log("Yes");
-            };
-
-            // Handle No button click
-            const handleNo = () => {
-                setModalVisible(false);
-                resolve(false);
-                console.log("No");
-            };
-
-            return { handleYes, handleNo };
+    const confirmAction = () => {
+        return new Promise((resolve, reject) => {
+            Alert.alert(
+                "Confirm Action",
+                "Amount of locations exceeded available time.\nRemove lowest priority locations?",
+                [
+                    {
+                        text: "Cancel",
+                        onPress: () => resolve(false),
+                        style: "cancel",
+                    },
+                    {
+                        text: "OK",
+                        onPress: () => resolve(true),
+                    },
+                ],
+                { cancelable: false }
+            );
         });
-    };
+    }; 
 
     // Extract transportation mode
     useEffect(() => {
@@ -615,44 +613,7 @@ const GenerateItineraryScreen = () => {
     
 
     return (
-        <View style={styles.container}>
-            {/* Pop-Up for Priority Confirmation */}
-            <Modal
-                visible={modalVisible}
-                transparent={true}
-                animationType="slide"
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalText}>
-                            Amount of locations exceeded available time. Remove lowest priority locations?
-                        </Text>
-                        <View style={styles.buttonContainer}>
-                            <Button
-                                title="Yes"
-                                onPress={() => {
-                                    confirmAction().then(() => {
-                                        console.log("User allowed priority to remove locations.");
-                                    });
-                                    setModalVisible(false);  // Close the modal after action
-                                }}
-                            />
-                            <Button
-                                title="No"
-                                onPress={() => {
-                                    setModalVisible(false);
-                                    confirmAction().then(() => {
-                                        console.log("User selected No, going back a screen.");
-                                        navigation.goBack();
-                                    });
-                                }}
-                            />
-                        </View>
-                    </View>
-                </View>
-            </Modal>
-            
+        <View style={styles.container}>            
             <SafeAreaView style={{ flex: 1 }}>
                 {resultRoute.length > 0 && (
                     <MultiRoutesMap
