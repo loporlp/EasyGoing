@@ -10,7 +10,7 @@ import { clearLocal } from '@/scripts/localStore';
 import { getAuth } from 'firebase/auth';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-const Account = () => {
+const Settings = () => {
 
   const navigation = useNavigation();
   const router = useRouter();
@@ -246,4 +246,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Account;
+export default Settings;
