@@ -1,6 +1,6 @@
 //methods for storing data in async storage, will be stored in JSON format, keys are expected to be strings
 import storage from '@react-native-async-storage/async-storage';
-import {getTrips} from "./databaseInteraction";
+import {createTrip, getTrips} from "./databaseInteraction";
 
 //storages data with given key and value
 export const storeData = async (key, value) => {
@@ -67,14 +67,26 @@ export const fillLocal = async () => {
     if(!hasTrips || JSON.parse(hasTrips).length === 0){
         trips = await getTrips();
         tripIDs = Object.keys(trips);
-        await storeData("tripIDs", tripIDs);
-        tripIDs.forEach(ID => {
+        await storeData("tripIDs", tripIDs); // Must await because later in this same function we will be checking if this information is stored
+        for (const ID of tripIDs){
+            if(trips[ID].tripStartDate === "saved"){
+                console.log("Stored Saved Destinations")
+                await storeData("savedDestinations", [trips[ID], ID]);
+            } else{
             storeData(ID, trips[ID]);
-        });
+            }
+        }
         console.log(`Storing new: ${hasTrips}`)
     }
     else {
         console.log(`Already has trips: ${hasTrips}`)
+    }
+
+    // If a user doesn't have a trip for saving destinations we must create one
+    savedTrips = await getData("savedDestinations");
+    if(!savedTrips){
+        console.log("no saved destinations, creating trip");
+        await createTrip("saved", 0, 0, 0);
     }
 }
 

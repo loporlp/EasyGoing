@@ -49,6 +49,8 @@ const AddEditDestinations = () => {
     const [trip, setTrip] = useState<any>(null);
     const [tripId, setTripId] = useState<string | null>(null);
     const [destinations, setDestinations] = useState<any[]>([]); // Store destinations for rendering
+    const [hasOrigin, setHasOrigin] = useState(false); // used for checking if an origin exists
+    const [originText, setOriginText] = useState("");
 
 
     //load existing trip data and set it as 'trip'
@@ -59,12 +61,16 @@ const AddEditDestinations = () => {
                 if (currentTripID) {
                     const tripDetails = await getData(currentTripID.toString());
                     console.log("Loaded trip data:", tripDetails); // Log the full trip details
-     
+                    console.log("Destinations: ", tripDetails.destinations);
                     // Check if the trip details include 'id' correctly
                     if (tripDetails) {
                         setTripId(currentTripID);  // Store only the trip id
                         setTrip(tripDetails);  // Store the full trip data
                         setDestinations(tripDetails.destinations); // Immediately update the destinations so they load on screen
+                        if(destinations.length > 0 && destinations[0].dayOrigin){
+                            setHasOrigin(true);
+                            setOriginText(tripDetails.destinations[0].address)
+                        }
                         console.log("Trip ID Set:", currentTripID);
                     } else {
                         console.error("Trip data is invalid, missing trip details");
@@ -77,6 +83,17 @@ const AddEditDestinations = () => {
 
         loadTrip(); // Load trip data when the component mounts
     }, []); // Empty dependency array ensures this runs only once    
+
+    useEffect(() => {
+        if (trip?.destinations?.length > 0 && trip.destinations[0].dayOrigin) {
+            setHasOrigin(true);
+            setOriginText(trip.destinations[0].address);
+        } else {
+            setHasOrigin(false);
+            setOriginText("");
+        }
+    }, [trip]); // Runs every time `trip` updates
+    
 
     const addLocation = () => {
         // Ensure that trip data and tripId are available
@@ -133,13 +150,14 @@ const AddEditDestinations = () => {
             // Replaces existing destination with the newly edited one
             trip.destinations.push(newDestination);
             setDestinations([...trip.destinations]);
-            storeData(tripId.toString(), trip); // Ensure tripId is used here
+            updateTrip(tripId, trip); // Ensure tripId is used here
             setIsEditing(false), setEditIndex(-1);
         } else {
             // Add the new destination to the trip's destinations
             trip.destinations.push(newDestination);
             setDestinations([...trip.destinations]);
-            storeData(tripId.toString(), trip); // Ensure tripId is used here
+            console.log("storing the trip as: ", trip);
+            updateTrip(tripId, trip); // Ensure tripId is used here
         }
 
         console.log(newDestination);
@@ -173,11 +191,15 @@ const AddEditDestinations = () => {
         if (!tripId) {
             console.error("tripId is null, cannot delete location.");
             return;
-        } else {
-            trip.destinations = trip.destinations.filter((_: any, i: number) => i !== index);
-            setDestinations([...trip.destinations]);
-            storeData(tripId.toString(), trip);
+        } 
+
+        if(trip.destinations[index].dayOrigin){
+            setHasOrigin(false);
+            setOriginText("");
         }
+        trip.destinations = trip.destinations.filter((_: any, i: number) => i !== index);
+        setDestinations([...trip.destinations]);
+        updateTrip(tripId, trip);
     };
 
 
@@ -187,11 +209,10 @@ const AddEditDestinations = () => {
             return;
         }
     
-        
         const newOriginDestination = {
             alias: "Origin",
             address: address.description,
-            priority: 0, // Set priority for origin
+            priority: 0,
             mode: "driving",
             transportToNext: "",
             transportDuration: "",
@@ -203,22 +224,29 @@ const AddEditDestinations = () => {
             picture: ""
         };
     
-        // Ensure trip.destinations is not null before modifying
-        if (!trip.destinations) {
-            trip.destinations = [];
-        }
+        const updatedDestinations =
+            trip.destinations.length > 0 && trip.destinations[0].dayOrigin
+                ? trip.destinations.map((dest: any, index: number) => (index === 0 ? newOriginDestination : dest))
+                : [newOriginDestination, ...trip.destinations];
     
-        // Add the new origin at the beginning of the destinations list
-        const updatedDestinations = [newOriginDestination, ...trip.destinations];
+        // Update state with the new trip object using the function version of setTrip
+        setTrip((prevTrip: any) => {
+            const newTrip = { ...prevTrip, destinations: updatedDestinations };
     
-        // Update the state
+            // Update trip in the database using the new state
+            updateTrip(tripId, newTrip);
+    
+            // Persist updated trip data to local storage
+            storeData(tripId.toString(), newTrip);
+    
+            console.log("Updated Trip State:", newTrip);
+            return newTrip; // Ensures React updates state correctly
+        });
+    
+        // Update local component states
         setDestinations(updatedDestinations);
-        setTrip({ ...trip, destinations: updatedDestinations });
-    
-        // Persist updated trip data to local storage
-        //storeData(tripId.toString(), { ...trip, destinations: updatedDestinations });
-    
-        console.log("New Origin Added:", newOriginDestination);
+        setHasOrigin(true);
+        setOriginText(address.description);
     };
 
     // Calendar Modal
@@ -337,7 +365,7 @@ const AddEditDestinations = () => {
                 <View style={{ marginTop: 15 }}>
                     <View style={{flexDirection: "row", marginBottom: 10, alignItems: "center", backgroundColor: "white", borderRadius: 10}}>
                         <Ionicons name="location" size={22} color={"#24a6ad"} style={{position: "absolute", zIndex: 1, marginLeft: 10}} />
-                        <AutocompleteTextBox placeholder="Origin" placeholderTextColor="gray" onPlaceSelect={handleOriginSelect} style={{ width: "100%", paddingLeft: 30 }} />
+                        <AutocompleteTextBox placeholder="Origin" placeholderTextColor="gray" onPlaceSelect={handleOriginSelect} value={originText} style={{ width: "100%", paddingLeft: 30 }} />
                     </View>
 
                     <TouchableOpacity style={[styles.input, { flex: 1, flexDirection: "row", alignItems: 'center' }]} onPress={() => setModalVisible(true)}>
@@ -383,11 +411,11 @@ const AddEditDestinations = () => {
                     <MaterialCommunityIcons name="application-import" size={30} color={"#24a6ad"} />
                 </TouchableOpacity>
                 <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={() => { 
-                        if (destinations.length > 1) {
+                        if (destinations.length > 1 && hasOrigin) {
                             updateTrip(tripId, trip)
                             router.push("/GenerateItineraryScreen")
                         } else {
-                            alert("You must add at least 1 destination (excluding origin).")
+                            alert(hasOrigin ?  "You must add at least 1 destination (excluding origin).": "You must have an origin")
                         }
                     }}>
                     <Ionicons name="arrow-forward-circle-sharp" size={30} color={"#24a6ad"} />

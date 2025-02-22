@@ -14,13 +14,25 @@ type AutocompleteTextBoxProps = {
     value?: string; // Accept a value prop to set the initial value
   };
 
+  
+
 const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTextColor, value = ''} : AutocompleteTextBoxProps) => {
     const [text, setText] = useState(value);
     const [addresses, setAddresses] = useState<Address[]>([]);
     const [isSelectingAddress, setIsSelectingAddress] = useState(false); // Track if an address is selected
     const [previousText, setPreviousText] = useState(''); // Track previous text
+    const [initialLoad, setInitialLoad] = useState(true); // Tracks if it's first render
     
 
+    useEffect(() => {
+        if (value !== text) {
+            setText(value);
+            setInitialLoad(true);
+            setAddresses([]);
+        }
+    }, [value]);
+    
+    
     const handlePlaceSelect = (selectedPlace : string) => {
         console.log("Place selected:", selectedPlace);
         // Ensure the callback is invoked with the correct data
@@ -31,7 +43,7 @@ const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTex
 
     useEffect(() => {
         // Fetch addresses only if text is provided and not selecting an address AND did not just select an address
-        if (text && !isSelectingAddress && text !== previousText) {
+        if (!initialLoad && text && !isSelectingAddress && text !== previousText) {
             callProtectedApi(text);
             setPreviousText(text);
         } else {
@@ -103,10 +115,22 @@ const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTex
             {/* Search textbox */}
             <TextInput
                 value={text}
+                onFocus={() => {
+                    setText("");
+                    setPreviousText(text);
+                    //setIsSelectingAddress(false);
+                }}
+                onBlur={() => {
+                    if (!isSelectingAddress) {
+                      // The user did NOT pick a suggestion => revert to original text
+                      setText(previousText);
+                    }
+                  }}
                 onChangeText={(newText) => {
                     setText(newText);
                     setIsSelectingAddress(false);
                     setAddresses([]); // Clear suggestions as user types
+                    setInitialLoad(false);
                 }}
                 placeholder={placeholder}
                 placeholderTextColor={placeholderTextColor}

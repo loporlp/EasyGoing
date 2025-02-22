@@ -79,6 +79,13 @@ export const createTrip = async (startDate, endDate, budget, origin) => {
         const data = await response.json();
         console.log(data);
         tripIDs = await getData("tripIDs");
+
+        // if this is a trip for saving destinations we don't modify tripIDs
+        if(startDate === "saved"){
+          storeData("savedDestinations", [data.trip_details, data.id]);
+          return true;
+        }
+
         storeData(data.id.toString(), data.trip_details);
         tripIDs.push(data.id.toString());
         storeData("currentTrip", data.id);
