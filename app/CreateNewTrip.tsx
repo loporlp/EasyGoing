@@ -44,7 +44,7 @@ const CreateNewTrip = () => {
         const isTripCreated = await createTrip(selectedStartDate, selectedEndDate, budget, selectedAutocompletePlace);
         //only proceed if the trip was successfully created
         if (isTripCreated) {
-            router.push("/AddEditDestinations");
+            router.replace("/AddEditDestinations");
         } else {
             console.error("Trip creation failed");
         }

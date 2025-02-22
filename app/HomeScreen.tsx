@@ -13,8 +13,6 @@ import { updateTrip } from '@/scripts/databaseInteraction';
 
 const HomeScreen = () => {
 
-
-    fillLocal();
     // Fill the local storage with trips if it is empty
     // Trip ids in local storage can be accessed through getData("tripIDs")
     useEffect(() => {
