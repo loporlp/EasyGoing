@@ -232,13 +232,18 @@ const GenerateItineraryScreen = () => {
                 // It's just the trip ID
                 const tripToStore = await getData(currentTripID.toString());
                 console.log("tripToStore Upon Load", tripToStore);
-                tripToStore.destinations = orderedDestinations;
-                console.log("tripToStore After Replacing Destinations:", tripToStore);
-                const succeededToSave = await updateTrip(currentTripID, tripToStore);
-                if (succeededToSave) {
-                    console.log("GI: Managed to save trip to the database");
-                } else {
-                    console.log("GI: FAILED to save trip to the database");
+                if (Object.keys(orderedDestinations).length != 0) {
+                    tripToStore.destinations = orderedDestinations;
+                    console.log("tripToStore After Replacing Destinations:", tripToStore);
+                    const succeededToSave = await updateTrip(currentTripID, tripToStore);
+                    if (succeededToSave) {
+                        console.log("GI: Managed to save trip to the database");
+                    } else {
+                        console.log("GI: FAILED to save trip to the database");
+                    }
+                    // Update for the ScrollList
+                    setResultRoute(optimalRoute);
+                    setIsLoading(false);
                 }
             }
         } catch (error) {
@@ -491,9 +496,6 @@ const GenerateItineraryScreen = () => {
         //console.log("upDests:", updatedDests);
         saveOrderedDestinations(updatedDests);
 
-        // Update for the ScrollList
-        setResultRoute(optimalRoute);
-
     }, [toSaveData]);    
 
     const handlePress = (destination: string) => {
@@ -641,7 +643,6 @@ const GenerateItineraryScreen = () => {
                         transportDurations={transportDurations}
                         markers={markers}
                         bounds={bounds}
-                        onPolylinesReady={() => setIsLoading(false)}
                     />
                 )}
             </SafeAreaView>
