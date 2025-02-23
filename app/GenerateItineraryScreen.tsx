@@ -1,5 +1,5 @@
 // GenerateItineraryScreen.tsx
-import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image, SafeAreaView, Alert } from "react-native";
+import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image, SafeAreaView, Alert, Button, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import MapMarker from '../components/MapMarker';
 import RouteMap from '../components/RouteMap';
@@ -633,7 +633,15 @@ const GenerateItineraryScreen = () => {
     
 
     return (
-        <View style={styles.container}>            
+        <View style={styles.container}>    
+            {isLoading ? (
+                    // Show loading spinner while data is being fetched
+                    <ActivityIndicator size="large" color="#0000ff" style={styles.loading} />
+                ) : (
+                    // Once loading is done, show the content
+                    <View></View>
+            )}
+
             <SafeAreaView style={{ flex: 1 }}>
                 {resultRoute.length > 0 && (
                     <MultiRoutesMap
@@ -902,6 +910,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         width: '100%',
+    },
+    loading: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff',
     },
 });
 
