@@ -644,7 +644,7 @@ const GenerateItineraryScreen = () => {
                     <View></View>
             )}
 
-<SafeAreaView style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1 }}>
             {frontendOptimalRoute.length > 0 && (
                 <MultiRoutesMap
                     locations={frontendOptimalRoute}
@@ -660,17 +660,17 @@ const GenerateItineraryScreen = () => {
                 {resultRoute.reduce((acc, destination) => {
                     // If it's a new day (dayOrigin is true), start a new group
                     if (destination.dayOrigin) {
-                        // If there's already a group, push it to the accumulator
+                        // If the last group is not empty, push it to the accumulator and start a new group
                         if (acc.length > 0 && acc[acc.length - 1].length > 0) {
-                            acc.push([]);
+                            acc.push([]); // Start a new group
                         }
                     }
 
                     // Add the destination to the current group
                     if (acc.length === 0 || acc[acc.length - 1].length === 0) {
-                        acc.push([destination]);
+                        acc.push([destination]); // Start with the first destination of the group
                     } else {
-                        acc[acc.length - 1].push(destination);
+                        acc[acc.length - 1].push(destination); // Add destination to the current group
                     }
 
                     return acc;
@@ -697,22 +697,24 @@ const GenerateItineraryScreen = () => {
                     return (
                         <View key={destinationGroupKey}>
                             {/* Date Header */}
-                            <TouchableOpacity
-                                onPress={() => handlePressDate(routeGroupIndex)}
-                                style={[styles.dateHeader, isSelected && styles.selectedDateHeader]}
-                            >
-                                <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>
-                                    {formatDate(dateForThisGroup)}
-                                </Text>
-                                <Ionicons
-                                    name={isSelected ? "chevron-up" : "chevron-down"}
-                                    size={18}
-                                    color="#000"
-                                />
-                            </TouchableOpacity>
+                            {routeGroup.length > 0 && (routeGroupIndex === 0 || routeGroup[0].dayOrigin) ? (
+                                <TouchableOpacity
+                                    onPress={() => handlePressDate(routeGroupIndex)}
+                                    style={[styles.dateHeader, isSelected && styles.selectedDateHeader]}
+                                >
+                                    <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>
+                                        {formatDate(dateForThisGroup)}
+                                    </Text>
+                                    <Ionicons
+                                        name={isSelected ? "chevron-up" : "chevron-down"}
+                                        size={18}
+                                        color="#000"
+                                    />
+                                </TouchableOpacity>
+                            ) : null}
 
                             {/* Loop through each destination in the current routeGroup */}
-                            {routeGroup.map((destination: { alias: any; address: any; duration: any; priority: any; picture: { url: string; }; }, destinationIndex: any) => {
+                            {routeGroup.map((destination, destinationIndex) => {
                                 const destinationKey = `${destinationGroupKey}-${destinationIndex}`;
                                 const destinationName = destination.alias; // Alias as the destination name
                                 const destinationAddress = destination.address; // Address of the destination
