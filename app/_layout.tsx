@@ -40,8 +40,8 @@ export default function RootLayout() {
         }}
       />
 
-      {/*Account screen*/}
-      <Stack.Screen name="Account"
+      {/*Settings screen*/}
+      <Stack.Screen name="Settings"
         options={{
           headerShown: false,
           animation: "none"
@@ -67,6 +67,14 @@ export default function RootLayout() {
         name="CreateNewTrip"
         options={{
           headerShown: false,
+        }}
+      />
+
+      {/* Account screen */}
+      <Stack.Screen 
+        name="Account"
+        options={{
+          headerShown: false
         }}
       />
 

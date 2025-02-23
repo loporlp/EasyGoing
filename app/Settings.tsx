@@ -31,6 +31,10 @@ const Settings = () => {
     router.replace("/SavedDestinationsScreen")
   }
 
+  const userAccountSettings = () => {
+    router.push("/Account")
+  }
+
   /**
    * Signs the user out of their account. 
    */
@@ -93,7 +97,7 @@ const Settings = () => {
       <View style={styles.accountContainer}>
         <Text style={{ fontSize: 22, fontWeight: "700" }}>Settings</Text>
 
-        <TouchableOpacity style={styles.accountDetails}>
+        <TouchableOpacity style={styles.accountDetails} onPress={userAccountSettings}>
           <Image source={require("../assets/images/blue.png")} style={styles.destinationImage} />
           <View style={{ flex: 1, flexDirection: "column", padding: 5, marginLeft: 5, justifyContent: "space-between" }}>
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "flex-start", gap: 10, marginTop: 15 }}>
@@ -185,7 +189,8 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    flexDirection: "column"
+    flexDirection: "column",
+    backgroundColor: "#f4f4f4"
   },
 
   accountContainer: {
@@ -199,7 +204,7 @@ const styles = StyleSheet.create({
     height: 100,
     backgroundColor: "white",
     borderRadius: 10,
-    marginTop: 10,
+    marginTop: 15,
     shadowColor: "#333333",
     shadowOffset: { width: 1, height: 2 },
     shadowOpacity: 0.3,

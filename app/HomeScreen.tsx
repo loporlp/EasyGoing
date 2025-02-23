@@ -40,8 +40,8 @@ const HomeScreen = () => {
         router.replace("/EditExistingTripsScreen")
     }
 
-    const accountScreen = () => {
-        router.replace("/Account")
+    const settingsScreen = () => {
+        router.replace("/Settings")
     }
 
     const searchScreen = () => {
@@ -353,7 +353,7 @@ const HomeScreen = () => {
                     <TouchableOpacity style={{ padding: 10 }} onPress={viewTrips}>
                         <Ionicons name="calendar" size={30} color={"lightgray"} />
                     </TouchableOpacity>
-                    <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={accountScreen}>
+                    <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={settingsScreen}>
                         <Ionicons name="person" size={30} color={"lightgray"} />
                     </TouchableOpacity>
                 </View>
