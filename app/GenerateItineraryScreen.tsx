@@ -64,6 +64,7 @@ const GenerateItineraryScreen = () => {
     const [grouped2DDestinations, setGrouped2DDestinations] = useState<Place[][]>([]);
     const [optimalRoute, setOptimalRoute] = useState<any[][]>([]);
     const [resultRoute, setResultRoute] = useState<any[][]>([]);
+    const [frontendOptimalRoute, setFrontendOptimalRoute] = useState<any[][]>([]);
     const [transportationModes, setTransportationModes] = useState<string[]>([]);
 
     const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
@@ -242,7 +243,8 @@ const GenerateItineraryScreen = () => {
                         console.log("GI: FAILED to save trip to the database");
                     }
                     // Update for the ScrollList
-                    setResultRoute(optimalRoute);
+                    setResultRoute(orderedDestinations);
+                    setFrontendOptimalRoute(optimalRoute);
                     setIsLoading(false);
                 }
             }
@@ -642,42 +644,59 @@ const GenerateItineraryScreen = () => {
                     <View></View>
             )}
 
-            <SafeAreaView style={{ flex: 1 }}>
-                {resultRoute.length > 0 && (
-                    <MultiRoutesMap
-                        locations={resultRoute}
-                        transportationModes={transportationModes}
-                        polylines={polylinesData}
-                        transportDurations={transportDurations}
-                        markers={markers}
-                        bounds={bounds}
-                    />
-                )}
-            </SafeAreaView>
+<SafeAreaView style={{ flex: 1 }}>
+            {frontendOptimalRoute.length > 0 && (
+                <MultiRoutesMap
+                    locations={frontendOptimalRoute}
+                    transportationModes={transportationModes}
+                    polylines={polylinesData}
+                    transportDurations={transportDurations}
+                    markers={markers}
+                    bounds={bounds}
+                />
+            )}
 
             <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
-                {resultRoute.map((routeGroup, routeGroupIndex) => {
+                {resultRoute.reduce((acc, destination) => {
+                    // If it's a new day (dayOrigin is true), start a new group
+                    if (destination.dayOrigin) {
+                        // If there's already a group, push it to the accumulator
+                        if (acc.length > 0 && acc[acc.length - 1].length > 0) {
+                            acc.push([]);
+                        }
+                    }
+
+                    // Add the destination to the current group
+                    if (acc.length === 0 || acc[acc.length - 1].length === 0) {
+                        acc.push([destination]);
+                    } else {
+                        acc[acc.length - 1].push(destination);
+                    }
+
+                    return acc;
+                }, []).map((routeGroup, routeGroupIndex) => {
                     const destinationGroupKey = `group-${routeGroupIndex}`;
                     let dateForThisGroup;
+
+                    // Calculate the date for the group (same logic as before)
                     try {
                         if (routeGroupIndex === 0) {
-                            dateForThisGroup = new Date(destinations[routeGroupIndex].startDateTime);
+                            dateForThisGroup = new Date(routeGroup[0].startDateTime);
                         } else {
-                            const previousGroupDate = new Date(destinations[routeGroupIndex - 1].startDateTime);
+                            const previousGroupDate = new Date(resultRoute[routeGroupIndex - 1].startDateTime);
                             dateForThisGroup = getNextDay(previousGroupDate);
                         }
                     } catch (error) {
-                        console.log("ScrollView - StartDateTime Error:", error);
-                        console.log("destinations[routeGroupIndex]:", destinations[routeGroupIndex]);
-                        console.log("destinations:", destinations);
-                        dateForThisGroup = new Date(); // TODO: Fix this bug
+                        console.log("Error in calculating group date:", error);
+                        dateForThisGroup = new Date(); // Fallback to current date
                     }
+
                     console.log('Date for this group:', dateForThisGroup);
                     const isSelected = selectedDayIndex === routeGroupIndex;
 
                     return (
                         <View key={destinationGroupKey}>
-                            {/* Date Header - Clickable */}
+                            {/* Date Header */}
                             <TouchableOpacity
                                 onPress={() => handlePressDate(routeGroupIndex)}
                                 style={[styles.dateHeader, isSelected && styles.selectedDateHeader]}
@@ -693,10 +712,13 @@ const GenerateItineraryScreen = () => {
                             </TouchableOpacity>
 
                             {/* Loop through each destination in the current routeGroup */}
-                            {routeGroup.map((destinationArray, destinationIndex) => {
+                            {routeGroup.map((destination: { alias: any; address: any; duration: any; priority: any; picture: { url: string; }; }, destinationIndex: any) => {
                                 const destinationKey = `${destinationGroupKey}-${destinationIndex}`;
-                                const destinationName = destinationArray[0]; // Name of the destination (first item in the array)
-                                console.log("DestArray:", destinationArray);
+                                const destinationName = destination.alias; // Alias as the destination name
+                                const destinationAddress = destination.address; // Address of the destination
+                                const destinationDuration = destination.duration;
+                                const destinationPriority = destination.priority;
+                                const destinationImageUri = destination.picture?.url || ''; // Image URL (from picture property)
 
                                 return (
                                     <TouchableOpacity key={destinationKey} style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
@@ -706,11 +728,11 @@ const GenerateItineraryScreen = () => {
                                         </View>
 
                                         <View style={styles.destinationContainer}>
-                                            <Image source={{ uri: destinationArray[1] }} style={styles.destinationImage} /> {/* destinationArray[1] is the address */}
+                                            <Image source={{ uri: destinationImageUri }} style={styles.destinationImage} />
                                             <View style={styles.destinationLabel}>
-                                                <Text style={styles.destinationName}>{destinationName}</Text> {/* Display destination name */}
+                                                <Text style={styles.destinationName}>{destinationName}</Text>
                                                 <Text style={styles.destinationDetails}>
-                                                    Duration: {Math.floor(destinationArray[2] / 60)} hrs {destinationArray[2] % 60} mins | Priority: {destinationArray[3]}
+                                                    Duration: {Math.floor(destinationDuration / 60)} hrs {destinationDuration % 60} mins | Priority: {destinationPriority}
                                                 </Text>
                                             </View>
                                         </View>
@@ -728,6 +750,7 @@ const GenerateItineraryScreen = () => {
                     );
                 })}
             </ScrollView>
+        </SafeAreaView>
 
             {/* "Review Itinerary" button */}
             <TouchableOpacity
