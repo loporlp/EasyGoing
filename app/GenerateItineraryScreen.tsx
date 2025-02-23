@@ -1,5 +1,5 @@
 // GenerateItineraryScreen.tsx
-import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image, SafeAreaView, Alert } from "react-native";
+import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image, SafeAreaView, Alert, Button, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import MapMarker from '../components/MapMarker';
 import RouteMap from '../components/RouteMap';
@@ -64,6 +64,7 @@ const GenerateItineraryScreen = () => {
     const [grouped2DDestinations, setGrouped2DDestinations] = useState<Place[][]>([]);
     const [optimalRoute, setOptimalRoute] = useState<any[][]>([]);
     const [resultRoute, setResultRoute] = useState<any[][]>([]);
+    const [frontendOptimalRoute, setFrontendOptimalRoute] = useState<any[][]>([]);
     const [transportationModes, setTransportationModes] = useState<string[]>([]);
 
     const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
@@ -232,13 +233,19 @@ const GenerateItineraryScreen = () => {
                 // It's just the trip ID
                 const tripToStore = await getData(currentTripID.toString());
                 console.log("tripToStore Upon Load", tripToStore);
-                tripToStore.destinations = orderedDestinations;
-                console.log("tripToStore After Replacing Destinations:", tripToStore);
-                const succeededToSave = await updateTrip(currentTripID, tripToStore);
-                if (succeededToSave) {
-                    console.log("GI: Managed to save trip to the database");
-                } else {
-                    console.log("GI: FAILED to save trip to the database");
+                if (Object.keys(orderedDestinations).length != 0) {
+                    tripToStore.destinations = orderedDestinations;
+                    console.log("tripToStore After Replacing Destinations:", tripToStore);
+                    const succeededToSave = await updateTrip(currentTripID, tripToStore);
+                    if (succeededToSave) {
+                        console.log("GI: Managed to save trip to the database");
+                    } else {
+                        console.log("GI: FAILED to save trip to the database");
+                    }
+                    // Update for the ScrollList
+                    setResultRoute(orderedDestinations);
+                    setFrontendOptimalRoute(optimalRoute);
+                    setIsLoading(false);
                 }
             }
         } catch (error) {
@@ -491,9 +498,6 @@ const GenerateItineraryScreen = () => {
         //console.log("upDests:", updatedDests);
         saveOrderedDestinations(updatedDests);
 
-        // Update for the ScrollList
-        setResultRoute(optimalRoute);
-
     }, [toSaveData]);    
 
     const handlePress = (destination: string) => {
@@ -631,63 +635,92 @@ const GenerateItineraryScreen = () => {
     
 
     return (
-        <View style={styles.container}>            
-            <SafeAreaView style={{ flex: 1 }}>
-                {resultRoute.length > 0 && (
-                    <MultiRoutesMap
-                        locations={resultRoute}
-                        transportationModes={transportationModes}
-                        polylines={polylinesData}
-                        transportDurations={transportDurations}
-                        markers={markers}
-                        bounds={bounds}
-                        onPolylinesReady={() => setIsLoading(false)}
-                    />
-                )}
-            </SafeAreaView>
+        <View style={styles.container}>    
+            {isLoading ? (
+                    // Show loading spinner while data is being fetched
+                    <ActivityIndicator size="large" color="#0000ff" style={styles.loading} />
+                ) : (
+                    // Once loading is done, show the content
+                    <View></View>
+            )}
+
+        <SafeAreaView style={{ flex: 1 }}>
+            {frontendOptimalRoute.length > 0 && (
+                <MultiRoutesMap
+                    locations={frontendOptimalRoute}
+                    transportationModes={transportationModes}
+                    polylines={polylinesData}
+                    transportDurations={transportDurations}
+                    markers={markers}
+                    bounds={bounds}
+                />
+            )}
 
             <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
-                {resultRoute.map((routeGroup, routeGroupIndex) => {
+                {resultRoute.reduce((acc, destination) => {
+                    // If it's a new day (dayOrigin is true), start a new group
+                    if (destination.dayOrigin) {
+                        // If the last group is not empty, push it to the accumulator and start a new group
+                        if (acc.length > 0 && acc[acc.length - 1].length > 0) {
+                            acc.push([]); // Start a new group
+                        }
+                    }
+
+                    // Add the destination to the current group
+                    if (acc.length === 0 || acc[acc.length - 1].length === 0) {
+                        acc.push([destination]); // Start with the first destination of the group
+                    } else {
+                        acc[acc.length - 1].push(destination); // Add destination to the current group
+                    }
+
+                    return acc;
+                }, []).map((routeGroup, routeGroupIndex) => {
                     const destinationGroupKey = `group-${routeGroupIndex}`;
                     let dateForThisGroup;
+
+                    // Calculate the date for the group (same logic as before)
                     try {
                         if (routeGroupIndex === 0) {
-                            dateForThisGroup = new Date(destinations[routeGroupIndex].startDateTime);
+                            dateForThisGroup = new Date(routeGroup[0].startDateTime);
                         } else {
-                            const previousGroupDate = new Date(destinations[routeGroupIndex - 1].startDateTime);
+                            const previousGroupDate = new Date(resultRoute[routeGroupIndex - 1].startDateTime);
                             dateForThisGroup = getNextDay(previousGroupDate);
                         }
                     } catch (error) {
-                        console.log("ScrollView - StartDateTime Error:", error);
-                        console.log("destinations[routeGroupIndex]:", destinations[routeGroupIndex]);
-                        console.log("destinations:", destinations);
-                        dateForThisGroup = new Date(); // TODO: Fix this bug
+                        console.log("Error in calculating group date:", error);
+                        dateForThisGroup = new Date(); // Fallback to current date
                     }
+
                     console.log('Date for this group:', dateForThisGroup);
                     const isSelected = selectedDayIndex === routeGroupIndex;
 
                     return (
                         <View key={destinationGroupKey}>
-                            {/* Date Header - Clickable */}
-                            <TouchableOpacity
-                                onPress={() => handlePressDate(routeGroupIndex)}
-                                style={[styles.dateHeader, isSelected && styles.selectedDateHeader]}
-                            >
-                                <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>
-                                    {formatDate(dateForThisGroup)}
-                                </Text>
-                                <Ionicons
-                                    name={isSelected ? "chevron-up" : "chevron-down"}
-                                    size={18}
-                                    color="#000"
-                                />
-                            </TouchableOpacity>
+                            {/* Date Header */}
+                            {routeGroup.length > 0 && (routeGroupIndex === 0 || routeGroup[0].dayOrigin) ? (
+                                <TouchableOpacity
+                                    onPress={() => handlePressDate(routeGroupIndex)}
+                                    style={[styles.dateHeader, isSelected && styles.selectedDateHeader]}
+                                >
+                                    <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>
+                                        {formatDate(dateForThisGroup)}
+                                    </Text>
+                                    <Ionicons
+                                        name={isSelected ? "chevron-up" : "chevron-down"}
+                                        size={18}
+                                        color="#000"
+                                    />
+                                </TouchableOpacity>
+                            ) : null}
 
                             {/* Loop through each destination in the current routeGroup */}
-                            {routeGroup.map((destinationArray, destinationIndex) => {
+                            {routeGroup.map((destination, destinationIndex) => {
                                 const destinationKey = `${destinationGroupKey}-${destinationIndex}`;
-                                const destinationName = destinationArray[0]; // Name of the destination (first item in the array)
-                                console.log("DestArray:", destinationArray);
+                                const destinationName = destination.alias; // Alias as the destination name
+                                const destinationAddress = destination.address; // Address of the destination
+                                const destinationDuration = destination.duration;
+                                const destinationPriority = destination.priority;
+                                const destinationImageUri = destination.picture?.url || ''; // Image URL (from picture property)
 
                                 return (
                                     <TouchableOpacity key={destinationKey} style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
@@ -697,11 +730,11 @@ const GenerateItineraryScreen = () => {
                                         </View>
 
                                         <View style={styles.destinationContainer}>
-                                            <Image source={{ uri: destinationArray[1] }} style={styles.destinationImage} /> {/* destinationArray[1] is the address */}
+                                            <Image source={{ uri: destinationImageUri }} style={styles.destinationImage} />
                                             <View style={styles.destinationLabel}>
-                                                <Text style={styles.destinationName}>{destinationName}</Text> {/* Display destination name */}
+                                                <Text style={styles.destinationName}>{destinationName}</Text>
                                                 <Text style={styles.destinationDetails}>
-                                                    Duration: {Math.floor(destinationArray[2] / 60)} hrs {destinationArray[2] % 60} mins | Priority: {destinationArray[3]}
+                                                    Duration: {Math.floor(destinationDuration / 60)} hrs {destinationDuration % 60} mins | Priority: {destinationPriority}
                                                 </Text>
                                             </View>
                                         </View>
@@ -719,6 +752,7 @@ const GenerateItineraryScreen = () => {
                     );
                 })}
             </ScrollView>
+        </SafeAreaView>
 
             {/* "Review Itinerary" button */}
             <TouchableOpacity
@@ -901,6 +935,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         width: '100%',
+    },
+    loading: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff',
     },
 });
 
