@@ -325,7 +325,7 @@ const GenerateItineraryScreen = () => {
             // This script will be specifically for the ScrollView
 
             // Create a map of ordered locations for quick lookup
-            const updatedDurations = processGroupedDestinations(orderedLocations, groupedDestinations, destinations, fetchedDurations, setGroupedDestinations);
+            const updatedDurations = processGroupedDestinations(orderedLocations, groupedDestinations, Object.values(destinations), fetchedDurations, setGroupedDestinations);
             console.log("GI - Updated Durations (Map)", updatedDurations);
 
             // Get number of days
@@ -418,7 +418,7 @@ const GenerateItineraryScreen = () => {
             // START: STORES THE ROUTES TO THE GROUPED ORDERS
 
             // Helper function to find the object corresponding to the destination
-            const getPolylineObject = (destination) => {
+            const getPolylineObject = (destination: { alias: string; address: string; priority: number; mode: string; transportToNext: string; transportDuration: number; startDateTime: Date; duration: number; notes: string; dayOrigin: boolean; cost: number; picture: string; }) => {
                 //console.log("Dest Destination:", destination);
 
                 const polyline = fetchedPolylines.find(polyline => {
@@ -595,7 +595,7 @@ const GenerateItineraryScreen = () => {
                     const destination = formattedDestinations[key];
     
                     // Check if the substring before ',' in the 'id' matches the destination name
-                    const routeNames = destination.id.split('$').map(route => route.split(',')[0].trim());
+                    const routeNames = destination.id.split('$').map((route: string) => route.split(',')[0].trim());
                     if (routeNames.includes(destinationName)) {
                         matched = true;
                         console.log(`Matched destination: ${destinationName} with id: ${destination.id}`);
@@ -678,7 +678,7 @@ const GenerateItineraryScreen = () => {
                     const destinationGroupKey = `group-${routeGroupIndex}`;
                     let dateForThisGroup;
 
-                    // Calculate the date for the group (same logic as before)
+                    // Calculate the date for the group 
                     try {
                         if (routeGroupIndex === 0) {
                             dateForThisGroup = new Date(routeGroup[0].startDateTime);
@@ -714,13 +714,13 @@ const GenerateItineraryScreen = () => {
                             ) : null}
 
                             {/* Loop through each destination in the current routeGroup */}
-                            {routeGroup.map((destination, destinationIndex) => {
+                            {routeGroup.map((destination: { alias: any; address: any; duration: any; priority: any; picture: { url: string; }; }, destinationIndex: any) => {
                                 const destinationKey = `${destinationGroupKey}-${destinationIndex}`;
-                                const destinationName = destination.alias; // Alias as the destination name
-                                const destinationAddress = destination.address; // Address of the destination
+                                const destinationName = destination.alias;
+                                const destinationAddress = destination.address;
                                 const destinationDuration = destination.duration;
                                 const destinationPriority = destination.priority;
-                                const destinationImageUri = destination.picture?.url || ''; // Image URL (from picture property)
+                                const destinationImageUri = destination.picture?.url || '';
 
                                 return (
                                     <TouchableOpacity key={destinationKey} style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
