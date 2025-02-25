@@ -26,6 +26,8 @@ const GenerateItineraryScreen = () => {
     const router = useRouter();
     const navigation = useNavigation();
 
+    const defaultMode : string = "DRIVING";
+
     // Tracks if map is loading
     const [isLoading, setIsLoading] = useState(true);  
 
@@ -99,7 +101,7 @@ const GenerateItineraryScreen = () => {
         if (Object.keys(destinations).length > 1) {
             // Get transportation modes for all but the last destination
             const modes = Object.values(destinations)
-                .map(destination => destination.mode || 'DRIVING'); // Default to 'DRIVING' if mode is missing
+                .map(destination => destination.mode || defaultMode);
 
             setTransportationModes(modes);
             console.log("Transport Modes", transportationModes);
@@ -137,6 +139,11 @@ const GenerateItineraryScreen = () => {
 
                 setStartDate(trip.tripStartDate);
                 setEndDate(trip.tripEndDate);
+
+                // Set the initial transportation modes
+                const destinationsCount = trip.destinations.length;
+                const initialTransportationModes: string[] = new Array(destinationsCount).fill("Driving");
+                setTransportationModes(initialTransportationModes);
     
                 // Iterate over destinations and format them
                 trip.destinations.forEach((destination: { picture: string; alias: any; address: any; priority: any; mode: any; transportToNext: any; transportDuration: any; startDateTime: any; duration: string; notes: any; dayOrigin: any; cost: any; }, index: { toString: () => string | number; }) => {
@@ -144,7 +151,7 @@ const GenerateItineraryScreen = () => {
                         alias: destination.alias,
                         address: destination.address,
                         priority: destination.priority,
-                        mode: destination.mode || 'DRIVING', // default mode is DRIVING
+                        mode: destination.mode || defaultMode,
                         transportToNext: destination.transportToNext ? JSON.stringify(destination.transportToNext) : "", // serialized route
                         transportDuration: destination.transportDuration,
                         startDateTime: destination.startDateTime,
@@ -482,7 +489,8 @@ const GenerateItineraryScreen = () => {
             console.log("orderedLocations:", orderedLocations);
             // TODO: Set optimalRoute to the orderedLocations (in optimalRoute's format)
             const newDests = reorderDestinations(orderedLocations);
-            const updatedDests = updateDestinationsWithTransport(newDests, updatedGroupedDestinations);
+            console.log("transportationModes: ", transportationModes);
+            const updatedDests = updateDestinationsWithTransport(newDests, updatedGroupedDestinations, transportationModes);
             console.log("Updated Dests (final):", updatedDests);
             setToSaveData(updatedDests);
         }
@@ -508,16 +516,24 @@ const GenerateItineraryScreen = () => {
     };
 
     const handleModeChange = (selectedMode: string, destinationIndex: number) => {
-        // Create a copy of the current transportationText array
-        const updatedTransportationText = [...transportationText];
+        console.log("What happens to transportationModes:", transportationModes);
+
+        // Check if the selected mode is the same as the current mode at the destinationIndex
+        if (transportationModes[destinationIndex] === selectedMode) {
+            console.log("Mode is the same, no update needed.");
+            return;
+        }
     
-        // Update the transportation mode at the specific index
-        updatedTransportationText[destinationIndex] = selectedMode;
+        const updatedTransportationModes = [...transportationModes];
+        updatedTransportationModes[destinationIndex] = selectedMode;
     
-        // Update the state with the new array
-        setTransportationModes(updatedTransportationText);
+        // Update the state with the new array for transportation modes
+        setTransportationModes(updatedTransportationModes);
         setTransportationText(selectedMode);
+    
+        console.log("What happens to transportationModes 2:", updatedTransportationModes);
     };
+    
     
     
 
@@ -566,7 +582,7 @@ const GenerateItineraryScreen = () => {
             setPolylinesData(allRoutesData);
 
             // Reset transportation modes for all routes (or set defaults)
-            const allModes = allRoutesData.map(route => route.mode || 'DRIVING');
+            const allModes = allRoutesData.map(route => route.mode || defaultMode);
             setTransportationModes(allModes);
 
             // Reset the selected day index to null
@@ -639,7 +655,7 @@ const GenerateItineraryScreen = () => {
         }
     
         // Update the transportation modes for this day
-        const modesForThisDay = selectedDestinations.map(destination => destination.mode || 'DRIVING');
+        const modesForThisDay = selectedDestinations.map(destination => destination.mode || defaultMode);
         console.log("Modes for this day:", modesForThisDay);
     
         // Update transportation modes state
@@ -734,7 +750,7 @@ const GenerateItineraryScreen = () => {
                                 const destinationDuration = destination.duration;
                                 const destinationPriority = destination.priority;
                                 const destinationImageUri = destination.picture?.url || '';
-                                const destinationTransportMode = destination.mode || 'DRIVING';
+                                const destinationTransportMode = destination.mode || defaultMode;
                                 const destinationTransportDuration = destination.transportDuration;
 
                                 return (
@@ -772,11 +788,11 @@ const GenerateItineraryScreen = () => {
                                                 {/* Dropdown for picking transport mode */}
                                                 <Picker
                                                     selectedValue={destinationTransportMode}
-                                                    onValueChange={(itemValue: string) => handleModeChange(itemValue, destinationIndex)}
+                                                    onValueChange={(mode: string) => handleModeChange(mode, destinationIndex)}
                                                 >
                                                     <Picker.Item label="Driving" value="driving" />
                                                     <Picker.Item label="Walking" value="walking" />
-                                                    <Picker.Item label="Biking" value="biking" />
+                                                    <Picker.Item label="Bicycling" value="bicycling" />
                                                     <Picker.Item label="Transit" value="transit" />
                                                 </Picker>
                                                 

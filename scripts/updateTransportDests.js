@@ -4,7 +4,7 @@ const flattenGroupedObjects = (groupedObjects) => {
 };
 
 // Function to update destinations with transport info
-export const updateDestinationsWithTransport = (newDest, updatedGroupedDestinations) => {
+export const updateDestinationsWithTransport = (newDest, updatedGroupedDestinations, transportationModes) => {
     // Flatten the grouped destinations into a 1D array
     const flattenedDestinations = flattenGroupedObjects(updatedGroupedDestinations);
     //console.log("Flattened destinations:", flattenedDestinations);
@@ -41,6 +41,13 @@ export const updateDestinationsWithTransport = (newDest, updatedGroupedDestinati
                 //console.log(`Last destination. Setting transportToNext to null and transportDuration to 'No travel duration'`);
                 destination.transportToNext = null;
                 destination.transportDuration = "No travel duration";
+            }
+
+            // Add the tranportation modes
+            if (transportationModes[i]) {
+                destination.mode = transportationModes[i];
+            } else {
+                console.log("Error: there should have been a default of DRIVING already.");
             }
         }
     }
