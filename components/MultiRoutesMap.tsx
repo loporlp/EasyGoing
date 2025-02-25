@@ -40,7 +40,7 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({
   
         // Loop through each polyline and calculate the min and max latitudes and longitudes
         polylines.forEach(polyline => {
-          polyline.coordinates.forEach(coord => {
+          polyline.coordinates.forEach((coord: { latitude: number; longitude: number; }) => {
             minLat = Math.min(minLat, coord.latitude);
             maxLat = Math.max(maxLat, coord.latitude);
             minLon = Math.min(minLon, coord.longitude);
@@ -116,11 +116,25 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({
               <Marker
                 coordinate={{ latitude: marker.origin.latitude, longitude: marker.origin.longitude }}
                 title={locations[index][0][0]} // Origin title
+                pinColor={
+                  transportationModes[index] === 'driving' ? 'red' :
+                  transportationModes[index] === 'walking' ? 'blue' :
+                  transportationModes[index] === 'transit' ? 'green' :
+                  transportationModes[index] === 'bicycling' ? 'yellow' :
+                  'gray'
+                }
                 zIndex={10}
               />
               <Marker
                 coordinate={{ latitude: marker.destination.latitude, longitude: marker.destination.longitude }}
                 title={locations[index][1][0]} // Destination title
+                pinColor={
+                  transportationModes[index] === 'driving' ? 'red' :
+                  transportationModes[index] === 'walking' ? 'blue' :
+                  transportationModes[index] === 'transit' ? 'green' :
+                  transportationModes[index] === 'bicycling' ? 'yellow' :
+                  'gray'
+                }
                 zIndex={10}
               />
             </React.Fragment>
@@ -171,24 +185,9 @@ const styles = StyleSheet.create({
     padding: 20,
     justifyContent: 'center',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  subTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: 10,
-  },
-  text: {
-    fontSize: 16,
-    marginTop: 5,
-  },
   map: {
     width: '100%',
-    height: '50%',
+    height: '100%',
     marginTop: 20,
   },
   loadingContainer: {

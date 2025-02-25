@@ -697,6 +697,8 @@ const GenerateItineraryScreen = () => {
                     bounds={bounds}
                 />
             )}
+        </SafeAreaView>
+        <SafeAreaView>
 
             <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
                 {resultRoute.reduce((acc, destination) => {
