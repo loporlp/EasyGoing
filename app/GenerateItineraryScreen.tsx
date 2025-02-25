@@ -1,5 +1,6 @@
 // GenerateItineraryScreen.tsx
 import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image, SafeAreaView, Alert, Button, ActivityIndicator } from "react-native";
+import { Picker } from '@react-native-picker/picker';
 import { useRouter } from "expo-router";
 import MapMarker from '../components/MapMarker';
 import RouteMap from '../components/RouteMap';
@@ -24,6 +25,8 @@ const { height } = Dimensions.get('window');
 const GenerateItineraryScreen = () => {
     const router = useRouter();
     const navigation = useNavigation();
+
+    const defaultMode : string = "DRIVING";
 
     // Tracks if map is loading
     const [isLoading, setIsLoading] = useState(true);  
@@ -98,7 +101,7 @@ const GenerateItineraryScreen = () => {
         if (Object.keys(destinations).length > 1) {
             // Get transportation modes for all but the last destination
             const modes = Object.values(destinations)
-                .map(destination => destination.mode || 'DRIVING'); // Default to 'DRIVING' if mode is missing
+                .map(destination => destination.mode || defaultMode);
 
             setTransportationModes(modes);
             console.log("Transport Modes", transportationModes);
@@ -136,6 +139,11 @@ const GenerateItineraryScreen = () => {
 
                 setStartDate(trip.tripStartDate);
                 setEndDate(trip.tripEndDate);
+
+                // Set the initial transportation modes
+                const destinationsCount = trip.destinations.length;
+                const initialTransportationModes: string[] = new Array(destinationsCount).fill("Driving");
+                setTransportationModes(initialTransportationModes);
     
                 // Iterate over destinations and format them
                 trip.destinations.forEach((destination: { picture: string; alias: any; address: any; priority: any; mode: any; transportToNext: any; transportDuration: any; startDateTime: any; duration: string; notes: any; dayOrigin: any; cost: any; }, index: { toString: () => string | number; }) => {
@@ -143,7 +151,7 @@ const GenerateItineraryScreen = () => {
                         alias: destination.alias,
                         address: destination.address,
                         priority: destination.priority,
-                        mode: destination.mode || 'DRIVING', // default mode is DRIVING
+                        mode: destination.mode || defaultMode,
                         transportToNext: destination.transportToNext ? JSON.stringify(destination.transportToNext) : "", // serialized route
                         transportDuration: destination.transportDuration,
                         startDateTime: destination.startDateTime,
@@ -303,6 +311,8 @@ const GenerateItineraryScreen = () => {
     4. Each group needs to be correlated to each day (probably index for the date header)
     5. When clicking on a date header, pass that group into MultiRouteMap
     5.1.MultiRouteMap now takes this route data and plots it rather than calling routePolyline itself
+
+    * Additionally, this calls when transportationModes is updated (such as the user picking a new way to tranport for a location)
     */
     useEffect(() => {
         // (2) Route Polylines
@@ -479,12 +489,13 @@ const GenerateItineraryScreen = () => {
             console.log("orderedLocations:", orderedLocations);
             // TODO: Set optimalRoute to the orderedLocations (in optimalRoute's format)
             const newDests = reorderDestinations(orderedLocations);
-            const updatedDests = updateDestinationsWithTransport(newDests, updatedGroupedDestinations);
+            console.log("transportationModes: ", transportationModes);
+            const updatedDests = updateDestinationsWithTransport(newDests, updatedGroupedDestinations, transportationModes);
             console.log("Updated Dests (final):", updatedDests);
             setToSaveData(updatedDests);
         }
         getDurationAndPolylines();
-    }, [optimalRoute]);
+    }, [optimalRoute, transportationModes]);
 
     const [selectedDestination, setSelectedDestination] = useState<string | null>(null);
     const [transportationText, setTransportationText] = useState("driving");
@@ -504,9 +515,27 @@ const GenerateItineraryScreen = () => {
         setSelectedDestination(prev => prev === destination ? null : destination);
     };
 
-    const handleModeChange = (text: string) => {
-        setTransportationText(text);
+    const handleModeChange = (selectedMode: string, destinationIndex: number) => {
+        console.log("What happens to transportationModes:", transportationModes);
+
+        // Check if the selected mode is the same as the current mode at the destinationIndex
+        if (transportationModes[destinationIndex] === selectedMode) {
+            console.log("Mode is the same, no update needed.");
+            return;
+        }
+    
+        const updatedTransportationModes = [...transportationModes];
+        updatedTransportationModes[destinationIndex] = selectedMode;
+    
+        // Update the state with the new array for transportation modes
+        setTransportationModes(updatedTransportationModes);
+        setTransportationText(selectedMode);
+    
+        console.log("What happens to transportationModes 2:", updatedTransportationModes);
     };
+    
+    
+    
 
     const getRouteText = () => {
         if (!selectedDestination) return "";
@@ -553,7 +582,7 @@ const GenerateItineraryScreen = () => {
             setPolylinesData(allRoutesData);
 
             // Reset transportation modes for all routes (or set defaults)
-            const allModes = allRoutesData.map(route => route.mode || 'DRIVING');
+            const allModes = allRoutesData.map(route => route.mode || defaultMode);
             setTransportationModes(allModes);
 
             // Reset the selected day index to null
@@ -626,7 +655,7 @@ const GenerateItineraryScreen = () => {
         }
     
         // Update the transportation modes for this day
-        const modesForThisDay = selectedDestinations.map(destination => destination.mode || 'DRIVING');
+        const modesForThisDay = selectedDestinations.map(destination => destination.mode || defaultMode);
         console.log("Modes for this day:", modesForThisDay);
     
         // Update transportation modes state
@@ -714,40 +743,73 @@ const GenerateItineraryScreen = () => {
                             ) : null}
 
                             {/* Loop through each destination in the current routeGroup */}
-                            {routeGroup.map((destination: { alias: any; address: any; duration: any; priority: any; picture: { url: string; }; }, destinationIndex: any) => {
-                                const destinationKey = `${destinationGroupKey}-${destinationIndex}`;
+                            {routeGroup.map((destination: { alias: any; address: any; duration: any; priority: any; picture: { url: string; }; mode: any, transportDuration: any; }, destinationIndex: any) => {
+                                const destinationKey = `${destinationGroupKey}-${destinationIndex}`;  // Unique key for each destination
                                 const destinationName = destination.alias;
                                 const destinationAddress = destination.address;
                                 const destinationDuration = destination.duration;
                                 const destinationPriority = destination.priority;
                                 const destinationImageUri = destination.picture?.url || '';
+                                const destinationTransportMode = destination.mode || defaultMode;
+                                const destinationTransportDuration = destination.transportDuration;
+
+                                // Determine if it's the last destination in the current routeGroup
+                                const isLastDestination = destinationIndex === routeGroup.length - 1;
 
                                 return (
-                                    <TouchableOpacity key={destinationKey} style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
-                                        {/* Background with opacity */}
-                                        <View style={styles.backgroundContainer}>
-                                            <View style={styles.backgroundOverlay}></View>
-                                        </View>
+                                    <View key={destinationKey}>
+                                        <TouchableOpacity 
+                                            style={styles.destinationElement} 
+                                            onPress={() => handlePress(destinationKey)}  // Update selectedDestination on click
+                                        >
+                                            <View style={styles.backgroundContainer}>
+                                                <View style={styles.backgroundOverlay}></View>
+                                            </View>
 
-                                        <View style={styles.destinationContainer}>
-                                            <Image source={{ uri: destinationImageUri }} style={styles.destinationImage} />
-                                            <View style={styles.destinationLabel}>
-                                                <Text style={styles.destinationName}>{destinationName}</Text>
-                                                <Text style={styles.destinationDetails}>
-                                                    Duration: {Math.floor(destinationDuration / 60)} hrs {destinationDuration % 60} mins | Priority: {destinationPriority}
+                                            <View style={styles.destinationContainer}>
+                                                <Image source={{ uri: destinationImageUri }} style={styles.destinationImage} />
+                                                <View style={styles.destinationLabel}>
+                                                    <Text style={styles.destinationName}>{destinationName}</Text>
+                                                    <Text style={styles.destinationDetails}>
+                                                        Duration: {Math.floor(destinationDuration / 60)} hrs {destinationDuration % 60} mins | Priority: {destinationPriority}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                        </TouchableOpacity>
+
+                                        {/* Conditional rendering of additional info */}
+                                        {selectedDestination === destinationKey && (
+                                            <View style={styles.additionalInfo}>
+                                                {/*<Text style={styles.additionalText}>{getRouteText()}</Text>*/}
+                                                {/* TODO: Need to get directions (no direct way to get from here yet) */}
+                                                
+                                                {/* Show transport mode */}
+                                                <Text style={styles.additionalText}>
+                                                    Transport Mode: {isLastDestination ? "None" : destinationTransportMode.charAt(0).toUpperCase() + destinationTransportMode.slice(1).toLowerCase()}
+                                                </Text>
+
+                                                {/* Dropdown for picking transport mode */}
+                                                {!isLastDestination && (
+                                                    <Picker
+                                                        selectedValue={destinationTransportMode}
+                                                        onValueChange={(mode: string) => handleModeChange(mode, destinationIndex)}
+                                                    >
+                                                        <Picker.Item label="Driving" value="driving" />
+                                                        <Picker.Item label="Walking" value="walking" />
+                                                        <Picker.Item label="Bicycling" value="bicycling" />
+                                                        <Picker.Item label="Transit" value="transit" />
+                                                    </Picker>
+                                                )}
+                                                
+                                                {/* Show transport duration */}
+                                                <Text style={styles.additionalText}>
+                                                    Duration: {isLastDestination ? "None" : destinationTransportDuration}
                                                 </Text>
                                             </View>
-                                        </View>
-                                    </TouchableOpacity>
+                                        )}
+                                    </View>
                                 );
                             })}
-
-                            {/* Conditional rendering of additional info */}
-                            {selectedDestination === destinationGroupKey && (
-                                <View style={styles.additionalInfo}>
-                                    <Text style={styles.additionalText}>{getRouteText()}</Text>
-                                </View>
-                            )}
                         </View>
                     );
                 })}
