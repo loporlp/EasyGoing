@@ -32,35 +32,52 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({
 
   useEffect(() => {
     const updateRegion = () => {
-      if (bounds.minLat !== Infinity && bounds.maxLat !== -Infinity && bounds.minLon !== Infinity && bounds.maxLon !== -Infinity) {
-        const padding = 0.05; // Adjust padding to give some space around the routes
+      if (polylines.length > 0) {
+        let minLat = Infinity;
+        let maxLat = -Infinity;
+        let minLon = Infinity;
+        let maxLon = -Infinity;
+  
+        // Loop through each polyline and calculate the min and max latitudes and longitudes
+        polylines.forEach(polyline => {
+          polyline.coordinates.forEach(coord => {
+            minLat = Math.min(minLat, coord.latitude);
+            maxLat = Math.max(maxLat, coord.latitude);
+            minLon = Math.min(minLon, coord.longitude);
+            maxLon = Math.max(maxLon, coord.longitude);
+          });
+        });
+  
+        // Add some padding around the bounds
+        const padding = 0.05;
+  
         const newRegion = {
-          latitude: (bounds.minLat + bounds.maxLat) / 2,
-          longitude: (bounds.minLon + bounds.maxLon) / 2,
-          latitudeDelta: bounds.maxLat - bounds.minLat + padding,
-          longitudeDelta: bounds.maxLon - bounds.minLon + padding,
+          latitude: (minLat + maxLat) / 2,
+          longitude: (minLon + maxLon) / 2,
+          latitudeDelta: maxLat - minLat + padding,
+          longitudeDelta: maxLon - minLon + padding,
         };
-
+  
         setMapRegion(newRegion);
-
+  
         // Smoothly transition to the new region
         if (mapRef.current && newRegion) {
           mapRef.current.animateToRegion(newRegion, 1000);
         }
       }
     };
-
+  
     if (isFocused) {
       setMapKey(Date.now()); // Update key when screen is focused
-
+  
       // Call the onPolylinesReady if provided
       if (onPolylinesReady) {
         onPolylinesReady(polylines);
       }
-
+  
       updateRegion();
     }
-
+  
     // When all data has loaded, stop loading
     if (polylines.length > 0 && markers.length > 0 && transportDurations.length > 0 && bounds) {
       setIsLoading(false);
