@@ -753,6 +753,9 @@ const GenerateItineraryScreen = () => {
                                 const destinationTransportMode = destination.mode || defaultMode;
                                 const destinationTransportDuration = destination.transportDuration;
 
+                                // Determine if it's the last destination in the current routeGroup
+                                const isLastDestination = destinationIndex === routeGroup.length - 1;
+
                                 return (
                                     <View key={destinationKey}>
                                         <TouchableOpacity 
@@ -782,23 +785,25 @@ const GenerateItineraryScreen = () => {
                                                 
                                                 {/* Show transport mode */}
                                                 <Text style={styles.additionalText}>
-                                                    Transport Mode: {destinationTransportMode.charAt(0).toUpperCase() + destinationTransportMode.slice(1).toLowerCase()}
+                                                    Transport Mode: {isLastDestination ? "None" : destinationTransportMode.charAt(0).toUpperCase() + destinationTransportMode.slice(1).toLowerCase()}
                                                 </Text>
 
                                                 {/* Dropdown for picking transport mode */}
-                                                <Picker
-                                                    selectedValue={destinationTransportMode}
-                                                    onValueChange={(mode: string) => handleModeChange(mode, destinationIndex)}
-                                                >
-                                                    <Picker.Item label="Driving" value="driving" />
-                                                    <Picker.Item label="Walking" value="walking" />
-                                                    <Picker.Item label="Bicycling" value="bicycling" />
-                                                    <Picker.Item label="Transit" value="transit" />
-                                                </Picker>
+                                                {!isLastDestination && (
+                                                    <Picker
+                                                        selectedValue={destinationTransportMode}
+                                                        onValueChange={(mode: string) => handleModeChange(mode, destinationIndex)}
+                                                    >
+                                                        <Picker.Item label="Driving" value="driving" />
+                                                        <Picker.Item label="Walking" value="walking" />
+                                                        <Picker.Item label="Bicycling" value="bicycling" />
+                                                        <Picker.Item label="Transit" value="transit" />
+                                                    </Picker>
+                                                )}
                                                 
                                                 {/* Show transport duration */}
                                                 <Text style={styles.additionalText}>
-                                                    Duration: {destinationTransportDuration}
+                                                    Duration: {isLastDestination ? "None" : destinationTransportDuration}
                                                 </Text>
                                             </View>
                                         )}
