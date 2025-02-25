@@ -715,7 +715,7 @@ const GenerateItineraryScreen = () => {
 
                             {/* Loop through each destination in the current routeGroup */}
                             {routeGroup.map((destination: { alias: any; address: any; duration: any; priority: any; picture: { url: string; }; }, destinationIndex: any) => {
-                                const destinationKey = `${destinationGroupKey}-${destinationIndex}`;
+                                const destinationKey = `${destinationGroupKey}-${destinationIndex}`;  // Unique key for each destination
                                 const destinationName = destination.alias;
                                 const destinationAddress = destination.address;
                                 const destinationDuration = destination.duration;
@@ -723,31 +723,35 @@ const GenerateItineraryScreen = () => {
                                 const destinationImageUri = destination.picture?.url || '';
 
                                 return (
-                                    <TouchableOpacity key={destinationKey} style={styles.destinationElement} onPress={() => handlePress(destinationKey)}>
-                                        {/* Background with opacity */}
-                                        <View style={styles.backgroundContainer}>
-                                            <View style={styles.backgroundOverlay}></View>
-                                        </View>
-
-                                        <View style={styles.destinationContainer}>
-                                            <Image source={{ uri: destinationImageUri }} style={styles.destinationImage} />
-                                            <View style={styles.destinationLabel}>
-                                                <Text style={styles.destinationName}>{destinationName}</Text>
-                                                <Text style={styles.destinationDetails}>
-                                                    Duration: {Math.floor(destinationDuration / 60)} hrs {destinationDuration % 60} mins | Priority: {destinationPriority}
-                                                </Text>
+                                    <View key={destinationKey}>
+                                        <TouchableOpacity 
+                                            style={styles.destinationElement} 
+                                            onPress={() => handlePress(destinationKey)}  // Update selectedDestination on click
+                                        >
+                                            <View style={styles.backgroundContainer}>
+                                                <View style={styles.backgroundOverlay}></View>
                                             </View>
-                                        </View>
-                                    </TouchableOpacity>
+
+                                            <View style={styles.destinationContainer}>
+                                                <Image source={{ uri: destinationImageUri }} style={styles.destinationImage} />
+                                                <View style={styles.destinationLabel}>
+                                                    <Text style={styles.destinationName}>{destinationName}</Text>
+                                                    <Text style={styles.destinationDetails}>
+                                                        Duration: {Math.floor(destinationDuration / 60)} hrs {destinationDuration % 60} mins | Priority: {destinationPriority}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                        </TouchableOpacity>
+
+                                        {/* Conditional rendering of additional info */}
+                                        {selectedDestination === destinationKey && (
+                                            <View style={styles.additionalInfo}>
+                                                <Text style={styles.additionalText}>{getRouteText()}</Text>
+                                            </View>
+                                        )}
+                                    </View>
                                 );
                             })}
-
-                            {/* Conditional rendering of additional info */}
-                            {selectedDestination === destinationGroupKey && (
-                                <View style={styles.additionalInfo}>
-                                    <Text style={styles.additionalText}>{getRouteText()}</Text>
-                                </View>
-                            )}
                         </View>
                     );
                 })}
