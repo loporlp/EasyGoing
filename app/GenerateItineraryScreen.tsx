@@ -54,6 +54,14 @@ const GenerateItineraryScreen = () => {
         picture: string;
     };
 
+    type PolylinePlace = Place & {
+        duration: any;
+        coordinates: any;
+        id: string;
+        strokeColor: string;
+        strokeWidth: number;
+    }
+
 
     const [origin, setOrigin] = useState<{ name: string; address: string; duration: number; priority: number}>();
     const [startDate, setStartDate] = useState<Date>();
@@ -507,7 +515,7 @@ const GenerateItineraryScreen = () => {
         // SAVING
         const updatedDests = updateDayOrigin(toSaveData, grouped2DDestinations);
         //console.log("newDests:", newDests);
-        //console.log("upDests:", updatedDests);
+        console.log("upDests:", updatedDests);
         saveOrderedDestinations(updatedDests);
 
     }, [toSaveData]);    
@@ -629,11 +637,11 @@ const GenerateItineraryScreen = () => {
             // Loop through the formattedDestinations
             for (const key in formattedDestinations) {
                 if (formattedDestinations.hasOwnProperty(key)) {
-                    const destination = formattedDestinations[key];
+                    const destination: PolylinePlace = formattedDestinations[key] as PolylinePlace;
     
                     // Check if the substring before ',' in the 'id' matches the destination name
                     const routeNames = destination.id.split('$').map((route: string) => route.split(',')[0].trim());
-                    if (routeNames.includes(destinationName)) {
+                    if (typeof destinationName === 'string' && routeNames.includes(destinationName)) {
                         matched = true;
                         console.log(`Matched destination: ${destinationName} with id: ${destination.id}`);
     
