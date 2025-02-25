@@ -656,6 +656,9 @@ const GenerateItineraryScreen = () => {
     
         // After processing all destinations, update the polyline data
         if (matchedPolylinesData.length > 0) {
+            // Remove last one since that shows route to next day (not necessary right now)
+            matchedPolylinesData.pop();
+
             console.log("Updating global polylines data:", matchedPolylinesData);
             setPolylinesData(matchedPolylinesData);  // Update the global polyline data
         } else {
