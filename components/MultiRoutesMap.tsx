@@ -124,7 +124,7 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({
             >
               <View style={styles.routeInfoContainer}>
                 <Text style={styles.routeText}>
-                  {`${route.mode}: ${route.duration}`}
+                  {`${route.mode.charAt(0).toUpperCase() + route.mode.slice(1)}: ${route.duration}`}
                 </Text>
               </View>
             </Marker>
