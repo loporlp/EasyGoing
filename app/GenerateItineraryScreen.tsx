@@ -1,5 +1,6 @@
 // GenerateItineraryScreen.tsx
 import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image, SafeAreaView, Alert, Button, ActivityIndicator } from "react-native";
+import { Picker } from '@react-native-picker/picker';
 import { useRouter } from "expo-router";
 import MapMarker from '../components/MapMarker';
 import RouteMap from '../components/RouteMap';
@@ -303,6 +304,8 @@ const GenerateItineraryScreen = () => {
     4. Each group needs to be correlated to each day (probably index for the date header)
     5. When clicking on a date header, pass that group into MultiRouteMap
     5.1.MultiRouteMap now takes this route data and plots it rather than calling routePolyline itself
+
+    * Additionally, this calls when transportationModes is updated (such as the user picking a new way to tranport for a location)
     */
     useEffect(() => {
         // (2) Route Polylines
@@ -484,7 +487,7 @@ const GenerateItineraryScreen = () => {
             setToSaveData(updatedDests);
         }
         getDurationAndPolylines();
-    }, [optimalRoute]);
+    }, [optimalRoute, transportationModes]);
 
     const [selectedDestination, setSelectedDestination] = useState<string | null>(null);
     const [transportationText, setTransportationText] = useState("driving");
@@ -504,9 +507,19 @@ const GenerateItineraryScreen = () => {
         setSelectedDestination(prev => prev === destination ? null : destination);
     };
 
-    const handleModeChange = (text: string) => {
-        setTransportationText(text);
+    const handleModeChange = (selectedMode: string, destinationIndex: number) => {
+        // Create a copy of the current transportationText array
+        const updatedTransportationText = [...transportationText];
+    
+        // Update the transportation mode at the specific index
+        updatedTransportationText[destinationIndex] = selectedMode;
+    
+        // Update the state with the new array
+        setTransportationModes(updatedTransportationText);
+        setTransportationText(selectedMode);
     };
+    
+    
 
     const getRouteText = () => {
         if (!selectedDestination) return "";
@@ -714,13 +727,15 @@ const GenerateItineraryScreen = () => {
                             ) : null}
 
                             {/* Loop through each destination in the current routeGroup */}
-                            {routeGroup.map((destination: { alias: any; address: any; duration: any; priority: any; picture: { url: string; }; }, destinationIndex: any) => {
+                            {routeGroup.map((destination: { alias: any; address: any; duration: any; priority: any; picture: { url: string; }; mode: any, transportDuration: any; }, destinationIndex: any) => {
                                 const destinationKey = `${destinationGroupKey}-${destinationIndex}`;  // Unique key for each destination
                                 const destinationName = destination.alias;
                                 const destinationAddress = destination.address;
                                 const destinationDuration = destination.duration;
                                 const destinationPriority = destination.priority;
                                 const destinationImageUri = destination.picture?.url || '';
+                                const destinationTransportMode = destination.mode || 'DRIVING';
+                                const destinationTransportDuration = destination.transportDuration;
 
                                 return (
                                     <View key={destinationKey}>
@@ -746,7 +761,29 @@ const GenerateItineraryScreen = () => {
                                         {/* Conditional rendering of additional info */}
                                         {selectedDestination === destinationKey && (
                                             <View style={styles.additionalInfo}>
-                                                <Text style={styles.additionalText}>{getRouteText()}</Text>
+                                                {/*<Text style={styles.additionalText}>{getRouteText()}</Text>*/}
+                                                {/* TODO: Need to get directions (no direct way to get from here yet) */}
+                                                
+                                                {/* Show transport mode */}
+                                                <Text style={styles.additionalText}>
+                                                    Transport Mode: {destinationTransportMode.charAt(0).toUpperCase() + destinationTransportMode.slice(1).toLowerCase()}
+                                                </Text>
+
+                                                {/* Dropdown for picking transport mode */}
+                                                <Picker
+                                                    selectedValue={destinationTransportMode}
+                                                    onValueChange={(itemValue: string) => handleModeChange(itemValue, destinationIndex)}
+                                                >
+                                                    <Picker.Item label="Driving" value="driving" />
+                                                    <Picker.Item label="Walking" value="walking" />
+                                                    <Picker.Item label="Biking" value="biking" />
+                                                    <Picker.Item label="Transit" value="transit" />
+                                                </Picker>
+                                                
+                                                {/* Show transport duration */}
+                                                <Text style={styles.additionalText}>
+                                                    Duration: {destinationTransportDuration}
+                                                </Text>
                                             </View>
                                         )}
                                     </View>
