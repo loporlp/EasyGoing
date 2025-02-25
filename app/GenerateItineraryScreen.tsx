@@ -9,7 +9,7 @@ import { fetchPolylinesAndDurations } from '../scripts/routeHelpers';
 import { calculateOptimalRoute } from '../scripts/optimalRoute.js';
 import { Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, act } from "react";
 import { getData } from '../scripts/localStore.js';
 import { divideLocationsIntoGroups } from '../scripts/dateDividers.js';
 import { updateDestinationsWithTransport, updateDayOrigin } from '../scripts/updateTransportDests.js';
@@ -39,8 +39,6 @@ const GenerateItineraryScreen = () => {
     const [allRoutesData, setAllRoutesData] = useState<any[]>([]);
     const [toSaveData, setToSaveData] = useState<any[]>([]);
 
-    const [isDateSelected, setIsDateSelected] = useState(false);
-
     type Place = {
         alias: string;
         address: string;
@@ -60,6 +58,8 @@ const GenerateItineraryScreen = () => {
     const [origin, setOrigin] = useState<{ name: string; address: string; duration: number; priority: number}>();
     const [startDate, setStartDate] = useState<Date>();
     const [endDate, setEndDate] = useState<Date>();
+    const [isDateSelected, setIsDateSelected] = useState(false);
+    const [tripDates, setTripDates] = useState<Date[]>([])
 
     // Initial empties
     const [destinations, setDestinations] = useState<Record<string, Place>>({});
@@ -139,6 +139,7 @@ const GenerateItineraryScreen = () => {
 
                 setStartDate(trip.tripStartDate);
                 setEndDate(trip.tripEndDate);
+                console.log("End Date set to:", trip.tripEndDate);
 
                 // Set the initial transportation modes
                 const destinationsCount = trip.destinations.length;
@@ -533,9 +534,6 @@ const GenerateItineraryScreen = () => {
     
         console.log("What happens to transportationModes 2:", updatedTransportationModes);
     };
-    
-    
-    
 
     const getRouteText = () => {
         if (!selectedDestination) return "";
@@ -557,39 +555,49 @@ const GenerateItineraryScreen = () => {
         return new Intl.DateTimeFormat('en-US', options).format(date);
     };
 
-    const getNextDay = (currentDate: Date) => {
-        // Check if the currentDate is a valid Date
-        if (isNaN(currentDate.getTime())) {
-            //console.error("Invalid Date passed to getNextDay:", currentDate);
-            return new Date(); // Return null or a default date if invalid
+    // Used to calculate Dates
+    useEffect(() => {
+        console.log("Calculating dates in GI");
+        let numberOfDays = 7; // Default of a week (7 days)
+        let actualStartDate = new Date();
+        try {
+            if (startDate && endDate) {
+                const actualEndDate = new Date(endDate);
+                actualStartDate = new Date(startDate);
+                numberOfDays = (actualEndDate.getTime() - actualStartDate.getTime()) / (1000 * 3600 * 24);
+            } else {
+                throw new Error("Either StartDate or EndDate has an issue.");
+            }
+        } catch (error) {
+            console.log("Error in Date", error);
         }
 
-        const nextDate = new Date(currentDate);
-        nextDate.setDate(nextDate.getDate() + 1);
-        return nextDate;
-    };
+        // Fill the array of Dates
+        let tempDates: Date[] = new Array(numberOfDays);
+        let newDay: Date = new Date(actualStartDate);
+        for (let i = 0; i < numberOfDays; i++) {
+            tempDates[i] = new Date(newDay);
+            newDay.setDate(newDay.getDate() + 1);
+        }
+        setTripDates(tempDates);
+        console.log("Trip Dates:", tripDates);
 
-    const handlePressDate = (index: number) => {
-        // Toggle selection state
-        setIsDateSelected(prevState => !prevState);
+        // endDate is set after startDate so use endDate for this useEffect
+    }, [endDate]);    
 
+    const handleDatePress = (index: number) => {
         // Check if the same day index is selected again
         const isSameDateSelected = index === selectedDayIndex;
-
+    
+        // If the same day is selected again, revert to showing all routes
         if (isSameDateSelected) {
-            // If the same date is selected again, revert to showing all routes
             console.log("Same day selected. Reverting to show all routes.");
-            setPolylinesData(allRoutesData);
-
-            // Reset transportation modes for all routes (or set defaults)
-            const allModes = allRoutesData.map(route => route.mode || defaultMode);
-            setTransportationModes(allModes);
-
-            // Reset the selected day index to null
-            setSelectedDayIndex(null);
+            setPolylinesData(allRoutesData);  // Revert to showing all routes
+            setSelectedDayIndex(null);  // Reset the selected day index
             return;
         }
-
+    
+        // Update the selected day index
         setSelectedDayIndex(index);
         console.log("Selected day index", index);
     
@@ -653,14 +661,8 @@ const GenerateItineraryScreen = () => {
         } else {
             console.warn("No polyline data to update.");
         }
-    
-        // Update the transportation modes for this day
-        const modesForThisDay = selectedDestinations.map(destination => destination.mode || defaultMode);
-        console.log("Modes for this day:", modesForThisDay);
-    
-        // Update transportation modes state
-        setTransportationModes(modesForThisDay);
     };
+    
     
 
     return (
@@ -696,7 +698,7 @@ const GenerateItineraryScreen = () => {
                     }
 
                     // Add the destination to the current group
-                    if (acc.length === 0 || acc[acc.length - 1].length === 0) {
+                    if (acc.length === 0) {
                         acc.push([destination]); // Start with the first destination of the group
                     } else {
                         acc[acc.length - 1].push(destination); // Add destination to the current group
@@ -707,13 +709,15 @@ const GenerateItineraryScreen = () => {
                     const destinationGroupKey = `group-${routeGroupIndex}`;
                     let dateForThisGroup;
 
+                    console.log('routeGroup:', routeGroup);
+                    console.log('routeGroupIndex:', routeGroupIndex);
+
                     // Calculate the date for the group 
                     try {
                         if (routeGroupIndex === 0) {
-                            dateForThisGroup = new Date(routeGroup[0].startDateTime);
+                            dateForThisGroup = tripDates[0];
                         } else {
-                            const previousGroupDate = new Date(resultRoute[routeGroupIndex - 1].startDateTime);
-                            dateForThisGroup = getNextDay(previousGroupDate);
+                            dateForThisGroup = tripDates[routeGroupIndex];
                         }
                     } catch (error) {
                         console.log("Error in calculating group date:", error);
@@ -728,7 +732,7 @@ const GenerateItineraryScreen = () => {
                             {/* Date Header */}
                             {routeGroup.length > 0 && (routeGroupIndex === 0 || routeGroup[0].dayOrigin) ? (
                                 <TouchableOpacity
-                                    onPress={() => handlePressDate(routeGroupIndex)}
+                                    onPress={() => handleDatePress(routeGroupIndex)}
                                     style={[styles.dateHeader, isSelected && styles.selectedDateHeader]}
                                 >
                                     <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>
