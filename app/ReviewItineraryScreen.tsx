@@ -4,6 +4,8 @@ import { CommonActions } from '@react-navigation/native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "expo-router";
+import { storeData, getData } from '../scripts/localStore.js';
+import moment from 'moment';
 
 /**
  *  City Header (picture of city, overlay with text -> City, Country; Dates Visiting; # travelers)
@@ -14,6 +16,61 @@ import { useRouter } from "expo-router";
  */
 const ReviewItineraryScreen = () => {
     const router = useRouter();
+
+    // Sets trip data
+    const [trip, setTrip] = useState<any>(null);
+    const [tripId, setTripId] = useState<string | null>(null);
+    const [destinations, setDestinations] = useState<any[]>([]); // Store destinations for rendering
+    const [groupedDestinations, setGroupedDestinations] = useState<Record<string, any[]>>({}); // Groups destinations by date
+    const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({}); // Controls visibility of date sections
+
+    //load existing trip data and set it as 'trip'
+    useEffect(() => {
+        const loadTrip = async () => {
+            try {
+                const currentTripID = await getData("currentTrip"); // Fetch the current trip ID from storage
+                if (currentTripID) {
+                    const tripDetails = await getData(currentTripID.toString());
+                    console.log("Loaded trip data:", tripDetails); // Log the full trip details
+                    console.log("Destinations: ", tripDetails.destinations);
+                    // Check if the trip details include 'id' correctly
+                    if (tripDetails) {
+                        setTripId(currentTripID);  // Store only the trip id
+                        setTrip(tripDetails);  // Store the full trip data
+                        setDestinations(tripDetails.destinations); // Immediately update the destinations so they load on screen
+                        console.log("Trip ID Set:", currentTripID);
+                    } else {
+                        console.error("Trip data is invalid, missing trip details");
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading trip data:", error);
+            }
+        };
+
+        loadTrip(); // Load trip data when the component mounts
+    }, []); // Empty dependency array ensures this runs only once    
+
+    //group trips by their start date (day) for display
+    useEffect(() => {
+        if (destinations.length > 0) {
+            const grouped = destinations.reduce((formatted, dest) => {
+                const formattedDate = moment(dest.startDateTime).format('ddd, MMM D'); //format date
+                if (!formatted[formattedDate]) {
+                    formatted[formattedDate] = [];
+                }
+                formatted[formattedDate].push(dest);
+                return formatted;
+            }, {});
+            setGroupedDestinations(grouped);
+        }
+    }, [destinations]);
+
+    //toggles the visibility of a section (day)
+    const toggleSection = (date: string) => {
+        setExpandedSections(prev => ({ ...prev, [date]: !prev[date] }));
+    };
+
     const goToHome = () => {
         router.replace("/HomeScreen")
     }
@@ -28,216 +85,103 @@ const ReviewItineraryScreen = () => {
 
     return (
         <View style={styles.container}>
-            <ScrollView style={{ flex: 1, height: "100%" }} contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}>
-                <View style={{ marginTop: 50, marginHorizontal: 20, position: "absolute", zIndex: 10, flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                    {/* Left Arrow */}
-                    <TouchableOpacity onPress={goBack}>
-                        <Ionicons name="arrow-back" size={30} color={"white"} />
+            {/* Top Bar */}
+            <View style={styles.topBar}>
+                <TouchableOpacity onPress={() => router.back()}>
+                    <Ionicons name="arrow-back" size={30} color={"white"} />
+                </TouchableOpacity>
+                <View style={{ flexDirection: "row" }}>
+                    <TouchableOpacity style={{ marginRight: 10 }}>
+                        <Ionicons name="share" size={30} color={"white"} />
                     </TouchableOpacity>
-
-                    {/* Right Icons (Share and Checkmark) */}
-                    <View style={{ flexDirection: "row", marginRight: 40 }}>
-                        <TouchableOpacity style={{ marginRight: 10 }}>
-                            <Ionicons name="share" size={30} color={"white"} />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={goToHome}>
-                            <Ionicons name="checkmark" size={30} color={"white"} />
-                        </TouchableOpacity>
-                    </View>
+                    <TouchableOpacity onPress={() => router.replace("/HomeScreen")}>
+                        <Ionicons name="checkmark" size={30} color={"white"} />
+                    </TouchableOpacity>
                 </View>
+            </View>
 
-
-
-                { /* City Header */}
-                <Image style={styles.backgroundImage} source={require("../assets/images/newyorkcity.jpg")} />
-                <View style={styles.darkOverlay} />
-                <View style={styles.headerContainer}>
-                    <View style={styles.screenContainer}>
-                        <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
-                            <Ionicons name="location" size={30} color={"#24a6ad"} style={{ marginRight: 10 }} />
-                            <View style={{ flexDirection: "column", alignItems: "flex-start" }}>
-                                <Text style={{ fontWeight: "bold", color: "white", fontSize: 25 }}>New York City, USA</Text>
-                                <Text style={{ color: "white", fontSize: 16 }}>Sat, Jul. 13 - Sun. Jul 14</Text>
-                            </View>
+            {/* City Header */}
+            <Image style={styles.backgroundImage} source={require("../assets/images/newyorkcity.jpg")} />
+            <View style={styles.darkOverlay} />
+            <View style={styles.headerContainer}>
+                <View style={styles.screenContainer}>
+                    <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                        <Ionicons name="location" size={30} color={"#24a6ad"} style={{ marginRight: 10 }} />
+                        <View style={{ flexDirection: "column", alignItems: "flex-start" }}>
+                        <Text style={styles.cityTitle}>{trip?.origin || 'Unknown City'}</Text>
+                        <Text style={styles.dateRange}>{trip?.tripStartDate ? moment(trip.tripStartDate).format('ddd, MMM D') : 'Start Date'} - {trip?.tripEndDate ? moment(trip.tripEndDate).format('ddd, MMM D') : 'End Date'}</Text>
                         </View>
                     </View>
                 </View>
-
-                { /* Bottom window */}
+            </View>
+            
+            {/* Itinerary Section */}
+            <ScrollView style={{ flex: 1 }}>
                 <View style={styles.bottomScreen}>
-
-                    { /* Itinerary Day 1 */}
                     <Text style={styles.textLabel}>Itinerary:</Text>
-                    <TouchableOpacity style={styles.dateHeader} onPress={() => setDate1(!date1)} >
-                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                            <Ionicons name="calendar" size={25} color={"#24a6ad"} />
-                            <Text style={styles.dateText}>Sat, Jul. 13</Text>
+                    {/* Loop through grouped destinations and create a section for each date */}
+                    {Object.keys(groupedDestinations).map((date, index) => (
+                        <View key={index}>
+                            {/* Date Header - Expands/Collapses destinations for the date */}
+                            <TouchableOpacity style={styles.dateHeader} onPress={() => toggleSection(date)}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Ionicons name="calendar" size={25} color="#24a6ad" />
+                                    <Text style={styles.dateText}>{date}</Text>
+                                </View>
+                                <Ionicons name={expandedSections[date] ? 'caret-up' : 'caret-down'} size={25} color="#24a6ad" />
+                            </TouchableOpacity>
+                            {/* Expand section when clicked */}
+                            {expandedSections[date] && (
+                                <View>
+                                    {/* Iterate through the destinations for the date */}
+                                    {groupedDestinations[date].map((dest, idx) => (
+                                        <View key={idx}>
+                                             {/* Display transit info */}
+                                            {idx > 0 && (
+                                                <View style={{ height: 50, backgroundColor: "white", borderTopWidth: 1, borderColor: "lightgray" }}>
+                                                    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 15 }}>
+                                                        <Ionicons name={dest.mode === 'walking' ? "walk" : "bus"} size={22} color="#24a6ad" />
+                                                        <Text style={{ fontSize: 16 }}>{dest.transportDuration || "Transit"}</Text>
+                                                    </View>
+                                                </View>
+                                            )}
+                                            {/* Display the destination */}
+                                            <TouchableOpacity>
+                                                <View style={styles.destination}>
+                                                    <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                                                        <Image source={{ uri: dest.picture?.url || 'https://via.placeholder.com/100' }} style={styles.destinationImage} />
+                                                        <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10 }}>
+                                                            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                                                <Ionicons name="location" size={20} color={"#24a6ad"} />
+                                                                <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{dest.alias}</Text>
+                                                            </View>
+                                                            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginLeft: 5 }}>
+                                                                <MaterialCommunityIcons name={"label"} color={"#24a6ad"} />
+                                                                <Text numberOfLines={1} ellipsizeMode="tail" style={{ marginLeft: 5, color: "gray", marginTop: -5 }}>{dest.address}</Text>
+                                                            </View>
+                                                            <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5 }}>
+                                                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                                                    <Ionicons name="time" size={18} color={"#24a6ad"} />
+                                                                    <Text style={{ marginLeft: 5 }}>{dest.duration} hr</Text>
+                                                                </View>
+                                                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginRight: 5 }}>
+                                                                    <MaterialCommunityIcons name="priority-high" size={18} color={"#24a6ad"} />
+                                                                    <Text style={{ marginLeft: 5 }}>{dest.priority}</Text>
+                                                                </View>
+                                                            </View>
+                                                        </View>
+                                                    </View>
+                                                </View>
+                                            </TouchableOpacity>
+                                        </View>
+                                    ))}
+                                </View>
+                            )}
                         </View>
-                        {(date1) ? (
-                            <Ionicons name={"caret-up"} size={25} color={"#24a6ad"} />
-                        ) : (
-                            <Ionicons name={"caret-down"} size={25} color={"#24a6ad"} />
-                        )}
-                    </TouchableOpacity>
-
-                    {(date1) ? (
-                        <View style={{ backgroundColor: "white", height: 100 }}>
-                            <TouchableOpacity style={{ height: 50, backgroundColor: "white", borderTopWidth: 1, borderColor: "lightgray" }}>
-                                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 15 }}>
-                                    <Ionicons name={"location"} size={22} color={"#24a6ad"} />
-                                    <Text style={{ fontSize: 16 }}>Origin (Leave at: 9:30 AM)</Text>
-                                </View>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity style={{ height: 50, backgroundColor: "white", borderTopWidth: 1, borderColor: "lightgray" }}>
-                                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 15 }}>
-                                    <Ionicons name={"bus"} size={22} color={"#24a6ad"} />
-                                    <Text style={{ fontSize: 16 }}>Transit (20mins)</Text>
-                                </View>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity>
-                                <View style={styles.destination}>
-                                    <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                                        <Image style={styles.destinationImage} source={require("../assets/images/statueofliberty.jpg")} />
-                                        <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10 }}>
-                                            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
-                                                <Ionicons name="location" size={20} color={"#24a6ad"} />
-                                                <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>Statue of Liberty</Text>
-                                            </View>
-
-                                            <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5 }}>
-                                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
-                                                    <Ionicons name="time" size={18} color={"#24a6ad"} />
-                                                    <Text style={{ marginLeft: 5 }}>3hr</Text>
-                                                </View>
-
-                                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginRight: 5 }}>
-                                                    <MaterialCommunityIcons name="priority-high" size={18} color={"#24a6ad"} />
-                                                    <Text style={{ marginLeft: 5 }}>1</Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    </View>
-                                </View>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity style={{ height: 50, backgroundColor: "white", borderTopWidth: 1, borderColor: "lightgray" }}>
-                                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 15 }}>
-                                    <Ionicons name={"bus"} size={22} color={"#24a6ad"} />
-                                    <Text style={{ fontSize: 16 }}>Transit (57 mins)</Text>
-                                </View>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity>
-                                <View style={styles.destination}>
-                                    <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                                        <Image style={styles.destinationImage} source={require("../assets/images/CentralPark.jpg")} />
-                                        <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10 }}>
-                                            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
-                                                <Ionicons name="location" size={20} color={"#24a6ad"} />
-                                                <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>Central Park</Text>
-                                            </View>
-
-                                            <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5 }}>
-                                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
-                                                    <Ionicons name="time" size={18} color={"#24a6ad"} />
-                                                    <Text style={{ marginLeft: 5 }}>2hr</Text>
-                                                </View>
-
-                                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginRight: 5 }}>
-                                                    <MaterialCommunityIcons name="priority-high" size={18} color={"#24a6ad"} />
-                                                    <Text style={{ marginLeft: 5 }}>2</Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    </View>
-                                </View>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity style={{ height: 50, backgroundColor: "white", borderTopWidth: 1, borderColor: "lightgray" }}>
-                                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 15 }}>
-                                    <Ionicons name={"walk"} size={22} color={"#24a6ad"} />
-                                    <Text style={{ fontSize: 16 }}>Walk (10 mins)</Text>
-                                </View>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity>
-                                <View style={styles.destination}>
-                                    <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                                        <Image style={styles.destinationImage} source={require("../assets/images/moma.jpg")} />
-                                        <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10 }}>
-                                            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
-                                                <Ionicons name="location" size={20} color={"#24a6ad"} />
-                                                <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>Museum of Modern Art</Text>
-                                            </View>
-
-                                            <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5 }}>
-                                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
-                                                    <Ionicons name="time" size={18} color={"#24a6ad"} />
-                                                    <Text style={{ marginLeft: 5 }}>2hr</Text>
-                                                </View>
-
-                                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginRight: 5 }}>
-                                                    <MaterialCommunityIcons name="priority-high" size={18} color={"#24a6ad"} />
-                                                    <Text style={{ marginLeft: 5 }}>2</Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    </View>
-                                </View>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity style={{ height: 50, backgroundColor: "white", borderTopWidth: 1, borderColor: "lightgray" }}>
-                                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 15 }}>
-                                    <Ionicons name={"car"} size={22} color={"#24a6ad"} />
-                                    <Text style={{ fontSize: 16 }}>Driving (14mins)</Text>
-                                </View>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity>
-                                <View style={styles.destination}>
-                                    <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                                        <Image style={styles.destinationImage} source={require("../assets/images/grandCentralMarket.jpg")} />
-                                        <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10 }}>
-                                            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
-                                                <Ionicons name="location" size={20} color={"#24a6ad"} />
-                                                <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>Grand Central Market</Text>
-                                            </View>
-
-                                            <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5 }}>
-                                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
-                                                    <Ionicons name="time" size={18} color={"#24a6ad"} />
-                                                    <Text style={{ marginLeft: 5 }}>3hr</Text>
-                                                </View>
-
-                                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginRight: 5 }}>
-                                                    <MaterialCommunityIcons name="priority-high" size={18} color={"#24a6ad"} />
-                                                    <Text style={{ marginLeft: 5 }}>3</Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    </View>
-                                </View>
-                            </TouchableOpacity>
-                        </View>
-                    ) : (
-                        <TouchableOpacity style={styles.dateHeader} onPress={() => setDate2(!date2)} >
-                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                            <Ionicons name="calendar" size={25} color={"#24a6ad"} />
-                            <Text style={styles.dateText}>Sun, Jul. 14</Text>
-                        </View>
-                        {(date2) ? (
-                            <Ionicons name={"caret-up"} size={25} color={"#24a6ad"} />
-                        ) : (
-                            <Ionicons name={"caret-down"} size={25} color={"#24a6ad"} />
-                        )}
-                    </TouchableOpacity>
-                    )}
-
+                    ))}
                 </View>
-            </ScrollView >
-        </View >
+            </ScrollView>
+        </View>
     );
 };
 
@@ -254,18 +198,50 @@ const styles = StyleSheet.create({
         marginBottom: 10
     },
 
+    topBar: {
+        position: "absolute",
+        top: 50,
+        left: 0,
+        right: 0,
+        zIndex: 10,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingHorizontal: 20,
+        width: "100%",
+    },
+
     // ==== CITY HEADER ==== //
     headerContainer: {
         position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: 250,
+        justifyContent: "flex-end",
+        paddingBottom: 20,
+        paddingHorizontal: 15,
         zIndex: 1,
-        flexDirection: "column",
-        alignItems: "flex-start"
     },
 
     backgroundImage: {
         width: "100%",
         height: 250,
         resizeMode: "cover",
+    },
+
+    cityTitle: {
+        fontSize: 22,
+        fontWeight: "bold",
+        color: "white",
+        flexWrap: "wrap",
+        maxWidth: "90%",
+    },
+
+    dateRange: {
+        fontSize: 16,
+        color: "white",
+        marginTop: 2,
     },
 
     darkOverlay: {
