@@ -4,6 +4,7 @@ import { CommonActions } from '@react-navigation/native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "expo-router";
+import { storeData, getData } from '../scripts/localStore.js';
 
 /**
  *  City Header (picture of city, overlay with text -> City, Country; Dates Visiting; # travelers)
@@ -14,6 +15,39 @@ import { useRouter } from "expo-router";
  */
 const ReviewItineraryScreen = () => {
     const router = useRouter();
+
+    // Sets trip data
+    const [trip, setTrip] = useState<any>(null);
+    const [tripId, setTripId] = useState<string | null>(null);
+    const [destinations, setDestinations] = useState<any[]>([]); // Store destinations for rendering
+
+    //load existing trip data and set it as 'trip'
+    useEffect(() => {
+        const loadTrip = async () => {
+            try {
+                const currentTripID = await getData("currentTrip"); // Fetch the current trip ID from storage
+                if (currentTripID) {
+                    const tripDetails = await getData(currentTripID.toString());
+                    console.log("Loaded trip data:", tripDetails); // Log the full trip details
+                    console.log("Destinations: ", tripDetails.destinations);
+                    // Check if the trip details include 'id' correctly
+                    if (tripDetails) {
+                        setTripId(currentTripID);  // Store only the trip id
+                        setTrip(tripDetails);  // Store the full trip data
+                        setDestinations(tripDetails.destinations); // Immediately update the destinations so they load on screen
+                        console.log("Trip ID Set:", currentTripID);
+                    } else {
+                        console.error("Trip data is invalid, missing trip details");
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading trip data:", error);
+            }
+        };
+
+        loadTrip(); // Load trip data when the component mounts
+    }, []); // Empty dependency array ensures this runs only once    
+
     const goToHome = () => {
         router.replace("/HomeScreen")
     }
