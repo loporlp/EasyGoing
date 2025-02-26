@@ -177,11 +177,18 @@ const AddEditDestinations = () => {
     const editLocation = (index: number) => {
         setIsEditing(true), setEditIndex(index);
         const oldDestination = trip.destinations[index];
+        //set the values
         setAlias(oldDestination.alias);
         setLocation(oldDestination.address);
         setDuration(oldDestination.duration);
         setPriority(oldDestination.priority.toString());
         setNotes(oldDestination.notes || ""); //defaults notes to empty if it is
+        //set the textboxes
+        setTempAlias(oldDestination.alias);
+        setTempLocation(oldDestination.address);
+        setTempDuration(oldDestination.duration);
+        setTempPriority(oldDestination.priority.toString());
+        //shows the edit screen
         show()
     }
 
