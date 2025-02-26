@@ -108,8 +108,8 @@ const ReviewItineraryScreen = () => {
                     <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                         <Ionicons name="location" size={30} color={"#24a6ad"} style={{ marginRight: 10 }} />
                         <View style={{ flexDirection: "column", alignItems: "flex-start" }}>
-                            <Text style={styles.cityTitle}>{trip?.destination || 'New York City, USA'}</Text>
-                            <Text style={styles.dateRange}>{trip?.dateRange || 'Sat, Jul. 13 - Sun. Jul 14'}</Text>
+                        <Text style={styles.cityTitle}>{trip?.origin || 'Unknown City'}</Text>
+                        <Text style={styles.dateRange}>{trip?.tripStartDate ? moment(trip.tripStartDate).format('ddd, MMM D') : 'Start Date'} - {trip?.tripEndDate ? moment(trip.tripEndDate).format('ddd, MMM D') : 'End Date'}</Text>
                         </View>
                     </View>
                 </View>
@@ -214,9 +214,14 @@ const styles = StyleSheet.create({
     // ==== CITY HEADER ==== //
     headerContainer: {
         position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: 250,
+        justifyContent: "flex-end",
+        paddingBottom: 20,
+        paddingHorizontal: 15,
         zIndex: 1,
-        flexDirection: "column",
-        alignItems: "flex-start"
     },
 
     backgroundImage: {
@@ -226,14 +231,17 @@ const styles = StyleSheet.create({
     },
 
     cityTitle: {
-        fontSize: 25,
+        fontSize: 22,
         fontWeight: "bold",
         color: "white",
+        flexWrap: "wrap",
+        maxWidth: "90%",
     },
 
     dateRange: {
         fontSize: 16,
         color: "white",
+        marginTop: 2,
     },
 
     darkOverlay: {
