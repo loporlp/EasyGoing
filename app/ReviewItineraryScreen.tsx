@@ -149,7 +149,7 @@ const ReviewItineraryScreen = () => {
                                             <TouchableOpacity>
                                                 <View style={styles.destination}>
                                                     <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                                                        <Image source={{ uri: dest.picture?.url || 'https://via.placeholder.com/100' }} style={styles.destinationImage} />
+                                                    <Image source={dest.picture?.url ? { uri: dest.picture.url } : require("../assets/images/newyorkcity.jpg")} style={styles.destinationImage} />
                                                         <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10 }}>
                                                             <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                                                                 <Ionicons name="location" size={20} color={"#24a6ad"} />
