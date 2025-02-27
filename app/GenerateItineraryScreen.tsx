@@ -306,12 +306,35 @@ const GenerateItineraryScreen = () => {
                     }
                 } catch (error) {
                     console.error("Failed to get optimal route:", error);
+                    failedPopup();
                 }
             };
 
-            fetchOptimalRoute();
+            try {
+                fetchOptimalRoute();
+            } catch (error) {
+                // TODO: Alert the user there was an error and go back to AED
+                console.log("Error when trying to fetch optimal route: ", error);
+                failedPopup();
+            }
+           
         }
     }, [destinations, origin]);
+
+    // Pop-Up for when something Fails
+    const failedPopup = () => {
+        Alert.alert(
+            "Error Occured",
+            "Sorry. Something wrong occured and can't proceed.\nGoing back to the previous screen.\n\nPlease make sure your trip does not require oversea travels.",
+            [
+                {
+                    text: "OK",
+                    onPress: () => navigation.goBack(),
+                },
+            ],
+            { cancelable: false }
+        );
+    }; 
 
     /*
     1. Generate optimal route (which triggers this useEffect)

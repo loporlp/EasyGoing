@@ -55,42 +55,47 @@ async function getDistanceMatrix(origin, destinations, mode) {
 
 // Optimal Route Main Function
 export async function calculateOptimalRoute(locations, origin, mode) {
-    const optimalRoute = [];
-    let currentOrigin = origin;
-
-    const length = locations.length;
-    console.log("Locations Length: " + length);
-    for (let i = 0; i < length; i++) {
-        console.log(locations);
-        // Get the distance matrix for the current origin and remaining locations
-        const distancesList = await getDistanceMatrix(currentOrigin, locations, mode);
-
-        // Find the destination with the minimum distance
-        // TODO: Based on user input, whether it's distance or duration
-        const destination = distancesList.reduce((prev, current) => (prev.distance < current.distance ? prev : current));
-
-        // Add the current origin and destination to the route
-        optimalRoute.push([
-            [currentOrigin.name, currentOrigin.address, currentOrigin.duration, currentOrigin.priority],
-            [destination.originalLocationName, destination.destinationAddress, destination.duration, destination.priority]
-        ]);         
-
-        // Update the current origin to the chosen destination
-        currentOrigin = { name: destination.originalLocationName, address: destination.destinationAddress };
-
-        //console.log("To remove: ", currentOrigin);
-
-        // Remove the destination from the list of locations
-        const destinationIndex = locations.findIndex(loc => loc.name === destination.originalLocationName);
-        if (destinationIndex !== -1) {
-            locations.splice(destinationIndex, 1); // Remove the matched destination
-        } else {
-            console.log("Destination not found in locations array");
+    try {
+        const optimalRoute = [];
+        let currentOrigin = origin;
+    
+        const length = locations.length;
+        console.log("Locations Length: " + length);
+        for (let i = 0; i < length; i++) {
+            console.log(locations);
+            // Get the distance matrix for the current origin and remaining locations
+            const distancesList = await getDistanceMatrix(currentOrigin, locations, mode);
+    
+            // Find the destination with the minimum distance
+            // TODO: Based on user input, whether it's distance or duration
+            const destination = distancesList.reduce((prev, current) => (prev.distance < current.distance ? prev : current));
+    
+            // Add the current origin and destination to the route
+            optimalRoute.push([
+                [currentOrigin.name, currentOrigin.address, currentOrigin.duration, currentOrigin.priority],
+                [destination.originalLocationName, destination.destinationAddress, destination.duration, destination.priority]
+            ]);         
+    
+            // Update the current origin to the chosen destination
+            currentOrigin = { name: destination.originalLocationName, address: destination.destinationAddress };
+    
+            //console.log("To remove: ", currentOrigin);
+    
+            // Remove the destination from the list of locations
+            const destinationIndex = locations.findIndex(loc => loc.name === destination.originalLocationName);
+            if (destinationIndex !== -1) {
+                locations.splice(destinationIndex, 1); // Remove the matched destination
+            } else {
+                console.log("Destination not found in locations array");
+            }
         }
+        console.log("End");
+    
+        return optimalRoute;
+    } catch (error) {
+        console.log("Error occured in OptimalRoute.js: ", error);
+        throw new Error(error);
     }
-    console.log("End");
-
-    return optimalRoute;
 }
 
 
