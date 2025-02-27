@@ -122,6 +122,39 @@ export function processDurations(locationAndDurations) {
             return null;  // No need to process the last transport duration
         }
 
+        // Check if duration includes "day" or "days"
+        if (duration.includes('day') || duration.includes('days')) {
+            let totalHours = 0;
+
+            // Match days from the duration string
+            const daysMatch = duration.match(/(\d+)\s*(day|days)/);
+
+            // Parse days if present
+            if (daysMatch) {
+                totalHours += parseInt(daysMatch[1]) * 24;
+                console.log(`Parsed ${daysMatch[1]} day(s) as ${parseInt(daysMatch[1]) * 24} hours`);
+            }
+
+            // Match hours and minutes from the duration string
+            const hoursMatch = duration.match(/(\d+)\s*(hrs?|hour|hours)/);
+            const minutesMatch = duration.match(/(\d+)\s*mins/);
+
+            // Parse hours if present
+            if (hoursMatch) {
+                totalHours += parseInt(hoursMatch[1]);
+                console.log(`Parsed ${hoursMatch[1]} hours`);
+            }
+
+            // Parse minutes if present
+            if (minutesMatch) {
+                totalHours += parseInt(minutesMatch[1]) / 60;
+                console.log(`Parsed ${minutesMatch[1]} minutes`);
+            }
+
+            console.log(`Total duration: ${totalHours} hours`);
+            return totalHours;  // Return total duration in hours
+        }
+
         // Check if duration includes "hour", "hrs", or "hours"
         if (duration.includes('hour') || duration.includes('hrs') || duration.includes('hours')) {
             let totalHours = 0;
