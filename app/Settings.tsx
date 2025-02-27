@@ -1,6 +1,6 @@
 // Account.tsx
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Image, Switch } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, Image, Switch, useColorScheme } from 'react-native';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +14,7 @@ const Settings = () => {
 
   const navigation = useNavigation();
   const router = useRouter();
+  const colorScheme = useColorScheme();
 
   const viewTrips = () => {
     router.replace("/EditExistingTripsScreen")
@@ -63,7 +64,9 @@ const Settings = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+  const toggleSwitch = () => {
+    setIsEnabled(previousState => !previousState);
+  }
 
   const [optimizeRoutes, setOptimizeRoutes] = useState(false);
   const toggleSwitchOptimize = () => setOptimizeRoutes(previousState => !previousState)
@@ -93,23 +96,23 @@ const Settings = () => {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {backgroundColor: isEnabled ? "#2A2A2A" : "#F4F4F4"}]}>
       <View style={styles.accountContainer}>
-        <Text style={{ fontSize: 22, fontWeight: "700" }}>Settings</Text>
+        <Text style={{ fontSize: 22, fontWeight: "700", color: isEnabled ? "white" : "black" }}>Settings</Text>
 
-        <TouchableOpacity style={styles.accountDetails} onPress={userAccountSettings}>
+        <TouchableOpacity style={[styles.accountDetails, {backgroundColor: isEnabled ? "#5b5b5b" : "white", shadowColor: isEnabled ? "gray" : "#333333"}]} onPress={userAccountSettings}>
           <Image source={require("../assets/images/blue.png")} style={styles.destinationImage} />
           <View style={{ flex: 1, flexDirection: "column", padding: 5, marginLeft: 5, justifyContent: "space-between" }}>
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "flex-start", gap: 10, marginTop: 15 }}>
               <Ionicons name="person" size={22} color={"#24a6ad"} />
-              <Text style={{ fontSize: 22 }}>{username}</Text>
+              <Text style={{ fontSize: 22, color: isEnabled ? "white" : "black" }}>{username}</Text>
             </View>
 
             <View style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "flex-start", gap: 10 }}>
               <MaterialCommunityIcons name="email" size={16} color={"#24a6ad"} />
               {/* Display the user's email if logged in */}
               {userEmail ? (
-                < Text style={styles.emailText} numberOfLines={1} ellipsizeMode='tail'>{userEmail}</Text>
+                < Text style={[styles.emailText, {color: isEnabled ? "#e0e0e0" : "gray"}]} numberOfLines={1} ellipsizeMode='tail'>{userEmail}</Text>
               ) : (
                 <Text style={styles.emailText}>No user logged in</Text>
               )}
@@ -125,7 +128,7 @@ const Settings = () => {
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 10 }}>
             <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", gap: 10 }}>
               <MaterialCommunityIcons name={"circle-half-full"} size={18} color={"#24a6ad"} />
-              <Text style={{ fontSize: 18, marginRight: 50 }}>Dark Mode</Text>
+              <Text style={{ fontSize: 18, marginRight: 50, color: isEnabled ? "white" : "black"  }}>Dark Mode</Text>
             </View>
 
             <Switch
@@ -142,7 +145,7 @@ const Settings = () => {
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 10 }}>
             <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", gap: 10 }}>
               <MaterialCommunityIcons name={"map-marker-distance"} size={18} color={"#24a6ad"} />
-              <Text style={{ fontSize: 18, marginRight: 50 }}>Optimize Routes</Text>
+              <Text style={{ fontSize: 18, marginRight: 50, color: isEnabled ? "white" : "black"  }}>Optimize Routes</Text>
             </View>
 
             <Switch
@@ -164,7 +167,7 @@ const Settings = () => {
         </View>
       </View>
 
-      <View style={styles.navBar}>
+      <View style={[styles.navBar, {backgroundColor: isEnabled ? "#5b5b5b" : "white"}]}>
         <TouchableOpacity style={{ padding: 10, marginLeft: 20 }} onPress={homeScreen}>
           <Ionicons name="home" size={30} color={"lightgray"} />
         </TouchableOpacity>
@@ -190,7 +193,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: "column",
-    backgroundColor: "#f4f4f4"
   },
 
   accountContainer: {
@@ -205,7 +207,6 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 10,
     marginTop: 15,
-    shadowColor: "#333333",
     shadowOffset: { width: 1, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
@@ -217,7 +218,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexWrap: "wrap",
     fontSize: 16,
-    color: "gray"
   },
 
   signOut: {

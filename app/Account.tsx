@@ -7,11 +7,12 @@
 // - Delete Account
 
 import { View, StyleSheet, TouchableOpacity, Text, Image, TextInput } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { getAuth } from 'firebase/auth';
 import React, { useEffect, useState } from 'react';
 import { auth } from '../firebaseConfig';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Account = () => {
 
@@ -56,7 +57,7 @@ const Account = () => {
                 <TouchableOpacity>
                     <Image source={require("../assets/images/blue.png")} style={styles.profileImage} />
                 </TouchableOpacity>
-                <Text style={{marginTop: 5}}>Change Profile Photo</Text>
+                <Text style={{ marginTop: 5 }}>Change Profile Photo</Text>
             </View>
 
             <View style={styles.divider}></View>
@@ -85,8 +86,9 @@ const Account = () => {
                     <Ionicons name={"key"} size={18} color={"#24a6ad"} />
                     <Text style={{ fontSize: 18 }}>Password:</Text>
                 </View>
-                <TouchableOpacity style={[styles.textInput, { justifyContent: "center", borderWidth: 0 }]}>
+                <TouchableOpacity style={[styles.textInput, { flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderWidth: 0 }]}>
                     <Text style={{ fontSize: 18 }}>Change password...</Text>
+                    <MaterialIcons name={"keyboard-arrow-right"} size={18} />
                 </TouchableOpacity>
             </View>
 

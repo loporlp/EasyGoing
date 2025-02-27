@@ -48,8 +48,8 @@ const EditExistingTripsScreen = () => {
         router.replace("/SearchScreen")
     }
 
-    const accountScreen = () => {
-        router.replace("/Account")
+    const settingsScreen = () => {
+        router.replace("/Settings")
     }
 
     const createNewTrip = () => {
@@ -113,7 +113,7 @@ const EditExistingTripsScreen = () => {
                 <TouchableOpacity style={{ padding: 10 }}>
                     <Ionicons name="calendar" size={30} color={"#24a6ad"} />
                 </TouchableOpacity>
-                <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={accountScreen}>
+                <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={settingsScreen}>
                     <Ionicons name="person" size={30} color={"lightgray"} />
                 </TouchableOpacity>
             </View>
