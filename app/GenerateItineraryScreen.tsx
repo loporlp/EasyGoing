@@ -548,10 +548,12 @@ const GenerateItineraryScreen = () => {
     };
 
     const handleModeChange = (selectedMode: string, destinationIndex: number) => {
+        setIsLoading(true);
         console.log("What happens to transportationModes:", transportationModes);
 
         // Check if the selected mode is the same as the current mode at the destinationIndex
-        if (transportationModes[destinationIndex] === selectedMode) {
+        const previousMode = transportationModes[destinationIndex];
+        if (previousMode === selectedMode) {
             console.log("Mode is the same, no update needed.");
             return;
         }
@@ -709,18 +711,20 @@ const GenerateItineraryScreen = () => {
                     <View></View>
             )}
 
-        <SafeAreaView style={{ flex: 1 }}>
-            {frontendOptimalRoute.length > 0 && (
-                <MultiRoutesMap
-                    locations={frontendOptimalRoute}
-                    transportationModes={transportationModes}
-                    polylines={polylinesData}
-                    transportDurations={transportDurations}
-                    markers={markers}
-                    bounds={bounds}
-                />
+            {!isLoading && (
+                <SafeAreaView style={{ flex: 1 }}>
+                    {frontendOptimalRoute.length > 0 && (
+                        <MultiRoutesMap
+                            locations={frontendOptimalRoute}
+                            transportationModes={transportationModes}
+                            polylines={polylinesData}
+                            transportDurations={transportDurations}
+                            markers={markers}
+                            bounds={bounds}
+                        />
+                    )}
+                </SafeAreaView>
             )}
-        </SafeAreaView>
         <SafeAreaView>
 
             <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
@@ -830,15 +834,21 @@ const GenerateItineraryScreen = () => {
 
                                                 {/* Dropdown for picking transport mode */}
                                                 {!isLastDestination && (
-                                                    <Picker
-                                                        selectedValue={destinationTransportMode}
-                                                        onValueChange={(mode: string) => handleModeChange(mode, destinationIndex)}
-                                                    >
-                                                        <Picker.Item label="Driving" value="driving" />
-                                                        <Picker.Item label="Walking" value="walking" />
-                                                        <Picker.Item label="Bicycling" value="bicycling" />
-                                                        <Picker.Item label="Transit" value="transit" />
-                                                    </Picker>
+                                                    isLoading ? (
+                                                        <Text style={styles.additionalText}>
+                                                            Loading new transport route...
+                                                        </Text>
+                                                    ) : (
+                                                        <Picker
+                                                            selectedValue={destinationTransportMode}
+                                                            onValueChange={(mode: string) => handleModeChange(mode, destinationIndex)}
+                                                        >
+                                                            <Picker.Item label="Driving" value="driving" />
+                                                            <Picker.Item label="Walking" value="walking" />
+                                                            <Picker.Item label="Bicycling" value="bicycling" />
+                                                            <Picker.Item label="Transit" value="transit" />
+                                                        </Picker>
+                                                    )
                                                 )}
                                                 
                                                 {/* Show transport duration */}
