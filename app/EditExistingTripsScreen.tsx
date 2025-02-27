@@ -1,7 +1,7 @@
 // EditExistingTripsScreen.tsx
-import { ScrollView, Image, StyleSheet, TouchableOpacity, Text, View } from "react-native";
+import { ScrollView, Image, StyleSheet, TouchableOpacity, Text, View, Modal } from "react-native";
 import { useRouter } from "expo-router";
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useState, useEffect } from "react";
 import { getData, storeData, fillLocal } from '../scripts/localStore';
 
@@ -10,6 +10,8 @@ const EditExistingTripsScreen = () => {
 
     // State to store the trips
     const [trips, setTrips] = useState<any[]>([]);
+
+    const [isModalVisible, setModalVisible] = useState(false);
 
     // Load trips when the component mounts
     useEffect(() => {
@@ -77,7 +79,7 @@ const EditExistingTripsScreen = () => {
                     trips.map((trip) => (
                         <TouchableOpacity
                             key={trip.id}
-                            style={styles.tripButtonTokyo}
+                            style={styles.tripButton}
                             onPress={() => editTrip(trip.id)}
                         >
                             <Image
@@ -85,19 +87,54 @@ const EditExistingTripsScreen = () => {
                                 source={require("../assets/images/newyorkcity.jpg")}
                             />
                             <View style={styles.darkOverlay} />
+
                             <View style={styles.screenContainer}>
-                                <Text style={styles.upcoming}>UPCOMING TRIP</Text>
-                                <Text style={styles.destinationName}>{trip.details?.tripName ? String(trip.details.tripName) : "Unnamed Trip"}</Text>
-                                <Text style={styles.dates}>{trip.details?.tripStartDate && trip.details?.tripEndDate
-                                    ? `${String(trip.details.tripStartDate)} - ${String(trip.details.tripEndDate)}`
-                                    : "Dates Unavailable"}
-                                </Text>
+                                <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+                                    <TouchableOpacity style={{ padding: 10 }} onPress={() => setModalVisible(true)}>
+                                        <Ionicons name={"ellipsis-horizontal-circle-outline"} color={"white"} size={30} />
+                                    </TouchableOpacity>
+                                </View>
+
+                                <View style={{ marginTop: 120, paddingHorizontal: 10 }}>
+                                    <Text style={styles.upcoming}>UPCOMING TRIP</Text>
+                                    <Text style={styles.destinationName}>{trip.details?.tripName ? String(trip.details.tripName) : "Unnamed Trip"}</Text>
+                                    <Text numberOfLines={1} style={styles.dates}>{trip.details?.tripStartDate && trip.details?.tripEndDate
+                                        ? `${String(trip.details.tripStartDate)} - ${String(trip.details.tripEndDate)}`
+                                        : "Dates Unavailable"}
+                                    </Text>
+                                </View>
                             </View>
                         </TouchableOpacity>
                     ))
                 ) : (
                     <Text style={{ textAlign: 'center', fontSize: 16 }}>No trips available. Please create a new one.</Text>
                 )}
+
+                <Modal
+                    visible={isModalVisible}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={() => setModalVisible(false)}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={{ flexDirection: "column", width: "100%", height: "20%", backgroundColor: "white", borderTopRightRadius: 10, borderTopLeftRadius: 10, padding: 5 }}>
+                            <TouchableOpacity style={styles.menuItem} onPress={() => setModalVisible(false)}>
+                                <MaterialIcons name={"cancel"} color={"#24a6ad"} size={18} />
+                                <Text style={{ fontSize: 18 }}>Cancel</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.menuItem}>
+                                <Ionicons name={"pencil"} color={"#24a6ad"} size={18} />
+                                <Text style={{ fontSize: 18 }}>Rename Trip</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.menuItem}>
+                                <Ionicons name={"trash"} color={"red"} size={18} />
+                                <Text style={{ fontSize: 18 }}>Delete Trip</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
 
             </ScrollView>
             <View style={styles.navBar}>
@@ -152,7 +189,7 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(255, 255, 255, 0.5)",
     },
 
-    tripButtonTokyo: {
+    tripButton: {
         width: "100%",
         height: 250,
         marginBottom: 10,
@@ -168,11 +205,9 @@ const styles = StyleSheet.create({
 
     screenContainer: {
         position: "absolute",
-        top: 200, // Positioning text below the image
-        left: 20,
-        right: 20,
+        marginTop: 30,
         zIndex: 1, // Ensures text is above the overlay
-        flexDirection: "column",
+        flexDirection: "column"
     },
 
     upcoming: {
@@ -199,6 +234,22 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 1, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 3,
+    },
+
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+
+    menuItem: {
+        flexDirection: "row",
+        justifyContent: "flex-start",
+        alignItems: "center",
+        gap: 10,
+        marginLeft: 5,
+        padding: 10
     }
 
 });
