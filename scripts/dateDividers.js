@@ -57,6 +57,7 @@ export async function divideLocationsIntoGroups(locationAndDurations, days) {
                     remaining_hours = available_hours;
                 } else {
                     console.log("Not enough days available for all activities");
+                    throw new Error("Not enough days available for all activities");
                 }
             }
 
@@ -109,6 +110,7 @@ export async function divideLocationsIntoGroups(locationAndDurations, days) {
 
     } catch (error) {
         console.log("Error in divideLocationsIntoGroups:", error);
+        throw new Error(error);
     }
 }
 

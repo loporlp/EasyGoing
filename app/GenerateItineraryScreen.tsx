@@ -81,6 +81,7 @@ const GenerateItineraryScreen = () => {
     const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
 
     const [timeChecked, setTimeChecked] = useState<boolean>(false);
+    const [changedModeOfTransport, setChangedModeOfTransport] = useState<boolean>(false);
 
     // Pop-Up for Priority 
     const confirmAction = () => {
@@ -336,6 +337,20 @@ const GenerateItineraryScreen = () => {
         );
     }; 
 
+    // Pop-Up for when transport change fails
+    const failedTransportPopup = () => {
+        Alert.alert(
+            "Error Occured",
+            "Changing mode of transport would make travel time exceed available time in the day",
+            [
+                {
+                    text: "OK",
+                },
+            ],
+            { cancelable: false }
+        );
+    }; 
+
     /*
     1. Generate optimal route (which triggers this useEffect)
     2. Use routePolyline to get and store the routes in order
@@ -387,7 +402,7 @@ const GenerateItineraryScreen = () => {
             }
 
             // Used to rerun fetchOptimalRoute to get the new ordered list given the old list (after removing locations that don't fit due to time)
-            if (!timeChecked) {
+            if (!timeChecked && !changedModeOfTransport) {
                 /*
                 TODO:
                 
@@ -443,17 +458,42 @@ const GenerateItineraryScreen = () => {
             // Uses fetchedDurations for this (as well as the loaded durations per location)
             // This returns a dictionary with indices as the ID for range of locations (i.e. "0:2" means from location 0 to location 2)
             console.log("Updated Durations:", updatedDurations);
-            let groupedDays = await divideLocationsIntoGroups(updatedDurations, numberOfDays);
-            console.log("Grouped Days Indices Dict 1:", groupedDays);
-            console.log("New Ordered Locations:", orderedLocations);
-            groupedDays = (groupedDays || {}) as { [key: number]: number };
-            console.log("Grouped Days Indices Dict 2:", groupedDays);
 
-            // (4) Set the groups
-            const resultingGroupedDestinations = groupDestinationsByDay(groupedDays as { [key: number]: number }, orderedLocations);
-            setGroupedDestinations(resultingGroupedDestinations);
-            setGrouped2DDestinations(resultingGroupedDestinations);
-            console.log("Resulting Grouped Destinations Result:", resultingGroupedDestinations);
+            let groupedDays = null;
+            const previousGroupedDests = groupedDestinations;
+            const  previousGrouped2dDests = grouped2DDestinations;
+            let resultingGroupedDestinations;
+
+            // If it's an update from the user side to change mode of transportation, we need to check to see if it's valid change or not
+            try {
+                groupedDays = await divideLocationsIntoGroups(updatedDurations, numberOfDays);
+            } catch (error) {
+                console.log("GI: Error in divideLocationsIntoGroups:", error);
+                groupedDays = null;
+            }
+
+            // This means the error above occured
+            if (groupedDays == null) {
+                // Use the previous stuff
+                setGroupedDestinations(previousGroupedDests);
+                setGrouped2DDestinations(previousGrouped2dDests);
+                resultingGroupedDestinations = previousGrouped2dDests; // or previousGroupedDests. Doesn't matter
+                failedTransportPopup();
+                setChangedModeOfTransport(false);
+            }
+            // Otherwise, run it as usual
+            else {
+                console.log("Grouped Days Indices Dict 1:", groupedDays);
+                console.log("New Ordered Locations:", orderedLocations);
+                groupedDays = (groupedDays || {}) as { [key: number]: number };
+                console.log("Grouped Days Indices Dict 2:", groupedDays);
+    
+                // (4) Set the groups
+                resultingGroupedDestinations = groupDestinationsByDay(groupedDays as { [key: number]: number }, orderedLocations);
+                setGroupedDestinations(resultingGroupedDestinations);
+                setGrouped2DDestinations(resultingGroupedDestinations);
+                console.log("Resulting Grouped Destinations Result:", resultingGroupedDestinations);
+            }
 
             //console.log("Fetched Polylines:", fetchedPolylines);
 
@@ -549,12 +589,14 @@ const GenerateItineraryScreen = () => {
 
     const handleModeChange = (selectedMode: string, destinationIndex: number) => {
         setIsLoading(true);
+        setChangedModeOfTransport(true);
         console.log("What happens to transportationModes:", transportationModes);
 
         // Check if the selected mode is the same as the current mode at the destinationIndex
         const previousMode = transportationModes[destinationIndex];
         if (previousMode === selectedMode) {
             console.log("Mode is the same, no update needed.");
+            setIsLoading(false);
             return;
         }
     
