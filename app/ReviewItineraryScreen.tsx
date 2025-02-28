@@ -5,6 +5,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "expo-router";
 import { storeData, getData } from '../scripts/localStore.js';
+import { Share } from "react-native";
 import moment from 'moment';
 
 /**
@@ -71,6 +72,26 @@ const ReviewItineraryScreen = () => {
         setExpandedSections(prev => ({ ...prev, [date]: !prev[date] }));
     };
 
+    //export trip data in json as a text message
+    const exportTripData = async () => {
+        if (!trip) {
+            alert("No trip data available to export.");
+            return;
+        }
+
+        try {
+            const tripDataString = JSON.stringify(trip, null, 2); //json data as string for text msg
+            //message for the 'share' function to display
+            await Share.share({
+                message: tripDataString,
+                title: "Exported Trip Data",
+            });
+
+        } catch (error) {
+            console.error("Error exporting trip data:", error);
+        }
+    };
+
     const goToHome = () => {
         router.replace("/HomeScreen")
     }
@@ -91,7 +112,7 @@ const ReviewItineraryScreen = () => {
                     <Ionicons name="arrow-back" size={30} color={"white"} />
                 </TouchableOpacity>
                 <View style={{ flexDirection: "row" }}>
-                    <TouchableOpacity style={{ marginRight: 10 }}>
+                    <TouchableOpacity style={{ marginRight: 10 }} onPress={exportTripData}>
                         <Ionicons name="share" size={30} color={"white"} />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => router.replace("/HomeScreen")}>
@@ -136,15 +157,6 @@ const ReviewItineraryScreen = () => {
                                     {/* Iterate through the destinations for the date */}
                                     {groupedDestinations[date].map((dest, idx) => (
                                         <View key={idx}>
-                                             {/* Display transit info */}
-                                            {idx > 0 && (
-                                                <View style={{ height: 50, backgroundColor: "white", borderTopWidth: 1, borderColor: "lightgray" }}>
-                                                    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 15 }}>
-                                                        <Ionicons name={dest.mode === 'walking' ? "walk" : "bus"} size={22} color="#24a6ad" />
-                                                        <Text style={{ fontSize: 16 }}>{dest.transportDuration || "Transit"}</Text>
-                                                    </View>
-                                                </View>
-                                            )}
                                             {/* Display the destination */}
                                             <TouchableOpacity>
                                                 <View style={styles.destination}>
@@ -173,6 +185,13 @@ const ReviewItineraryScreen = () => {
                                                     </View>
                                                 </View>
                                             </TouchableOpacity>
+                                            {/* Display transit info */}
+                                            <View style={{ height: 50, backgroundColor: "white", borderTopWidth: 1, borderColor: "lightgray" }}>
+                                                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 15 }}>
+                                                    <Ionicons name={dest.mode === 'walking' ? "walk" : "bus"} size={22} color="#24a6ad" />
+                                                    <Text style={{ fontSize: 16 }}>{dest.transportDuration || "Transit"}</Text>
+                                                </View>
+                                            </View>
                                         </View>
                                     ))}
                                 </View>
