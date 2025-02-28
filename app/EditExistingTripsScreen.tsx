@@ -133,6 +133,8 @@ const EditExistingTripsScreen = () => {
                                 <Ionicons name={"pencil"} color={"#24a6ad"} size={18} />
                                 <Text style={{ fontSize: 18 }}>Rename Trip</Text>
                             </TouchableOpacity>
+                            
+                            <View style={styles.divider}></View>
 
                             {/* Delete trip */}
                             <TouchableOpacity style={styles.menuItem} onPress={deleteTrip}>
@@ -257,7 +259,14 @@ const styles = StyleSheet.create({
         gap: 10,
         marginLeft: 5,
         padding: 10
-    }
+    },
+
+    divider: {
+        height: 1,
+        backgroundColor: '#ccc',
+        marginVertical: 10,
+        width: "100%"
+    },
 
 });
 
