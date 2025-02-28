@@ -327,7 +327,7 @@ const AddEditDestinations = () => {
             >
                 <View style={{ flex: 1, flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                     <DynamicImage placeName={item.alias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
-                    <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10, marginLeft: 5 }}>
+                    <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10, marginHorizontal: 5 }}>
                         <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                             <Ionicons name="location" size={20} color={"#24a6ad"} />
                             <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{item.alias}</Text>
@@ -335,7 +335,7 @@ const AddEditDestinations = () => {
 
                         <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginLeft: 5 }}>
                             <MaterialCommunityIcons name={"label"} color={"#24a6ad"} />
-                            <Text numberOfLines={1} ellipsizeMode="tail" style={{ marginLeft: 5, color: "gray", marginTop: -5 }}>{item.address}</Text>
+                            <Text numberOfLines={1} ellipsizeMode="tail" style={{ marginLeft: 5, color: "gray"}}>{item.address}</Text>
                         </View>
 
                         <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5 }}>
@@ -443,7 +443,7 @@ const AddEditDestinations = () => {
                     }}
                     >
                         <Text style={{ color: "black", fontWeight: "700", fontSize: 22 }}>Add Destination</Text>
-                        <View style={[styles.destination, { marginTop: 10, flexDirection: "row", alignItems: "center" }]}>
+                        <View style={[styles.destination, { marginTop: 10, flexDirection: "row", alignItems: "center"}]}>
                             {(tempAlias == "") ? (
                                 <Image source={require("../assets/images/blue.png")} style={[styles.destinationImage, { marginLeft: 0 }]} />
                             ) : (
