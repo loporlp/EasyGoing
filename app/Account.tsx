@@ -45,7 +45,7 @@ const Account = () => {
     }, []);
 
     return (
-        < View style={styles.container} >
+        <View style={styles.container} >
             <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                 <TouchableOpacity onPress={() => { navigation.goBack() }}>
                     <Ionicons name="arrow-back-outline" size={22} color={"black"} />
