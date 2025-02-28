@@ -446,7 +446,6 @@ const AddEditDestinations = () => {
                     <TouchableOpacity style={{ height: "80%", width: "100%" }} onPress={() => setAddTripVisible(false)}></TouchableOpacity>
                     <View style={{ flexDirection: "column", width: "100%", height: "20%", backgroundColor: "white", borderTopRightRadius: 10, borderTopLeftRadius: 10, padding: 5 }}>
 
-                        {/* Rename trip */}
                         <TouchableOpacity style={styles.menuItem} onPress={() => { }}>
                             <Ionicons name={"pencil"} color={"#24a6ad"} size={20} />
                             <Text style={{ fontSize: 18 }}>Add Destination</Text>
@@ -454,9 +453,8 @@ const AddEditDestinations = () => {
 
                         <View style={styles.divider}></View>
 
-                        {/* Delete trip */}
                         <TouchableOpacity style={styles.menuItem} onPress={() => { }}>
-                            <MaterialCommunityIcons name="application-import" size={20} color={"#24a6ad"} />
+                            <Ionicons name="bookmark" size={20} color={"#24a6ad"} />
                             <Text style={{ fontSize: 18 }}>Import from Saved</Text>
                         </TouchableOpacity>
                     </View>
