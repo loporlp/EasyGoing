@@ -418,12 +418,6 @@ const AddEditDestinations = () => {
             </View>
 
             <View style={styles.navBar}>
-                <TouchableOpacity style={{ padding: 10, marginLeft: 20 }} onPress={show}>
-                    <Ionicons name="add" size={30} color={"#24a6ad"} />
-                </TouchableOpacity>
-                <TouchableOpacity style={{ padding: 10 }}>
-                    <MaterialCommunityIcons name="application-import" size={30} color={"#24a6ad"} />
-                </TouchableOpacity>
                 <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={() => {
                     if (destinations.length > 1 && hasOrigin) {
                         updateTrip(tripId, trip)
@@ -446,14 +440,14 @@ const AddEditDestinations = () => {
                     <TouchableOpacity style={{ height: "80%", width: "100%" }} onPress={() => setAddTripVisible(false)}></TouchableOpacity>
                     <View style={{ flexDirection: "column", width: "100%", height: "20%", backgroundColor: "white", borderTopRightRadius: 10, borderTopLeftRadius: 10, padding: 5 }}>
 
-                        <TouchableOpacity style={styles.menuItem} onPress={() => { }}>
+                        <TouchableOpacity style={styles.menuItem} onPress={() => { setAddTripVisible(false); show() }}>
                             <Ionicons name={"pencil"} color={"#24a6ad"} size={20} />
                             <Text style={{ fontSize: 18 }}>Add Destination</Text>
                         </TouchableOpacity>
 
                         <View style={styles.divider}></View>
 
-                        <TouchableOpacity style={styles.menuItem} onPress={() => { }}>
+                        <TouchableOpacity style={styles.menuItem} onPress={() => { setAddTripVisible(false) }}>
                             <Ionicons name="bookmark" size={20} color={"#24a6ad"} />
                             <Text style={{ fontSize: 18 }}>Import from Saved</Text>
                         </TouchableOpacity>
