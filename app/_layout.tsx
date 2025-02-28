@@ -95,6 +95,14 @@ export default function RootLayout() {
         }}
       />
 
+      {/* Notifications screen */}
+      <Stack.Screen
+        name="NotificationsScreen"
+        options={{
+          headerShown: false,
+        }}
+      />
+
       {/*Connection to server failed screen*/}
       <Stack.Screen
         name="ConnectionToServerFailedScreen"
