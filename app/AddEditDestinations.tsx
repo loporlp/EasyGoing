@@ -418,7 +418,7 @@ const AddEditDestinations = () => {
             </View>
 
             <View style={styles.navBar}>
-                <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={() => {
+                <TouchableOpacity style={{ backgroundColor: "#24a6ad", width: "80%", alignItems: "center", paddingVertical: 15, paddingHorizontal: 5, marginBottom: 10, borderRadius: 10}} onPress={() => {
                     if (destinations.length > 1 && hasOrigin) {
                         updateTrip(tripId, trip)
                         router.push("/GenerateItineraryScreen")
@@ -426,7 +426,7 @@ const AddEditDestinations = () => {
                         alert(hasOrigin ? "You must add at least 1 destination (excluding origin)." : "You must have an origin")
                     }
                 }}>
-                    <Ionicons name="arrow-forward-circle-sharp" size={30} color={"#24a6ad"} />
+                    <Text style={{fontSize: 18, color: "white", fontWeight: "700"}}>Generate Itinerary</Text>
                 </TouchableOpacity>
             </View>
 
@@ -703,9 +703,10 @@ const styles = StyleSheet.create({
     navBar: {
         flexDirection: "row",
         backgroundColor: "white",
-        justifyContent: "space-between",
+        justifyContent: "center",
         alignItems: "center",
-        height: "8%",
+        height: "10%",
+        width: "100%",
         shadowColor: "#333333",
         shadowOffset: { width: 1, height: 2 },
         shadowOpacity: 0.3,
