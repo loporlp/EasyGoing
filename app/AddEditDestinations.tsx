@@ -67,7 +67,7 @@ const AddEditDestinations = () => {
                         setTripId(currentTripID);  // Store only the trip id
                         setTrip(tripDetails);  // Store the full trip data
                         setDestinations(tripDetails.destinations); // Immediately update the destinations so they load on screen
-                        if(destinations.length > 0 && destinations[0].dayOrigin){
+                        if (destinations.length > 0 && destinations[0].dayOrigin) {
                             setHasOrigin(true);
                             setOriginText(tripDetails.destinations[0].address)
                         }
@@ -93,7 +93,7 @@ const AddEditDestinations = () => {
             setOriginText("");
         }
     }, [trip]); // Runs every time `trip` updates
-    
+
 
     const addLocation = () => {
         // Ensure that trip data and tripId are available
@@ -198,9 +198,9 @@ const AddEditDestinations = () => {
         if (!tripId) {
             console.error("tripId is null, cannot delete location.");
             return;
-        } 
+        }
 
-        if(trip.destinations[index].dayOrigin){
+        if (trip.destinations[index].dayOrigin) {
             setHasOrigin(false);
             setOriginText("");
         }
@@ -215,7 +215,7 @@ const AddEditDestinations = () => {
             console.error("Trip data is not loaded yet.");
             return;
         }
-    
+
         const newOriginDestination = {
             alias: "Origin",
             address: address.description,
@@ -230,26 +230,26 @@ const AddEditDestinations = () => {
             cost: 0,
             picture: ""
         };
-    
+
         const updatedDestinations =
             trip.destinations.length > 0 && trip.destinations[0].dayOrigin
                 ? trip.destinations.map((dest: any, index: number) => (index === 0 ? newOriginDestination : dest))
                 : [newOriginDestination, ...trip.destinations];
-    
+
         // Update state with the new trip object using the function version of setTrip
         setTrip((prevTrip: any) => {
             const newTrip = { ...prevTrip, destinations: updatedDestinations };
-    
+
             // Update trip in the database using the new state
             updateTrip(tripId, newTrip);
-    
+
             // Persist updated trip data to local storage
             storeData(tripId.toString(), newTrip);
-    
+
             console.log("Updated Trip State:", newTrip);
             return newTrip; // Ensures React updates state correctly
         });
-    
+
         // Update local component states
         setDestinations(updatedDestinations);
         setHasOrigin(true);
@@ -258,6 +258,7 @@ const AddEditDestinations = () => {
 
     // Calendar Modal
     const [isModalVisible, setModalVisible] = useState(false); // To control modal visibility
+    const [isAddTripVisible, setAddTripVisible] = useState(false);
     const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null); // Explicitly define state type
     const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null); // Explicitly define state type
     const [datesText, setDatesText] = useState("");
@@ -327,7 +328,7 @@ const AddEditDestinations = () => {
             >
                 <View style={{ flex: 1, flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                     <DynamicImage placeName={item.alias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
-                    <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10, marginLeft: 5 }}>
+                    <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10, marginHorizontal: 5 }}>
                         <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                             <Ionicons name="location" size={20} color={"#24a6ad"} />
                             <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{item.alias}</Text>
@@ -335,7 +336,7 @@ const AddEditDestinations = () => {
 
                         <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginLeft: 5 }}>
                             <MaterialCommunityIcons name={"label"} color={"#24a6ad"} />
-                            <Text numberOfLines={1} ellipsizeMode="tail" style={{ marginLeft: 5, color: "gray", marginTop: -5 }}>{item.address}</Text>
+                            <Text numberOfLines={1} ellipsizeMode="tail" style={{ marginLeft: 5, color: "gray" }}>{item.address}</Text>
                         </View>
 
                         <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5 }}>
@@ -370,8 +371,8 @@ const AddEditDestinations = () => {
 
                 {/* Group of text fields */}
                 <View style={{ marginTop: 15 }}>
-                    <View style={{flexDirection: "row", marginBottom: 10, alignItems: "center", backgroundColor: "white", borderRadius: 10}}>
-                        <Ionicons name="location" size={22} color={"#24a6ad"} style={{position: "absolute", zIndex: 1, marginLeft: 10}} />
+                    <View style={{ flexDirection: "row", marginBottom: 10, alignItems: "center", backgroundColor: "white", borderRadius: 10 }}>
+                        <Ionicons name="location" size={22} color={"#24a6ad"} style={{ position: "absolute", zIndex: 1, marginLeft: 10 }} />
                         <AutocompleteTextBox placeholder="Origin" placeholderTextColor="gray" onPlaceSelect={handleOriginSelect} value={originText} style={{ width: "100%", paddingLeft: 30 }} />
                     </View>
 
@@ -396,7 +397,13 @@ const AddEditDestinations = () => {
 
             {/* Scrollable window that displays all the destinations added */}
             <View style={styles.destinationScreen}>
-                <Text style={{ fontSize: 22, fontWeight: "700", marginBottom: 10, marginHorizontal: 20, marginTop: 10 }}>Destinations Selected <Text style={{ color: "#24a6ad" }}>({destinations.length})</Text>:</Text>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginVertical: 10, marginHorizontal: 20 }}>
+                    <Text style={{ fontSize: 22, fontWeight: "700" }}>Destinations Selected <Text style={{ color: "#24a6ad" }}>({destinations.length})</Text>:</Text>
+                    <TouchableOpacity style={{ padding: 5 }} onPress={() => setAddTripVisible(true)}>
+                        <Ionicons name="add-circle" size={28} color="#24a6ad" />
+                    </TouchableOpacity>
+                </View>
+
                 <SwipeListView
                     data={destinations.map((item, index) => ({ ...item, key: `${index}` }))}
                     renderItem={renderItem}
@@ -411,23 +418,42 @@ const AddEditDestinations = () => {
             </View>
 
             <View style={styles.navBar}>
-                <TouchableOpacity style={{ padding: 10, marginLeft: 20 }} onPress={show}>
-                    <Ionicons name="add" size={30} color={"#24a6ad"} />
-                </TouchableOpacity>
-                <TouchableOpacity style={{ padding: 10 }}>
-                    <MaterialCommunityIcons name="application-import" size={30} color={"#24a6ad"} />
-                </TouchableOpacity>
-                <TouchableOpacity style={{ padding: 10, marginRight: 20 }} onPress={() => { 
-                        if (destinations.length > 1 && hasOrigin) {
-                            updateTrip(tripId, trip)
-                            router.push("/GenerateItineraryScreen")
-                        } else {
-                            alert(hasOrigin ?  "You must add at least 1 destination (excluding origin).": "You must have an origin")
-                        }
-                    }}>
-                    <Ionicons name="arrow-forward-circle-sharp" size={30} color={"#24a6ad"} />
+                <TouchableOpacity style={{ backgroundColor: "#24a6ad", width: "80%", alignItems: "center", paddingVertical: 15, paddingHorizontal: 5, marginBottom: 10, borderRadius: 10}} onPress={() => {
+                    if (destinations.length > 1 && hasOrigin) {
+                        updateTrip(tripId, trip)
+                        router.push("/GenerateItineraryScreen")
+                    } else {
+                        alert(hasOrigin ? "You must add at least 1 destination (excluding origin)." : "You must have an origin")
+                    }
+                }}>
+                    <Text style={{fontSize: 18, color: "white", fontWeight: "700"}}>Generate Itinerary</Text>
                 </TouchableOpacity>
             </View>
+
+            <Modal
+                visible={isAddTripVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setAddTripVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <TouchableOpacity style={{ height: "80%", width: "100%" }} onPress={() => setAddTripVisible(false)}></TouchableOpacity>
+                    <View style={{ flexDirection: "column", width: "100%", height: "20%", backgroundColor: "white", borderTopRightRadius: 10, borderTopLeftRadius: 10, padding: 5 }}>
+
+                        <TouchableOpacity style={styles.menuItem} onPress={() => { setAddTripVisible(false); show() }}>
+                            <Ionicons name={"pencil"} color={"#24a6ad"} size={20} />
+                            <Text style={{ fontSize: 18 }}>Add Destination</Text>
+                        </TouchableOpacity>
+
+                        <View style={styles.divider}></View>
+
+                        <TouchableOpacity style={styles.menuItem} onPress={() => { setAddTripVisible(false) }}>
+                            <Ionicons name="bookmark" size={20} color={"#24a6ad"} />
+                            <Text style={{ fontSize: 18 }}>Import from Saved</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
 
             {/* Add destination pop-up */}
             <Modal animationType="fade" visible={visible} transparent={true} onRequestClose={hide}>
@@ -606,7 +632,7 @@ const styles = StyleSheet.create({
     },
 
     travelerInput: {
-        height: 50,
+        height: 40,
         flex: 1,
         borderColor: '#999',
         borderBottomWidth: 1,
@@ -623,7 +649,7 @@ const styles = StyleSheet.create({
     },
 
     budgetInput: {
-        height: 50,
+        height: 40,
         width: "50%",
         borderColor: '#999',
         borderBottomWidth: 1,
@@ -677,9 +703,10 @@ const styles = StyleSheet.create({
     navBar: {
         flexDirection: "row",
         backgroundColor: "white",
-        justifyContent: "space-between",
+        justifyContent: "center",
         alignItems: "center",
-        height: "8%",
+        height: "10%",
+        width: "100%",
         shadowColor: "#333333",
         shadowOffset: { width: 1, height: 2 },
         shadowOpacity: 0.3,
@@ -847,7 +874,23 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 1, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 3,
-    }
+    },
+
+    menuItem: {
+        flexDirection: "row",
+        justifyContent: "flex-start",
+        alignItems: "center",
+        gap: 10,
+        marginLeft: 5,
+        padding: 10
+    },
+
+    divider: {
+        height: 1,
+        backgroundColor: '#ccc',
+        marginVertical: 10,
+        width: "100%"
+    },
 });
 
 export default AddEditDestinations;
