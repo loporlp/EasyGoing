@@ -63,6 +63,14 @@ const EditExistingTripsScreen = () => {
         router.replace("/SavedDestinationsScreen")
     }
 
+    const renameTrip = () => {
+        setModalVisible(false)
+    }
+
+    const deleteTrip = () => {
+        setModalVisible(false)
+    }
+
     return (
         <View style={{ flex: 1, flexDirection: "column" }}>
             <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1 }}>
@@ -117,18 +125,17 @@ const EditExistingTripsScreen = () => {
                     onRequestClose={() => setModalVisible(false)}
                 >
                     <View style={styles.modalOverlay}>
+                        <TouchableOpacity style={{height: "80%", width: "100%"}} onPress={() => setModalVisible(false)}></TouchableOpacity>
                         <View style={{ flexDirection: "column", width: "100%", height: "20%", backgroundColor: "white", borderTopRightRadius: 10, borderTopLeftRadius: 10, padding: 5 }}>
-                            <TouchableOpacity style={styles.menuItem} onPress={() => setModalVisible(false)}>
-                                <MaterialIcons name={"cancel"} color={"#24a6ad"} size={18} />
-                                <Text style={{ fontSize: 18 }}>Cancel</Text>
-                            </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.menuItem}>
+                            {/* Rename trip */}
+                            <TouchableOpacity style={styles.menuItem} onPress={renameTrip}>
                                 <Ionicons name={"pencil"} color={"#24a6ad"} size={18} />
                                 <Text style={{ fontSize: 18 }}>Rename Trip</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.menuItem}>
+                            {/* Delete trip */}
+                            <TouchableOpacity style={styles.menuItem} onPress={deleteTrip}>
                                 <Ionicons name={"trash"} color={"red"} size={18} />
                                 <Text style={{ fontSize: 18 }}>Delete Trip</Text>
                             </TouchableOpacity>
