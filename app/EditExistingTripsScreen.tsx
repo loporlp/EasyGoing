@@ -95,15 +95,14 @@ const EditExistingTripsScreen = () => {
                                 source={require("../assets/images/newyorkcity.jpg")}
                             />
                             <View style={styles.darkOverlay} />
+                            <View style={{ flexDirection: "row", justifyContent: "flex-end", position: "absolute", marginTop: 30, right: 0 }}>
+                                <TouchableOpacity style={{ padding: 15 }} onPress={() => setModalVisible(true)}>
+                                    <Ionicons name={"ellipsis-horizontal-circle-outline"} color={"white"} size={30} />
+                                </TouchableOpacity>
+                            </View>
 
                             <View style={styles.screenContainer}>
-                                <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
-                                    <TouchableOpacity style={{ padding: 10 }} onPress={() => setModalVisible(true)}>
-                                        <Ionicons name={"ellipsis-horizontal-circle-outline"} color={"white"} size={30} />
-                                    </TouchableOpacity>
-                                </View>
-
-                                <View style={{ marginTop: 120, paddingHorizontal: 10 }}>
+                                <View style={{ marginTop: 180, paddingHorizontal: 10 }}>
                                     <Text style={styles.upcoming}>UPCOMING TRIP</Text>
                                     <Text style={styles.destinationName}>{trip.details?.tripName ? String(trip.details.tripName) : "Unnamed Trip"}</Text>
                                     <Text numberOfLines={1} style={styles.dates}>{trip.details?.tripStartDate && trip.details?.tripEndDate
@@ -125,7 +124,7 @@ const EditExistingTripsScreen = () => {
                     onRequestClose={() => setModalVisible(false)}
                 >
                     <View style={styles.modalOverlay}>
-                        <TouchableOpacity style={{height: "80%", width: "100%"}} onPress={() => setModalVisible(false)}></TouchableOpacity>
+                        <TouchableOpacity style={{ height: "80%", width: "100%" }} onPress={() => setModalVisible(false)}></TouchableOpacity>
                         <View style={{ flexDirection: "column", width: "100%", height: "20%", backgroundColor: "white", borderTopRightRadius: 10, borderTopLeftRadius: 10, padding: 5 }}>
 
                             {/* Rename trip */}
@@ -133,7 +132,7 @@ const EditExistingTripsScreen = () => {
                                 <Ionicons name={"pencil"} color={"#24a6ad"} size={18} />
                                 <Text style={{ fontSize: 18 }}>Rename Trip</Text>
                             </TouchableOpacity>
-                            
+
                             <View style={styles.divider}></View>
 
                             {/* Delete trip */}
