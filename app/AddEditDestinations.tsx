@@ -464,7 +464,7 @@ const AddEditDestinations = () => {
                         backgroundColor: '#F4F4F4',
                         padding: 20,
                         borderRadius: 10,
-                        height: "55%",
+                        height: 460,
                     }}
                     >
                         <Text style={{ color: "black", fontWeight: "700", fontSize: 22 }}>Add Destination</Text>
