@@ -1,6 +1,6 @@
 // AddEditDestinations.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, TextInput, Text, TouchableOpacity, Dimensions, Modal, TouchableWithoutFeedback, Button, Image } from "react-native";
+import { View, StyleSheet, TextInput, Text, TouchableOpacity, Dimensions, Modal, TouchableWithoutFeedback, KeyboardAvoidingView, Image, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import { storeData, getData } from '../scripts/localStore.js';
@@ -331,7 +331,7 @@ const AddEditDestinations = () => {
                     <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10, marginHorizontal: 5 }}>
                         <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                             <Ionicons name="location" size={20} color={"#24a6ad"} />
-                            <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{item.alias}</Text>
+                            <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5, marginRight: 15 }}>{item.alias}</Text>
                         </View>
 
                         <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginLeft: 5 }}>
@@ -418,7 +418,7 @@ const AddEditDestinations = () => {
             </View>
 
             <View style={styles.navBar}>
-                <TouchableOpacity style={{ backgroundColor: "#24a6ad", width: "80%", alignItems: "center", paddingVertical: 15, paddingHorizontal: 5, marginBottom: 10, borderRadius: 10}} onPress={() => {
+                <TouchableOpacity style={{ backgroundColor: "#24a6ad", width: "80%", alignItems: "center", paddingVertical: 15, paddingHorizontal: 5, marginBottom: 10, borderRadius: 10 }} onPress={() => {
                     if (destinations.length > 1 && hasOrigin) {
                         updateTrip(tripId, trip)
                         router.push("/GenerateItineraryScreen")
@@ -426,7 +426,7 @@ const AddEditDestinations = () => {
                         alert(hasOrigin ? "You must add at least 1 destination (excluding origin)." : "You must have an origin")
                     }
                 }}>
-                    <Text style={{fontSize: 18, color: "white", fontWeight: "700"}}>Generate Itinerary</Text>
+                    <Text style={{ fontSize: 18, color: "white", fontWeight: "700" }}>Generate Itinerary</Text>
                 </TouchableOpacity>
             </View>
 
@@ -456,7 +456,7 @@ const AddEditDestinations = () => {
             </Modal>
 
             {/* Add destination pop-up */}
-            <Modal animationType="fade" visible={visible} transparent={true} onRequestClose={hide}>
+            <Modal animationType="fade" visible={visible} transparent={true} onRequestClose={hide} statusBarTranslucent={true}>
 
                 <View style={styles.modalOverlay}>
                     <View style={{
@@ -464,8 +464,7 @@ const AddEditDestinations = () => {
                         backgroundColor: '#F4F4F4',
                         padding: 20,
                         borderRadius: 10,
-                        height: "55%",
-                        marginTop: -100
+                        height: 460,
                     }}
                     >
                         <Text style={{ color: "black", fontWeight: "700", fontSize: 22 }}>Add Destination</Text>
@@ -501,7 +500,7 @@ const AddEditDestinations = () => {
                                         {(tempDuration == "") ? (
                                             <Text style={{ marginLeft: 5 }}>Duration</Text>
                                         ) : (
-                                            <Text style={{ marginLeft: 5 }}>{tempDuration} hrs</Text>
+                                            <Text style={{ marginLeft: 5 }}>{tempDuration} mins</Text>
                                         )}
                                     </View>
 
@@ -572,6 +571,7 @@ const AddEditDestinations = () => {
                     </View>
                 </View>
             </Modal>
+
 
             {/* Pop-up for Date Interval picker */}
             {/* Modal with CalendarPicker */}
