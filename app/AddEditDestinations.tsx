@@ -331,7 +331,7 @@ const AddEditDestinations = () => {
                     <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10, marginHorizontal: 5 }}>
                         <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                             <Ionicons name="location" size={20} color={"#24a6ad"} />
-                            <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{item.alias}</Text>
+                            <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5, marginRight: 15 }}>{item.alias}</Text>
                         </View>
 
                         <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginLeft: 5 }}>
@@ -501,7 +501,7 @@ const AddEditDestinations = () => {
                                         {(tempDuration == "") ? (
                                             <Text style={{ marginLeft: 5 }}>Duration</Text>
                                         ) : (
-                                            <Text style={{ marginLeft: 5 }}>{tempDuration} hrs</Text>
+                                            <Text style={{ marginLeft: 5 }}>{tempDuration} mins</Text>
                                         )}
                                     </View>
 
