@@ -5,6 +5,7 @@ import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-ic
 import { useState, useEffect } from "react";
 import { getData, storeData, fillLocal } from '../scripts/localStore';
 import { deleteTrip, updateTrip } from '../scripts/databaseInteraction.js';
+import Toast from 'react-native-toast-message';
 
 const EditExistingTripsScreen = () => {
     const router = useRouter();
@@ -37,6 +38,16 @@ const EditExistingTripsScreen = () => {
         };
         loadTrips();
     }, []);
+
+    const showToast = (tripName: string) => {
+        Toast.show({
+            type: "success",
+            text1: "Successfully deleted trip: " + tripName,
+            text1Style: {
+                fontSize: 12,
+            }
+        });
+    }
 
     const editTrip = async (tripId: string) => {
         //set current trip before going to edit
@@ -74,13 +85,14 @@ const EditExistingTripsScreen = () => {
         setModalVisible(false)
     }
 
-    const deleteATrip = async (index: number) => {
+    const deleteATrip = async (index: number, tripName: string) => {
         const deleteSuccess = await deleteTrip(index)
-
         if (deleteSuccess) {
             setTrips(prevTrips => prevTrips.filter(trips => trips.id !== index));
             setModalVisible(false)
         }
+
+        showToast(tripName);
     }
 
     return (
@@ -157,7 +169,16 @@ const EditExistingTripsScreen = () => {
                             <View style={styles.divider}></View>
 
                             {/* Delete trip */}
-                            <TouchableOpacity style={styles.menuItem} onPress={() => deleteATrip(selectedTripId)}>
+                            <TouchableOpacity style={styles.menuItem} onPress={() => {
+                                const selectedTrip = trips.find(trip => trip.id === selectedTripId); // Find the selected trip by ID
+                                
+                                if (selectedTrip) {
+                                    const tripName = selectedTrip.details.tripName ? selectedTrip.details.tripName : "Unnamed Trip";
+                                    console.log("Selected Trip Name:", tripName);
+                                    deleteATrip(selectedTripId, tripName)
+                                }}
+                                }  
+                            >
                                 <Ionicons name={"trash"} color={"red"} size={18} />
                                 <Text style={{ fontSize: 18 }}>Delete Trip</Text>
                             </TouchableOpacity>
@@ -166,6 +187,9 @@ const EditExistingTripsScreen = () => {
                 </Modal>
 
             </ScrollView>
+
+            <Toast />
+
             <View style={styles.navBar}>
                 <TouchableOpacity style={{ padding: 10, marginLeft: 20 }} onPress={homeScreen}>
                     <Ionicons name="home" size={30} color={"lightgray"} />
