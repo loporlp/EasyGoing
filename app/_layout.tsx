@@ -71,7 +71,7 @@ export default function RootLayout() {
       />
 
       {/* Account screen */}
-      <Stack.Screen 
+      <Stack.Screen
         name="Account"
         options={{
           headerShown: false
@@ -79,8 +79,8 @@ export default function RootLayout() {
       />
 
       {/* Saved Desstinations screen */}
-      <Stack.Screen 
-        name = "SavedDestinationsScreen"
+      <Stack.Screen
+        name="SavedDestinationsScreen"
         options={{
           headerShown: false,
           animation: "none"
@@ -131,6 +131,14 @@ export default function RootLayout() {
           headerShown: false,
           animation: "none"
         }} />
+
+      {/* Budget Manager Screen */}
+      <Stack.Screen
+        name="BudgetManagerScreen"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   )
 };

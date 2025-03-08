@@ -1,15 +1,17 @@
 // EditExistingTripsScreen.tsx
 import { ScrollView, Image, StyleSheet, TouchableOpacity, Text, View, Modal } from "react-native";
 import { useRouter } from "expo-router";
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useState, useEffect } from "react";
 import { getData, storeData, fillLocal } from '../scripts/localStore';
+import { deleteTrip, updateTrip } from '../scripts/databaseInteraction.js';
 
 const EditExistingTripsScreen = () => {
     const router = useRouter();
 
     // State to store the trips
     const [trips, setTrips] = useState<any[]>([]);
+    const [selectedTripId, setSelectedTripId] = useState<any | null>(null);
 
     const [isModalVisible, setModalVisible] = useState(false);
 
@@ -42,6 +44,11 @@ const EditExistingTripsScreen = () => {
         router.push("/AddEditDestinations");
     }
 
+    const budgetManagerScreen = () => {
+        setModalVisible(false);
+        router.push("/BudgetManagerScreen");
+    }
+
     const homeScreen = () => {
         router.replace("/HomeScreen")
     }
@@ -67,8 +74,13 @@ const EditExistingTripsScreen = () => {
         setModalVisible(false)
     }
 
-    const deleteTrip = () => {
-        setModalVisible(false)
+    const deleteATrip = async (index: number) => {
+        const deleteSuccess = await deleteTrip(index)
+
+        if (deleteSuccess) {
+            setTrips(prevTrips => prevTrips.filter(trips => trips.id !== index));
+            setModalVisible(false)
+        }
     }
 
     return (
@@ -90,13 +102,14 @@ const EditExistingTripsScreen = () => {
                             style={styles.tripButton}
                             onPress={() => editTrip(trip.id)}
                         >
+                            {/* Make this dynamic to take in trip.origin*/}
                             <Image
                                 style={styles.backgroundImage}
                                 source={require("../assets/images/newyorkcity.jpg")}
                             />
                             <View style={styles.darkOverlay} />
                             <View style={{ flexDirection: "row", justifyContent: "flex-end", position: "absolute", marginTop: 30, right: 0 }}>
-                                <TouchableOpacity style={{ padding: 15 }} onPress={() => setModalVisible(true)}>
+                                <TouchableOpacity style={{ padding: 15, zIndex: 10 }} onPress={() => {setModalVisible(true); setSelectedTripId(trip.id)}}>
                                     <Ionicons name={"ellipsis-horizontal-circle-outline"} color={"white"} size={30} />
                                 </TouchableOpacity>
                             </View>
@@ -125,7 +138,15 @@ const EditExistingTripsScreen = () => {
                 >
                     <View style={styles.modalOverlay}>
                         <TouchableOpacity style={{ height: "80%", width: "100%" }} onPress={() => setModalVisible(false)}></TouchableOpacity>
-                        <View style={{ flexDirection: "column", width: "100%", height: "20%", backgroundColor: "white", borderTopRightRadius: 10, borderTopLeftRadius: 10, padding: 5 }}>
+                        <View style={{ flexDirection: "column", width: "100%", height: "30%", backgroundColor: "white", borderTopRightRadius: 10, borderTopLeftRadius: 10, padding: 5 }}>
+
+                            {/* Rename trip */}
+                            <TouchableOpacity style={styles.menuItem} onPress={budgetManagerScreen}>
+                                <MaterialCommunityIcons name={"cash-marker"} color={"#24a6ad"} size={18} />
+                                <Text style={{ fontSize: 18 }}>Budget Manager</Text>
+                            </TouchableOpacity>
+
+                            <View style={styles.divider}></View>
 
                             {/* Rename trip */}
                             <TouchableOpacity style={styles.menuItem} onPress={renameTrip}>
@@ -136,7 +157,7 @@ const EditExistingTripsScreen = () => {
                             <View style={styles.divider}></View>
 
                             {/* Delete trip */}
-                            <TouchableOpacity style={styles.menuItem} onPress={deleteTrip}>
+                            <TouchableOpacity style={styles.menuItem} onPress={() => deleteATrip(selectedTripId)}>
                                 <Ionicons name={"trash"} color={"red"} size={18} />
                                 <Text style={{ fontSize: 18 }}>Delete Trip</Text>
                             </TouchableOpacity>
