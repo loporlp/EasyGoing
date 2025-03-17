@@ -3,29 +3,32 @@ import axios from 'axios';
 // Distance Matrix API
 async function getDistanceMatrix(origin, destinations, mode) {
     const url = 'https://maps.googleapis.com/maps/api/distancematrix/json';
+
+    // Log the destinations array converted to a string
     const destinationsStr = destinations.map(d => d.address).join('|'); // Between each destination, add this symbol
-    console.log("DestStr:" + destinationsStr);
+    console.log("DestStr:", destinationsStr);
 
     const apiKey = "AIzaSyAQgbWUgdfMozsamfhRi8HrHlRorkFNIEc";
-    const originFull = origin.name + ", " + origin.address; //TODO: name + address
-    console.log("Origin OptimalRoute: " + originFull);
-    // TODO: Convert to getCoords()
+    const originFull = origin.name + ", " + origin.address;
+    console.log("Origin OptimalRoute:", originFull);
+
     // TODO: Switch to ezgoing API call
+    // Construct the full URL for the API call
     const fullUrl = `${url}?origins=${encodeURIComponent(originFull)}&destinations=${encodeURIComponent(destinationsStr)}&mode=${mode}&key=${apiKey}`;
     console.log('Request URL:', fullUrl);
 
     let response;
 
     try {
-        // Call the API
+        // Call the API and log the response
+        console.log("Sending request to API...");
         response = await axios.get(fullUrl, {
             method: "GET"
         });
-        //console.log('API Response:', response.data);
+        console.log('API Response:', response.data);
     } catch (error) {
         console.error('Error in API call:', error);
 
-        // Log more details if the error has a response
         if (error.response) {
             console.error('Response Error:', error.response.data);
             console.error('Response Status:', error.response.status);
@@ -36,20 +39,36 @@ async function getDistanceMatrix(origin, destinations, mode) {
         }
     }
 
+    // Check if the response has the expected structure
+    if (!response || !response.data || !response.data.rows || !response.data.rows[0].elements) {
+        console.error("Invalid response structure:", response);
+        throw new Error("Invalid API response structure");
+    }
 
-    // Get the response
+    // Get the response data and log the rows and elements
     const data = response.data;
+    console.log("Response Data:", data);
 
-    // Process and return the distances and durations
-    const distances = data.rows[0].elements.map((element, index) => ({
-        destinationAddress: data.destination_addresses[index], // address
-        originalLocationName: destinations[index].name, // location name
-        duration: destinations[index].duration, // location duration
-        priority: destinations[index].priority, // location priority
-        distance: element.distance.value,  // in meters
-        transportDuration: element.duration.value,  // in seconds (transport)
-    }));
+    // Map the distances and durations for each destination
+    const distances = data.rows[0].elements.map((element, index) => {
+        console.log(`Processing destination ${index + 1}: ${destinations[index].name}`);
 
+        const distanceData = {
+            destinationAddress: data.destination_addresses[index], // address
+            originalLocationName: destinations[index].name, // location name
+            duration: destinations[index].duration, // location duration
+            priority: destinations[index].priority, // location priority
+            distance: element.distance.value,  // in meters
+            transportDuration: element.duration.value,  // in seconds (transport)
+        };
+
+        console.log("Distance Data:", distanceData);
+
+        return distanceData;
+    });
+
+    // Return the distances array
+    console.log("Distances List:", distances);
     return distances;
 }
 
@@ -64,7 +83,14 @@ export async function calculateOptimalRoute(locations, origin, mode) {
         for (let i = 0; i < length; i++) {
             console.log(locations);
             // Get the distance matrix for the current origin and remaining locations
-            const distancesList = await getDistanceMatrix(currentOrigin, locations, mode);
+            let distancesList;
+            try {
+                distancesList = await getDistanceMatrix(currentOrigin, locations, mode);
+            } catch (error){
+                console.log("Error occured in DistanceMatrix: ", error);
+                throw new Error(error);
+            }
+
     
             // Find the destination with the minimum distance
             // TODO: Based on user input, whether it's distance or duration
