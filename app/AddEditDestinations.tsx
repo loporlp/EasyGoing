@@ -419,10 +419,13 @@ const AddEditDestinations = () => {
 
             <View style={styles.navBar}>
                 <TouchableOpacity style={{ backgroundColor: "#24a6ad", width: "80%", alignItems: "center", paddingVertical: 15, paddingHorizontal: 5, marginBottom: 10, borderRadius: 10 }} onPress={() => {
-                    if (destinations.length > 1 && hasOrigin) {
+                    if (destinations.length > 1 && destinations.length <= 25 && hasOrigin) {
                         updateTrip(tripId, trip)
                         router.push("/GenerateItineraryScreen")
-                    } else {
+                    } else if (destinations.length > 25) {
+                        alert("You can only have a max of 25 destinations (including origin).")
+                    }
+                    else {
                         alert(hasOrigin ? "You must add at least 1 destination (excluding origin)." : "You must have an origin")
                     }
                 }}>
