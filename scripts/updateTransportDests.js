@@ -84,3 +84,38 @@ export const updateDayOrigin = (updatedDests, grouped2DDestinations) => {
         };
     });
 };
+
+// Function to add tripDates to startDateTime for each destination
+export const addTripDatesToStartDateTime = (updatedDest, tripDates) => {
+    console.log("Updated Destinations (Before Trip Dates):", updatedDest);
+    console.log("Trip Dates:", tripDates);
+
+    return updatedDest.map((destination, index) => {
+        // Check if there's a corresponding trip date for this destination
+        if (tripDates[index]) {
+            const tripDate = tripDates[index];
+
+            // Ensure the destination has a startDateTime field
+            const startDateTime = new Date(destination.startDateTime);
+
+            // Update startDateTime with the corresponding trip date
+            const updatedStartDateTime = new Date(tripDate);
+
+            // Set the time of day based on the original startDateTime
+            updatedStartDateTime.setHours(startDateTime.getHours());
+            updatedStartDateTime.setMinutes(startDateTime.getMinutes());
+            updatedStartDateTime.setSeconds(startDateTime.getSeconds());
+
+            console.log(`Updating startDateTime for ${destination.alias} to: ${updatedStartDateTime}`);
+
+            return {
+                ...destination,
+                startDateTime: updatedStartDateTime.toISOString(),
+            };
+        } else {
+            // If no trip date, leave the startDateTime unchanged
+            console.log(`No trip date for ${destination.alias}. Keeping original startDateTime.`);
+            return destination;
+        }
+    });
+};

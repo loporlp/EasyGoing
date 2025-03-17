@@ -12,7 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useState, useEffect, useRef, act } from "react";
 import { getData } from '../scripts/localStore.js';
 import { divideLocationsIntoGroups } from '../scripts/dateDividers.js';
-import { updateDestinationsWithTransport, updateDayOrigin } from '../scripts/updateTransportDests.js';
+import { updateDestinationsWithTransport, updateDayOrigin, addTripDatesToStartDateTime } from '../scripts/updateTransportDests.js';
 import { launchPrioritySystem} from '../scripts/prioritySystem.js';
 import { updateTrip } from '../scripts/databaseInteraction.js';
 import groupDestinationsByDay from '../scripts/groupDestinationsByDay';
@@ -340,7 +340,7 @@ const GenerateItineraryScreen = () => {
     // Pop-Up for when transport change fails
     const failedTransportPopup = () => {
         Alert.alert(
-            "Error Occured",
+            "Warning",
             "Changing mode of transport would make travel time exceed available time in the day",
             [
                 {
@@ -576,7 +576,8 @@ const GenerateItineraryScreen = () => {
         console.log("Updated grouped2DDestinations:", grouped2DDestinations);
 
         // SAVING
-        const updatedDests = updateDayOrigin(toSaveData, grouped2DDestinations);
+        let updatedDests = updateDayOrigin(toSaveData, grouped2DDestinations);
+        updatedDests = addTripDatesToStartDateTime(updatedDests, tripDates);
         //console.log("newDests:", newDests);
         console.log("upDests:", updatedDests);
         saveOrderedDestinations(updatedDests);
