@@ -517,6 +517,265 @@ app.delete('/api/trips/:id', verifyFirebaseToken, async (req, res) => {
 });
 
 
+/**
+ * @swagger
+ * /api/history:
+ *   post:
+ *     summary: Create a new history entry
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user_id:
+ *                 type: string
+ *                 description: ID of the user creating the history entry
+ *                 example: "user_123"
+ *               tag:
+ *                 type: string
+ *                 enum: ["flight", "hotel", "thingsToDo", "food", "other"]
+ *                 description: The category of the expense
+ *                 example: "flight"
+ *               value:
+ *                 type: number
+ *                 format: float
+ *                 description: The amount spent
+ *                 example: 250.75
+ *               description:
+ *                 type: string
+ *                 maxLength: 50
+ *                 description: A brief description of the entry
+ *                 example: "Round trip to NYC"
+ *               date:
+ *                 type: string
+ *                 format: date
+ *                 description: The date of the history entry (optional, defaults to current date)
+ *                 example: "2025-03-18"
+ *     responses:
+ *       201:
+ *         description: History entry successfully created
+ *       400:
+ *         description: Bad request. Invalid input data.
+ *       403:
+ *         description: Unauthorized. Ensure you are using a valid User ID as Bearer token.
+ *       500:
+ *         description: Server error.
+ *
+ *   get:
+ *     summary: Get all history entries for a user
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: user_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the user whose history is being fetched
+ *     responses:
+ *       200:
+ *         description: List of history entries for the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: Unique ID of the history entry
+ *                     example: 1
+ *                   user_id:
+ *                     type: string
+ *                     description: ID of the user
+ *                     example: "user_123"
+ *                   tag:
+ *                     type: string
+ *                     enum: ["flight", "hotel", "thingsToDo", "food", "other"]
+ *                     description: The category of the expense
+ *                     example: "hotel"
+ *                   value:
+ *                     type: number
+ *                     format: float
+ *                     description: The amount spent
+ *                     example: 120.50
+ *                   description:
+ *                     type: string
+ *                     maxLength: 50
+ *                     description: A brief description
+ *                     example: "One-night stay"
+ *                   date:
+ *                     type: string
+ *                     format: date
+ *                     description: Date of the history entry
+ *                     example: "2025-03-18"
+ *       400:
+ *         description: Bad request. Missing or invalid user_id.
+ *       403:
+ *         description: Unauthorized. Ensure you are using a valid User ID as Bearer token.
+ *       500:
+ *         description: Server error.
+ */
+app.post('/api/history', verifyFirebaseToken, async (req, res) => {
+    const { uid } = req.user;
+    const { tag, value, description, date } = req.body; 
+
+    // Validate input
+    if (!tag || !value || !description || description.length > 50) {
+        return res.status(400).json({ success: false, error: "Invalid input. Ensure all required fields are provided and description is ≤ 50 chars." });
+    }
+
+    // Ensure 'tag' is one of the predefined values
+    const validTags = ["flight", "hotel", "thingsToDo", "food", "other"];
+    if (!validTags.includes(tag)) {
+        return res.status(400).json({ success: false, error: "Invalid tag. Must be one of: flight, hotel, thingsToDo, food, other." });
+    }
+
+    try {
+        const query = `
+            INSERT INTO history (user_id, tag, value, description, date)
+            VALUES ($1, $2, $3, $4, COALESCE($5, CURRENT_DATE))
+            RETURNING *;
+        `;
+
+        const result = await pool.query(query, [uid, tag, value, description, date || null]);
+
+        res.status(201).json({ success: true, history: result.rows[0] });
+    } catch (error) {
+        console.error("Database error:", error);
+        res.status(500).json({ success: false, error: "Database error" });
+    }
+});
+
+
+
+app.get('/api/history', verifyFirebaseToken, async (req, res) => {
+    const { uid } = req.user;
+
+    try {
+        const result = await pool.query('SELECT * FROM history WHERE user_id = $1', [uid]);
+        res.status(200).json({ success: true, histories: result.rows });
+    } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).json({ success: false, error: 'Database error' });
+    }
+});
+
+/**
+ * @swagger
+ * /api/history/{id}:
+ *   delete:
+ *     summary: Delete a history entry
+ *     description: Deletes a history entry by ID. The user must be authenticated via Firebase.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the history entry to delete
+ *     responses:
+ *       200:
+ *         description: History entry successfully deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "History entry deleted."
+ *                 deletedHistory:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     user_id:
+ *                       type: string
+ *                       example: "user_123"
+ *                     tag:
+ *                       type: string
+ *                       example: "flight"
+ *                     value:
+ *                       type: number
+ *                       format: float
+ *                       example: 250.75
+ *                     description:
+ *                       type: string
+ *                       example: "Round trip to NYC"
+ *                     date:
+ *                       type: string
+ *                       format: date
+ *                       example: "2025-03-18"
+ *       400:
+ *         description: Bad request. Invalid history ID.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   example: "Invalid history ID."
+ *       404:
+ *         description: Not found. The history entry does not exist.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   example: "History entry not found."
+ *       500:
+ *         description: Server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   example: "Database error."
+ */
+app.delete('/api/history/:id', verifyFirebaseToken, async (req, res) => {
+    const { uid } = req.user;
+    const { id } = req.params;
+
+    try {
+        const deleteQuery = 'DELETE FROM history WHERE id = $1 AND user_id = $2 RETURNING *';
+        const deleteResult = await pool.query(deleteQuery, [id, uid]);
+
+        if (deleteResult.rowCount === 0) {
+            return res.status(404).json({ success: false, error: "History entry not found." });
+        }
+
+        res.status(200).json({ success: true, message: "History entry deleted.", deletedHistory: deleteResult.rows[0] });
+    } catch (error) {
+        console.error("Database error:", error);
+        res.status(500).json({ success: false, error: "Database error" });
+    }
+});
 
 
 
