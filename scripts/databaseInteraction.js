@@ -200,3 +200,124 @@ export const registerUser = async () => {
     clearTimeout(timeout); // Clear the timeout once the request completes
   }
 };
+
+
+/**
+ * 
+ * @param {import('firebase/auth').Auth} auth of signed in user
+ * @returns bool if creation was successfull
+ * Creates a history in the database and in local storage with specified information then 
+ * sets the current trip to that trip
+ */
+export const createHistory = async (tag, value, description, date) => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000); // Set timeout to 5 seconds
+  
+    try {
+        const idToken = await getIdToken(auth);
+
+        const response = await fetch(`https://ezgoing.app/api/history`, {
+            signal: controller.signal,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",   
+                Authorization: `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({                  
+                trip_details: {
+                  "tag": tag,
+                  "value": value,
+                  "description": description,
+                  "date": date,
+                }
+              }),
+      
+        });
+
+        const data = await response.json();
+        var histories = await getHistories();
+        storeData("history", histories);
+        return true;
+  
+    } catch (error) {
+      console.error('Error creating trip:', error);
+      return false;
+    } finally {
+      clearTimeout(timeout);
+    }
+  };
+
+    /**
+ * 
+ * @param {int} id of trip to be deleted 
+ * @param {import('firebase/auth').Auth} auth of signed in user
+ * @returns bool if deletion was successfull
+ */
+export const deleteHistory = async (historyId) => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000); // Set timeout to 5 seconds
+
+  try {
+    const idToken = await getIdToken(auth);
+
+    const response = await fetch(`https://ezgoing.app/api/history/${tripId}`, {
+      signal: controller.signal,
+      method: "DELETE",
+      headers: {
+          Authorization: `Bearer ${idToken}`, // Include the ID token in the header
+        },
+    });
+
+    //const data = await response.json();
+    var histories = await getHistories();
+    storeData("history", histories);
+    return true;
+
+  } catch (error) {
+    console.error('Error fetching users trips:', error);
+    return null;
+  } finally {
+    clearTimeout(timeout); // Clear the timeout once the request completes
+  }
+};
+
+/**
+ * Fetches a user's histories and returns them as a list of dictionaries.
+ *
+ * @param {import('firebase/auth').Auth} auth
+ * @returns {Promise<Array<Object>>} A list of history objects.
+ */
+export const getHistories = async () => {
+  console.log("RAHAHAHAHHAHAHAHAH")
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000); // Set timeout to 5 seconds
+
+  try {
+    const idToken = await getIdToken(auth);
+
+    const response = await fetch('https://ezgoing.app/api/history', {
+      signal: controller.signal,
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${idToken}`, // Include the ID token in the header
+      },
+    });
+
+    const data = await response.json();
+    console.log("Called get histories")
+    console.log(data);
+
+    // Ensure API response contains `histories`
+    if (!data.success || !Array.isArray(data.histories)) {
+      throw new Error("Invalid response from server");
+    }
+
+    return data.histories; // Just return the list as it is
+
+  } catch (error) {
+    console.error('Error fetching user histories:', error);
+    return []; // Return an empty list on failure instead of null
+  } finally {
+    clearTimeout(timeout); // Clear the timeout once the request completes
+  }
+};
