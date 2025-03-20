@@ -313,7 +313,7 @@ app.get('/api/place/textsearch', verifyFirebaseToken, async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-app.get('/api/place/photo', verifyFirebaseToken, async (req, res) => {
+app.get('/api/place/photo', async (req, res) => {
     console.log("photo called");
     try {
         // Get parameters from the client request
