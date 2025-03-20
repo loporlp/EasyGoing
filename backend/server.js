@@ -291,6 +291,68 @@ app.get('/api/place/photo', verifyFirebaseToken, async (req, res) => {
 
 /**
  * @swagger
+ * /api/distancematrix:
+ *   get:
+ *     summary: Retrieve distancematrix from Google Places API
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: origins
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: destinations
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: mode
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Returns the requested distancematrix info
+ *       400:
+ *         description: Missing required parameters
+ *       500:
+ *         description: Internal server error
+ */
+app.get('/api/distancematrix', verifyFirebaseToken, async (req, res) => {
+    console.log("distancematrix called");
+    try {
+        // Get parameters from the client request
+        const { origins, destinations, mode }  = req.query;
+        // Validate required parameters
+        if (!origins || !destinations || !mode) {
+            return res.status(400).json({ error: 'Missing required parameters: origins, destinations, or mode' });
+        }
+
+        
+        const apiUrl = 'https://maps.googleapis.com/maps/api/distancematrix/json';
+        
+        // Make the API request
+        const response = await axios.get(apiUrl, {
+            params: {
+                origins: origins,
+                destinations: destinations,
+                mode: mode,
+                key: GOOGLE_API_KEY, 
+            },
+        });
+
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching distancematrix:', error.message);
+        res.status(500).json({ error: 'An error occurred while fetching distancematrix' });
+    }
+});
+
+
+/**
+ * @swagger
  * /api/serverstatus:
  *   get:
  *     summary: Check if the server is running
