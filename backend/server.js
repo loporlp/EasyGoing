@@ -84,6 +84,7 @@ const verifyFirebaseToken = async (req, res, next) => {
  */
 
 app.get('/api/autocomplete', verifyFirebaseToken, async (req, res) => {
+    console.log("autocomplete called");
   try {
       // External API URL
       const apiUrl = 'https://maps.googleapis.com/maps/api/place/autocomplete/json';
@@ -140,6 +141,7 @@ app.get('/api/autocomplete', verifyFirebaseToken, async (req, res) => {
  */
 
 app.get('/api/geocode', verifyFirebaseToken, async (req, res) => {
+    console.log("geocode called");
     try {
         // External API URL
         const apiUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
@@ -414,6 +416,7 @@ app.get('/api/distancematrix', verifyFirebaseToken, async (req, res) => {
  *         description: Server is running
  */
 app.get('/api/serverstatus', (req, res) => {
+    console.log("serverstatus called");
     res.json({ message: 'Server is Running' });
 });
 
@@ -433,6 +436,7 @@ const pool = require('./db'); // Import DB connection
  *         description: Database error
  */
 app.post('/api/register', verifyFirebaseToken, async (req, res) => {
+    console.log("register called");
     const { uid, email } = req.user;
 
     try {
@@ -461,6 +465,7 @@ app.post('/api/register', verifyFirebaseToken, async (req, res) => {
  *         description: Unauthorized access. Ensure you are sending the Firebase User ID as the Bearer token.
  */
 app.get('/api/trips', verifyFirebaseToken, async (req, res) => {
+    console.log("get trips called");
     const { uid } = req.user;
 
     try {
@@ -496,6 +501,7 @@ app.get('/api/trips', verifyFirebaseToken, async (req, res) => {
  *         description: Unauthorized. Ensure you are using a valid User ID as Bearer token.
  */
 app.post('/api/trips', verifyFirebaseToken, async (req, res) => {
+    console.log("create trip called");
     const { trip_details } = req.body;
     const { uid } = req.user;
 
@@ -563,6 +569,7 @@ app.post('/api/trips', verifyFirebaseToken, async (req, res) => {
  *         description: Database error
  */
 app.put('/api/trips/:id', verifyFirebaseToken, async (req, res) => {
+    console.log("update trip called");
     const { id } = req.params;
     const { trip_details } = req.body;
     const { uid } = req.user;
@@ -611,6 +618,7 @@ app.put('/api/trips/:id', verifyFirebaseToken, async (req, res) => {
  *         description: Unauthorized. Ensure you are using a valid User ID as Bearer token.
  */
 app.delete('/api/trips/:id', verifyFirebaseToken, async (req, res) => {
+    console.log("delete trip called");
     const { id } = req.params;
     const { uid } = req.user;
 
@@ -737,6 +745,7 @@ app.delete('/api/trips/:id', verifyFirebaseToken, async (req, res) => {
  *         description: Server error.
  */
 app.post('/api/history', verifyFirebaseToken, async (req, res) => {
+    console.log("create history called");
     const { uid } = req.user;
     const { tag, value, description, date } = req.body; 
 
@@ -770,6 +779,7 @@ app.post('/api/history', verifyFirebaseToken, async (req, res) => {
 
 
 app.get('/api/history', verifyFirebaseToken, async (req, res) => {
+    console.log("get history called");
     const { uid } = req.user;
 
     try {
@@ -874,6 +884,7 @@ app.get('/api/history', verifyFirebaseToken, async (req, res) => {
  *                   example: "Database error."
  */
 app.delete('/api/history/:id', verifyFirebaseToken, async (req, res) => {
+    console.log("delete history called");
     const { uid } = req.user;
     const { id } = req.params;
 
