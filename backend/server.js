@@ -333,10 +333,12 @@ app.get('/api/place/photo', verifyFirebaseToken, async (req, res) => {
                 maxwidth: maxwidth,
                 key: GOOGLE_API_KEY, 
             },
+            responseType: 'stream',
         });
 
-        // Send back the response from Google Directions API to the client
-        res.json(response.data);
+        // Send back the response from Google Photos API to the client
+        res.setHeader('Content-Type', response.headers['content-type']);
+        response.data.pipe(res);
     } catch (error) {
         console.error('Error fetching directions:', error.message);
         res.status(500).json({ error: 'An error occurred while fetching photos' });
