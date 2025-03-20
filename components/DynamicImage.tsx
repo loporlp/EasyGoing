@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Image, Text, StyleSheet, StyleProp, ImageStyle, ViewStyle } from 'react-native';
 import axios from 'axios';
+import {getIdToken} from '../scripts/getFirebaseID'
+import { auth } from '@/firebaseConfig';
+//import { encode as base64Encode } from 'base-64';
 
-const apiKey = 'AIzaSyAQgbWUgdfMozsamfhRi8HrHlRorkFNIEc'; //MASONS KEY, 
-// AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI SOLIS KEY;
 
 type DynamicImageProps = {
   placeName : string;
@@ -16,18 +17,25 @@ const DynamicImage = ({ placeName, containerStyle, imageStyle } : DynamicImagePr
   const [error, setError] = useState<string | null>(null);
 
   const fetchDynamicImage = async () => {
+    const idToken = await getIdToken(auth);
     try {
       // Step 1: Get Place Details
-      const placeSearchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${placeName}&key=${apiKey}`;
-      const placeSearchResponse = await axios.get(placeSearchUrl);
+      const placeSearchUrl = `https://ezgoing.app/api/place/textsearch?query=${placeName}`;
+      const placeSearchResponse = await axios.get(placeSearchUrl, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${idToken}`, // Include the ID token in the header
+        },
+    });
 
       const place = placeSearchResponse.data.results[0];
       const photoReference = place.photos[0].photo_reference;
 
       // Step 2: Get Photo URL
-      const photoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photoReference}&key=${apiKey}`;
+      const photoUrl = `https://ezgoing.app/api/place/photo?maxwidth=400&photo_reference=${photoReference}`;
 
       setPhotoUrl(photoUrl);
+      console.log("PHOTO URL IS: ", photoUrl);
     } catch (err) {
       setError('Unknown Photo');
       console.error(err);

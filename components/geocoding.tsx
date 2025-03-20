@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import axios from 'axios';
-
-const apiKey = 'AIzaSyAQgbWUgdfMozsamfhRi8HrHlRorkFNIEc';
+import { getIdToken } from '@/scripts/getFirebaseID';
+import { auth } from '@/firebaseConfig';
 
 type Coordinates = {
     latitude: number;
@@ -15,8 +15,14 @@ type Place = {
 };
 
 export const getCoordinates = async (description: string): Promise<Coordinates | null> => {
+    const idToken = await getIdToken(auth)
     try {
-        const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${description}&key=${apiKey}`);
+        const response = await axios.get(`https://ezgoing.app/api/geocode?address=${encodeURIComponent(description)}`, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${idToken}`, // Include the ID token in the header
+            },
+        });
         const result = response.data.results[0];
 
         if (result && result.geometry && result.geometry.location) {
