@@ -118,6 +118,59 @@ app.get('/api/autocomplete', verifyFirebaseToken, async (req, res) => {
 
 /**
  * @swagger
+ * /api/geocode:
+ *   get:
+ *     summary: converts address to lat long from Google Places API
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: address
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The address being converted
+ *     responses:
+ *       200:
+ *         description: lat long coords
+ *       400:
+ *         description: Missing required parameter 'address'
+ *       403:
+ *         description: Unauthorized request. Ensure you are sending a valid User ID as Bearer token.
+ */
+
+app.get('/api/geocode', verifyFirebaseToken, async (req, res) => {
+    try {
+        // External API URL
+        const apiUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
+  
+        // Get the 'address' parameter from the client request
+        const address = req.query.address;
+        if (!address) {
+            return res.status(400).json({ error: 'Missing required parameter: address' });
+        }
+  
+        // Make the API request
+        const response = await axios.get(apiUrl, {
+            params: {
+                address: address,
+                key: GOOGLE_API_KEY, // API Key
+            },
+        });
+  
+        // Return the API's response to the client
+        res.status(response.status).json(response.data);
+    } catch (error) {
+        console.error('Error in autocomplete API proxy:', error.message);
+        res.status(error.response?.status || 500).json({
+            error: 'Failed to fetch geocode data',
+            details: error.message,
+        });
+    }
+  });
+
+/**
+ * @swagger
  * /api/directions:
  *   get:
  *     summary: Get directions between two locations
