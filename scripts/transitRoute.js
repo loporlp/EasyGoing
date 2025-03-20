@@ -1,10 +1,12 @@
 import axios from 'axios'
+import {getIdToken} from '../scripts/getFirebaseID'
+import { auth } from '@/firebaseConfig';
 
 export async function getTransitRoute(originCoords, destinationCoords) {
+  const idToken = await getIdToken(auth)
   try {
     // Construct the API URL
-    const apiKey = 'AIzaSyAQgbWUgdfMozsamfhRi8HrHlRorkFNIEc';
-    const apiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${originCoords.latitude},${originCoords.longitude}&destination=${destinationCoords.latitude},${destinationCoords.longitude}&mode=transit&key=${apiKey}`;
+    const apiUrl = `https://ezgoing.app/api/directions?origin=${originCoords.latitude},${originCoords.longitude}&destination=${destinationCoords.latitude},${destinationCoords.longitude}&mode=transit`;
     // TEST API FOR TRANSIT
     //const apiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=Draper+Station&destination=University+of+Utah&mode=transit&key=${apiKey}`;
     //const apiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=40.748817,-73.985428&destination=40.785091,-73.968285&mode=transit&key=${apiKey}`
@@ -12,7 +14,12 @@ export async function getTransitRoute(originCoords, destinationCoords) {
     console.log("API Link " + apiUrl);
 
     // Make the request to the Directions API
-    const response = await axios.get(apiUrl);
+    const response = await axios.get(apiUrl, {
+      method: "GET",
+      headers: {
+          Authorization: `Bearer ${idToken}`, // Include the ID token in the header
+      },
+  });
 
     if (response.data.routes && response.data.routes.length > 0) {
       const routes = response.data.routes;
