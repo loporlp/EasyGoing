@@ -3,9 +3,53 @@ import { useRouter } from "expo-router";
 import { View, StyleSheet, TextInput, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Image, ScrollView } from "react-native";
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { useState, useEffect } from "react";
+import { getHistories } from '../scripts/databaseInteraction.js';
+import { getData, storeData, fillLocal } from '../scripts/localStore';
 
 const BudgetManagerScreen = () => {
     const navigation = useNavigation();
+
+    const [budgetHistory, setBudgetHistory] = useState<any[]>([]);
+    const [hotelBudget, setHotelBudget] = useState(0);
+    const [transportationBudget, setTransportationBudget] = useState(0);
+    const [foodBudget, setFoodBudget] = useState(0);
+    const [thingsToDoBudget, setThingsToDoBudget] = useState(0);
+    const [otherBudget, setOtherBudget] = useState(0);
+    const [totalBudget, setTotalBudget] = useState(0);
+
+
+    // Load history when the component mounts
+    useEffect(() => {
+        const loadHistory = async () => {
+            // Get the list of trip IDs from local storage
+            const historyIds = await getData("history");
+            if (historyIds && historyIds.length > 0) {
+                const loadedHistory = [];
+
+                // Loop through each history ID and fetch the history details from local storage
+                for (const historyId of historyIds) {
+
+                    if (historyId.tag === "flight") {
+                        setTransportationBudget(prevTransportBudget => prevTransportBudget + parseFloat(historyId.value));
+                    }
+
+                    loadedHistory.push({ 
+                        id: historyId.id, 
+                        tag: historyId.tag, 
+                        value: historyId.value, 
+                        description: historyId.description, 
+                        date: historyId.date 
+                    });
+                }
+
+                setBudgetHistory(loadedHistory);
+            } else {
+                console.log("No history available in local storage.");
+            }
+        };
+        loadHistory();
+    }, []);
 
     return (
         <ScrollView style={styles.container}>
@@ -22,15 +66,15 @@ const BudgetManagerScreen = () => {
                 {/* Replace this with DynamicImage from placeName = trip.origin */}
                 <Image style={styles.backgroundImage} source={require("../assets/images/newyorkcity.jpg")} />
                 <View style={styles.darkOverlay}>
-                    <Text style={{color: "white", fontSize: 18, fontWeight: "bold"}}>#trip.origin/destination#</Text>
-                    <Text style={{color: "white", fontSize: 16}}>Initial Budget: $#budget#</Text>
-                    <Text style={{color: "white", fontSize: 16}}>Remaining: $#remainingBudget#</Text>
+                    <Text style={{ color: "white", fontSize: 18, fontWeight: "bold" }}>#trip.origin/destination#</Text>
+                    <Text style={{ color: "white", fontSize: 16 }}>Initial Budget: $#budget#</Text>
+                    <Text style={{ color: "white", fontSize: 16 }}>Remaining: $#remainingBudget#</Text>
                 </View>
 
                 {/* Calculate this */}
-                <Text style={{fontWeight: "700", fontSize: 18, marginTop: 10}}>Summary</Text>
-                <View style={[styles.divider, {marginTop: 0}]}></View>
-                <Text>Total Spent: $188.91</Text>
+                <Text style={{ fontWeight: "700", fontSize: 18, marginTop: 10 }}>Summary</Text>
+                <View style={[styles.divider, { marginTop: 0 }]}></View>
+                <Text>Total Spent: ${transportationBudget}</Text>
 
                 {/* Bar showing how much someone spent */}
                 <View style={styles.bar}>
@@ -58,7 +102,7 @@ const BudgetManagerScreen = () => {
                             <Ionicons name={"airplane"} color={"skyblue"} size={20} />
                             <Text style={{ fontSize: 18 }}>Transportation</Text>
                         </View>
-                        <Text style={{ fontSize: 18, color: "gray" }}>N/A</Text>
+                        <Text style={{ fontSize: 18, color: "gray" }}>${transportationBudget}</Text>
                     </TouchableOpacity>
 
                     <View style={styles.divider}></View>
@@ -96,19 +140,19 @@ const BudgetManagerScreen = () => {
                 <View style={styles.historyView}>
                     <Text style={styles.textLabel}>History</Text>
                     <TouchableOpacity onPress={() => { }}>
-                        <Ionicons style={{marginTop: 5}} name="add-circle" size={25} color="#24a6ad" />
+                        <Ionicons style={{ marginTop: 5 }} name="add-circle" size={25} color="#24a6ad" />
                     </TouchableOpacity>
                 </View>
 
-                <View style={[styles.divider, {marginTop: 0}]}></View>
+                <View style={[styles.divider, { marginTop: 0 }]}></View>
 
                 <ScrollView style={styles.historyContainer}>
                     {/* Will load this part through the database */}
                     <View style={styles.hotelSection}>
                         <View style={styles.hotelLabel}>
-                        <MaterialIcons name={"more-horiz"} color={"#800080"} size={22} />
-                            <View style={{flexDirection: "column"}}>
-                                <Text style={{color: "gray"}}>March 16, 2025</Text>
+                            <MaterialIcons name={"more-horiz"} color={"#800080"} size={22} />
+                            <View style={{ flexDirection: "column" }}>
+                                <Text style={{ color: "gray" }}>March 16, 2025</Text>
                                 <Text style={{ fontSize: 18 }}>bag</Text>
                             </View>
                         </View>
@@ -119,9 +163,9 @@ const BudgetManagerScreen = () => {
 
                     <View style={styles.hotelSection}>
                         <View style={styles.hotelLabel}>
-                        <MaterialIcons name={"more-horiz"} color={"#800080"} size={22} />
-                            <View style={{flexDirection: "column"}}>
-                                <Text style={{color: "gray"}}>March 16, 2025</Text>
+                            <MaterialIcons name={"more-horiz"} color={"#800080"} size={22} />
+                            <View style={{ flexDirection: "column" }}>
+                                <Text style={{ color: "gray" }}>March 16, 2025</Text>
                                 <Text style={{ fontSize: 18 }}>Shoppin'</Text>
                             </View>
                         </View>
@@ -133,8 +177,8 @@ const BudgetManagerScreen = () => {
                     <View style={styles.hotelSection}>
                         <View style={styles.hotelLabel}>
                             <Ionicons name={"location"} color={"green"} size={22} />
-                            <View style={{flexDirection: "column"}}>
-                                <Text style={{color: "gray"}}>March 16, 2025</Text>
+                            <View style={{ flexDirection: "column" }}>
+                                <Text style={{ color: "gray" }}>March 16, 2025</Text>
                                 <Text style={{ fontSize: 18 }}>MoMA tickets</Text>
                             </View>
                         </View>
@@ -146,8 +190,8 @@ const BudgetManagerScreen = () => {
                     <View style={styles.hotelSection}>
                         <View style={styles.hotelLabel}>
                             <Ionicons name={"location"} color={"green"} size={22} />
-                            <View style={{flexDirection: "column"}}>
-                                <Text style={{color: "gray"}}>March 15, 2025</Text>
+                            <View style={{ flexDirection: "column" }}>
+                                <Text style={{ color: "gray" }}>March 15, 2025</Text>
                                 <Text style={{ fontSize: 18 }}>Empire State building</Text>
                             </View>
                         </View>
@@ -159,8 +203,8 @@ const BudgetManagerScreen = () => {
                     <View style={styles.hotelSection}>
                         <View style={styles.hotelLabel}>
                             <Ionicons name={"fast-food"} color={"#FFD700"} size={22} />
-                            <View style={{flexDirection: "column"}}>
-                                <Text style={{color: "gray"}}>March 15, 2025</Text>
+                            <View style={{ flexDirection: "column" }}>
+                                <Text style={{ color: "gray" }}>March 15, 2025</Text>
                                 <Text style={{ fontSize: 18 }}>New York style pizza</Text>
                             </View>
                         </View>
@@ -168,7 +212,7 @@ const BudgetManagerScreen = () => {
                     </View>
 
                     <View style={styles.divider}></View>
-                    
+
                 </ScrollView>
             </View>
         </ScrollView>
