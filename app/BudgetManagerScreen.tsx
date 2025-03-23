@@ -73,19 +73,23 @@ const BudgetManagerScreen = () => {
     // add to history
     const addHistory = () => {
 
-        // date
-        const currentDate = new Date();
-        const formattedDate = moment(currentDate).format('MMMM DD, YYYY');
-        setExpenseDate(formattedDate.toString())
+        if (expenseLabel != "" && expensePrice != "" && expensePrice != "" && expenseTag != "") {
+            // date
+            const currentDate = new Date();
+            const formattedDate = moment(currentDate).format('MMMM DD, YYYY');
+            setExpenseDate(formattedDate.toString())
 
-        resetHistory();
+            resetHistory();
+        } else {
+            console.error("Expense report failed");
+        }
     }
 
     // cancels the creation of a history
     const resetHistory = () => {
-        setAddHistoryVisible(false); 
+        setAddHistoryVisible(false);
         setValue(null);
-        
+
         setExpenseTag("");
         setExpenseDate("");
         setExpenseLabel("");
@@ -189,70 +193,42 @@ const BudgetManagerScreen = () => {
 
                 <ScrollView style={styles.historyContainer}>
                     {/* Will load this part through the database */}
-                    <View style={styles.hotelSection}>
-                        <View style={styles.hotelLabel}>
-                            <MaterialIcons name={"more-horiz"} color={"#800080"} size={22} />
-                            <View style={{ flexDirection: "column" }}>
-                                <Text style={{ color: "gray" }}>March 16, 2025</Text>
-                                <Text style={{ fontSize: 18 }}>bag</Text>
+                    {budgetHistory.length > 0 ? (
+                        budgetHistory.map((expense) => (
+                            <View>
+                                <View style={styles.hotelSection}>
+                                    <View style={styles.hotelLabel}>
+                                        {(() => {
+                                            switch (expense.tag) {
+                                                case 'Hotel':
+                                                    return <MaterialIcons name="hotel" color={"#FF6347"} size={22} />;
+                                                case 'flight':
+                                                    return <Ionicons name="airplane" color={"skyblue"} size={22} />;
+                                                case 'Food':
+                                                    return <MaterialIcons name="local-dining" color={"#FFD700"} size={22} />;
+                                                case 'Things To Do':
+                                                    return <Ionicons name="location" color={"green"} size={22} />;
+                                                case 'Other':
+                                                    return <MaterialIcons name="more-horiz" color={"#800080"} size={22} />;
+                                                default:
+                                                    return <MaterialIcons name="help" color={"gray"} size={22} />;
+                                            }
+                                        })()}
+                                        <View style={{ flexDirection: "column" }}>
+                                            <Text style={{ color: "gray" }}>{expense.date}</Text>
+                                            <Text style={{ fontSize: 18 }}>{expense.description}</Text>
+                                        </View>
+                                    </View>
+                                    <Text style={{ fontSize: 18, color: "#24a6ad" }}>${expense.value}</Text>
+                                </View>
+
+                                <View style={styles.divider}></View>
                             </View>
-                        </View>
-                        <Text style={{ fontSize: 18, color: "#24a6ad" }}>-$40.21</Text>
-                    </View>
+                        ))
+                    ) : (
+                        <Text style={{ textAlign: 'center', fontSize: 16, marginTop: 10 }}>No expenses reported.</Text>
+                    )}
 
-                    <View style={styles.divider}></View>
-
-                    <View style={styles.hotelSection}>
-                        <View style={styles.hotelLabel}>
-                            <MaterialIcons name={"more-horiz"} color={"#800080"} size={22} />
-                            <View style={{ flexDirection: "column" }}>
-                                <Text style={{ color: "gray" }}>March 16, 2025</Text>
-                                <Text style={{ fontSize: 18 }}>Shoppin'</Text>
-                            </View>
-                        </View>
-                        <Text style={{ fontSize: 18, color: "#24a6ad" }}>-$40.21</Text>
-                    </View>
-
-                    <View style={styles.divider}></View>
-
-                    <View style={styles.hotelSection}>
-                        <View style={styles.hotelLabel}>
-                            <Ionicons name={"location"} color={"green"} size={22} />
-                            <View style={{ flexDirection: "column" }}>
-                                <Text style={{ color: "gray" }}>March 16, 2025</Text>
-                                <Text style={{ fontSize: 18 }}>MoMA tickets</Text>
-                            </View>
-                        </View>
-                        <Text style={{ fontSize: 18, color: "#24a6ad" }}>-$20.11</Text>
-                    </View>
-
-                    <View style={styles.divider}></View>
-
-                    <View style={styles.hotelSection}>
-                        <View style={styles.hotelLabel}>
-                            <Ionicons name={"location"} color={"green"} size={22} />
-                            <View style={{ flexDirection: "column" }}>
-                                <Text style={{ color: "gray" }}>March 15, 2025</Text>
-                                <Text style={{ fontSize: 18 }}>Empire State building</Text>
-                            </View>
-                        </View>
-                        <Text style={{ fontSize: 18, color: "#24a6ad" }}>-$34.40</Text>
-                    </View>
-
-                    <View style={styles.divider}></View>
-
-                    <View style={styles.hotelSection}>
-                        <View style={styles.hotelLabel}>
-                            <Ionicons name={"fast-food"} color={"#FFD700"} size={22} />
-                            <View style={{ flexDirection: "column" }}>
-                                <Text style={{ color: "gray" }}>March 15, 2025</Text>
-                                <Text style={{ fontSize: 18 }}>New York style pizza</Text>
-                            </View>
-                        </View>
-                        <Text style={{ fontSize: 18, color: "#24a6ad" }}>-$53.98</Text>
-                    </View>
-
-                    <View style={styles.divider}></View>
 
                 </ScrollView>
             </View>
@@ -350,7 +326,7 @@ const BudgetManagerScreen = () => {
                                 <Text style={{ fontSize: 12, color: "white", fontWeight: "700" }}>CANCEL</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity onPress={() => {addHistory()}} style={{
+                            <TouchableOpacity onPress={() => { addHistory() }} style={{
                                 backgroundColor: "green",
                                 height: 35,
                                 width: 70,
