@@ -6,6 +6,8 @@ import { useNavigation } from "@react-navigation/native";
 import { useState, useEffect } from "react";
 import { getHistories } from '../scripts/databaseInteraction.js';
 import { getData, storeData, fillLocal } from '../scripts/localStore';
+import { Dropdown } from 'react-native-element-dropdown';
+import moment from 'moment';
 
 const BudgetManagerScreen = () => {
     const navigation = useNavigation();
@@ -18,8 +20,23 @@ const BudgetManagerScreen = () => {
     const [otherBudget, setOtherBudget] = useState(0);
     const [totalBudget, setTotalBudget] = useState(0);
 
+    // Add to history params
+    const [expenseTag, setExpenseTag] = useState("");
+    const [expenseDate, setExpenseDate] = useState("");
+    const [expensePrice, setExpensePrice] = useState("");
+    const [expenseLabel, setExpenseLabel] = useState("");
+
     const [isAddHistoryVisible, setAddHistoryVisible] = useState(false);
 
+    // Remane "flight" to "Transportation"
+    const [value, setValue] = useState(null);
+    const tags = [
+        { label: 'Hotels', symbol: 'hotel', color: '#FF6347', value: '1' },
+        { label: 'Transportation', symbol: 'airplane', color: 'skyblue', value: '2' },
+        { label: 'Food', symbol: 'local-dining', color: '#FFD700', value: '3' },
+        { label: 'Things To Do', symbol: 'location', color: 'green', value: '4' },
+        { label: 'Other', symbol: 'more-horiz', color: '#800080', value: '5' },
+    ];
 
     // Load history when the component mounts
     useEffect(() => {
@@ -52,6 +69,28 @@ const BudgetManagerScreen = () => {
         };
         loadHistory();
     }, []);
+
+    // add to history
+    const addHistory = () => {
+
+        // date
+        const currentDate = new Date();
+        const formattedDate = moment(currentDate).format('MMMM DD, YYYY');
+        setExpenseDate(formattedDate.toString())
+
+        resetHistory();
+    }
+
+    // cancels the creation of a history
+    const resetHistory = () => {
+        setAddHistoryVisible(false); 
+        setValue(null);
+        
+        setExpenseTag("");
+        setExpenseDate("");
+        setExpenseLabel("");
+        setExpensePrice("");
+    }
 
     return (
         <ScrollView style={styles.container}>
@@ -141,7 +180,7 @@ const BudgetManagerScreen = () => {
                 {/* Add a payment history here */}
                 <View style={styles.historyView}>
                     <Text style={styles.textLabel}>History</Text>
-                    <TouchableOpacity onPress={() => {setAddHistoryVisible(true)}}>
+                    <TouchableOpacity onPress={() => { setAddHistoryVisible(true) }}>
                         <Ionicons style={{ marginTop: 5 }} name="add-circle" size={25} color="#24a6ad" />
                     </TouchableOpacity>
                 </View>
@@ -225,13 +264,108 @@ const BudgetManagerScreen = () => {
                 onRequestClose={() => setAddHistoryVisible(false)}
             >
                 <View style={[styles.modalOverlay, { justifyContent: "center" }]}>
-                    <View style={{ width: "95%", height: 300, backgroundColor: "#F4F4F4", padding: 20, borderRadius: 10 }}>
-                        <Text style={[styles.textLabel, {marginTop: 0}]}>Add History</Text>
-                    </View>
+                    <View style={{ width: "95%", height: 220, backgroundColor: "#F4F4F4", padding: 20, borderRadius: 10, gap: 10 }}>
+                        <Text style={[styles.textLabel, { marginTop: 0 }]}>Add History</Text>
 
-                    <TouchableOpacity style={{width: 30, height: 30, backgroundColor: "red"}} onPress={() => {setAddHistoryVisible(false)}}>
-                        <Text>Close</Text>
-                    </TouchableOpacity>
+                        <Dropdown
+                            style={styles.dropdown}
+                            placeholderStyle={styles.placeholderStyle}
+                            data={tags}
+                            maxHeight={200}
+                            labelField="label"
+                            valueField="value"
+                            placeholder="Select tag..."
+                            value={value}
+                            onChange={item => {
+                                setExpenseTag(item.label)
+                                setValue(item.value);
+                            }}
+                            renderLeftIcon={() => {
+                                // Dynamically render the icon based on the 'symbol' value
+                                const tag = tags[(value as unknown as number) - 1];
+                                if (tag) {
+                                    // Use the correct icon component based on the symbol
+                                    if (tag.symbol === 'hotel') {
+                                        return <MaterialIcons name="hotel" size={20} color={tag.color} style={{ marginRight: 5 }} />;
+                                    } else if (tag.symbol === 'airplane') {
+                                        return <Ionicons name="airplane" size={20} color={tag.color} style={{ marginRight: 5 }} />;
+                                    } else if (tag.symbol === 'local-dining') {
+                                        return <MaterialIcons name="local-dining" size={20} color={tag.color} style={{ marginRight: 5 }} />;
+                                    } else if (tag.symbol === 'location') {
+                                        return <Ionicons name="location" size={20} color={tag.color} style={{ marginRight: 5 }} />;
+                                    } else if (tag.symbol === 'more-horiz') {
+                                        return <MaterialIcons name="more-horiz" size={20} color={tag.color} style={{ marginRight: 5 }} />;
+                                    }
+                                }
+
+                                return null; // Default case if no match is found
+                            }}
+                        />
+
+                        <View style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            gap: 5
+                        }}>
+                            <TextInput value={expenseLabel} onChangeText={text => setExpenseLabel(text)} placeholder="Name" placeholderTextColor="lightgray" style={{
+                                height: 40,
+                                fontSize: 16,
+                                width: "65%",
+                                backgroundColor: "white",
+                                borderRadius: 10,
+                                padding: 10,
+                                shadowColor: "lightgray",
+                                shadowOffset: { width: 1, height: 2 },
+                                shadowOpacity: 0.3,
+                                shadowRadius: 3,
+                            }}></TextInput>
+
+                            <TextInput value={expensePrice} onChangeText={text => setExpenseLabel(text)} keyboardType="numeric" style={{
+                                height: 40,
+                                fontSize: 16,
+                                width: "30%",
+                                backgroundColor: "white",
+                                borderRadius: 10,
+                                padding: 10,
+                                shadowColor: "lightgray",
+                                shadowOffset: { width: 1, height: 2 },
+                                shadowOpacity: 0.3,
+                                shadowRadius: 3,
+                            }}>$</TextInput>
+                        </View>
+
+                        <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 15, gap: 30 }}>
+                            <TouchableOpacity onPress={resetHistory} style={{
+                                backgroundColor: "red",
+                                height: 35,
+                                width: 70,
+                                alignItems: "center",
+                                justifyContent: "center",
+                                shadowColor: "#333333",
+                                shadowOffset: { width: 1, height: 2 },
+                                shadowOpacity: 0.1,
+                                shadowRadius: 3,
+                                borderRadius: 10
+                            }}>
+                                <Text style={{ fontSize: 12, color: "white", fontWeight: "700" }}>CANCEL</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={() => {addHistory()}} style={{
+                                backgroundColor: "green",
+                                height: 35,
+                                width: 70,
+                                alignItems: "center",
+                                justifyContent: "center",
+                                shadowColor: "#333333",
+                                shadowOffset: { width: 1, height: 2 },
+                                shadowOpacity: 0.1,
+                                shadowRadius: 3,
+                                borderRadius: 10
+                            }}>
+                                <Text style={{ fontSize: 12, color: "white", fontWeight: "700" }}>OK</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                 </View>
 
             </Modal>
@@ -346,6 +480,19 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+
+    dropdown: {
+        height: 40,
+        backgroundColor: "white",
+        borderBottomColor: 'lightgray',
+        borderBottomWidth: 0.5,
+        borderRadius: 10,
+        padding: 10
+    },
+
+    placeholderStyle: {
+        fontSize: 16,
     },
 });
 

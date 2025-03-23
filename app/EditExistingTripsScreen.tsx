@@ -29,7 +29,7 @@ const EditExistingTripsScreen = () => {
             if (tripIDs && tripIDs.length > 0) {
                 const loadedTrips = [];
                 // Loop through each trip ID and fetch the trip details from local storage
-                
+
                 for (const tripID of tripIDs) {
                     const tripDetails = await getData(tripID);
                     if (tripDetails) {
@@ -301,9 +301,6 @@ const EditExistingTripsScreen = () => {
                 </TouchableOpacity>
             </View>
         </View>
-
-
-
     );
 }
 
