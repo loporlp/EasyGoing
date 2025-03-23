@@ -18,6 +18,8 @@ const BudgetManagerScreen = () => {
     const [otherBudget, setOtherBudget] = useState(0);
     const [totalBudget, setTotalBudget] = useState(0);
 
+    const [isAddHistoryVisible, setAddHistoryVisible] = useState(false);
+
 
     // Load history when the component mounts
     useEffect(() => {
@@ -34,12 +36,12 @@ const BudgetManagerScreen = () => {
                         setTransportationBudget(prevTransportBudget => prevTransportBudget + parseFloat(historyId.value));
                     }
 
-                    loadedHistory.push({ 
-                        id: historyId.id, 
-                        tag: historyId.tag, 
-                        value: historyId.value, 
-                        description: historyId.description, 
-                        date: historyId.date 
+                    loadedHistory.push({
+                        id: historyId.id,
+                        tag: historyId.tag,
+                        value: historyId.value,
+                        description: historyId.description,
+                        date: historyId.date
                     });
                 }
 
@@ -139,7 +141,7 @@ const BudgetManagerScreen = () => {
                 {/* Add a payment history here */}
                 <View style={styles.historyView}>
                     <Text style={styles.textLabel}>History</Text>
-                    <TouchableOpacity onPress={() => { }}>
+                    <TouchableOpacity onPress={() => {setAddHistoryVisible(true)}}>
                         <Ionicons style={{ marginTop: 5 }} name="add-circle" size={25} color="#24a6ad" />
                     </TouchableOpacity>
                 </View>
@@ -215,6 +217,24 @@ const BudgetManagerScreen = () => {
 
                 </ScrollView>
             </View>
+
+            <Modal
+                visible={isAddHistoryVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setAddHistoryVisible(false)}
+            >
+                <View style={[styles.modalOverlay, { justifyContent: "center" }]}>
+                    <View style={{ width: "95%", height: 300, backgroundColor: "#F4F4F4", padding: 20, borderRadius: 10 }}>
+                        <Text style={[styles.textLabel, {marginTop: 0}]}>Add History</Text>
+                    </View>
+
+                    <TouchableOpacity style={{width: 30, height: 30, backgroundColor: "red"}} onPress={() => {setAddHistoryVisible(false)}}>
+                        <Text>Close</Text>
+                    </TouchableOpacity>
+                </View>
+
+            </Modal>
         </ScrollView>
     );
 };
@@ -319,6 +339,13 @@ const styles = StyleSheet.create({
         backgroundColor: '#ccc',
         marginVertical: 10,
         width: "100%"
+    },
+
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
 });
 
