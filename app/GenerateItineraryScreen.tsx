@@ -17,6 +17,7 @@ import { launchPrioritySystem} from '../scripts/prioritySystem.js';
 import { updateTrip } from '../scripts/databaseInteraction.js';
 import groupDestinationsByDay from '../scripts/groupDestinationsByDay';
 import processGroupedDestinations from '../scripts/processGroupedDestinations';
+import { recalculatePaths } from '../scripts/reorderingLocations';
 import { Ionicons } from '@expo/vector-icons';
 import moment from 'moment';
 
@@ -262,6 +263,7 @@ const GenerateItineraryScreen = () => {
                     }
                     // Update for the ScrollList
                     setResultRoute(orderedDestinations);
+                    console.log("ResultRoute: ", resultRoute);
                     setFrontendOptimalRoute(optimalRoute);
                     setIsLoading(false);
                 }
@@ -742,6 +744,44 @@ const GenerateItineraryScreen = () => {
         }
     };
     
+    // Function to move the destination up or down
+    const moveDestination = async (destinationIndex: number, direction: string) => {
+        const newResultRoute= [...resultRoute];
+        
+        // Ensure destinationIndex is valid
+        if (destinationIndex < 0 || destinationIndex >= newResultRoute.length) {
+            return;
+        }
+
+        // Retain only alias and address for each element
+        const simplifiedRoute = newResultRoute.map(destination => ({
+            alias: destination.alias,
+            address: destination.address
+        }));
+
+        if (direction === 'up' && destinationIndex > 0) {
+            // Move the destination up
+            const [movedDestination] = simplifiedRoute.splice(destinationIndex, 1);
+            simplifiedRoute.splice(destinationIndex - 1, 0, movedDestination);
+        } else if (direction === 'down' && destinationIndex < simplifiedRoute.length - 1) {
+            // Move the destination down
+            const [movedDestination] = simplifiedRoute.splice(destinationIndex, 1);
+            simplifiedRoute.splice(destinationIndex + 1, 0, movedDestination);
+        } else {
+            return;
+        }
+
+        // Recalculate the new path before saving it
+        try {
+            const reorganizedDestinations = await recalculatePaths(simplifiedRoute);
+            
+            // Ensure that reorderDestinations is set to the reorganizedDestinations
+            setToSaveData(reorganizedDestinations);
+        } catch (error) {
+            console.error("Error recalculating paths or saving data:", error);
+        }
+    };
+   
     
 
     return (
@@ -863,6 +903,25 @@ const GenerateItineraryScreen = () => {
                                                 </View>
                                             </View>
                                         </TouchableOpacity>
+
+                                        <View style={styles.buttonContainer}>
+                                            {destinationIndex > 0 && (
+                                                <TouchableOpacity
+                                                    onPress={() => moveDestination(destinationIndex, 'up')}
+                                                    style={styles.moveButton}
+                                                >
+                                                    <Ionicons name="arrow-up" size={20} color="#000" />
+                                                </TouchableOpacity>
+                                            )}
+                                            {destinationIndex < routeGroup.length - 1 && (
+                                                <TouchableOpacity
+                                                    onPress={() => moveDestination(destinationIndex, 'down')}
+                                                    style={styles.moveButton}
+                                                >
+                                                    <Ionicons name="arrow-down" size={20} color="#000" />
+                                                </TouchableOpacity>
+                                            )}
+                                        </View>
 
                                         {/* Conditional rendering of additional info */}
                                         {selectedDestination === destinationKey && (
@@ -1096,6 +1155,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#fff',
+    },
+    moveButton: {
+        padding: 5,
+        backgroundColor: '#f0f0f0',
+        borderRadius: 5,
+        marginHorizontal: 5,
     },
 });
 
