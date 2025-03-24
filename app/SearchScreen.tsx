@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, TextInput } from 'react-nativ
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router'
 import AutocompleteTextBox from '@/components/AutoCompleteTextBox';
+import GoBotAI from '@/components/GoBotAI';
 
 const SearchScreen = () => {
     const router = useRouter();
@@ -39,6 +40,10 @@ const SearchScreen = () => {
                     <Ionicons name="search" size={20} style={{}} color={"black"} />
                     <AutocompleteTextBox placeholder="Search..." placeholderTextColor="#d6d6d6" style={styles.destinationInput} />
                 </View>
+            </View>
+
+            <View style={styles.searchSection}>
+                <GoBotAI />
             </View>
 
             <View style={styles.navBar}>
