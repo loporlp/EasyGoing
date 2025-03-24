@@ -4,7 +4,7 @@ import { View, StyleSheet, TextInput, Text, TouchableOpacity, Modal, TouchableWi
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useState, useEffect } from "react";
-import { getHistories } from '../scripts/databaseInteraction.js';
+import { getHistories, createHistory } from '../scripts/databaseInteraction.js';
 import { getData, storeData, fillLocal } from '../scripts/localStore';
 import { Dropdown } from 'react-native-element-dropdown';
 import moment from 'moment';
@@ -31,7 +31,7 @@ const BudgetManagerScreen = () => {
     // Remane "flight" to "Transportation"
     const [value, setValue] = useState(null);
     const tags = [
-        { label: 'Hotels', symbol: 'hotel', color: '#FF6347', value: '1' },
+        { label: 'Hotel', symbol: 'hotel', color: '#FF6347', value: '1' },
         { label: 'Transportation', symbol: 'airplane', color: 'skyblue', value: '2' },
         { label: 'Food', symbol: 'local-dining', color: '#FFD700', value: '3' },
         { label: 'Things To Do', symbol: 'location', color: 'green', value: '4' },
@@ -40,6 +40,12 @@ const BudgetManagerScreen = () => {
 
     // Load history when the component mounts
     useEffect(() => {
+        let hotelExpense = 0;
+        let transportExpense = 0;
+        let foodExpense = 0;
+        let thingsToDoExpense = 0;
+        let otherExpense = 0;
+
         const loadHistory = async () => {
             // Get the list of trip IDs from local storage
             const historyIds = await getData("history");
@@ -48,11 +54,6 @@ const BudgetManagerScreen = () => {
 
                 // Loop through each history ID and fetch the history details from local storage
                 for (const historyId of historyIds) {
-
-                    if (historyId.tag === "flight") {
-                        setTransportationBudget(prevTransportBudget => prevTransportBudget + parseFloat(historyId.value));
-                    }
-
                     loadedHistory.push({
                         id: historyId.id,
                         tag: historyId.tag,
@@ -60,6 +61,31 @@ const BudgetManagerScreen = () => {
                         description: historyId.description,
                         date: historyId.date
                     });
+
+                    switch (historyId.tag) {
+                        case 'Hotel':
+                            hotelExpense += parseFloat(historyId.value);
+                            setHotelBudget(hotelExpense);
+                            break;
+                        case 'flight':
+                            transportExpense += parseFloat(historyId.value);
+                            setTransportationBudget(transportExpense);
+                            break;
+                        case 'Food':
+                            foodExpense += parseFloat(historyId.value);
+                            setFoodBudget(foodExpense);
+                            break;
+                        case 'Things To Do':
+                            thingsToDoExpense += parseFloat(historyId.value);
+                            setThingsToDoBudget(thingsToDoExpense);
+                            break;
+                        case 'Other':
+                            otherExpense += parseFloat(historyId.value);
+                            setOtherBudget(otherExpense);
+                            break;
+                        default:
+                            break;
+                    }
                 }
 
                 setBudgetHistory(loadedHistory);
@@ -71,15 +97,29 @@ const BudgetManagerScreen = () => {
     }, []);
 
     // add to history
-    const addHistory = () => {
+    const addHistory = async () => {
 
         if (expenseLabel != "" && expensePrice != "" && expensePrice != "" && expenseTag != "") {
             // date
             const currentDate = new Date();
             const formattedDate = moment(currentDate).format('MMMM DD, YYYY');
-            setExpenseDate(formattedDate.toString())
 
-            resetHistory();
+            const createExpense = await createHistory(expenseTag, expensePrice, expenseLabel, formattedDate.toString());
+
+            if (!createExpense) {
+                console.error("Failed to create expense!");
+            } else {
+                const newExpense = {
+                    tag: expenseTag,
+                    value: expensePrice,
+                    description: expenseLabel,
+                    date: formattedDate.toString()
+                };
+
+                budgetHistory.unshift(newExpense);
+                await storeData("history", budgetHistory);
+                resetHistory();
+            }
         } else {
             console.error("Expense report failed");
         }
@@ -137,7 +177,7 @@ const BudgetManagerScreen = () => {
                             <MaterialIcons name={"hotel"} color={"#FF6347"} size={20} />
                             <Text style={{ fontSize: 18 }}>Hotels</Text>
                         </View>
-                        <Text style={{ fontSize: 18, color: "gray" }}>N/A</Text>
+                        <Text style={{ fontSize: 18, color: "gray" }}>${hotelBudget}</Text>
                     </TouchableOpacity>
 
                     <View style={styles.divider}></View>
@@ -157,7 +197,7 @@ const BudgetManagerScreen = () => {
                             <MaterialIcons name={"local-dining"} color={"#FFD700"} size={20} />
                             <Text style={{ fontSize: 18 }}>Food</Text>
                         </View>
-                        <Text style={{ fontSize: 18, color: "gray" }}>N/A</Text>
+                        <Text style={{ fontSize: 18, color: "gray" }}>${foodBudget}</Text>
                     </TouchableOpacity>
 
                     <View style={styles.divider}></View>
@@ -167,7 +207,7 @@ const BudgetManagerScreen = () => {
                             <Ionicons name={"location"} color={"green"} size={20} />
                             <Text style={{ fontSize: 18 }}>Things To Do</Text>
                         </View>
-                        <Text style={{ fontSize: 18, color: "gray" }}>N/A</Text>
+                        <Text style={{ fontSize: 18, color: "gray" }}>${thingsToDoBudget}</Text>
                     </TouchableOpacity>
 
                     <View style={styles.divider}></View>
@@ -177,7 +217,7 @@ const BudgetManagerScreen = () => {
                             <MaterialIcons name={"more-horiz"} color={"#800080"} size={20} />
                             <Text style={{ fontSize: 18 }}>Other</Text>
                         </View>
-                        <Text style={{ fontSize: 18, color: "gray" }}>N/A</Text>
+                        <Text style={{ fontSize: 18, color: "gray" }}>${otherBudget}</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -228,8 +268,6 @@ const BudgetManagerScreen = () => {
                     ) : (
                         <Text style={{ textAlign: 'center', fontSize: 16, marginTop: 10 }}>No expenses reported.</Text>
                     )}
-
-
                 </ScrollView>
             </View>
 
@@ -296,7 +334,7 @@ const BudgetManagerScreen = () => {
                                 shadowRadius: 3,
                             }}></TextInput>
 
-                            <TextInput value={expensePrice} onChangeText={text => setExpenseLabel(text)} keyboardType="numeric" style={{
+                            <TextInput value={expensePrice} onChangeText={text => setExpensePrice(text)} keyboardType="numeric" style={{
                                 height: 40,
                                 fontSize: 16,
                                 width: "30%",
@@ -307,7 +345,7 @@ const BudgetManagerScreen = () => {
                                 shadowOffset: { width: 1, height: 2 },
                                 shadowOpacity: 0.3,
                                 shadowRadius: 3,
-                            }}>$</TextInput>
+                            }}></TextInput>
                         </View>
 
                         <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 15, gap: 30 }}>
@@ -417,7 +455,6 @@ const styles = StyleSheet.create({
 
     historyContainer: {
         flex: 1,
-        overflow: 'visible',
         backgroundColor: "white",
         height: 500,
         borderRadius: 10,
