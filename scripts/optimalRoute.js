@@ -1,29 +1,31 @@
 import axios from 'axios';
+import {getIdToken} from '../scripts/getFirebaseID'
+import { auth } from '@/firebaseConfig';
 
 // Distance Matrix API
 async function getDistanceMatrix(origin, destinations, mode) {
-    const url = 'https://maps.googleapis.com/maps/api/distancematrix/json';
-
+    const url = 'https://ezgoing.app/api/distancematrix';
     // Log the destinations array converted to a string
     const destinationsStr = destinations.map(d => d.address).join('|'); // Between each destination, add this symbol
     console.log("DestStr:", destinationsStr);
 
-    const apiKey = "AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI";
     const originFull = origin.name + ", " + origin.address;
     console.log("Origin OptimalRoute:", originFull);
 
-    // TODO: Switch to ezgoing API call
     // Construct the full URL for the API call
-    const fullUrl = `${url}?origins=${encodeURIComponent(originFull)}&destinations=${encodeURIComponent(destinationsStr)}&mode=${mode}&key=${apiKey}`;
+    const fullUrl = `${url}?origins=${encodeURIComponent(originFull)}&destinations=${encodeURIComponent(destinationsStr)}&mode=${mode}`;
     console.log('Request URL:', fullUrl);
 
     let response;
-
+    const idToken = await getIdToken(auth);
     try {
         // Call the API and log the response
         console.log("Sending request to API...");
         response = await axios.get(fullUrl, {
-            method: "GET"
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${idToken}`, // Include the ID token in the header
+            },
         });
         console.log('API Response:', response.data);
     } catch (error) {

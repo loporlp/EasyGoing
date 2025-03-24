@@ -1,7 +1,8 @@
 import axios from 'axios';
+import {getIdToken} from '../scripts/getFirebaseID'
+import { auth } from '@/firebaseConfig';
+import { getId } from 'firebase/installations';
 
-const apiKey = 'AIzaSyAQgbWUgdfMozsamfhRi8HrHlRorkFNIEc'; //MASONS KEY, 
-// AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI SOLIS KEY;
 
 /**
  * Checks if the image URL is valid by trying to fetch it.
@@ -9,9 +10,13 @@ const apiKey = 'AIzaSyAQgbWUgdfMozsamfhRi8HrHlRorkFNIEc'; //MASONS KEY,
  * @returns {Promise<boolean>} - Resolves with true if the image loads successfully, false otherwise.
  */
 const checkImage = async (imageUrl) => {
+  const idToken = await getIdToken(auth);
   try {
     const response = await axios.get(imageUrl, { 
-      responseType: 'arraybuffer' 
+      responseType: 'arraybuffer',
+      headers: {
+        Authorization: `Bearer ${idToken}`, // Include the ID token in the header
+    },
     });
     // Check if the response status is 200 (OK) and content type is an image
     return response.status === 200 && response.headers['content-type'].includes('image'); // Returns True
@@ -28,12 +33,18 @@ const checkImage = async (imageUrl) => {
  * @returns {Promise<string|null>} - The URL of the place's image or null if not found.
  */
 const getImageUrl = async (placeAlias, address = '') => {
+  const idToken = await getIdToken(auth);
   try {
     // Construct the place search query string using the name and address of the destination
     let searchQuery = `${placeAlias} ${address}`;
-    const placeSearchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchQuery)}&key=${apiKey}`;
+    const placeSearchUrl = `https://ezgoing.app/api/place/textsearch?query=${encodeURIComponent(searchQuery)}`;
 
-    const response = await axios.get(placeSearchUrl);
+    const response = await axios.get(placeSearchUrl, {
+      method: "GET",
+      headers: {
+          Authorization: `Bearer ${idToken}`, // Include the ID token in the header
+      },
+  });
     const place = response.data.results[0];
 
     // If no place or no photo found, return none
@@ -44,7 +55,7 @@ const getImageUrl = async (placeAlias, address = '') => {
 
     // Acutal photo URL
     const photoReference = place.photos[0].photo_reference;
-    const photoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photoReference}&key=${apiKey}`;
+    const photoUrl = `https://ezgoing.app/api/place/photo?maxwidth=400&photo_reference=${photoReference}`;
 
     return photoUrl;
   } catch (err) {

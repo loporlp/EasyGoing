@@ -84,6 +84,7 @@ const verifyFirebaseToken = async (req, res, next) => {
  */
 
 app.get('/api/autocomplete', verifyFirebaseToken, async (req, res) => {
+    console.log("autocomplete called");
   try {
       // External API URL
       const apiUrl = 'https://maps.googleapis.com/maps/api/place/autocomplete/json';
@@ -115,6 +116,60 @@ app.get('/api/autocomplete', verifyFirebaseToken, async (req, res) => {
       });
   }
 });
+
+/**
+ * @swagger
+ * /api/geocode:
+ *   get:
+ *     summary: converts address to lat long from Google Places API
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: address
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The address being converted
+ *     responses:
+ *       200:
+ *         description: lat long coords
+ *       400:
+ *         description: Missing required parameter 'address'
+ *       403:
+ *         description: Unauthorized request. Ensure you are sending a valid User ID as Bearer token.
+ */
+
+app.get('/api/geocode', verifyFirebaseToken, async (req, res) => {
+    console.log("geocode called");
+    try {
+        // External API URL
+        const apiUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
+  
+        // Get the 'address' parameter from the client request
+        const address = req.query.address;
+        if (!address) {
+            return res.status(400).json({ error: 'Missing required parameter: address' });
+        }
+  
+        // Make the API request
+        const response = await axios.get(apiUrl, {
+            params: {
+                address: address,
+                key: GOOGLE_API_KEY, // API Key
+            },
+        });
+  
+        // Return the API's response to the client
+        res.status(response.status).json(response.data);
+    } catch (error) {
+        console.error('Error in autocomplete API proxy:', error.message);
+        res.status(error.response?.status || 500).json({
+            error: 'Failed to fetch geocode data',
+            details: error.message,
+        });
+    }
+  });
 
 /**
  * @swagger
@@ -258,7 +313,7 @@ app.get('/api/place/textsearch', verifyFirebaseToken, async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-app.get('/api/place/photo', verifyFirebaseToken, async (req, res) => {
+app.get('/api/place/photo', async (req, res) => {
     console.log("photo called");
     try {
         // Get parameters from the client request
@@ -278,13 +333,77 @@ app.get('/api/place/photo', verifyFirebaseToken, async (req, res) => {
                 maxwidth: maxwidth,
                 key: GOOGLE_API_KEY, 
             },
+            responseType: 'stream',
         });
 
-        // Send back the response from Google Directions API to the client
-        res.json(response.data);
+        // Send back the response from Google Photos API to the client
+        res.setHeader('Content-Type', response.headers['content-type']);
+        response.data.pipe(res);
     } catch (error) {
         console.error('Error fetching directions:', error.message);
         res.status(500).json({ error: 'An error occurred while fetching photos' });
+    }
+});
+
+
+/**
+ * @swagger
+ * /api/distancematrix:
+ *   get:
+ *     summary: Retrieve distancematrix from Google Places API
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: origins
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: destinations
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: mode
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Returns the requested distancematrix info
+ *       400:
+ *         description: Missing required parameters
+ *       500:
+ *         description: Internal server error
+ */
+app.get('/api/distancematrix', verifyFirebaseToken, async (req, res) => {
+    console.log("distancematrix called");
+    try {
+        // Get parameters from the client request
+        const { origins, destinations, mode }  = req.query;
+        // Validate required parameters
+        if (!origins || !destinations || !mode) {
+            return res.status(400).json({ error: 'Missing required parameters: origins, destinations, or mode' });
+        }
+
+        
+        const apiUrl = 'https://maps.googleapis.com/maps/api/distancematrix/json';
+        
+        // Make the API request
+        const response = await axios.get(apiUrl, {
+            params: {
+                origins: origins,
+                destinations: destinations,
+                mode: mode,
+                key: GOOGLE_API_KEY, 
+            },
+        });
+
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching distancematrix:', error.message);
+        res.status(500).json({ error: 'An error occurred while fetching distancematrix' });
     }
 });
 
@@ -299,6 +418,7 @@ app.get('/api/place/photo', verifyFirebaseToken, async (req, res) => {
  *         description: Server is running
  */
 app.get('/api/serverstatus', (req, res) => {
+    console.log("serverstatus called");
     res.json({ message: 'Server is Running' });
 });
 
@@ -318,6 +438,7 @@ const pool = require('./db'); // Import DB connection
  *         description: Database error
  */
 app.post('/api/register', verifyFirebaseToken, async (req, res) => {
+    console.log("register called");
     const { uid, email } = req.user;
 
     try {
@@ -346,6 +467,7 @@ app.post('/api/register', verifyFirebaseToken, async (req, res) => {
  *         description: Unauthorized access. Ensure you are sending the Firebase User ID as the Bearer token.
  */
 app.get('/api/trips', verifyFirebaseToken, async (req, res) => {
+    console.log("get trips called");
     const { uid } = req.user;
 
     try {
@@ -381,6 +503,7 @@ app.get('/api/trips', verifyFirebaseToken, async (req, res) => {
  *         description: Unauthorized. Ensure you are using a valid User ID as Bearer token.
  */
 app.post('/api/trips', verifyFirebaseToken, async (req, res) => {
+    console.log("create trip called");
     const { trip_details } = req.body;
     const { uid } = req.user;
 
@@ -448,6 +571,7 @@ app.post('/api/trips', verifyFirebaseToken, async (req, res) => {
  *         description: Database error
  */
 app.put('/api/trips/:id', verifyFirebaseToken, async (req, res) => {
+    console.log("update trip called");
     const { id } = req.params;
     const { trip_details } = req.body;
     const { uid } = req.user;
@@ -496,6 +620,7 @@ app.put('/api/trips/:id', verifyFirebaseToken, async (req, res) => {
  *         description: Unauthorized. Ensure you are using a valid User ID as Bearer token.
  */
 app.delete('/api/trips/:id', verifyFirebaseToken, async (req, res) => {
+    console.log("delete trip called");
     const { id } = req.params;
     const { uid } = req.user;
 
@@ -517,6 +642,268 @@ app.delete('/api/trips/:id', verifyFirebaseToken, async (req, res) => {
 });
 
 
+/**
+ * @swagger
+ * /api/history:
+ *   post:
+ *     summary: Create a new history entry
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user_id:
+ *                 type: string
+ *                 description: ID of the user creating the history entry
+ *                 example: "user_123"
+ *               tag:
+ *                 type: string
+ *                 enum: ["flight", "hotel", "thingsToDo", "food", "other"]
+ *                 description: The category of the expense
+ *                 example: "flight"
+ *               value:
+ *                 type: number
+ *                 format: float
+ *                 description: The amount spent
+ *                 example: 250.75
+ *               description:
+ *                 type: string
+ *                 maxLength: 50
+ *                 description: A brief description of the entry
+ *                 example: "Round trip to NYC"
+ *               date:
+ *                 type: string
+ *                 format: date
+ *                 description: The date of the history entry (optional, defaults to current date)
+ *                 example: "2025-03-18"
+ *     responses:
+ *       201:
+ *         description: History entry successfully created
+ *       400:
+ *         description: Bad request. Invalid input data.
+ *       403:
+ *         description: Unauthorized. Ensure you are using a valid User ID as Bearer token.
+ *       500:
+ *         description: Server error.
+ *
+ *   get:
+ *     summary: Get all history entries for a user
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: user_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the user whose history is being fetched
+ *     responses:
+ *       200:
+ *         description: List of history entries for the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: Unique ID of the history entry
+ *                     example: 1
+ *                   user_id:
+ *                     type: string
+ *                     description: ID of the user
+ *                     example: "user_123"
+ *                   tag:
+ *                     type: string
+ *                     enum: ["flight", "hotel", "thingsToDo", "food", "other"]
+ *                     description: The category of the expense
+ *                     example: "hotel"
+ *                   value:
+ *                     type: number
+ *                     format: float
+ *                     description: The amount spent
+ *                     example: 120.50
+ *                   description:
+ *                     type: string
+ *                     maxLength: 50
+ *                     description: A brief description
+ *                     example: "One-night stay"
+ *                   date:
+ *                     type: string
+ *                     format: date
+ *                     description: Date of the history entry
+ *                     example: "2025-03-18"
+ *       400:
+ *         description: Bad request. Missing or invalid user_id.
+ *       403:
+ *         description: Unauthorized. Ensure you are using a valid User ID as Bearer token.
+ *       500:
+ *         description: Server error.
+ */
+app.post('/api/history', verifyFirebaseToken, async (req, res) => {
+    console.log("create history called");
+    const { uid } = req.user;
+    const { tag, value, description, date } = req.body; 
+
+    // Validate input
+    if (!tag || !value || !description || description.length > 50) {
+        return res.status(400).json({ success: false, error: "Invalid input. Ensure all required fields are provided and description is ≤ 50 chars." });
+    }
+
+    // Ensure 'tag' is one of the predefined values
+    const validTags = ["flight", "hotel", "thingsToDo", "food", "other"];
+    if (!validTags.includes(tag)) {
+        return res.status(400).json({ success: false, error: "Invalid tag. Must be one of: flight, hotel, thingsToDo, food, other." });
+    }
+
+    try {
+        const query = `
+            INSERT INTO history (user_id, tag, value, description, date)
+            VALUES ($1, $2, $3, $4, COALESCE($5, CURRENT_DATE))
+            RETURNING *;
+        `;
+
+        const result = await pool.query(query, [uid, tag, value, description, date || null]);
+
+        res.status(201).json({ success: true, history: result.rows[0] });
+    } catch (error) {
+        console.error("Database error:", error);
+        res.status(500).json({ success: false, error: "Database error" });
+    }
+});
+
+
+
+app.get('/api/history', verifyFirebaseToken, async (req, res) => {
+    console.log("get history called");
+    const { uid } = req.user;
+
+    try {
+        const result = await pool.query('SELECT * FROM history WHERE user_id = $1', [uid]);
+        res.status(200).json({ success: true, histories: result.rows });
+    } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).json({ success: false, error: 'Database error' });
+    }
+});
+
+/**
+ * @swagger
+ * /api/history/{id}:
+ *   delete:
+ *     summary: Delete a history entry
+ *     description: Deletes a history entry by ID. The user must be authenticated via Firebase.
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the history entry to delete
+ *     responses:
+ *       200:
+ *         description: History entry successfully deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "History entry deleted."
+ *                 deletedHistory:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     user_id:
+ *                       type: string
+ *                       example: "user_123"
+ *                     tag:
+ *                       type: string
+ *                       example: "flight"
+ *                     value:
+ *                       type: number
+ *                       format: float
+ *                       example: 250.75
+ *                     description:
+ *                       type: string
+ *                       example: "Round trip to NYC"
+ *                     date:
+ *                       type: string
+ *                       format: date
+ *                       example: "2025-03-18"
+ *       400:
+ *         description: Bad request. Invalid history ID.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   example: "Invalid history ID."
+ *       404:
+ *         description: Not found. The history entry does not exist.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   example: "History entry not found."
+ *       500:
+ *         description: Server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   example: "Database error."
+ */
+app.delete('/api/history/:id', verifyFirebaseToken, async (req, res) => {
+    console.log("delete history called");
+    const { uid } = req.user;
+    const { id } = req.params;
+
+    try {
+        const deleteQuery = 'DELETE FROM history WHERE id = $1 AND user_id = $2 RETURNING *';
+        const deleteResult = await pool.query(deleteQuery, [id, uid]);
+
+        if (deleteResult.rowCount === 0) {
+            return res.status(404).json({ success: false, error: "History entry not found." });
+        }
+
+        res.status(200).json({ success: true, message: "History entry deleted.", deletedHistory: deleteResult.rows[0] });
+    } catch (error) {
+        console.error("Database error:", error);
+        res.status(500).json({ success: false, error: "Database error" });
+    }
+});
 
 
 
