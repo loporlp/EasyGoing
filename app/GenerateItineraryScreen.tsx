@@ -17,6 +17,7 @@ import { launchPrioritySystem} from '../scripts/prioritySystem.js';
 import { updateTrip } from '../scripts/databaseInteraction.js';
 import groupDestinationsByDay from '../scripts/groupDestinationsByDay';
 import processGroupedDestinations from '../scripts/processGroupedDestinations';
+import { recalculatePaths } from '../scripts/reorderingLocations';
 import { Ionicons } from '@expo/vector-icons';
 import moment from 'moment';
 
@@ -744,46 +745,43 @@ const GenerateItineraryScreen = () => {
     };
     
     // Function to move the destination up or down
-    const moveDestination = (destinationIndex: number, direction: string) => {
-        const newResultRoute = [...resultRoute];  // Copy the resultRoute to avoid direct mutation
-    
-        console.log(`Attempting to move destination at index: ${destinationIndex} in direction: ${direction}`);
-    
-        // Ensure destinationIndex is valid (if this occurs, error in code)
+    const moveDestination = async (destinationIndex: number, direction: string) => {
+        const newResultRoute= [...resultRoute];
+        
+        // Ensure destinationIndex is valid
         if (destinationIndex < 0 || destinationIndex >= newResultRoute.length) {
-            console.error(`Invalid destination index: ${destinationIndex}. It must be between 0 and ${newResultRoute.length - 1}`);
             return;
         }
-    
-        // Check the direction and handle it
-        if (direction === 'up') {
-            if (destinationIndex > 0) {
-                // Move the destination up
-                const [movedDestination] = newResultRoute.splice(destinationIndex, 1);  // Remove destination from current position
-                newResultRoute.splice(destinationIndex - 1, 0, movedDestination);  // Insert at the previous position
-            } else {
-                console.error('Cannot move up, already at the top.');
-                return;
-            }
-        } else if (direction === 'down') {
-            if (destinationIndex < newResultRoute.length - 1) {
-                // Move the destination down
-                const [movedDestination] = newResultRoute.splice(destinationIndex, 1);  // Remove destination from current position
-                newResultRoute.splice(destinationIndex + 1, 0, movedDestination);  // Insert at the next position
-            } else {
-                console.error('Cannot move down, already at the bottom.');
-                return;
-            }
+
+        // Retain only alias and address for each element
+        const simplifiedRoute = newResultRoute.map(destination => ({
+            alias: destination.alias,
+            address: destination.address
+        }));
+
+        if (direction === 'up' && destinationIndex > 0) {
+            // Move the destination up
+            const [movedDestination] = simplifiedRoute.splice(destinationIndex, 1);
+            simplifiedRoute.splice(destinationIndex - 1, 0, movedDestination);
+        } else if (direction === 'down' && destinationIndex < simplifiedRoute.length - 1) {
+            // Move the destination down
+            const [movedDestination] = simplifiedRoute.splice(destinationIndex, 1);
+            simplifiedRoute.splice(destinationIndex + 1, 0, movedDestination);
         } else {
-            console.error('Invalid direction. Please use "up" or "down".');
-            return; // Invalid direction
+            return;
         }
-    
-        console.log('Updated resultRoute:', newResultRoute);
-    
-        // Update the state with the new resultRoute
-        setResultRoute(newResultRoute);
+
+        // Recalculate the new path before saving it
+        try {
+            const reorganizedDestinations = await recalculatePaths(simplifiedRoute);
+            
+            // Ensure that reorderDestinations is set to the reorganizedDestinations
+            setToSaveData(reorganizedDestinations);
+        } catch (error) {
+            console.error("Error recalculating paths or saving data:", error);
+        }
     };
+   
     
 
     return (
