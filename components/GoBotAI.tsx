@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, ScrollView } from 'react-native';
-import { travel_agent_recommendation } from '../scripts/travelAgentAI.py';
+//import { travel_agent_recommendation } from '../scripts/travelAgentAI.py';
 
 // Default export (no need to use closing tags when importing)
 const GoBotAI = () => {
@@ -17,7 +17,8 @@ const GoBotAI = () => {
 
     // Gets a response from GoBotAI
     const sendTextToGoBot = (input: string) => {
-        const result = travel_agent_recommendation(input);
+        //const result = travel_agent_recommendation(input);
+        const result = "Hi! I'm working but I'm a static GoBot!"; // TEMP
         setRecommendation(result);
     };
 
