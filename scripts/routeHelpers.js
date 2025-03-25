@@ -1,5 +1,7 @@
 import { getRoutePolyline } from './routePolyline';
 import { getCoords } from './nameToCoords';
+import { getIdToken } from '../scripts/getFirebaseID';
+import { auth } from '../firebaseConfig';
 
 export const fetchPolylinesAndDurations = async (locations, transportationModes) => {
   const allPolylines = [];
@@ -64,3 +66,77 @@ export const fetchPolylinesAndDurations = async (locations, transportationModes)
     bounds: { minLat, maxLat, minLon, maxLon },
   };
 };
+
+export async function getDirectionsBetweenLocations(origin, destination, mode) { 
+  console.log("(Get Directions - Origin: ", origin);
+  console.log("(Get Directions - Dest: ", destination);
+  console.log("(Get Directions - Mode: ", mode);
+
+  // Fetch coordinates for origin and destination
+  const originCoords = await getCoords({ description: origin, place_id: '' });
+  const destinationCoords = await getCoords({ description: destination, place_id: '' });
+
+  // Retrieve the ID token from Firebase
+  const idToken = await getIdToken(auth);
+
+  // Construct the API URL
+  let url = `https://ezgoing.app/api/directions?origin=${originCoords.latitude},${originCoords.longitude}&destination=${destinationCoords.latitude},${destinationCoords.longitude}&mode=${mode.toLowerCase()}`;
+
+  try {
+    // Make the API call with authentication token
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+          Authorization: `Bearer ${idToken}`,
+      },
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    // Fetch the route and extract directions and duration
+    const data = await response.json();
+
+    // Check if the response is valid
+    if (data.status === 'OK') {
+        // Extract directions (steps) and duration
+        const routeSteps = [];
+        const legs = data.routes[0].legs;
+
+        // Loop through each leg of the route
+        legs.forEach(leg => {
+            // Loop through each step in the leg (exp: step is a part of the journey like "Turn right onto X street")
+            leg.steps.forEach(step => {
+              // This contains the textual instructions
+                routeSteps.push(step.html_instructions);
+            });
+        });
+
+        // Extract the duration of the route
+        const duration = legs[0].duration.text;
+
+        return {
+            directions: routeSteps,
+            duration: duration,
+        };
+    } else {
+        console.error('Error fetching route (data):', data.status);
+        if (data.status === 'ZERO_RESULTS' && mode.toLowerCase() === 'transit') {
+            console.log("Zero results for transit mode, trying driving mode...");
+            // Try with 'driving' mode if 'transit' fails
+            return getDirectionsBetweenLocations(origin, destination, 'driving');
+        }
+        return null;
+    }
+  } catch (error) {
+    console.log("Directions Error: ", error);
+    // If the error is a ZERO_RESULTS error for transit mode, handle it with default of driving
+    if (error.message.includes("ZERO_RESULTS") && mode.toLowerCase() === 'transit') {
+      console.log("Zero results for transit, retrying with driving mode.");
+      return getDirectionsBetweenLocations(origin, destination, 'driving');
+    } else {
+      console.log("An unexpected error occurred: ", error.message);
+    }
+  }
+}

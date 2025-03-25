@@ -2,9 +2,8 @@
 import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image, SafeAreaView, Alert, Button, ActivityIndicator } from "react-native";
 import { Picker } from '@react-native-picker/picker';
 import { useRouter } from "expo-router";
-import MapMarker from '../components/MapMarker';
-import RouteMap from '../components/RouteMap';
 import MultiRoutesMap from '../components/MultiRoutesMap';
+import DirectionsList from '../components/DirectionsList';
 import { fetchPolylinesAndDurations } from '../scripts/routeHelpers';
 import { calculateOptimalRoute } from '../scripts/optimalRoute.js';
 import { Dimensions } from "react-native";
@@ -19,7 +18,6 @@ import groupDestinationsByDay from '../scripts/groupDestinationsByDay';
 import processGroupedDestinations from '../scripts/processGroupedDestinations';
 import { recalculatePaths } from '../scripts/reorderingLocations';
 import { Ionicons } from '@expo/vector-icons';
-import moment from 'moment';
 
 const { height } = Dimensions.get('window');
 
@@ -904,30 +902,10 @@ const GenerateItineraryScreen = () => {
                                             </View>
                                         </TouchableOpacity>
 
-                                        <View style={styles.buttonContainer}>
-                                            {destinationIndex > 0 && (
-                                                <TouchableOpacity
-                                                    onPress={() => moveDestination(destinationIndex, 'up')}
-                                                    style={styles.moveButton}
-                                                >
-                                                    <Ionicons name="arrow-up" size={20} color="#000" />
-                                                </TouchableOpacity>
-                                            )}
-                                            {destinationIndex < routeGroup.length - 1 && (
-                                                <TouchableOpacity
-                                                    onPress={() => moveDestination(destinationIndex, 'down')}
-                                                    style={styles.moveButton}
-                                                >
-                                                    <Ionicons name="arrow-down" size={20} color="#000" />
-                                                </TouchableOpacity>
-                                            )}
-                                        </View>
-
                                         {/* Conditional rendering of additional info */}
                                         {selectedDestination === destinationKey && (
                                             <View style={styles.additionalInfo}>
                                                 {/*<Text style={styles.additionalText}>{getRouteText()}</Text>*/}
-                                                {/* TODO: Need to get directions (no direct way to get from here yet) */}
                                                 
                                                 {/* Show transport mode */}
                                                 <Text style={styles.additionalText}>
@@ -957,8 +935,35 @@ const GenerateItineraryScreen = () => {
                                                 <Text style={styles.additionalText}>
                                                     Duration: {isLastDestination ? "None" : destinationTransportDuration}
                                                 </Text>
+
+                                                {/* Directions */}
+                                                <DirectionsList
+                                                    origin={destinations[String(destinationIndex)].address}
+                                                    destination={destinations[String(destinationIndex + 1)]?.address || "Unknown Destination"}
+                                                    mode={destinations[String(destinationIndex)].mode}
+                                                />   
                                             </View>
                                         )}
+
+                                        {/* Move buttons */}
+                                        <View style={styles.buttonContainer}>
+                                            {destinationIndex > 0 && (
+                                                <TouchableOpacity
+                                                    onPress={() => moveDestination(destinationIndex, 'up')}
+                                                    style={styles.moveButton}
+                                                >
+                                                    <Ionicons name="arrow-up" size={20} color="#000" />
+                                                </TouchableOpacity>
+                                            )}
+                                            {destinationIndex < routeGroup.length - 1 && (
+                                                <TouchableOpacity
+                                                    onPress={() => moveDestination(destinationIndex, 'down')}
+                                                    style={styles.moveButton}
+                                                >
+                                                    <Ionicons name="arrow-down" size={20} color="#000" />
+                                                </TouchableOpacity>
+                                            )}
+                                        </View>
                                     </View>
                                 );
                             })}
@@ -1057,7 +1062,7 @@ const styles = StyleSheet.create({
     },
 
     scrollView: {
-        maxHeight: height * 0.4,
+        maxHeight: height * 0.45,
         borderRadius: 10,
         overflow: "hidden",
         marginBottom: 10,
@@ -1117,6 +1122,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#f0f0f0",
         padding: 10,
         borderRadius: 5,
+        flex: 1,
     },
 
     additionalText: {
