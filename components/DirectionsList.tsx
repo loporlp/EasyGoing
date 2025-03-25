@@ -64,28 +64,24 @@ const DirectionsList: React.FC<DirectionsListProps> = ({ origin, destination, mo
       {error && <Text style={styles.error}>{error}</Text>}
       {!loading && !error && (
         <>
-          {directions.map((item, index) => (
-            <View key={index} style={styles.directionStep}>
-              <View style={styles.directionContainer}>
-                {/* Color block next to each instruction */}
-                <View
-                  style={{
-                    ...styles.colorBlock,
-                    backgroundColor: modeColors[mode.toUpperCase()] || '#000',
-                  }}
-                />
-                {/* Render HTML instruction */}
-                {item.instruction ? (
+            {directions.map((item, index) => (
+                <View key={index} style={styles.directionStep}>
+                    <View style={styles.directionContainer}>
+                    {/* Color block next to each instruction */}
+                    <View
+                        style={{
+                        ...styles.colorBlock,
+                        backgroundColor: modeColors[mode.toUpperCase()] || '#000',
+                        }}
+                    />
+                    {/* Render HTML instruction */}
                     <RenderHtml
                         contentWidth={350} // Adjust here if not right size
-                        source={{ html: item.instruction }}
+                        source={{ html: item }}
                     />
-                ) : (
-                    <Text>No instructions available.</Text>
-                )}
-              </View>
-            </View>
-          ))}
+                    </View>
+                </View>
+            ))}
         </>
       )}
     </View>
