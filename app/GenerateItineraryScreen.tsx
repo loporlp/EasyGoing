@@ -1062,7 +1062,7 @@ const styles = StyleSheet.create({
     },
 
     scrollView: {
-        maxHeight: height * 0.4,
+        maxHeight: height * 0.45,
         borderRadius: 10,
         overflow: "hidden",
         marginBottom: 10,
