@@ -22,7 +22,6 @@ const BudgetManagerScreen = () => {
 
     // Add to history params
     const [expenseTag, setExpenseTag] = useState("");
-    const [expenseDate, setExpenseDate] = useState("");
     const [expensePrice, setExpensePrice] = useState("");
     const [expenseLabel, setExpenseLabel] = useState("");
 
@@ -54,13 +53,15 @@ const BudgetManagerScreen = () => {
 
                 // Loop through each history ID and fetch the history details from local storage
                 for (const historyId of historyIds) {
-                    loadedHistory.push({
+                    loadedHistory.unshift({
                         id: historyId.id,
                         tag: historyId.tag,
                         value: historyId.value,
                         description: historyId.description,
                         date: historyId.date
                     });
+
+                    console.log(historyId.id)
 
                     switch (historyId.tag) {
                         case 'Hotel':
@@ -88,6 +89,8 @@ const BudgetManagerScreen = () => {
                     }
                 }
 
+                let totalExpense = hotelBudget + transportationBudget + foodBudget + thingsToDoBudget + otherBudget;
+                setTotalBudget(totalExpense)
                 setBudgetHistory(loadedHistory);
             } else {
                 console.log("No history available in local storage.");
@@ -95,6 +98,10 @@ const BudgetManagerScreen = () => {
         };
         loadHistory();
     }, []);
+
+    useEffect(() => {
+
+    }, [budgetHistory])
 
     // add to history
     const addHistory = async () => {
@@ -115,9 +122,11 @@ const BudgetManagerScreen = () => {
                     description: expenseLabel,
                     date: formattedDate.toString()
                 };
-
+                console.log(budgetHistory)
                 budgetHistory.unshift(newExpense);
-                await storeData("history", budgetHistory);
+                let newBudgetHistory = [...budgetHistory];
+                setBudgetHistory(newBudgetHistory)
+                await storeData(budgetHistory[0].id.toString(), budgetHistory);
                 resetHistory();
             }
         } else {
@@ -131,7 +140,6 @@ const BudgetManagerScreen = () => {
         setValue(null);
 
         setExpenseTag("");
-        setExpenseDate("");
         setExpenseLabel("");
         setExpensePrice("");
     }
@@ -159,7 +167,7 @@ const BudgetManagerScreen = () => {
                 {/* Calculate this */}
                 <Text style={{ fontWeight: "700", fontSize: 18, marginTop: 10 }}>Summary</Text>
                 <View style={[styles.divider, { marginTop: 0 }]}></View>
-                <Text>Total Spent: ${transportationBudget}</Text>
+                <Text>Total Spent: ${totalBudget}</Text>
 
                 {/* Bar showing how much someone spent */}
                 <View style={styles.bar}>
@@ -235,7 +243,7 @@ const BudgetManagerScreen = () => {
                     {/* Will load this part through the database */}
                     {budgetHistory.length > 0 ? (
                         budgetHistory.map((expense) => (
-                            <View>
+                            <View key={expense.id}>
                                 <View style={styles.hotelSection}>
                                     <View style={styles.hotelLabel}>
                                         {(() => {
