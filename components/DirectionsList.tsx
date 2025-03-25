@@ -15,7 +15,7 @@ interface DirectionStep {
 
 const DirectionsList: React.FC<DirectionsListProps> = ({ origin, destination, mode }) => {
     const [directions, setDirections] = useState<DirectionStep[]>([]);
-    const [duration, setDuration] = useState<string>('');
+    const [duration, setDuration] = useState<string>('');  
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
   
@@ -55,7 +55,7 @@ const DirectionsList: React.FC<DirectionsListProps> = ({ origin, destination, mo
   
         fetchDirections();
     }, [origin, destination, mode]);
-  
+
     return (
         <View style={styles.container}>
             {loading && <ActivityIndicator size="large" color="#0000ff" />}
@@ -90,60 +90,58 @@ const DirectionsList: React.FC<DirectionsListProps> = ({ origin, destination, mo
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-    },
-    directionsList: {
-      flex: 1,
-      padding: 20,
-      backgroundColor: '#f9f9f9',
-      borderRadius: 8,
-      marginBottom: 20,
+        backgroundColor: '#f9f9f9',
+        padding: 20,
     },
     heading: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      color: '#333',
-      marginBottom: 10,
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: 'black',
+        marginBottom: 10,
     },
     subHeading: {
-      fontSize: 16,
-      color: '#666',
+        fontSize: 16,
+        color: 'gray',
+        marginBottom: 5,
     },
     directionStep: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 12,
-      padding: 10,
-      backgroundColor: '#ffffff',
-      borderRadius: 5,
-      elevation: 3,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-      shadowRadius: 3,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+        padding: 10,
+        backgroundColor: '#ffffff',
+        borderRadius: 5,
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
     },
     directionContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
     },
     colorBlock: {
-      width: 20,
-      height: 20,
-      marginRight: 12,
-      borderRadius: 50,
+        width: 20,
+        height: 20,
+        marginRight: 12,
+        borderRadius: 50,
     },
     instruction: {
-      fontSize: 16,
-      color: '#333',
-    },
-    loading: {
-      fontSize: 18,
-      color: '#666',
-      textAlign: 'center',
+        fontSize: 16,
+        color: 'black',
+        flexShrink: 1,
     },
     error: {
-      color: 'red',
-      fontSize: 18,
-      textAlign: 'center',
+        color: 'red',
+        fontSize: 18,
+        textAlign: 'center',
+    },
+    loading: {
+        fontSize: 18,
+        color: '#666',
+        textAlign: 'center',
     },
 });
 
