@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, TextInput, Button, ScrollView, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, TextInput, Button, ScrollView, StyleSheet, Animated } from 'react-native';
 import Markdown from 'react-native-markdown-display';
 import { travelAgentApi } from '../scripts/travelAgentApi';
 
@@ -7,6 +7,27 @@ const GoBotAI = () => {
     const [text, setText] = useState<string>('');
     const [recommendation, setRecommendation] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
+    const [displayedText, setDisplayedText] = useState<string>('');
+    const [textLoading, setTextLoading] = useState<boolean>(false);
+    const fadeAnim = useState(new Animated.Value(0))[0];
+
+    useEffect(() => {
+        if (recommendation) {
+            let index = 0;
+            setDisplayedText('');
+            setTextLoading(true);
+            const updateText = () => {
+                if (index < recommendation.length) {
+                    setDisplayedText(prev => prev + recommendation[index]);
+                    index++;
+                    requestAnimationFrame(updateText);
+                } else {
+                    setTextLoading(false);
+                }
+            };
+            requestAnimationFrame(updateText);
+        }
+    }, [recommendation]);
 
     // Button press for GoBot AI
     const handlePress = () => {
@@ -20,11 +41,16 @@ const GoBotAI = () => {
         setLoading(true);
         try {
             const result = await travelAgentApi(input);
-
+            
             // Extract GoBot's response text :D
             const textResponse = result?.choices?.[0]?.message?.content || 'Sorry! Please try again!';
 
             setRecommendation(textResponse);
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 500,
+                useNativeDriver: true,
+            }).start();
         } catch (error) {
             console.error('Error fetching data:', error);
             setRecommendation('Sorry, something went wrong.');
@@ -45,18 +71,20 @@ const GoBotAI = () => {
                 />
                 <View style={styles.buttonWrapper}>
                     <Button
-                        title={loading ? "Sending..." : "Send"}
+                        title={loading || textLoading ? "Sending..." : "Send"}
                         onPress={handlePress}
-                        disabled={loading}
+                        disabled={loading || textLoading}
                     />
                 </View>
             </View>
 
-            {/* Render Recommendation */}
+            {/* Render Recommendation with Fade-in Animation */}
             {recommendation && (
-                <ScrollView style={styles.recommendDest}>
-                    <Markdown>{recommendation}</Markdown>
-                </ScrollView>
+                <Animated.View style={[styles.recommendDest, { opacity: fadeAnim }]}>                    
+                    <ScrollView>
+                        <Markdown>{displayedText}</Markdown>
+                    </ScrollView>
+                </Animated.View>
             )}
         </View>
     );
