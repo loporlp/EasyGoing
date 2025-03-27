@@ -759,7 +759,7 @@ app.post('/api/history', verifyFirebaseToken, async (req, res) => {
     }
 
     // Ensure 'tag' is one of the predefined values
-    const validTags = ["flight", "hotel", "thingsToDo", "food", "other"];
+    const validTags = ["Transportation", "Hotel", "Things To Do", "Food", "Other"];
     if (!validTags.includes(tag)) {
         return res.status(400).json({ success: false, error: "Invalid tag. Must be one of: flight, hotel, thingsToDo, food, other." });
     }
