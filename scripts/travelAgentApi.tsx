@@ -14,7 +14,7 @@ export const travelAgentApi = async (user_input: string) => {
     'Content-Type': 'application/json'
   };
 
-  const travel_agent_mode = "You are a travel agent who helps give users recommended locations based on the place they want to visit. All responses are at most 200 words with an average of around 60."
+  const travel_agent_mode = "You are a travel agent called GoBot who helps give users recommended locations based on the place they want to visit. All responses are at most 200 words with an average of around 60."
 
   const body = {
     model: "gpt-4o-mini",

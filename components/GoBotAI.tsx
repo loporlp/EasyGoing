@@ -35,21 +35,26 @@ const GoBotAI = () => {
 
     return (
         <View style={styles.container}>
-            <TextInput
-                style={styles.input}
-                value={text}
-                onChangeText={setText}
-                placeholder="Ask GoBot a question!"
-            />
-            <Button
-                title={loading ? "Sending..." : "Send"}
-                onPress={handlePress}
-                disabled={loading}
-            />
+            <View style={styles.searchSection}>
+                <TextInput
+                    style={styles.searchBar}
+                    value={text}
+                    onChangeText={setText}
+                    placeholder="Ask GoBot a question!"
+                    multiline
+                />
+                <View style={styles.buttonWrapper}>
+                    <Button
+                        title={loading ? "Sending..." : "Send"}
+                        onPress={handlePress}
+                        disabled={loading}
+                    />
+                </View>
+            </View>
 
             {/* Render Recommendation */}
             {recommendation && (
-                <ScrollView style={styles.responseContainer}>
+                <ScrollView style={styles.recommendDest}>
                     <Markdown>{recommendation}</Markdown>
                 </ScrollView>
             )}
@@ -59,29 +64,49 @@ const GoBotAI = () => {
 
 const styles = StyleSheet.create({
     container: {
-        position: 'relative',
+        flex: 1,
+        height: "70%",
+        backgroundColor: "#F4F4F4",
+        borderRadius: 10,
         padding: 20,
     },
-    input: {
-        height: 40,
-        borderColor: '#999',
-        borderBottomWidth: 0.5,
-        fontSize: 18,
+    searchSection: {
+        flexDirection: "row",
+        marginVertical: 20,
+        marginTop: 15,
+        paddingHorizontal: 20,
+        shadowColor: "#333333",
+        shadowOffset: { width: 1, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
         backgroundColor: "white",
         borderRadius: 10,
-        paddingVertical: 5,
-        paddingLeft: 5,
-        textAlign: 'left',
-        writingDirection: 'ltr',
-        marginBottom: 20,
+        alignItems: "center",
+        height: 50,
     },
-    responseContainer: {
-        marginTop: 20,
+    searchBar: {
+        flex: 1,
+        backgroundColor: "white",
         padding: 10,
-        borderColor: '#ddd',
-        borderWidth: 1,
-        borderRadius: 5,
-        maxHeight: 200,
+        borderRadius: 10,
+        height: 50,
+    },
+    buttonWrapper: {
+        height: 50,
+        justifyContent: "center",
+        marginLeft: 10,
+    },
+    recommendDest: {
+        backgroundColor: "white",
+        padding: 10,
+        height: 250,
+        borderRadius: 10,
+        width: "100%",
+        shadowColor: "#333333",
+        shadowOffset: { width: 1, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        overflow: "hidden",
     },
 });
 
