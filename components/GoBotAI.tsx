@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, TextInput, Button, ScrollView, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, TextInput, Button, ScrollView, StyleSheet, Animated, Image } from 'react-native';
 import Markdown from 'react-native-markdown-display';
 import { travelAgentApi } from '../scripts/travelAgentApi';
 
@@ -7,6 +7,62 @@ const GoBotAI = () => {
     const [text, setText] = useState<string>('');
     const [recommendation, setRecommendation] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
+    const [displayedText, setDisplayedText] = useState<string>('');
+    const [textLoading, setTextLoading] = useState<boolean>(false);
+    const fadeAnimation = useState(new Animated.Value(0))[0];
+    const pulseAnimation = useState(new Animated.Value(1))[0];
+
+    useEffect(() => {
+        // Start pulsing animation when text is loading
+        if (textLoading) {
+            Animated.loop(
+                Animated.sequence([
+                    // Size up
+                    Animated.timing(pulseAnimation, {
+                        toValue: 1.1,
+                        duration: 500,
+                        useNativeDriver: true,
+                    }),
+                    // Size down
+                    Animated.timing(pulseAnimation, {
+                        toValue: 1,
+                        duration: 500,
+                        useNativeDriver: true,
+                    }),
+                ])
+            ).start();
+        } else {
+            // Stop pulsing animation when text is finished
+            Animated.timing(pulseAnimation, {
+                toValue: 1,
+                duration: 500,
+                useNativeDriver: true,
+            }).stop();
+        }
+    }, [textLoading, pulseAnimation]);
+   
+
+    useEffect(() => {
+        if (recommendation) {
+            let index = 0;
+            setDisplayedText(recommendation[index]);
+            setTextLoading(true);
+    
+            const updateText = () => {
+                if (index < recommendation.length - 1) {
+                    setDisplayedText(prev => prev + recommendation[index]);
+                    index++;
+                    requestAnimationFrame(updateText);
+                } else {
+                    setTextLoading(false);
+                }
+            };
+    
+            // Start appending characters one by one
+            requestAnimationFrame(updateText);
+        }
+    }, [recommendation]);
+    
 
     // Button press for GoBot AI
     const handlePress = () => {
@@ -20,11 +76,16 @@ const GoBotAI = () => {
         setLoading(true);
         try {
             const result = await travelAgentApi(input);
-
+            
             // Extract GoBot's response text :D
             const textResponse = result?.choices?.[0]?.message?.content || 'Sorry! Please try again!';
 
             setRecommendation(textResponse);
+            Animated.timing(fadeAnimation, {
+                toValue: 1,
+                duration: 500,
+                useNativeDriver: true,
+            }).start();
         } catch (error) {
             console.error('Error fetching data:', error);
             setRecommendation('Sorry, something went wrong.');
@@ -35,23 +96,38 @@ const GoBotAI = () => {
 
     return (
         <View style={styles.container}>
-            <TextInput
-                style={styles.input}
-                value={text}
-                onChangeText={setText}
-                placeholder="Ask GoBot a question!"
+            {/* Mascot Image */}
+            <View style={styles.mascotWrapper}>
+            <Animated.Image
+                source={require('../assets//images/GoBotAI.png')} 
+                style={[styles.mascotImage, { transform: [{ scale: pulseAnimation }] }]}
             />
-            <Button
-                title={loading ? "Sending..." : "Send"}
-                onPress={handlePress}
-                disabled={loading}
-            />
+            </View>
 
-            {/* Render Recommendation */}
+            <View style={styles.searchSection}>
+                <TextInput
+                    style={styles.searchBar}
+                    value={text}
+                    onChangeText={setText}
+                    placeholder="Ask GoBot a question!"
+                    multiline
+                />
+                <View style={styles.buttonWrapper}>
+                    <Button
+                        title={loading || textLoading ? "Sending..." : "Send"}
+                        onPress={handlePress}
+                        disabled={loading || textLoading}
+                    />
+                </View>
+            </View>
+
+            {/* Render Recommendation with Fade-in Animation */}
             {recommendation && (
-                <ScrollView style={styles.responseContainer}>
-                    <Markdown>{recommendation}</Markdown>
-                </ScrollView>
+                <Animated.View style={[styles.recommendDest, { opacity: fadeAnimation }]}>                    
+                    <ScrollView>
+                        <Markdown>{displayedText}</Markdown>
+                    </ScrollView>
+                </Animated.View>
             )}
         </View>
     );
@@ -59,29 +135,59 @@ const GoBotAI = () => {
 
 const styles = StyleSheet.create({
     container: {
-        position: 'relative',
+        flex: 1,
+        height: "70%",
+        backgroundColor: "#F4F4F4",
+        borderRadius: 10,
         padding: 20,
     },
-    input: {
-        height: 40,
-        borderColor: '#999',
-        borderBottomWidth: 0.5,
-        fontSize: 18,
+    searchSection: {
+        flexDirection: "row",
+        marginVertical: 20,
+        marginTop: 15,
+        paddingHorizontal: 20,
+        shadowColor: "#333333",
+        shadowOffset: { width: 1, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
         backgroundColor: "white",
         borderRadius: 10,
-        paddingVertical: 5,
-        paddingLeft: 5,
-        textAlign: 'left',
-        writingDirection: 'ltr',
+        alignItems: "center",
+        height: 50,
+    },
+    searchBar: {
+        flex: 1,
+        backgroundColor: "white",
+        padding: 10,
+        borderRadius: 10,
+        height: 50,
+    },
+    buttonWrapper: {
+        height: 50,
+        justifyContent: "center",
+        marginLeft: 10,
+    },
+    recommendDest: {
+        backgroundColor: "white",
+        padding: 10,
+        height: 250,
+        borderRadius: 10,
+        width: "100%",
+        shadowColor: "#333333",
+        shadowOffset: { width: 1, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        overflow: "hidden",
+    },
+    mascotWrapper: {
+        alignItems: 'center',
         marginBottom: 20,
     },
-    responseContainer: {
-        marginTop: 20,
-        padding: 10,
-        borderColor: '#ddd',
-        borderWidth: 1,
-        borderRadius: 5,
-        maxHeight: 200,
+    mascotImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        overflow: 'hidden',
     },
 });
 
