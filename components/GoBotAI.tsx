@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, ScrollView } from 'react-native';
+import { View, TextInput, Button, ScrollView, StyleSheet } from 'react-native';
+import Markdown from 'react-native-markdown-display';
 import { travelAgentApi } from '../scripts/travelAgentApi';
 
 const GoBotAI = () => {
@@ -20,11 +21,8 @@ const GoBotAI = () => {
         try {
             const result = await travelAgentApi(input);
 
-            // Extracting the message text from the response
-            const message = result?.choices?.[0]?.message;
-            
-            // Check if the message object exists and if it contains text
-            const textResponse = message ? JSON.stringify(message) : 'No valid response available';
+            // Extract GoBot's response text :D
+            const textResponse = result?.choices?.[0]?.message?.content || 'Sorry! Please try again!';
 
             setRecommendation(textResponse);
         } catch (error) {
@@ -49,10 +47,10 @@ const GoBotAI = () => {
                 disabled={loading}
             />
 
-            {/* Response if recommendation exists */}
+            {/* Render Recommendation */}
             {recommendation && (
                 <ScrollView style={styles.responseContainer}>
-                    <Text style={styles.responseText}>{recommendation}</Text>
+                    <Markdown>{recommendation}</Markdown>
                 </ScrollView>
             )}
         </View>
@@ -84,11 +82,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 5,
         maxHeight: 200,
-    },
-    responseText: {
-        fontSize: 16,
-        color: 'black',
-        flexShrink: 1,
     },
 });
 
