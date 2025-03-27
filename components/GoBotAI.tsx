@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, ScrollView, StyleSheet, Animated, Image } from 'react-native';
 import Markdown from 'react-native-markdown-display';
 import { travelAgentApi } from '../scripts/travelAgentApi';
+import { storeData, getData } from '../scripts/localStore.js';
 
 const GoBotAI = () => {
     const [text, setText] = useState<string>('');
@@ -11,6 +12,33 @@ const GoBotAI = () => {
     const [textLoading, setTextLoading] = useState<boolean>(false);
     const fadeAnimation = useState(new Animated.Value(0))[0];
     const pulseAnimation = useState(new Animated.Value(1))[0];
+
+    const [trip, setTrip] = useState<any>(null);
+    const [tripId, setTripId] = useState<string | null>(null);
+
+    // Load existing trip data
+    useEffect(() => {
+        const loadTrip = async () => {
+            try {
+                const currentTripID = await getData("currentTrip"); // Fetch the current trip ID from storage
+                if (currentTripID) {
+                    const tripDetails = await getData(currentTripID.toString());
+                    // Check if the trip details include 'id' correctly
+                    if (tripDetails) {
+                        setTripId(currentTripID);  // Store only the trip id
+                        setTrip(tripDetails);  // Store the full trip data
+                        console.log("Trip ID Set:", currentTripID);
+                    } else {
+                        console.error("Trip data is invalid, missing trip details");
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading trip data:", error);
+            }
+        };
+
+        loadTrip();
+    }, []);
 
     useEffect(() => {
         // Start pulsing animation when text is loading
@@ -71,6 +99,11 @@ const GoBotAI = () => {
         }
     };
 
+    // Limited Chat History
+    function storeToHistory(input: string, textResponse: any) {
+        // TODO: Store the chat history and allow the user to access it through a button?
+    }
+
     // Gets a response from GoBotAI
     const sendTextToGoBot = async (input: string) => {
         setLoading(true);
@@ -79,6 +112,9 @@ const GoBotAI = () => {
             
             // Extract GoBot's response text :D
             const textResponse = result?.choices?.[0]?.message?.content || 'Sorry! Please try again!';
+
+            // Send to history
+            storeToHistory(input, textResponse);
 
             setRecommendation(textResponse);
             Animated.timing(fadeAnimation, {
@@ -192,3 +228,4 @@ const styles = StyleSheet.create({
 });
 
 export default GoBotAI;
+
