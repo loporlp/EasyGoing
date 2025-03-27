@@ -1,25 +1,38 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, ScrollView } from 'react-native';
-//import { travel_agent_recommendation } from '../scripts/travelAgentAI.py';
+import { travelAgentApi } from '../scripts/travelAgentApi';
 
-// Default export (no need to use closing tags when importing)
 const GoBotAI = () => {
     const [text, setText] = useState<string>('');
     const [recommendation, setRecommendation] = useState<string | null>(null);
+    const [loading, setLoading] = useState<boolean>(false);
 
     // Button press for GoBot AI
     const handlePress = () => {
         if (!(text.trim() === '')) {
-            // Call the method to ask GoBotAI a question
-        sendTextToGoBot(text);
+            sendTextToGoBot(text);
         }
     };
 
     // Gets a response from GoBotAI
-    const sendTextToGoBot = (input: string) => {
-        //const result = travel_agent_recommendation(input);
-        const result = "Hi! I'm working but I'm a static GoBot!"; // TEMP
-        setRecommendation(result);
+    const sendTextToGoBot = async (input: string) => {
+        setLoading(true);
+        try {
+            const result = await travelAgentApi(input);
+
+            // Extracting the message text from the response
+            const message = result?.choices?.[0]?.message;
+            
+            // Check if the message object exists and if it contains text
+            const textResponse = message ? JSON.stringify(message) : 'No valid response available';
+
+            setRecommendation(textResponse);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            setRecommendation('Sorry, something went wrong.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -30,7 +43,11 @@ const GoBotAI = () => {
                 onChangeText={setText}
                 placeholder="Ask GoBot a question!"
             />
-            <Button title="Send" onPress={handlePress} />
+            <Button
+                title={loading ? "Sending..." : "Send"}
+                onPress={handlePress}
+                disabled={loading}
+            />
 
             {/* Response if recommendation exists */}
             {recommendation && (
@@ -66,7 +83,7 @@ const styles = StyleSheet.create({
         borderColor: '#ddd',
         borderWidth: 1,
         borderRadius: 5,
-        maxHeight: 200, 
+        maxHeight: 200,
     },
     responseText: {
         fontSize: 16,
