@@ -10,6 +10,7 @@ import {storeData, getData, fillLocal} from "../scripts/localStore";
 import storage from '@react-native-async-storage/async-storage';
 import { auth } from '@/firebaseConfig';
 import { updateTrip } from '@/scripts/databaseInteraction';
+import { recommended_places } from '../scripts/recommendedPlacesAi';
 
 const HomeScreen = () => {
 
@@ -80,7 +81,20 @@ const HomeScreen = () => {
         },
     ];
 
-    const destinationList = [
+    type Destination = {
+        destination: string;
+        image: string;
+        time: string;
+        amount: string;
+        review: string;
+        reviewAmt: string;
+        saved: boolean;
+    };
+
+    const [destinationList, setDestinationList] = useState<Destination[]>([]);
+
+    // Backup array
+    const backupArray = [
         {
             destination: "Statue of Liberty",
             image: "statue",
@@ -91,7 +105,7 @@ const HomeScreen = () => {
             saved: false
         },
         {
-            destination: "The Metropolitan Meuseum of Art",
+            destination: "The Metropolitan Museum of Art",
             image: "moma",
             time: "4h",
             amount: "$30",
@@ -127,6 +141,47 @@ const HomeScreen = () => {
             saved: false
         },
     ];
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const dataString = await recommended_places(3); // Get 3 recommendations
+                
+                // Extract AI message content
+                const recommendations = dataString?.choices?.[0]?.message?.content;
+                
+                if (!recommendations) {
+                    console.error("Error: No recommendations received");
+                    setDestinationList(backupArray);
+                    return;
+                }
+    
+                console.log("Recommendations from AI:", recommendations);
+    
+                let parsedData;
+    
+                // Check if it's a clean JSON array
+                if (recommendations.trim().startsWith("[") && recommendations.trim().endsWith("]")) {
+                    parsedData = JSON.parse(recommendations.trim());
+                } else {
+                    // Otherwise, clean the JSON string (remove ```json and ``` if present)
+                    const cleanData = recommendations.trim().replace(/```json|```/g, "");
+                    parsedData = JSON.parse(cleanData);
+                }
+    
+                setDestinationList(parsedData);
+            } catch (error) {
+                console.error("Error parsing JSON:", error);
+    
+                // Set backup array if parsing fails
+                setDestinationList(backupArray);
+            }
+        };
+    
+        fetchData();
+    }, []);
+    
+      
 
     const imageMap = {
         statue: require("../assets/images/statueofliberty.jpg"),
