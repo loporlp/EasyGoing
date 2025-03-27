@@ -26,8 +26,14 @@ const HomeScreen = () => {
 
     const headerHeight = useHeaderHeight();
     const [activeIndex, setActiveIndex] = useState(0);
+    const [locationType, setLocationType] = useState<string>("world travel locations");
     const handleSelectCategory = (index: number) => {
         setActiveIndex(index);
+    };
+
+    const handleTypeOfLocationPress = (locationType: string) => {
+        console.log("Type of place clicked:", locationType);
+        setLocationType(locationType);
     };
 
     /**
@@ -146,7 +152,7 @@ const HomeScreen = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const dataString = await recommended_places(3); // Get 3 recommendations
+                const dataString = await recommended_places(3, locationType); // Get 3 recommendations with location type
                 
                 // Extract AI message content
                 const recommendations = dataString?.choices?.[0]?.message?.content;
@@ -193,7 +199,7 @@ const HomeScreen = () => {
         };
     
         fetchData();
-    }, []);
+    }, [locationType]);
     
       
 
@@ -307,7 +313,13 @@ const HomeScreen = () => {
                                 marginBottom: 10
                             }}>
                                 {recommendedList.map((item, index) => (
-                                    <TouchableOpacity onPress={() => handleSelectCategory(index)} style={activeIndex == index ? styles.activeRecommendBtn : styles.recommendBtn} key={index}>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            handleSelectCategory(index);
+                                            handleTypeOfLocationPress(item.title);
+                                        }}
+                                        style={activeIndex == index ? styles.activeRecommendBtn : styles.recommendBtn}
+                                        key={index}>
                                         <MaterialCommunityIcons name={item.iconName as any} size={20} color={activeIndex == index ? "white" : "black"} />
                                         <Text style={activeIndex == index ? styles.recommendBtnTextActive : styles.recommendBtnText}>{item.title}</Text>
                                     </TouchableOpacity>
