@@ -3,7 +3,7 @@ import { getIdToken } from '../scripts/getFirebaseID';
 import { auth } from '../firebaseConfig';
 
 
-export const recommended_places = async (numRecommendations: number) => {
+export const recommended_places = async (numRecommendations: number, typeOfLocation: string) => {
   const url = "https://ezgoing.app/api/openai/chat";
 
   // Retrieve the ID token from Firebase
@@ -15,7 +15,7 @@ export const recommended_places = async (numRecommendations: number) => {
   };
 
   const agent = "You generate JSON."
-  const input = `Please come up with ${numRecommendations.toString} recommended places and format them like this. DO NOT ADD ANYTHING ELSE:
+  const input = `Please come up with ${numRecommendations.toString} recommended places about 5${typeOfLocation} and format them like this. DO NOT ADD ANYTHING ELSE:
     [
         {
             destination: "Statue of Liberty",
