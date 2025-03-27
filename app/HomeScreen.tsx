@@ -11,6 +11,7 @@ import storage from '@react-native-async-storage/async-storage';
 import { auth } from '@/firebaseConfig';
 import { updateTrip } from '@/scripts/databaseInteraction';
 import { recommended_places } from '../scripts/recommendedPlacesAi';
+import { getImageUrl } from '../scripts/ImageUtils'
 
 const HomeScreen = () => {
 
@@ -91,8 +92,6 @@ const HomeScreen = () => {
         saved: boolean;
     };
 
-    const [destinationList, setDestinationList] = useState<Destination[]>([]);
-
     // Backup array
     const backupArray = [
         {
@@ -142,6 +141,8 @@ const HomeScreen = () => {
         },
     ];
 
+    const [destinationList, setDestinationList] = useState<Destination[]>(backupArray);
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -168,8 +169,21 @@ const HomeScreen = () => {
                     const cleanData = recommendations.trim().replace(/```json|```/g, "");
                     parsedData = JSON.parse(cleanData);
                 }
-    
-                setDestinationList(parsedData);
+
+                // Get an actual image using APIs
+                const updatedData = await Promise.all(
+                    parsedData.map(async (item: Destination) => {
+                        const updatedImage = await getImageUrl(item.image);
+                        return {
+                            ...item,
+                            image: updatedImage
+                        };
+                    })
+                );
+
+                console.log("Updated Data: ", updatedData);
+        
+                setDestinationList(updatedData);
             } catch (error) {
                 console.error("Error parsing JSON:", error);
     
@@ -313,7 +327,7 @@ const HomeScreen = () => {
                                     <View>
                                         <TouchableOpacity style={styles.recommendDest}>
                                             <View style={styles.destImageWrapper}>
-                                                <Image style={styles.destImage} source={imageMap[item.image]} />
+                                                <Image style={styles.destImage} source={{ uri: item.image }} />
                                                 <TouchableOpacity style={styles.saveIconWrapper}>
                                                     <Ionicons name="bookmark" size={22} color={item.saved ? "#FFD700" : "white"} />
                                                 </TouchableOpacity>

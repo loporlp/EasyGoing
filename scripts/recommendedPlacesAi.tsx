@@ -54,9 +54,9 @@ export const recommended_places = async (numRecommendations: number) => {
         {"role": "system", "content": agent},
         {"role": "user", "content": input}
     ],
-    temperature: 0.8,        // Creativeness
+    temperature: 0.9,        // Creativeness
     top_p: 0.9,             // Top p Reponses
-    frequency_penalty: 0.1,  // How much to avoid repeats
+    frequency_penalty: 0.3,  // How much to avoid repeats
     max_tokens: 1000
   };
 
