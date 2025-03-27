@@ -9,7 +9,38 @@ const GoBotAI = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [displayedText, setDisplayedText] = useState<string>('');
     const [textLoading, setTextLoading] = useState<boolean>(false);
-    const fadeAnim = useState(new Animated.Value(0))[0];
+    const fadeAnimation = useState(new Animated.Value(0))[0];
+    const pulseAnimation = useState(new Animated.Value(1))[0];
+
+    useEffect(() => {
+        // Start pulsing animation when text is loading
+        if (textLoading) {
+            Animated.loop(
+                Animated.sequence([
+                    // Size up
+                    Animated.timing(pulseAnimation, {
+                        toValue: 1.1,
+                        duration: 500,
+                        useNativeDriver: true,
+                    }),
+                    // Size down
+                    Animated.timing(pulseAnimation, {
+                        toValue: 1,
+                        duration: 500,
+                        useNativeDriver: true,
+                    }),
+                ])
+            ).start();
+        } else {
+            // Stop pulsing animation when text is finished
+            Animated.timing(pulseAnimation, {
+                toValue: 1,
+                duration: 500,
+                useNativeDriver: true,
+            }).stop();
+        }
+    }, [textLoading, pulseAnimation]);
+   
 
     useEffect(() => {
         if (recommendation) {
@@ -50,7 +81,7 @@ const GoBotAI = () => {
             const textResponse = result?.choices?.[0]?.message?.content || 'Sorry! Please try again!';
 
             setRecommendation(textResponse);
-            Animated.timing(fadeAnim, {
+            Animated.timing(fadeAnimation, {
                 toValue: 1,
                 duration: 500,
                 useNativeDriver: true,
@@ -67,10 +98,10 @@ const GoBotAI = () => {
         <View style={styles.container}>
             {/* Mascot Image */}
             <View style={styles.mascotWrapper}>
-                <Image
-                    source={require('../assets/images/GoBotAI.png')}
-                    style={styles.mascotImage}
-                />
+            <Animated.Image
+                source={require('../assets//images/GoBotAI.png')} 
+                style={[styles.mascotImage, { transform: [{ scale: pulseAnimation }] }]}
+            />
             </View>
 
             <View style={styles.searchSection}>
@@ -92,7 +123,7 @@ const GoBotAI = () => {
 
             {/* Render Recommendation with Fade-in Animation */}
             {recommendation && (
-                <Animated.View style={[styles.recommendDest, { opacity: fadeAnim }]}>                    
+                <Animated.View style={[styles.recommendDest, { opacity: fadeAnimation }]}>                    
                     <ScrollView>
                         <Markdown>{displayedText}</Markdown>
                     </ScrollView>
