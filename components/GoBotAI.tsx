@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, ScrollView, StyleSheet, Animated } from 'react-native';
+import { View, TextInput, Button, ScrollView, StyleSheet, Animated, Image } from 'react-native';
 import Markdown from 'react-native-markdown-display';
 import { travelAgentApi } from '../scripts/travelAgentApi';
 
@@ -65,6 +65,14 @@ const GoBotAI = () => {
 
     return (
         <View style={styles.container}>
+            {/* Mascot Image */}
+            <View style={styles.mascotWrapper}>
+                <Image
+                    source={require('../assets/images/GoBotAI.png')}
+                    style={styles.mascotImage}
+                />
+            </View>
+
             <View style={styles.searchSection}>
                 <TextInput
                     style={styles.searchBar}
@@ -139,6 +147,16 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 3,
         overflow: "hidden",
+    },
+    mascotWrapper: {
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    mascotImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        overflow: 'hidden',
     },
 });
 
