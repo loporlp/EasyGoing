@@ -18,9 +18,11 @@ const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const { swaggerOptions } = require('./swagger.js');
 
+require('dotenv').config();
 
-// const GOOGLE_API_KEY = 'AIzaSyAQgbWUgdfMozsamfhRi8HrHlRorkFNIEc'; //Masons Key
-const GOOGLE_API_KEY = 'AIzaSyANe_6bk7NDht5ECPAtRQ1VZARSHBMlUTI'; // Solis Key
+
+const GOOGLE_API_KEY = process.env.GOOGLEMAPS_API_KEY;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const admin = require('firebase-admin');
 
 // Middleware to parse JSON bodies (if needed for POST/PUT requests)
@@ -904,6 +906,69 @@ app.delete('/api/history/:id', verifyFirebaseToken, async (req, res) => {
         res.status(500).json({ success: false, error: "Database error" });
     }
 });
+
+
+// OPEN AI ENDPOINT
+/**
+ * @swagger
+ * /api/openai/chat:
+ *   post:
+ *     summary: Proxy request to OpenAI's chat completion endpoint
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               model:
+ *                 type: string
+ *                 example: gpt-4o
+ *               messages:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                 example: [{ "role": "user", "content": "Hello!" }]
+ *     responses:
+ *       200:
+ *         description: OpenAI chat completion response
+ *       400:
+ *         description: Missing required parameters
+ *       500:
+ *         description: Internal server error
+ */
+app.post('/api/openai/chat', verifyFirebaseToken, async (req, res) => {
+    console.log("OpenAI chat proxy called");
+
+    try {
+        const { model, messages } = req.body;
+
+        if (!model || !messages) {
+            return res.status(400).json({ error: 'Missing required parameters: model or messages' });
+        }
+
+        const openaiRes = await axios.post(
+            'https://api.openai.com/v1/chat/completions',
+            req.body, // pass full body to allow extra options
+            {
+                headers: {
+                    'Authorization': `Bearer ${OPENAI_API_KEY}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        res.status(200).json(openaiRes.data);
+    } catch (error) {
+        console.error('Error calling OpenAI:', error?.response?.data || error.message);
+        res.status(error.response?.status || 500).json({
+            error: error.response?.data || 'An error occurred while contacting OpenAI',
+        });
+    }
+});
+
 
 
 

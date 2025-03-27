@@ -10,6 +10,8 @@ import {storeData, getData, fillLocal} from "../scripts/localStore";
 import storage from '@react-native-async-storage/async-storage';
 import { auth } from '@/firebaseConfig';
 import { updateTrip } from '@/scripts/databaseInteraction';
+import { recommended_places } from '../scripts/recommendedPlacesAi';
+import { getImageUrl } from '../scripts/ImageUtils'
 
 const HomeScreen = () => {
 
@@ -24,8 +26,14 @@ const HomeScreen = () => {
 
     const headerHeight = useHeaderHeight();
     const [activeIndex, setActiveIndex] = useState(0);
+    const [locationType, setLocationType] = useState<string>("world travel locations");
     const handleSelectCategory = (index: number) => {
         setActiveIndex(index);
+    };
+
+    const handleTypeOfLocationPress = (locationType: string) => {
+        console.log("Type of place clicked:", locationType);
+        setLocationType(locationType);
     };
 
     /**
@@ -80,7 +88,18 @@ const HomeScreen = () => {
         },
     ];
 
-    const destinationList = [
+    type Destination = {
+        destination: string;
+        image: string;
+        time: string;
+        amount: string;
+        review: string;
+        reviewAmt: string;
+        saved: boolean;
+    };
+
+    // Backup array
+    const backupArray = [
         {
             destination: "Statue of Liberty",
             image: "statue",
@@ -91,7 +110,7 @@ const HomeScreen = () => {
             saved: false
         },
         {
-            destination: "The Metropolitan Meuseum of Art",
+            destination: "The Metropolitan Museum of Art",
             image: "moma",
             time: "4h",
             amount: "$30",
@@ -127,6 +146,62 @@ const HomeScreen = () => {
             saved: false
         },
     ];
+
+    const [destinationList, setDestinationList] = useState<Destination[]>(backupArray);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const dataString = await recommended_places(3, locationType); // Get 3 recommendations with location type
+                
+                // Extract AI message content
+                const recommendations = dataString?.choices?.[0]?.message?.content;
+                
+                if (!recommendations) {
+                    console.error("Error: No recommendations received");
+                    setDestinationList(backupArray);
+                    return;
+                }
+    
+                console.log("Recommendations from AI:", recommendations);
+    
+                let parsedData;
+    
+                // Check if it's a clean JSON array
+                if (recommendations.trim().startsWith("[") && recommendations.trim().endsWith("]")) {
+                    parsedData = JSON.parse(recommendations.trim());
+                } else {
+                    // Otherwise, clean the JSON string (remove ```json and ``` if present)
+                    const cleanData = recommendations.trim().replace(/```json|```/g, "");
+                    parsedData = JSON.parse(cleanData);
+                }
+
+                // Get an actual image using APIs
+                const updatedData = await Promise.all(
+                    parsedData.map(async (item: Destination) => {
+                        const updatedImage = await getImageUrl(item.image);
+                        return {
+                            ...item,
+                            image: updatedImage
+                        };
+                    })
+                );
+
+                console.log("Updated Data: ", updatedData);
+        
+                setDestinationList(updatedData);
+            } catch (error) {
+                console.error("Error parsing JSON:", error);
+    
+                // Set backup array if parsing fails
+                setDestinationList(backupArray);
+            }
+        };
+    
+        fetchData();
+    }, [locationType]);
+    
+      
 
     const imageMap = {
         statue: require("../assets/images/statueofliberty.jpg"),
@@ -238,7 +313,13 @@ const HomeScreen = () => {
                                 marginBottom: 10
                             }}>
                                 {recommendedList.map((item, index) => (
-                                    <TouchableOpacity onPress={() => handleSelectCategory(index)} style={activeIndex == index ? styles.activeRecommendBtn : styles.recommendBtn} key={index}>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            handleSelectCategory(index);
+                                            handleTypeOfLocationPress(item.title);
+                                        }}
+                                        style={activeIndex == index ? styles.activeRecommendBtn : styles.recommendBtn}
+                                        key={index}>
                                         <MaterialCommunityIcons name={item.iconName as any} size={20} color={activeIndex == index ? "white" : "black"} />
                                         <Text style={activeIndex == index ? styles.recommendBtnTextActive : styles.recommendBtnText}>{item.title}</Text>
                                     </TouchableOpacity>
@@ -258,7 +339,7 @@ const HomeScreen = () => {
                                     <View>
                                         <TouchableOpacity style={styles.recommendDest}>
                                             <View style={styles.destImageWrapper}>
-                                                <Image style={styles.destImage} source={imageMap[item.image]} />
+                                                <Image style={styles.destImage} source={{ uri: item.image }} />
                                                 <TouchableOpacity style={styles.saveIconWrapper}>
                                                     <Ionicons name="bookmark" size={22} color={item.saved ? "#FFD700" : "white"} />
                                                 </TouchableOpacity>
@@ -377,36 +458,6 @@ const fetchData = async () => {
         console.error('Error fetching data:', error);
     }
 };
-
-// TODO: This was just an example. Eventually delete (since we probalby don't need on this page)
-const callProtectedApi = async () => {
-    try {
-        // Retrieve the ID token
-        const idToken = await getIdToken(auth);
-
-        const searchTerm = "McDona"
-        // Define the API endpoint
-        const apiUrl = `https://ezgoing.app/api/autocomplete?input=${searchTerm}`; // Search term is the user inputted that we are auto completeing
-
-        // Make the API call
-        const response = await fetch(apiUrl, {
-            method: "GET", // Or "POST", "PUT", etc.
-            headers: {
-                Authorization: `Bearer ${idToken}`, // Include the ID token in the header
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log("API Response:", data); // Handle the response
-    } catch (error) {
-        console.error("Error calling API:", error);
-    }
-};
-
 
 const styles = StyleSheet.create({
     container: {

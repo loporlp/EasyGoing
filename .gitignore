@@ -18,3 +18,9 @@ web-build/
 
 expo-env.d.ts
 # @end expo-cli
+
+
+# Ignore GitLab Runner build outputs
+backend/builds/
+
+backend/.env
