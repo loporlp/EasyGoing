@@ -14,10 +14,11 @@ const GoBotAI = () => {
     useEffect(() => {
         if (recommendation) {
             let index = 0;
-            setDisplayedText('');
+            setDisplayedText(recommendation[index]);
             setTextLoading(true);
+    
             const updateText = () => {
-                if (index < recommendation.length) {
+                if (index < recommendation.length - 1) {
                     setDisplayedText(prev => prev + recommendation[index]);
                     index++;
                     requestAnimationFrame(updateText);
@@ -25,9 +26,12 @@ const GoBotAI = () => {
                     setTextLoading(false);
                 }
             };
+    
+            // Start appending characters one by one
             requestAnimationFrame(updateText);
         }
     }, [recommendation]);
+    
 
     // Button press for GoBot AI
     const handlePress = () => {
