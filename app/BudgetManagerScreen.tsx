@@ -26,6 +26,16 @@ const BudgetManagerScreen = () => {
     const [expenseLabel, setExpenseLabel] = useState("");
 
     const [isAddHistoryVisible, setAddHistoryVisible] = useState(false);
+    const [isCategoryVisible, setCategoryVisible] = useState(false)
+
+    const [selectedCategory, setSelectedCategory] = useState("");
+    const [selectedCategoryList, setSelectedCategoryList] = useState<any[]>([]);
+    const [selectedTag, setSelectedTag] = useState({
+        label: "",
+        symbol: "",
+        color: "",
+        value: "",
+    });
 
     // Remane "flight" to "Transportation"
     const [value, setValue] = useState(null);
@@ -61,14 +71,12 @@ const BudgetManagerScreen = () => {
                         date: historyId.date
                     });
 
-                    console.log(historyId.id)
-
                     switch (historyId.tag) {
                         case 'Hotel':
                             hotelExpense += parseFloat(historyId.value);
                             setHotelBudget(hotelExpense);
                             break;
-                        case 'flight':
+                        case 'Transportation':
                             transportExpense += parseFloat(historyId.value);
                             setTransportationBudget(transportExpense);
                             break;
@@ -100,8 +108,8 @@ const BudgetManagerScreen = () => {
     }, []);
 
     useEffect(() => {
-
-    }, [budgetHistory])
+        getHistoriesByTag();
+    }, [selectedCategory]);
 
     // add to history
     const addHistory = async () => {
@@ -109,24 +117,16 @@ const BudgetManagerScreen = () => {
         if (expenseLabel != "" && expensePrice != "" && expensePrice != "" && expenseTag != "") {
             // date
             const currentDate = new Date();
-            const formattedDate = moment(currentDate).format('MMMM DD, YYYY');
-
-            const createExpense = await createHistory(expenseTag, expensePrice, expenseLabel, formattedDate.toString());
+            //const formattedDate = moment(currentDate).format('MMMM DD, YYYY');
+            let formatNumber = Number(parseFloat(expensePrice));
+            console.log("Format number: " + formatNumber)
+            const createExpense = await createHistory(expenseTag, formatNumber, expenseLabel);
 
             if (!createExpense) {
                 console.error("Failed to create expense!");
             } else {
-                const newExpense = {
-                    tag: expenseTag,
-                    value: expensePrice,
-                    description: expenseLabel,
-                    date: formattedDate.toString()
-                };
-                console.log(budgetHistory)
-                budgetHistory.unshift(newExpense);
-                let newBudgetHistory = [...budgetHistory];
-                setBudgetHistory(newBudgetHistory)
-                await storeData(budgetHistory[0].id.toString(), budgetHistory);
+                const updatedHistory = await getData("history");
+                setBudgetHistory(updatedHistory);
                 resetHistory();
             }
         } else {
@@ -143,6 +143,27 @@ const BudgetManagerScreen = () => {
         setExpenseLabel("");
         setExpensePrice("");
     }
+
+    // gets history given tag
+    const getHistoriesByTag = () => {
+        const categoryHistory = [];
+
+        // rename flight to Transportation
+        for (const expense of budgetHistory) {
+            if (expense.tag == selectedTag) {
+                categoryHistory.push(expense);
+            }
+        }
+
+        setSelectedCategoryList(categoryHistory);
+        console.log("SelCat: " + selectedCategory);
+        for (const tag of tags) {
+            if (tag.label === selectedCategory) {
+                setSelectedTag(tag);
+                break;
+            }
+        }
+    };
 
     return (
         <ScrollView style={styles.container}>
@@ -180,7 +201,7 @@ const BudgetManagerScreen = () => {
 
                 {/* Container showing how much someone spent in each category */}
                 <View style={styles.totalSpentContainer}>
-                    <TouchableOpacity style={styles.hotelSection}>
+                    <TouchableOpacity style={styles.hotelSection} onPress={() => { setSelectedCategory("Hotel"); setCategoryVisible(true); }}>
                         <View style={styles.hotelLabel}>
                             <MaterialIcons name={"hotel"} color={"#FF6347"} size={20} />
                             <Text style={{ fontSize: 18 }}>Hotels</Text>
@@ -190,7 +211,7 @@ const BudgetManagerScreen = () => {
 
                     <View style={styles.divider}></View>
 
-                    <TouchableOpacity style={styles.hotelSection}>
+                    <TouchableOpacity style={styles.hotelSection} onPress={() => { setSelectedCategory("Transportation"); setCategoryVisible(true); }}>
                         <View style={styles.hotelLabel}>
                             <Ionicons name={"airplane"} color={"skyblue"} size={20} />
                             <Text style={{ fontSize: 18 }}>Transportation</Text>
@@ -200,7 +221,7 @@ const BudgetManagerScreen = () => {
 
                     <View style={styles.divider}></View>
 
-                    <TouchableOpacity style={styles.hotelSection}>
+                    <TouchableOpacity style={styles.hotelSection} onPress={() => { setSelectedCategory("Food"); setCategoryVisible(true); }}>
                         <View style={styles.hotelLabel}>
                             <MaterialIcons name={"local-dining"} color={"#FFD700"} size={20} />
                             <Text style={{ fontSize: 18 }}>Food</Text>
@@ -210,7 +231,7 @@ const BudgetManagerScreen = () => {
 
                     <View style={styles.divider}></View>
 
-                    <TouchableOpacity style={styles.hotelSection}>
+                    <TouchableOpacity style={styles.hotelSection} onPress={() => { setSelectedCategory("Things To Do"); setCategoryVisible(true); }}>
                         <View style={styles.hotelLabel}>
                             <Ionicons name={"location"} color={"green"} size={20} />
                             <Text style={{ fontSize: 18 }}>Things To Do</Text>
@@ -220,7 +241,7 @@ const BudgetManagerScreen = () => {
 
                     <View style={styles.divider}></View>
 
-                    <TouchableOpacity style={styles.hotelSection}>
+                    <TouchableOpacity style={styles.hotelSection} onPress={() => { setSelectedCategory("Other"); setCategoryVisible(true); }}>
                         <View style={styles.hotelLabel}>
                             <MaterialIcons name={"more-horiz"} color={"#800080"} size={20} />
                             <Text style={{ fontSize: 18 }}>Other</Text>
@@ -263,11 +284,11 @@ const BudgetManagerScreen = () => {
                                             }
                                         })()}
                                         <View style={{ flexDirection: "column" }}>
-                                            <Text style={{ color: "gray" }}>{expense.date}</Text>
+                                            <Text style={{ color: "gray" }}>{moment(expense.date).format('MMMM DD, YYYY')}</Text>
                                             <Text style={{ fontSize: 18 }}>{expense.description}</Text>
                                         </View>
                                     </View>
-                                    <Text style={{ fontSize: 18, color: "#24a6ad" }}>${expense.value}</Text>
+                                    <Text style={{ fontSize: 18, color: "#24a6ad", fontWeight: "700" }}>${expense.value}</Text>
                                 </View>
 
                                 <View style={styles.divider}></View>
@@ -278,6 +299,65 @@ const BudgetManagerScreen = () => {
                     )}
                 </ScrollView>
             </View>
+
+            <Modal
+                visible={isCategoryVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setCategoryVisible(false)}
+            >
+                <View style={[styles.modalOverlay, { justifyContent: "center" }]}>
+                    <View style={{ width: "95%", height: 400, backgroundColor: "#F4F4F4", padding: 20, borderRadius: 10, gap: 10 }}>
+                        <View style={{ flexDirection: "column" }}>
+                            <View style={{ width: "100%", flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", gap: 10 }}>
+                                    {(() => {
+                                        switch (selectedTag.label) {
+                                            case 'Hotel':
+                                                return <MaterialIcons name="hotel" color={"#FF6347"} size={28} />;
+                                            case 'Transportation':
+                                                return <Ionicons name="airplane" color={"skyblue"} size={28} />;
+                                            case 'Food':
+                                                return <MaterialIcons name="local-dining" color={"#FFD700"} size={28} />;
+                                            case 'Things To Do':
+                                                return <Ionicons name="location" color={"green"} size={28} />;
+                                            case 'Other':
+                                                return <MaterialIcons name="more-horiz" color={"#800080"} size={28} />;
+                                            default:
+                                                return <MaterialIcons name="help" color={"gray"} size={28} />;
+                                        }
+                                    })()}
+                                    <Text style={{ fontSize: 20, fontWeight: "700" }}>{selectedTag.label}</Text>
+                                </View>
+                                <TouchableOpacity onPress={() => setCategoryVisible(false)}>
+                                    <MaterialCommunityIcons name={"close-box"} size={22} color={"red"}/>
+                                </TouchableOpacity>
+                            </View>
+
+                            <ScrollView style={{ width: "100%", height: 300, backgroundColor: "white", borderRadius: 10, padding: 10, marginTop: 10 }} contentContainerStyle={{ alignItems: "center" }}>
+                                {selectedCategoryList.length > 0 ? (
+                                    selectedCategoryList.map((expense) => (
+                                        <View style={{ flexDirection: "column", alignItems: "center", width: "100%" }}>
+                                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                                                <View style={{ flexDirection: "column" }}>
+                                                    <Text style={{ color: "gray", fontSize: 14 }}>{moment(expense.date).format('MMMM DD, YYYY')}</Text>
+                                                    <Text style={{ fontSize: 16 }}>{expense.description}</Text>
+                                                </View>
+                                                <Text style={{ fontSize: 16, color: "#24a6ad", fontWeight: "700" }}>${expense.value}</Text>
+                                            </View>
+
+                                            <View style={styles.divider}></View>
+                                        </View>
+                                    ))
+                                ) : (
+                                    <Text>No available expenses for this category!</Text>
+                                )}
+                            </ScrollView>
+                        </View>
+                    </View>
+                </View>
+
+            </Modal>
 
             <Modal
                 visible={isAddHistoryVisible}
