@@ -4,10 +4,11 @@ import { View, StyleSheet, TextInput, Text, TouchableOpacity, Modal, TouchableWi
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useState, useEffect } from "react";
-import { getHistories, createHistory } from '../scripts/databaseInteraction.js';
+import { getHistories, createHistory, deleteHistory } from '../scripts/databaseInteraction.js';
 import { getData, storeData, fillLocal } from '../scripts/localStore';
 import { Dropdown } from 'react-native-element-dropdown';
 import moment from 'moment';
+import { SwipeListView } from 'react-native-swipe-list-view';
 
 const BudgetManagerScreen = () => {
     const navigation = useNavigation();
@@ -118,7 +119,7 @@ const BudgetManagerScreen = () => {
             // date
             const currentDate = new Date();
             //const formattedDate = moment(currentDate).format('MMMM DD, YYYY');
-            let formatNumber = Number(parseFloat(expensePrice));
+            let formatNumber = parseFloat(expensePrice).toFixed(2);
             console.log("Format number: " + formatNumber)
             const createExpense = await createHistory(expenseTag, formatNumber, expenseLabel);
 
@@ -144,6 +145,15 @@ const BudgetManagerScreen = () => {
         setExpensePrice("");
     }
 
+    const deleteExepnse = async (id: string) => {
+        const del = await deleteHistory(id);
+
+        if (del) {
+            const updatedHistory = await getData("history");
+            setBudgetHistory(updatedHistory);
+        }
+    }
+
     // gets history given tag
     const getHistoriesByTag = () => {
         const categoryHistory = [];
@@ -164,6 +174,62 @@ const BudgetManagerScreen = () => {
             }
         }
     };
+
+    // Swipable List components
+    const [swipeStatus, setSwipeStatus] = useState<{ [key: string]: boolean }>({});
+
+    // Function to handle swipe state
+    const handleSwipeChange = (swipeData: any) => {
+        const { key, value } = swipeData;
+        if (value !== 0) {
+            // If swiping, remove border radius
+            setSwipeStatus((prevState) => ({ ...prevState, [key]: true }));
+        } else {
+            // If swipe is reset, restore border radius
+            setSwipeStatus((prevState) => ({ ...prevState, [key]: false }));
+        }
+    };
+
+    const renderHiddenItem = ({ item, index }: { item: any; index: number }) => (
+        <View style={[styles.hiddenItem, { height: 130 }]}>
+            <TouchableOpacity onPress={() => { }} style={[styles.deleteButton, { width: Math.abs(rightOpenValue) }]} onPressIn={() => { deleteExepnse(item.id) }}>
+                <Ionicons name="trash-bin" size={25} color={"white"} />
+            </TouchableOpacity>
+        </View>
+    );
+
+    const renderItem = ({ item }: any) => {
+        const isSwiped = swipeStatus[item.key];
+        return (
+            <View style={[styles.hotelSection, { borderColor: '#ccc', borderBottomWidth: 1, backgroundColor: "white" }]}>
+                <View style={styles.hotelLabel}>
+                    {(() => {
+                        switch (item.tag) {
+                            case 'Hotel':
+                                return <MaterialIcons name="hotel" color={"#FF6347"} size={22} />;
+                            case 'flight':
+                                return <Ionicons name="airplane" color={"skyblue"} size={22} />;
+                            case 'Food':
+                                return <MaterialIcons name="local-dining" color={"#FFD700"} size={22} />;
+                            case 'Things To Do':
+                                return <Ionicons name="location" color={"green"} size={22} />;
+                            case 'Other':
+                                return <MaterialIcons name="more-horiz" color={"#800080"} size={22} />;
+                            default:
+                                return <MaterialIcons name="help" color={"gray"} size={22} />;
+                        }
+                    })()}
+                    <View style={{ flexDirection: "column", marginBottom: 10 }}>
+                        <Text style={{ color: "gray" }}>{moment(item.date).format('MMMM DD, YYYY')}</Text>
+                        <Text style={{ fontSize: 18 }}>{item.description}</Text>
+                    </View>
+                </View>
+                <Text style={{ fontSize: 18, color: "#24a6ad", fontWeight: "700" }}>${item.value}</Text>
+            </View>
+        );
+    }
+
+    const rightOpenValue = -150 / 2;
 
     return (
         <ScrollView style={styles.container}>
@@ -260,43 +326,23 @@ const BudgetManagerScreen = () => {
 
                 <View style={[styles.divider, { marginTop: 0 }]}></View>
 
-                <ScrollView style={styles.historyContainer}>
+                <ScrollView style={styles.historyContainer} contentContainerStyle={{alignItems: "center"}}>
                     {/* Will load this part through the database */}
                     {budgetHistory.length > 0 ? (
-                        budgetHistory.map((expense) => (
-                            <View key={expense.id}>
-                                <View style={styles.hotelSection}>
-                                    <View style={styles.hotelLabel}>
-                                        {(() => {
-                                            switch (expense.tag) {
-                                                case 'Hotel':
-                                                    return <MaterialIcons name="hotel" color={"#FF6347"} size={22} />;
-                                                case 'flight':
-                                                    return <Ionicons name="airplane" color={"skyblue"} size={22} />;
-                                                case 'Food':
-                                                    return <MaterialIcons name="local-dining" color={"#FFD700"} size={22} />;
-                                                case 'Things To Do':
-                                                    return <Ionicons name="location" color={"green"} size={22} />;
-                                                case 'Other':
-                                                    return <MaterialIcons name="more-horiz" color={"#800080"} size={22} />;
-                                                default:
-                                                    return <MaterialIcons name="help" color={"gray"} size={22} />;
-                                            }
-                                        })()}
-                                        <View style={{ flexDirection: "column" }}>
-                                            <Text style={{ color: "gray" }}>{moment(expense.date).format('MMMM DD, YYYY')}</Text>
-                                            <Text style={{ fontSize: 18 }}>{expense.description}</Text>
-                                        </View>
-                                    </View>
-                                    <Text style={{ fontSize: 18, color: "#24a6ad", fontWeight: "700" }}>${expense.value}</Text>
-                                </View>
-
-                                <View style={styles.divider}></View>
-                            </View>
-                        ))
+                        <SwipeListView
+                            data={budgetHistory.map((item, index) => ({ ...item, key: `${index}` }))}
+                            renderItem={renderItem}
+                            renderHiddenItem={(data, rowMap) => renderHiddenItem({ ...data, index: parseInt(data.item.key) })}
+                            leftOpenValue={rightOpenValue}
+                            rightOpenValue={rightOpenValue}
+                            friction={60}
+                            tension={30}
+                            onSwipeValueChange={handleSwipeChange}>
+                        </SwipeListView>
                     ) : (
-                        <Text style={{ textAlign: 'center', fontSize: 16, marginTop: 10 }}>No expenses reported.</Text>
+                        <Text>No expenses found!</Text>
                     )}
+
                 </ScrollView>
             </View>
 
@@ -330,7 +376,7 @@ const BudgetManagerScreen = () => {
                                     <Text style={{ fontSize: 20, fontWeight: "700" }}>{selectedTag.label}</Text>
                                 </View>
                                 <TouchableOpacity onPress={() => setCategoryVisible(false)}>
-                                    <MaterialCommunityIcons name={"close-box"} size={22} color={"red"}/>
+                                    <MaterialCommunityIcons name={"close-box"} size={22} color={"red"} />
                                 </TouchableOpacity>
                             </View>
 
@@ -551,7 +597,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 3,
         padding: 10,
-        marginBottom: 10
+        marginBottom: 10,
     },
 
     bar: {
@@ -594,6 +640,26 @@ const styles = StyleSheet.create({
 
     placeholderStyle: {
         fontSize: 16,
+    },
+
+    hiddenItem: {
+        backgroundColor: "#F4F4F4",
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        alignItems: 'center',
+        borderRadius: 10,
+        width: "100%",
+    },
+
+    deleteButton: {
+        backgroundColor: "red",
+        height: "100%",
+        paddingHorizontal: 15,
+        justifyContent: "center",
+        alignItems: "center",
+        borderTopRightRadius: 10,
+        borderBottomRightRadius: 10,
     },
 });
 
