@@ -14,6 +14,7 @@ import { recalculatePaths } from '../scripts/reorderingLocations';
 import { Ionicons } from '@expo/vector-icons';
 import { getRoutePolylines } from "../scripts/routePolyline";
 import { updateDayOrigin, addTripDatesToStartDateTime } from '../scripts/updateTransportDests.js';
+import { calculateTripDates } from '../scripts/dateDividers';
 
 const { height } = Dimensions.get('window');
 
@@ -446,29 +447,11 @@ const GenerateItineraryScreen = () => {
     // Used to calculate Dates
     useEffect(() => {
         console.log("Calculating dates in GI");
-        let numberOfDays = 7; // Default of a week (7 days)
-        let actualStartDate = new Date();
-        try {
-            if (startDate && endDate) {
-                const actualEndDate = new Date(endDate);
-                actualStartDate = new Date(startDate);
-                numberOfDays = (actualEndDate.getTime() - actualStartDate.getTime()) / (1000 * 3600 * 24);
-            } else {
-                throw new Error("Either StartDate or EndDate has an issue.");
-            }
-        } catch (error) {
-            console.log("Error in Date", error);
-        }
 
-        // Fill the array of Dates
-        let tempDates: Date[] = new Array(numberOfDays);
-        let newDay: Date = new Date(actualStartDate);
-        for (let i = 0; i < numberOfDays; i++) {
-            tempDates[i] = new Date(newDay);
-            newDay.setDate(newDay.getDate() + 1);
-        }
+        const tempDates = calculateTripDates(startDate, endDate);
         setTripDates(tempDates);
-        console.log("Trip Dates:", tripDates);
+        
+        console.log("Trip Dates:", tempDates);
 
         // endDate is set after startDate so use endDate for this useEffect
     }, [endDate]);    

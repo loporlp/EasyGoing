@@ -185,3 +185,29 @@ export function calculateTotalTime(locationAndDurations) {
 
     return totalTime;
 }
+
+export const calculateTripDates = (startDate, endDate) => {
+    let numberOfDays = 7; // Default of a week (7 days)
+    let actualStartDate = new Date();
+    try {
+      if (startDate && endDate) {
+        const actualEndDate = new Date(endDate);
+        actualStartDate = new Date(startDate);
+        numberOfDays = (actualEndDate.getTime() - actualStartDate.getTime()) / (1000 * 3600 * 24);
+      } else {
+        throw new Error("Either StartDate or EndDate has an issue.");
+      }
+    } catch (error) {
+      console.log("Error in Date", error);
+    }
+  
+    // Fill the array of Dates
+    let tempDates = new Array(numberOfDays);
+    let newDay = new Date(actualStartDate);
+    for (let i = 0; i < numberOfDays; i++) {
+      tempDates[i] = new Date(newDay);
+      newDay.setDate(newDay.getDate() + 1);
+    }
+  
+    return tempDates;
+  };
