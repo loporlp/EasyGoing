@@ -808,7 +808,11 @@ const GenerateItineraryScreen = () => {
             )}
         <SafeAreaView>
 
-            <ScrollView contentContainerStyle={styles.scrollViewContainer} style={styles.scrollView}>
+            <ScrollView
+                contentContainerStyle={styles.scrollViewContainer}
+                style={styles.scrollView}
+                nestedScrollEnabled={true}
+            >
                 {resultRoute.reduce((acc, destination) => {
                     // If it's a new day (dayOrigin is true), start a new group
                     if (destination.dayOrigin) {
@@ -937,11 +941,15 @@ const GenerateItineraryScreen = () => {
                                                 </Text>
 
                                                 {/* Directions */}
-                                                <DirectionsList
-                                                    origin={destinations[String(destinationIndex)].address}
-                                                    destination={destinations[String(destinationIndex + 1)]?.address || "Unknown Destination"}
-                                                    mode={destinations[String(destinationIndex)].mode}
-                                                />   
+                                                <View style={{ maxHeight: 300 }}> 
+                                                    <ScrollView nestedScrollEnabled={true}>
+                                                        <DirectionsList
+                                                            origin={destinations[String(destinationIndex)].address}
+                                                            destination={destinations[String(destinationIndex + 1)]?.address || "Unknown Destination"}
+                                                            mode={destinations[String(destinationIndex)].mode}
+                                                        />
+                                                    </ScrollView>
+                                                </View>
                                             </View>
                                         )}
 
