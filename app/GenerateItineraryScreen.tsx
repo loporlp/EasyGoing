@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { getRoutePolylines } from "../scripts/routePolyline";
 import { updateDayOrigin, addTripDatesToStartDateTime } from '../scripts/updateTransportDests.js';
 import { calculateTripDates, formatSelectedDestinations, getMatchedPolylinesData, handleSameDateSelection } from '../scripts/dateDividers';
+import { loadDestinations } from '../scripts/destinationLoader';
 
 const { height } = Dimensions.get('window');
 
@@ -117,101 +118,13 @@ const GenerateItineraryScreen = () => {
     useEffect(() => {
         console.log("On GenerateItineraryScreen");
         const fetchDestinations = async () => {
-            const loadedDestinations = await loadDestinations();
+            const loadedDestinations = await loadDestinations(setDestinations, setStartDate, setEndDate, setTransportationModes, setOrigin);
             console.log("Loaded Destinations:", loadedDestinations);
             setDestinations(loadedDestinations); // Update state with loaded destinations
         };
 
         fetchDestinations();
     }, []);
-
-    // Function to fetch destinations
-    const loadDestinations = async () => {
-        const formattedDestinations: Record<string, Place> = {};
-        const groupedDestinationsTemp: Place[][] = [];
-        let currentGroup: Place[] = [];
-        let originSet = false;
-
-        try {
-            const tripID = await getData("currentTrip");
-            if(!tripID) {
-                throw new Error("No trip ID");
-            }
-            const trip = await getData(tripID.toString());
-    
-            if (trip) {
-                console.log("Trip Data:", trip);
-
-                setStartDate(trip.tripStartDate);
-                setEndDate(trip.tripEndDate);
-                console.log("End Date set to:", trip.tripEndDate);
-
-                // Set the initial transportation modes
-                const destinationsCount = trip.destinations.length;
-                const initialTransportationModes: string[] = new Array(destinationsCount).fill("Driving");
-                setTransportationModes(initialTransportationModes);
-    
-                // Iterate over destinations and format them
-                trip.destinations.forEach((destination: { picture: string; alias: any; address: any; priority: any; mode: any; transportToNext: any; transportDuration: any; startDateTime: any; duration: string; notes: any; dayOrigin: any; cost: any; }, index: { toString: () => string | number; }) => {
-                    const formattedDestination = {
-                        alias: destination.alias,
-                        address: destination.address,
-                        priority: destination.priority,
-                        mode: destination.mode || defaultMode,
-                        transportToNext: destination.transportToNext ? JSON.stringify(destination.transportToNext) : "", // serialized route
-                        transportDuration: destination.transportDuration,
-                        startDateTime: destination.startDateTime,
-                        duration: parseFloat(destination.duration),
-                        notes: destination.notes,
-                        dayOrigin: destination.dayOrigin || false,
-                        cost: destination.cost,
-                        picture: destination.picture,
-                    };
-    
-                    formattedDestinations[index.toString()] = formattedDestination;
-    
-                    // If dayOrigin is true, it means a new group starts
-                    if (destination.dayOrigin) {
-                        // Set the FIRST origin
-                        if (!originSet) {
-                            setOrigin({
-                                name: formattedDestination.alias,
-                                address: formattedDestination.address,
-                                duration: formattedDestination.duration,
-                                priority: formattedDestination.priority
-                            });
-                            originSet = true;
-                        }
-    
-                        // Push the current group into the temporary array if it's not empty
-                        if (currentGroup.length > 0) {
-                            groupedDestinationsTemp.push(currentGroup);
-                        }
-    
-                        // Start a new group with the current destination
-                        currentGroup = [formattedDestination];
-                    } else {
-                        // Otherwise, add this destination to the current group
-                        currentGroup.push(formattedDestination);
-                    }
-                    console.log("Current Group: ", currentGroup);
-                });
-    
-                // Push the last group if there are any destinations left
-                if (currentGroup.length > 0) {
-                    groupedDestinationsTemp.push(currentGroup);
-                }
-    
-                setDestinations(formattedDestinations);
-            } else {
-                console.log("No data found for this trip ID.");
-            }
-        } catch (error) {
-            console.error("Error fetching trip data:", error);
-        }
-    
-        return formattedDestinations;
-    };
 
     // Helper function to reorder destinations based on orderedLocations
     const reorderDestinations = (orderedLocations: any[]) => {
