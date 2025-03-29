@@ -4,20 +4,16 @@ import { Picker } from '@react-native-picker/picker';
 import { useRouter } from "expo-router";
 import MultiRoutesMap from '../components/MultiRoutesMap';
 import DirectionsList from '../components/DirectionsList';
-import { fetchPolylinesAndDurations } from '../scripts/routeHelpers';
 import { calculateOptimalRoute } from '../scripts/optimalRoute.js';
 import { Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useState, useEffect, useRef, act } from "react";
 import { getData } from '../scripts/localStore.js';
-import { divideLocationsIntoGroups } from '../scripts/dateDividers.js';
-import { updateDestinationsWithTransport, updateDayOrigin, addTripDatesToStartDateTime } from '../scripts/updateTransportDests.js';
-import { launchPrioritySystem} from '../scripts/prioritySystem.js';
 import { updateTrip } from '../scripts/databaseInteraction.js';
-import groupDestinationsByDay from '../scripts/groupDestinationsByDay';
-import processGroupedDestinations from '../scripts/processGroupedDestinations';
 import { recalculatePaths } from '../scripts/reorderingLocations';
 import { Ionicons } from '@expo/vector-icons';
+import { getRoutePolylines } from "../scripts/routePolyline";
+import { updateDayOrigin, addTripDatesToStartDateTime } from '../scripts/updateTransportDests.js';
 
 const { height } = Dimensions.get('window');
 
@@ -351,223 +347,39 @@ const GenerateItineraryScreen = () => {
         );
     }; 
 
-    /*
-    1. Generate optimal route (which triggers this useEffect)
-    2. Use routePolyline to get and store the routes in order
-    3. Use dateDividers to then divide it into groups
-    4. Each group needs to be correlated to each day (probably index for the date header)
-    5. When clicking on a date header, pass that group into MultiRouteMap
-    5.1.MultiRouteMap now takes this route data and plots it rather than calling routePolyline itself
-
-    * Additionally, this calls when transportationModes is updated (such as the user picking a new way to tranport for a location)
-    */
     useEffect(() => {
-        // (2) Route Polylines
-        const getDurationAndPolylines = async () => {
-            const { polylines: fetchedPolylines, transportDurations: fetchedDurations, markers: fetchedMarkers, bounds } = await fetchPolylinesAndDurations(optimalRoute, transportationModes);
-            setAllRoutesData(fetchedPolylines);
-
-            setPolylinesData(fetchedPolylines);
-            setTransportDurations(fetchedDurations);
-            setMarkers(fetchedMarkers);
-            setBounds(bounds);
-
-            // Get the ordered list of locations
-            const originLocations = optimalRoute.map(route => route[0][0]);
-            const lastDestination = optimalRoute[optimalRoute.length - 1][1][0];
-            const orderedLocations = [...originLocations, lastDestination];
-            console.log("Ordered Origins with Last Destination:", orderedLocations);
-
-            // TODO: We need a new script that takes in Group Indices and Ordered Locations
-            // This script will be specifically for the ScrollView
-
-            // Create a map of ordered locations for quick lookup
-            const updatedDurations = processGroupedDestinations(orderedLocations, groupedDestinations, Object.values(destinations), fetchedDurations, setGroupedDestinations);
-            console.log("GI - Updated Durations (Map)", updatedDurations);
-
-            // Get number of days
-            let numberOfDays;
-            console.log("Start Date:", startDate);
-            console.log("End Date:", endDate);
-            try {
-                if (startDate && endDate) {
-                    const actualEndDate = new Date(endDate);
-                    const actualStartDate = new Date(startDate);
-                    numberOfDays = (actualEndDate.getTime() - actualStartDate.getTime()) / (1000 * 3600 * 24);
-                } else {
-                    numberOfDays = 7; // Default 7 days
-                }
-            } catch (error) {
-                console.log("Error in Date", error);
-            }
-
-            // Used to rerun fetchOptimalRoute to get the new ordered list given the old list (after removing locations that don't fit due to time)
-            if (!timeChecked && !changedModeOfTransport) {
-                /*
-                TODO:
-                
-                Before fetching the official optimal route, calculate total time and budget.
-                If there is not enough time and/or budget, this is where the Priority system comes in.
-                
-                In order to do this, first use the calculateTotalTime in dateDividers.js using what we already have (optimalRoute + locationDurations)
-
-                If there is not enough time, use a new script to get a new list of locations based on priority
-
-                This new list needs to be saved (We need to warn the user if they are fine with removal of those extras first)
-                Then we run that new list through optimized list
-                Save this new optimized list
-                */
-
-                // This is the ONLY place timeChecked should change (otherwise, infinite loop)
-                const [timeExceeded, priorityOrderedList] = await launchPrioritySystem(updatedDurations, numberOfDays);
-                // Nothing happens if time isn't exceeded
-                if (timeExceeded) {
-                    setTimeChecked(true);
-
-                    // See if the user is fine with removing locations
-                    const userResponse = await confirmAction();
-                    if (!userResponse) {
-                        // Go back a screen if the answer is no
-                        console.log("User selected No. Going back to AED Screen.");
-                        navigation.goBack();
-                    }
-
-                    // This will re-trigger fetchOptimalRoute (so be careful to avoid infinite API calls)
-                    if (priorityOrderedList) {
-                        console.log("Prio - Destinations:", destinations);
-                        console.log("Prio - priorityOrderedList:", priorityOrderedList)
-
-                        // Convert priorityOrderedList into a set of aliases for quick lookup
-                        const validDestinationsSet = new Set(priorityOrderedList.map((item: any[]) => item[0]));
-
-                        // Filter out destinations that match alias only
-                        const filteredDestinations = Object.fromEntries(
-                            Object.entries(destinations).filter(([key, destination]) => 
-                                validDestinationsSet.has(destination.alias)
-                            )
-                        );
-
-                        console.log("FilteredDestinations Check:", filteredDestinations);
-
-                        setDestinations(filteredDestinations)
-                    }
-                }
-            }
-
-            // (3) Date Dividers
-            // Uses fetchedDurations for this (as well as the loaded durations per location)
-            // This returns a dictionary with indices as the ID for range of locations (i.e. "0:2" means from location 0 to location 2)
-            console.log("Updated Durations:", updatedDurations);
-
-            let groupedDays = null;
-            const previousGroupedDests = groupedDestinations;
-            const  previousGrouped2dDests = grouped2DDestinations;
-            let resultingGroupedDestinations;
-
-            // If it's an update from the user side to change mode of transportation, we need to check to see if it's valid change or not
-            try {
-                groupedDays = await divideLocationsIntoGroups(updatedDurations, numberOfDays);
-            } catch (error) {
-                console.log("GI: Error in divideLocationsIntoGroups:", error);
-                groupedDays = null;
-            }
-
-            // This means the error above occured
-            if (groupedDays == null) {
-                // Use the previous stuff
-                setGroupedDestinations(previousGroupedDests);
-                setGrouped2DDestinations(previousGrouped2dDests);
-                resultingGroupedDestinations = previousGrouped2dDests; // or previousGroupedDests. Doesn't matter
-                failedTransportPopup();
-                setChangedModeOfTransport(false);
-            }
-            // Otherwise, run it as usual
-            else {
-                console.log("Grouped Days Indices Dict 1:", groupedDays);
-                console.log("New Ordered Locations:", orderedLocations);
-                groupedDays = (groupedDays || {}) as { [key: number]: number };
-                console.log("Grouped Days Indices Dict 2:", groupedDays);
-    
-                // (4) Set the groups
-                resultingGroupedDestinations = groupDestinationsByDay(groupedDays as { [key: number]: number }, orderedLocations);
-                setGroupedDestinations(resultingGroupedDestinations);
-                setGrouped2DDestinations(resultingGroupedDestinations);
-                console.log("Resulting Grouped Destinations Result:", resultingGroupedDestinations);
-            }
-
-            //console.log("Fetched Polylines:", fetchedPolylines);
-
-            // START: STORES THE ROUTES TO THE GROUPED ORDERS
-
-            // Helper function to find the object corresponding to the destination
-            const getPolylineObject = (destination: { alias: string; address: string; priority: number; mode: string; transportToNext: string; transportDuration: number; startDateTime: Date; duration: number; notes: string; dayOrigin: boolean; cost: number; picture: string; }) => {
-                //console.log("Dest Destination:", destination);
-
-                const polyline = fetchedPolylines.find(polyline => {
-                    // Get the substring before the first comma which has the alias
-                    const firstPartOfId = polyline.id.split(',')[0];
-                    return firstPartOfId === destination;
-                });
-
-                // Since there's no polyline, we check the updatedDurations for the last destination
-                if (!polyline) {
-                    // Find the last destination's data in updatedDurations
-                    const lastDestination = updatedDurations[updatedDurations.length - 1];
-
-                    if (lastDestination && lastDestination.destination === null) {
-                        return {
-                            id: destination,
-                            duration: lastDestination.duration || "No travel duration",
-                            locationDuration: lastDestination.locationDuration || 0,
-                        };
-                    }
-
-                    // Default fallback if no polyline and no last destination
-                    return {
-                        id: destination,
-                        duration: "Unknown",
-                        locationDuration: 0,
-                    };
-                }
-
-                return polyline || null;
-            };
-
-            // Mapping destinations to polyline objects
-            const updatedGroupedDestinations = resultingGroupedDestinations.map((group, groupIndex) => {
-                return group.map((destination, subIndex) => {
-                    // Get the corresponding polyline object for the destination
-                    const polyline = getPolylineObject(destination);
-
-                    // console.log
-                    if (subIndex === group.length - 1) {
-                        // If it's the last destination in the group
-                        console.log(`Group ${groupIndex + 1}: Last destination "${destination.alias}", no polyline (or null):`, polyline ? polyline.id : "null");
-                    } else {
-                        // If it's not the last destination
-                        console.log(`Group ${groupIndex + 1}: Mapped destination "${destination.alias}" to polyline:`, polyline.id);
-                    }
-
-                    return polyline;
-                });
-            });
-
-            // END: STORES THE ROUTES TO THE GROUPED ORDERS
-
-            console.log("Grouped Objects in Order:", updatedGroupedDestinations);
-            setGroupedDestinations(updatedGroupedDestinations);
-
-            // Store the updated Routes and TransportTime in local storage
-            console.log("orderedLocations:", orderedLocations);
-            // TODO: Set optimalRoute to the orderedLocations (in optimalRoute's format)
-            const newDests = reorderDestinations(orderedLocations);
-            console.log("transportationModes: ", transportationModes);
-            const updatedDests = updateDestinationsWithTransport(newDests, updatedGroupedDestinations, transportationModes);
-            console.log("Updated Dests (final):", updatedDests);
-            setToSaveData(updatedDests);
-        }
-        getDurationAndPolylines();
-    }, [optimalRoute, transportationModes]);
+        console.log("Calling Pulled-out fetchPolylinesAndDurations");
+        const fetchPolylinesAndDurations = async () => {
+          await getRoutePolylines({
+            optimalRoute,
+            transportationModes,
+            startDate,
+            endDate,
+            destinations,
+            groupedDestinations,
+            grouped2DDestinations,
+            setAllRoutesData,
+            setPolylinesData,
+            setTransportDurations,
+            setMarkers,
+            setBounds,
+            setGroupedDestinations,
+            setGrouped2DDestinations,
+            setTimeChecked,
+            setDestinations,
+            confirmAction,
+            failedTransportPopup,
+            setChangedModeOfTransport,
+            setToSaveData,
+            reorderDestinations,
+            navigation,
+            timeChecked,
+            changedModeOfTransport
+          });
+        };
+        
+        fetchPolylinesAndDurations();
+      }, [optimalRoute, transportationModes]);
 
     const [selectedDestination, setSelectedDestination] = useState<string | null>(null);
     const [transportationText, setTransportationText] = useState("driving");
