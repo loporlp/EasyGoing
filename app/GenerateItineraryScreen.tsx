@@ -7,14 +7,14 @@ import DirectionsList from '../components/DirectionsList';
 import { calculateOptimalRoute } from '../scripts/optimalRoute.js';
 import { Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useState, useEffect, useRef, act } from "react";
+import { useState, useEffect, useRef, SetStateAction } from "react";
 import { getData } from '../scripts/localStore.js';
 import { updateTrip } from '../scripts/databaseInteraction.js';
 import { recalculatePaths } from '../scripts/reorderingLocations';
 import { Ionicons } from '@expo/vector-icons';
 import { getRoutePolylines } from "../scripts/routePolyline";
 import { updateDayOrigin, addTripDatesToStartDateTime } from '../scripts/updateTransportDests.js';
-import { calculateTripDates } from '../scripts/dateDividers';
+import { calculateTripDates, formatSelectedDestinations, getMatchedPolylinesData, handleSameDateSelection } from '../scripts/dateDividers';
 
 const { height } = Dimensions.get('window');
 
@@ -456,15 +456,10 @@ const GenerateItineraryScreen = () => {
         // endDate is set after startDate so use endDate for this useEffect
     }, [endDate]);    
 
-    const handleDatePress = (index: number) => {
+    const handleDatePress = (index: SetStateAction<number | null>) => {
         // Check if the same day index is selected again
-        const isSameDateSelected = index === selectedDayIndex;
-    
-        // If the same day is selected again, revert to showing all routes
+        const isSameDateSelected = handleSameDateSelection(index, selectedDayIndex, setSelectedDayIndex, setPolylinesData, allRoutesData);
         if (isSameDateSelected) {
-            console.log("Same day selected. Reverting to show all routes.");
-            setPolylinesData(allRoutesData);  // Revert to showing all routes
-            setSelectedDayIndex(null);  // Reset the selected day index
             return;
         }
     
@@ -483,59 +478,23 @@ const GenerateItineraryScreen = () => {
         }
     
         // Convert the selectedDestinations into an object with numeric keys
-        const formattedDestinations = selectedDestinations.reduce<{ [key: string]: Place }>((acc, curr, index) => {
-            acc[index.toString()] = curr;
-            return acc;
-        }, {});
-    
+        const formattedDestinations = formatSelectedDestinations(selectedDestinations);
         console.log("Formatted Destinations (Date):", formattedDestinations);
     
-        // Array to store the polyline data
-        const matchedPolylinesData: any[] = [];
-    
-        // Loop through each destination in grouped2DDestinations[index]
-        grouped2DDestinations[index].forEach(destinationName => {
-            let matched = false;
-    
-            // Loop through the formattedDestinations
-            for (const key in formattedDestinations) {
-                if (formattedDestinations.hasOwnProperty(key)) {
-                    const destination: PolylinePlace = formattedDestinations[key] as PolylinePlace;
-    
-                    // Check if the substring before ',' in the 'id' matches the destination name
-                    const routeNames = destination.id.split('$').map((route: string) => route.split(',')[0].trim());
-                    if (typeof destinationName === 'string' && routeNames.includes(destinationName)) {
-                        matched = true;
-                        console.log(`Matched destination: ${destinationName} with id: ${destination.id}`);
-    
-                        // Store the matched polyline data (coordinates, duration, etc.)
-                        matchedPolylinesData.push({
-                            coordinates: destination.coordinates,
-                            duration: destination.duration,
-                            strokeColor: destination.strokeColor,
-                            strokeWidth: destination.strokeWidth
-                        });
-                        break; // Break once we find the match
-                    }
-                }
-            }
-    
-            if (!matched) {
-                console.log(`No match found for: ${destinationName}`);
-            }
-        });
+        // Get the matched polyline data
+        const matchedPolylinesData = getMatchedPolylinesData(grouped2DDestinations, index, formattedDestinations);
     
         // After processing all destinations, update the polyline data
         if (matchedPolylinesData.length > 0) {
-            // Remove last one since that shows route to next day (not necessary right now)
+            // Remove the last one since that shows route to next day (not necessary right now)
             matchedPolylinesData.pop();
-
+    
             console.log("Updating global polylines data:", matchedPolylinesData);
-            setPolylinesData(matchedPolylinesData);  // Update the global polyline data
+            setPolylinesData(matchedPolylinesData); // Update the global polyline data
         } else {
             console.warn("No polyline data to update.");
         }
-    };
+      };
     
     // Function to move the destination up or down
     const moveDestination = async (destinationIndex: number, direction: string) => {

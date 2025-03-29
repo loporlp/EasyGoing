@@ -211,3 +211,61 @@ export const calculateTripDates = (startDate, endDate) => {
   
     return tempDates;
   };
+
+export const formatSelectedDestinations = (selectedDestinations) => {
+    return selectedDestinations.reduce((acc, curr, index) => {
+      acc[index.toString()] = curr;
+      return acc;
+    }, {});
+  };
+  
+  export const getMatchedPolylinesData = (grouped2DDestinations, index, formattedDestinations) => {
+    const matchedPolylinesData = [];
+  
+    grouped2DDestinations[index].forEach(destinationName => {
+      let matched = false;
+  
+      // Loop through the formattedDestinations
+      for (const key in formattedDestinations) {
+        if (formattedDestinations.hasOwnProperty(key)) {
+          const destination = formattedDestinations[key];
+  
+          // Check if the substring before ',' in the 'id' matches the destination name
+          const routeNames = destination.id.split('$').map(route => route.split(',')[0].trim());
+          if (typeof destinationName === 'string' && routeNames.includes(destinationName)) {
+            matched = true;
+  
+            // Store the matched polyline data
+            matchedPolylinesData.push({
+              coordinates: destination.coordinates,
+              duration: destination.duration,
+              strokeColor: destination.strokeColor,
+              strokeWidth: destination.strokeWidth
+            });
+            break; // Break once we find the match
+          }
+        }
+      }
+  
+      if (!matched) {
+        console.log(`No match found for: ${destinationName}`);
+      }
+    });
+  
+    return matchedPolylinesData;
+  };
+  
+  export const handleSameDateSelection = (index, selectedDayIndex, setSelectedDayIndex, setPolylinesData, allRoutesData) => {
+    const isSameDateSelected = index === selectedDayIndex;
+  
+    // If the same day is selected again, revert to showing all routes
+    if (isSameDateSelected) {
+      console.log("Same day selected. Reverting to show all routes.");
+      setPolylinesData(allRoutesData); // Revert to showing all routes
+      setSelectedDayIndex(null); // Reset the selected day index
+      return true;
+    }
+    
+    return false;
+  };
+  
