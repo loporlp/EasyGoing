@@ -1,6 +1,12 @@
 import { getIdToken } from '../scripts/getFirebaseID';
 import { auth } from '../firebaseConfig';
 import { getTransitRoute } from '../scripts/transitRoute.js';
+import { fetchPolylinesAndDurations } from '../scripts/routeHelpers';
+import { launchPrioritySystem} from '../scripts/prioritySystem.js';
+import { divideLocationsIntoGroups } from '../scripts/dateDividers.js';
+import groupDestinationsByDay from '../scripts/groupDestinationsByDay';
+import processGroupedDestinations from '../scripts/processGroupedDestinations';
+import { updateDestinationsWithTransport } from '../scripts/updateTransportDests.js';
 
 let routePolylines = [];
 
@@ -225,3 +231,172 @@ export async function getRoutePolyline(origin, originCoords, destination, destin
         return null;
     }
 }
+
+
+// Main function for calculating the routes and handling polylines
+    /*
+    1. Generate optimal route (which triggers this useEffect)
+    2. Use routePolyline to get and store the routes in order
+    3. Use dateDividers to then divide it into groups
+    4. Each group needs to be correlated to each day (probably index for the date header)
+    5. When clicking on a date header, pass that group into MultiRouteMap
+    5.1.MultiRouteMap now takes this route data and plots it rather than calling routePolyline itself
+
+    * Additionally, this calls when transportationModes is updated (such as the user picking a new way to tranport for a location)
+    */
+export const getRoutePolylines = async ({
+    optimalRoute,
+    transportationModes,
+    startDate,
+    endDate,
+    destinations,
+    groupedDestinations,
+    grouped2DDestinations,
+    setAllRoutesData,
+    setPolylinesData,
+    setTransportDurations,
+    setMarkers,
+    setBounds,
+    setGroupedDestinations,
+    setGrouped2DDestinations,
+    setTimeChecked,
+    setDestinations,
+    confirmAction,
+    failedTransportPopup,
+    setChangedModeOfTransport,
+    setToSaveData,
+    reorderDestinations,
+    navigation,
+    timeChecked,
+    changedModeOfTransport
+  }) => {
+    const { polylines: fetchedPolylines, transportDurations: fetchedDurations, markers: fetchedMarkers, bounds } = await fetchPolylinesAndDurations(optimalRoute, transportationModes);
+    
+    setAllRoutesData(fetchedPolylines);
+    setPolylinesData(fetchedPolylines);
+    setTransportDurations(fetchedDurations);
+    setMarkers(fetchedMarkers);
+    setBounds(bounds);
+  
+    // Get the ordered list of locations
+    const originLocations = optimalRoute.map(route => route[0][0]);
+    const lastDestination = optimalRoute[optimalRoute.length - 1][1][0];
+    const orderedLocations = [...originLocations, lastDestination];
+    console.log("Ordered Origins with Last Destination:", orderedLocations);
+  
+    // Process grouped destinations and updated durations
+    const updatedDurations = processGroupedDestinations(orderedLocations, groupedDestinations, Object.values(destinations), fetchedDurations, setGroupedDestinations);
+    console.log("GI - Updated Durations (Map)", updatedDurations);
+  
+    // Calculate the number of days
+    let numberOfDays;
+    try {
+      if (startDate && endDate) {
+        const actualEndDate = new Date(endDate);
+        const actualStartDate = new Date(startDate);
+        numberOfDays = (actualEndDate.getTime() - actualStartDate.getTime()) / (1000 * 3600 * 24);
+      } else {
+        numberOfDays = 7; // Default 7 days
+      }
+    } catch (error) {
+      console.log("Error in Date", error);
+    }
+    console.log("Number of days calculated.");
+  
+    // Priority system if necessary
+    try {
+        if (!timeChecked && !changedModeOfTransport) {
+            const [timeExceeded, priorityOrderedList] = await launchPrioritySystem(updatedDurations, numberOfDays);
+            
+            if (timeExceeded) {
+                console.log("Time exceeded");
+                setTimeChecked(true);
+                const userResponse = await confirmAction();
+                if (!userResponse) {
+                console.log("User selected No. Going back to AED Screen.");
+                navigation.goBack();
+                }
+        
+                if (priorityOrderedList) {
+                const validDestinationsSet = new Set(priorityOrderedList.map((item) => item[0]));
+                const filteredDestinations = Object.fromEntries(
+                    Object.entries(destinations).filter(([key, destination]) =>
+                    validDestinationsSet.has(destination.alias)
+                    )
+                );
+                setDestinations(filteredDestinations);
+                }
+            }
+        }
+    } catch (error) {
+        console.log("Error in PrioritySystem method call: ", error);
+    }
+    console.log("Priority system passed.");
+  
+    // Group locations into days
+    let groupedDays = null;
+    const previousGroupedDests = groupedDestinations;
+    const previousGrouped2dDests = grouped2DDestinations;
+    let resultingGroupedDestinations;
+  
+    try {
+        console.log("Dividing Locations Into Groups");
+        groupedDays = await divideLocationsIntoGroups(updatedDurations, numberOfDays);
+    } catch (error) {
+        console.log("GI: Error in divideLocationsIntoGroups:", error);
+        groupedDays = null;
+    }
+    console.log("Locations divided into groups");
+  
+    if (groupedDays == null) {
+        setGroupedDestinations(previousGroupedDests);
+        setGrouped2DDestinations(previousGrouped2dDests);
+        resultingGroupedDestinations = previousGrouped2dDests;
+        failedTransportPopup();
+        setChangedModeOfTransport(false);
+    } else {
+        groupedDays = groupedDays || {};
+        resultingGroupedDestinations = groupDestinationsByDay(groupedDays, orderedLocations);
+        setGroupedDestinations(resultingGroupedDestinations);
+        setGrouped2DDestinations(resultingGroupedDestinations);
+        console.log("Resulting Grouped Destinations Result:", resultingGroupedDestinations);
+    }
+  
+    // Get the polyline objects for destinations
+    const getPolylineObject = (destination) => {
+      const polyline = fetchedPolylines.find(polyline => polyline.id.split(',')[0] === destination);
+      
+      if (!polyline) {
+        const lastDestination = updatedDurations[updatedDurations.length - 1];
+        return {
+          id: destination,
+          duration: lastDestination?.duration || "No travel duration",
+          locationDuration: lastDestination?.locationDuration || 0,
+        };
+      }
+      return polyline || null;
+    };
+  
+    // Map the destinations to polyline objects
+    const updatedGroupedDestinations = resultingGroupedDestinations.map((group, groupIndex) => {
+      return group.map((destination, subIndex) => {
+        const polyline = getPolylineObject(destination);
+        
+        if (subIndex === group.length - 1) {
+          console.log(`Group ${groupIndex + 1}: Last destination "${destination.alias}", no polyline (or null):`, polyline ? polyline.id : "null");
+        } else {
+          console.log(`Group ${groupIndex + 1}: Mapped destination "${destination.alias}" to polyline:`, polyline.id);
+        }
+  
+        return polyline;
+      });
+    });
+    console.log("Destinations have been mapped.");
+  
+    setGroupedDestinations(updatedGroupedDestinations);
+  
+    // Reorder destinations and update with transport modes
+    const newDests = reorderDestinations(orderedLocations);  // Reorder destinations here
+    const updatedDests = updateDestinationsWithTransport(newDests, updatedGroupedDestinations, transportationModes);
+    setToSaveData(updatedDests);
+  };
