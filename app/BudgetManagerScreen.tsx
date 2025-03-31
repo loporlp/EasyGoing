@@ -394,7 +394,7 @@ const BudgetManagerScreen = () => {
                 {/* Bar showing how much someone spent */}
                 <View style={styles.bar}>
                     {categories.map((category) => (
-                        <View style={{ height: 25, backgroundColor: category.color, width: category.percentage }}></View>
+                        <View style={{ height: 30, backgroundColor: category.color, width: category.percentage }}></View>
                     ))}
                 </View>
 
@@ -715,7 +715,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "flex-start",
         backgroundColor: "white",
-        height: 25,
+        height: 30,
         marginBottom: 10
     },
 
