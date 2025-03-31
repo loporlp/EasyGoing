@@ -126,8 +126,8 @@ const BudgetManagerScreen = () => {
             if (!createExpense) {
                 console.error("Failed to create expense!");
             } else {
-                const updatedHistory = await getData("history");
-                setBudgetHistory(updatedHistory);
+                const historyReverse = await updateHistory();
+                setBudgetHistory(historyReverse);
                 resetHistory();
             }
         } else {
@@ -145,12 +145,54 @@ const BudgetManagerScreen = () => {
         setExpensePrice("");
     }
 
+    const updateHistory = async () => {
+        const updatedHistory = await getData("history");
+
+        // Recalculate the totals after adding the new expense
+        let newHotelBudget = 0;
+        let newTransportationBudget = 0;
+        let newFoodBudget = 0;
+        let newThingsToDoBudget = 0;
+        let newOtherBudget = 0;
+
+        updatedHistory.forEach((history: { tag: any; value: string; }) => {
+            switch (history.tag) {
+                case 'Hotel':
+                    newHotelBudget += parseFloat(history.value);
+                    break;
+                case 'Transportation':
+                    newTransportationBudget += parseFloat(history.value);
+                    break;
+                case 'Food':
+                    newFoodBudget += parseFloat(history.value);
+                    break;
+                case 'Things To Do':
+                    newThingsToDoBudget += parseFloat(history.value);
+                    break;
+                case 'Other':
+                    newOtherBudget += parseFloat(history.value);
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        // Update the states for each category
+        setHotelBudget(newHotelBudget);
+        setTransportationBudget(newTransportationBudget);
+        setFoodBudget(newFoodBudget);
+        setThingsToDoBudget(newThingsToDoBudget);
+        setOtherBudget(newOtherBudget);
+
+        return updatedHistory.reverse();
+    }
+
     const deleteExpense = async (id: string) => {
         const del = await deleteHistory(id);
 
         if (del) {
-            const updatedHistory = await getData("history");
-            setBudgetHistory(updatedHistory);
+            const newHistory = await updateHistory()
+            setBudgetHistory(newHistory);
         }
     }
 
@@ -166,7 +208,7 @@ const BudgetManagerScreen = () => {
             }
         }
 
-        
+
 
         setSelectedCategoryList(categoryHistory);
 
@@ -329,7 +371,7 @@ const BudgetManagerScreen = () => {
 
                 <View style={[styles.divider, { marginTop: 0 }]}></View>
 
-                <ScrollView style={styles.historyContainer} contentContainerStyle={{alignItems: "center"}}>
+                <ScrollView style={styles.historyContainer} contentContainerStyle={{ alignItems: "center" }}>
                     {/* Will load this part through the database */}
                     {budgetHistory.length > 0 ? (
                         <SwipeListView
@@ -343,8 +385,8 @@ const BudgetManagerScreen = () => {
                             onSwipeValueChange={handleSwipeChange}>
                         </SwipeListView>
                     ) : (
-                        <Text>No expenses found!</Text>
-                    )}
+                            <Text>No expenses found!</Text>
+                        )}
 
                 </ScrollView>
             </View>
@@ -399,8 +441,8 @@ const BudgetManagerScreen = () => {
                                         </View>
                                     ))
                                 ) : (
-                                    <Text>No available expenses for this category!</Text>
-                                )}
+                                        <Text>No available expenses for this category!</Text>
+                                    )}
                             </ScrollView>
                         </View>
                     </View>
