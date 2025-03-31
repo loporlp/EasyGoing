@@ -38,6 +38,48 @@ const BudgetManagerScreen = () => {
         value: "",
     });
 
+    const [categories, setCategories] = useState([
+        {
+            label: "Hotel",
+            totalPrice: 0,
+            percentage: "",
+            symbol: "",
+            color: "",
+        },
+
+        {
+            label: "Transportation",
+            totalPrice: 0,
+            percentage: "",
+            symbol: "",
+            color: "",
+        },
+
+        {
+            label: "Food",
+            totalPrice: 0,
+            percentage: "",
+            symbol: "",
+            color: "",
+        },
+
+        {
+            label: "Things To Do",
+            totalPrice: 0,
+            percentage: "",
+            symbol: "",
+            color: "",
+        },
+
+        {
+            label: "Other",
+            totalPrice: 0,
+            percentage: "",
+            symbol: "",
+            color: "",
+        }
+    ]);
+
     // Remane "flight" to "Transportation"
     const [value, setValue] = useState(null);
     const tags = [
@@ -64,6 +106,7 @@ const BudgetManagerScreen = () => {
 
                 // Loop through each history ID and fetch the history details from local storage
                 for (const historyId of historyIds) {
+
                     loadedHistory.unshift({
                         id: historyId.id,
                         tag: historyId.tag,
@@ -98,8 +141,6 @@ const BudgetManagerScreen = () => {
                     }
                 }
 
-                let totalExpense = hotelBudget + transportationBudget + foodBudget + thingsToDoBudget + otherBudget;
-                setTotalBudget(totalExpense)
                 setBudgetHistory(loadedHistory);
             } else {
                 console.log("No history available in local storage.");
@@ -112,6 +153,52 @@ const BudgetManagerScreen = () => {
         getHistoriesByTag();
     }, [selectedCategory]);
 
+    useEffect(() => {
+        const totalSpent = hotelBudget + transportationBudget + foodBudget + thingsToDoBudget + otherBudget;
+
+        for (let category in categories) {
+            if (categories[category].label == "Hotel") {
+                categories[category].totalPrice = hotelBudget;
+                categories[category].percentage = (Math.round((hotelBudget / totalSpent) * 100)).toString() + "%";
+                categories[category].symbol = tags[0].symbol;
+                categories[category].color = tags[0].color;
+            }
+
+            else if (categories[category].label == "Transportation") {
+                categories[category].totalPrice = transportationBudget;
+                categories[category].percentage = (Math.round((transportationBudget / totalSpent) * 100)).toString() + "%"
+                categories[category].symbol = tags[1].symbol;
+                categories[category].color = tags[1].color;
+            }
+
+            else if (categories[category].label == "Food") {
+                categories[category].totalPrice = foodBudget;
+                categories[category].percentage = (Math.round((foodBudget / totalSpent) * 100)).toString() + "%"
+                categories[category].symbol = tags[2].symbol;
+                categories[category].color = tags[2].color;
+            }
+
+            else if (categories[category].label == "Things To Do") {
+                categories[category].totalPrice = thingsToDoBudget;
+                categories[category].percentage = (Math.round((thingsToDoBudget / totalSpent) * 100)).toString() + "%"
+                categories[category].symbol = tags[3].symbol;
+                categories[category].color = tags[3].color;
+            }
+
+            else if (categories[category].label == "Other") {
+                categories[category].totalPrice = otherBudget;
+                categories[category].percentage = (Math.round((otherBudget / totalSpent) * 100)).toString() + "%"
+                categories[category].symbol = tags[4].symbol;
+                categories[category].color = tags[4].color;
+            }
+        }
+
+        const sortedData = categories.sort((a, b) => b.totalPrice - a.totalPrice);
+
+        setTotalBudget(totalSpent);
+        setCategories(sortedData)
+    }, [hotelBudget, transportationBudget, foodBudget, thingsToDoBudget, otherBudget])
+
     // add to history
     const addHistory = async () => {
 
@@ -121,12 +208,13 @@ const BudgetManagerScreen = () => {
             //const formattedDate = moment(currentDate).format('MMMM DD, YYYY');
             let formatNumber = parseFloat(expensePrice).toFixed(2);
             console.log("Format number: " + formatNumber)
-            const createExpense = await createHistory(expenseTag, formatNumber, expenseLabel);
+            const createExpense = await createHistory(expenseTag, formatNumber, expenseLabel, null);
 
             if (!createExpense) {
                 console.error("Failed to create expense!");
             } else {
                 const historyReverse = await updateHistory();
+
                 setBudgetHistory(historyReverse);
                 resetHistory();
             }
@@ -191,7 +279,11 @@ const BudgetManagerScreen = () => {
         const del = await deleteHistory(id);
 
         if (del) {
-            const newHistory = await updateHistory()
+            const newHistory = await updateHistory();
+
+            let totalExpense = hotelBudget + transportationBudget + foodBudget + thingsToDoBudget + otherBudget;
+            setTotalBudget(totalExpense)
+
             setBudgetHistory(newHistory);
         }
     }
@@ -207,8 +299,6 @@ const BudgetManagerScreen = () => {
                 categoryHistory.push(expense);
             }
         }
-
-
 
         setSelectedCategoryList(categoryHistory);
 
@@ -252,7 +342,7 @@ const BudgetManagerScreen = () => {
                         switch (item.tag) {
                             case 'Hotel':
                                 return <MaterialIcons name="hotel" color={"#FF6347"} size={22} />;
-                            case 'flight':
+                            case 'Transportation':
                                 return <Ionicons name="airplane" color={"skyblue"} size={22} />;
                             case 'Food':
                                 return <MaterialIcons name="local-dining" color={"#FFD700"} size={22} />;
@@ -303,62 +393,38 @@ const BudgetManagerScreen = () => {
 
                 {/* Bar showing how much someone spent */}
                 <View style={styles.bar}>
-                    <View style={{ height: 25, backgroundColor: "#FF6347", width: "43%", borderTopLeftRadius: 10, borderBottomLeftRadius: 10 }}></View>
-                    <View style={{ height: 25, backgroundColor: "skyblue", width: "33%" }}></View>
-                    <View style={{ height: 25, backgroundColor: "#FFD700", width: "15%" }}></View>
-                    <View style={{ height: 25, backgroundColor: "green", width: "7%" }}></View>
-                    <View style={{ height: 25, backgroundColor: "#800080", width: "2%", borderTopRightRadius: 10, borderBottomRightRadius: 10 }}></View>
+                    {categories.map((category) => (
+                        <View style={{ height: 25, backgroundColor: category.color, width: category.percentage }}></View>
+                    ))}
                 </View>
 
                 {/* Container showing how much someone spent in each category */}
                 <View style={styles.totalSpentContainer}>
-                    <TouchableOpacity style={styles.hotelSection} onPress={() => { setSelectedCategory("Hotel"); setCategoryVisible(true); }}>
-                        <View style={styles.hotelLabel}>
-                            <MaterialIcons name={"hotel"} color={"#FF6347"} size={20} />
-                            <Text style={{ fontSize: 18 }}>Hotels</Text>
-                        </View>
-                        <Text style={{ fontSize: 18, color: "gray" }}>${hotelBudget}</Text>
-                    </TouchableOpacity>
+                    {categories.map((category, index) => (
+                        category.label === "Transportation" || category.label === "Things To Do" ? (
+                            <>
+                                <TouchableOpacity style={[styles.hotelSection, {borderWidth: 1, borderColor: "#F4F4F4"}]} onPress={() => { setSelectedCategory(category.label); setCategoryVisible(true); }}>
+                                    <View style={styles.hotelLabel}>
+                                        <Ionicons name={category.symbol} color={category.color} size={20} />
+                                        <Text style={{ fontSize: 18 }}>{category.label}</Text>
+                                    </View>
+                                    <Text style={{ fontSize: 18, color: "gray" }}>${category.totalPrice} ({category.percentage})</Text>
+                                </TouchableOpacity>
+                            </>
 
-                    <View style={styles.divider}></View>
-
-                    <TouchableOpacity style={styles.hotelSection} onPress={() => { setSelectedCategory("Transportation"); setCategoryVisible(true); }}>
-                        <View style={styles.hotelLabel}>
-                            <Ionicons name={"airplane"} color={"skyblue"} size={20} />
-                            <Text style={{ fontSize: 18 }}>Transportation</Text>
-                        </View>
-                        <Text style={{ fontSize: 18, color: "gray" }}>${transportationBudget}</Text>
-                    </TouchableOpacity>
-
-                    <View style={styles.divider}></View>
-
-                    <TouchableOpacity style={styles.hotelSection} onPress={() => { setSelectedCategory("Food"); setCategoryVisible(true); }}>
-                        <View style={styles.hotelLabel}>
-                            <MaterialIcons name={"local-dining"} color={"#FFD700"} size={20} />
-                            <Text style={{ fontSize: 18 }}>Food</Text>
-                        </View>
-                        <Text style={{ fontSize: 18, color: "gray" }}>${foodBudget}</Text>
-                    </TouchableOpacity>
-
-                    <View style={styles.divider}></View>
-
-                    <TouchableOpacity style={styles.hotelSection} onPress={() => { setSelectedCategory("Things To Do"); setCategoryVisible(true); }}>
-                        <View style={styles.hotelLabel}>
-                            <Ionicons name={"location"} color={"green"} size={20} />
-                            <Text style={{ fontSize: 18 }}>Things To Do</Text>
-                        </View>
-                        <Text style={{ fontSize: 18, color: "gray" }}>${thingsToDoBudget}</Text>
-                    </TouchableOpacity>
-
-                    <View style={styles.divider}></View>
-
-                    <TouchableOpacity style={styles.hotelSection} onPress={() => { setSelectedCategory("Other"); setCategoryVisible(true); }}>
-                        <View style={styles.hotelLabel}>
-                            <MaterialIcons name={"more-horiz"} color={"#800080"} size={20} />
-                            <Text style={{ fontSize: 18 }}>Other</Text>
-                        </View>
-                        <Text style={{ fontSize: 18, color: "gray" }}>${otherBudget}</Text>
-                    </TouchableOpacity>
+                        ) : (
+                                <>
+                                    <TouchableOpacity style={[styles.hotelSection, {borderWidth: 1, borderColor: "#F4F4F4"}]} onPress={() => { setSelectedCategory(category.label); setCategoryVisible(true); }}>
+                                        <View style={styles.hotelLabel}>
+                                            <MaterialIcons name={category.symbol} color={category.color} size={20} />
+                                            <Text style={{ fontSize: 18 }}>{category.label}</Text>
+                                        </View>
+                                        <Text style={{ fontSize: 18, color: "gray" }}>${category.totalPrice} ({category.percentage})</Text>
+                                    </TouchableOpacity>
+                                </>
+                            )
+                    )
+                    )}
                 </View>
 
                 {/* Add a payment history here */}
@@ -615,7 +681,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        paddingVertical: 5
+        padding: 10,
     },
 
     hotelLabel: {
@@ -650,7 +716,6 @@ const styles = StyleSheet.create({
         justifyContent: "flex-start",
         backgroundColor: "white",
         height: 25,
-        borderRadius: 10,
         marginBottom: 10
     },
 
