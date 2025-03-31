@@ -145,7 +145,7 @@ const BudgetManagerScreen = () => {
         setExpensePrice("");
     }
 
-    const deleteExepnse = async (id: string) => {
+    const deleteExpense = async (id: string) => {
         const del = await deleteHistory(id);
 
         if (del) {
@@ -160,13 +160,16 @@ const BudgetManagerScreen = () => {
 
         // rename flight to Transportation
         for (const expense of budgetHistory) {
-            if (expense.tag == selectedTag) {
+            console.log("Expense tag: " + expense.tag + "; selectedTag: " + selectedCategory)
+            if (expense.tag == selectedCategory) {
                 categoryHistory.push(expense);
             }
         }
 
+        
+
         setSelectedCategoryList(categoryHistory);
-        console.log("SelCat: " + selectedCategory);
+
         for (const tag of tags) {
             if (tag.label === selectedCategory) {
                 setSelectedTag(tag);
@@ -192,7 +195,7 @@ const BudgetManagerScreen = () => {
 
     const renderHiddenItem = ({ item, index }: { item: any; index: number }) => (
         <View style={[styles.hiddenItem, { height: 140 }]}>
-            <TouchableOpacity style={[styles.deleteButton, { width: Math.abs(rightOpenValue) }]} onPressIn={() => { deleteExepnse(item.id) }}>
+            <TouchableOpacity style={[styles.deleteButton, { width: Math.abs(rightOpenValue) }]} onPressIn={() => { deleteExpense(item.id) }}>
                 <Ionicons name="trash-bin" size={25} color={"white"} />
             </TouchableOpacity>
         </View>
