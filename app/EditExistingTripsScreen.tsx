@@ -36,8 +36,10 @@ const EditExistingTripsScreen = () => {
                         loadedTrips.push({ id: tripID, details: tripDetails.details });
                     }
                 }
+
+                const reverseLoadTrips = loadedTrips.reverse();
                 // Update the state with the loaded trips
-                setTrips(loadedTrips);
+                setTrips(reverseLoadTrips);
             } else {
                 console.log("No trips available in local storage.");
             }
