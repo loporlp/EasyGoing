@@ -33,7 +33,7 @@ const EditExistingTripsScreen = () => {
                 for (const tripID of tripIDs) {
                     const tripDetails = await getData(tripID);
                     if (tripDetails) {
-                        loadedTrips.push({ id: tripID, details: tripDetails });
+                        loadedTrips.push({ id: tripID, details: tripDetails.details });
                     }
                 }
                 // Update the state with the loaded trips
@@ -266,7 +266,6 @@ const EditExistingTripsScreen = () => {
 
                                 if (selectedTrip) {
                                     const tripName = selectedTrip.details.tripName ? selectedTrip.details.tripName : "Unnamed Trip";
-                                    console.log("Selected Trip Name:", tripName);
                                     deleteATrip(selectedTripId, tripName)
                                 }
                             }
