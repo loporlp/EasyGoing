@@ -1,5 +1,5 @@
 // CreateAccountScreen.tsx
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, TextInput, Button, StyleSheet, TouchableOpacity, Image, Text, TouchableWithoutFeedback } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
@@ -8,6 +8,7 @@ import { RootStackParamList } from './types';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { registerUser } from '@/scripts/databaseInteraction';
+import { CrossfadeImage } from 'react-native-crossfade-image';
 
 type CreateAccountScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -56,110 +57,134 @@ const CreateAccountScreen = () => {
   const passwordInputRef = useRef(null);
   const passwordConfirmInputRef = useRef(null);
 
+  const images = [
+    require("../assets/images/createTripImage.jpg"),
+    require("../assets/images/city.jpg"),
+    require("../assets/images/airplane.jpg"),
+    require("../assets/images/hotel.jpg"),
+    require("../assets/images/venice.jpg"),
+    require("../assets/images/food.jpg"),
+  ]
+
+  const [imageSource, setImageSource] = useState(images[0]);
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setImageSource((prevImage) => {
+        const currentIndex = images.indexOf(prevImage);
+        const nextIndex = (currentIndex + 1) % images.length;  // Loop back to the first image after the last one
+        return images[nextIndex];
+      });
+    }, 6000);
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
     <View style={styles.container}>
       {/* Background image */}
-      <Image style={styles.backgroundImage} source={require("../assets/images/createTripImage.jpg")} />
+      <CrossfadeImage style={styles.backgroundImage} source={imageSource} resizeMode="cover" />
       <View style={styles.darkOverlay} />
 
       {/* EasyGoing logo */}
-      <Text style={{ color: "white", fontWeight: "bold", marginBottom: 20, fontSize: 25 }}>Easy<Text style={{ color: "#24a6ad", fontWeight: "bold" }}>Going</Text></Text>
+      <View style={{flexDirection: "row", justifyContent: "space-around", alignItems: "center", gap: 5, marginBottom: 15}}>
+        <Image style={styles.logoImage} source={require("../assets/images/icon.png")} />
+        <Text style={{ color: "white", fontWeight: "bold", fontSize: 30 }}>Easy<Text style={{ color: "#24a6ad", fontWeight: "bold" }}>Going</Text></Text>
+      </View>
 
       {/* Username */}
       <View style={styles.inputUserPass}>
         <TouchableWithoutFeedback onPress={() => emailInputRef.current.focus()}>
-        <View style={styles.userPassTextInput}>
-          <Ionicons name="person" size={18} color={"#24a6ad"} />
-          <TextInput
-            placeholder="Email"
-            placeholderTextColor="#d6d6d6"
-            value={email}
-            onChangeText={setEmail}
-            style={{ fontSize: 18, marginHorizontal: 15 }}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            textContentType="emailAddress"
-            ref={emailInputRef}
-          />
-        </View>
+          <View style={styles.userPassTextInput}>
+            <Ionicons name="person" size={18} color={"#24a6ad"} />
+            <TextInput
+              placeholder="Email"
+              placeholderTextColor="#d6d6d6"
+              value={email}
+              onChangeText={setEmail}
+              style={{ fontSize: 18, marginHorizontal: 15 }}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              textContentType="emailAddress"
+              ref={emailInputRef}
+            />
+          </View>
         </TouchableWithoutFeedback>
       </View>
 
       {/* Password */}
       <View style={styles.inputUserPass}>
         <TouchableWithoutFeedback onPress={() => passwordInputRef.current.focus()}>
-        <View style={styles.userPassTextInput}>
-          <Ionicons name="lock-closed" size={18} color={"#24a6ad"} style={{ marginRight: 15 }} />
-          { (viewPassword) ? (
-            <TextInput
-            placeholder="Password"
-            placeholderTextColor="#d6d6d6"
-            value={password}
-            onChangeText={setPassword}
-            style={{ fontSize: 18, marginRight: 55 }}
-            textContentType="password"
-            ref={passwordInputRef}
-          />
-          ) : (
-            <TextInput
-            placeholder="Password"
-            placeholderTextColor="#d6d6d6"
-            value={password}
-            onChangeText={setPassword}
-            style={{ fontSize: 18, marginRight: 55 }}
-            secureTextEntry
-            textContentType="password"
-            ref={passwordInputRef}
-          />
-          )}
-          
-          <TouchableOpacity style={{ position: "absolute", right: 10 }} onPress={() => { setViewPassword(!viewPassword) }}>
+          <View style={styles.userPassTextInput}>
+            <Ionicons name="lock-closed" size={18} color={"#24a6ad"} style={{ marginRight: 15 }} />
             {(viewPassword) ? (
-              <Ionicons name="eye" size={18} color={"#24a6ad"} style={{ marginLeft: 15 }} />
+              <TextInput
+                placeholder="Password"
+                placeholderTextColor="#d6d6d6"
+                value={password}
+                onChangeText={setPassword}
+                style={{ fontSize: 18, marginRight: 55 }}
+                textContentType="password"
+                ref={passwordInputRef}
+              />
             ) : (
-              <Ionicons name="eye-off" size={18} color={"#24a6ad"} style={{ marginLeft: 15 }} />
-            )}
-          </TouchableOpacity>
-        </View>
+                <TextInput
+                  placeholder="Password"
+                  placeholderTextColor="#d6d6d6"
+                  value={password}
+                  onChangeText={setPassword}
+                  style={{ fontSize: 18, marginRight: 55 }}
+                  secureTextEntry
+                  textContentType="password"
+                  ref={passwordInputRef}
+                />
+              )}
+
+            <TouchableOpacity style={{ position: "absolute", right: 10 }} onPress={() => { setViewPassword(!viewPassword) }}>
+              {(viewPassword) ? (
+                <Ionicons name="eye" size={18} color={"#24a6ad"} style={{ marginLeft: 15 }} />
+              ) : (
+                  <Ionicons name="eye-off" size={18} color={"#24a6ad"} style={{ marginLeft: 15 }} />
+                )}
+            </TouchableOpacity>
+          </View>
         </TouchableWithoutFeedback>
       </View>
 
       {/* Confirm Password */}
       <View style={styles.inputUserPass}>
         <TouchableWithoutFeedback onPress={() => passwordConfirmInputRef.current.focus()}>
-        <View style={styles.userPassTextInput}>
-          <Ionicons name="lock-closed" size={18} color={"#24a6ad"} style={{ marginRight: 15 }} />
-          { (viewConfirmedPassword) ? (
-            <TextInput
-            placeholder="Confirm password"
-            placeholderTextColor="#d6d6d6"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            style={{ fontSize: 18, marginRight: 55 }}
-            textContentType="password"
-            ref={passwordConfirmInputRef}
-          />
-          ) : (
-            <TextInput
-            placeholder="Confirm password"
-            placeholderTextColor="#d6d6d6"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            style={{ fontSize: 18, marginRight: 55 }}
-            secureTextEntry
-            textContentType="password"
-            ref={passwordConfirmInputRef}
-          />
-          )}
-
-          <TouchableOpacity style={{ position: "absolute", right: 10 }} onPress={() => { setViewConfirmedPassword(!viewConfirmedPassword) }}>
+          <View style={styles.userPassTextInput}>
+            <Ionicons name="lock-closed" size={18} color={"#24a6ad"} style={{ marginRight: 15 }} />
             {(viewConfirmedPassword) ? (
-              <Ionicons name="eye" size={18} color={"#24a6ad"} style={{ marginLeft: 15 }} />
+              <TextInput
+                placeholder="Confirm password"
+                placeholderTextColor="#d6d6d6"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                style={{ fontSize: 18, marginRight: 55 }}
+                textContentType="password"
+                ref={passwordConfirmInputRef}
+              />
             ) : (
-              <Ionicons name="eye-off" size={18} color={"#24a6ad"} style={{ marginLeft: 15 }} />
-            )}
-          </TouchableOpacity>
-        </View>
+                <TextInput
+                  placeholder="Confirm password"
+                  placeholderTextColor="#d6d6d6"
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  style={{ fontSize: 18, marginRight: 55 }}
+                  secureTextEntry
+                  textContentType="password"
+                  ref={passwordConfirmInputRef}
+                />
+              )}
+
+            <TouchableOpacity style={{ position: "absolute", right: 10 }} onPress={() => { setViewConfirmedPassword(!viewConfirmedPassword) }}>
+              {(viewConfirmedPassword) ? (
+                <Ionicons name="eye" size={18} color={"#24a6ad"} style={{ marginLeft: 15 }} />
+              ) : (
+                  <Ionicons name="eye-off" size={18} color={"#24a6ad"} style={{ marginLeft: 15 }} />
+                )}
+            </TouchableOpacity>
+          </View>
         </TouchableWithoutFeedback>
       </View>
 
@@ -216,11 +241,17 @@ const styles = StyleSheet.create({
 
   userPassTextInput: {
     flex: 1,
+    paddingHorizontal: 10,
     flexDirection: "row",
     backgroundColor: "white",
-    padding: 10,
     borderRadius: 10,
     alignItems: "center"
+  },
+
+  logoImage: {
+    width: 30,
+    height: 30,
+    borderRadius: 10
   },
 
   // ---- SIGN IN BUTTON ---- //
