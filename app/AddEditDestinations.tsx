@@ -85,12 +85,16 @@ const AddEditDestinations = () => {
     }, []); // Empty dependency array ensures this runs only once    
 
     useEffect(() => {
-        if (trip?.destinations?.length > 0 && trip.destinations[0].dayOrigin) {
-            setHasOrigin(true);
-            setOriginText(trip.destinations[0].address);
-        } else {
-            setHasOrigin(false);
-            setOriginText("");
+        try {
+            if (trip?.destinations?.length > 0 && trip.destinations[0].dayOrigin) {
+                setHasOrigin(true);
+                setOriginText(trip.destinations[0].address);
+            } else {
+                setHasOrigin(false);
+                setOriginText("");
+            }
+        } catch (error) {
+            console.log("Trip has no destinations! Need to delete or handle otherwise.");
         }
     }, [trip]); // Runs every time `trip` updates
 
