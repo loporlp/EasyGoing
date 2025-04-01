@@ -76,11 +76,14 @@ const SignInScreen = () => {
   return (
     <View style={styles.container}>
       {/* Background image */}
-      <CrossfadeImage style={styles.backgroundImage} source={imageSource} resizeMode="cover"/>
+      <CrossfadeImage style={styles.backgroundImage} source={imageSource} resizeMode="cover" />
       <View style={styles.darkOverlay} />
 
       {/* EasyGoing logo */}
-      <Text style={{ color: "white", fontWeight: "bold", marginBottom: 20, fontSize: 25 }}>Easy<Text style={{ color: "#24a6ad", fontWeight: "bold" }}>Going</Text></Text>
+      <View style={{flexDirection: "row", justifyContent: "space-around", alignItems: "center", gap: 5, marginBottom: 15}}>
+        <Image style={styles.logoImage} source={require("../assets/images/icon.png")} />
+        <Text style={{ color: "white", fontWeight: "bold", fontSize: 30 }}>Easy<Text style={{ color: "#24a6ad", fontWeight: "bold" }}>Going</Text></Text>
+      </View>
 
       {/* Username */}
       <View style={styles.inputUserPass}>
@@ -147,6 +150,12 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     position: "absolute"
+  },
+
+  logoImage: {
+    width: 30,
+    height: 30,
+    borderRadius: 10
   },
 
   darkOverlay: {
