@@ -1,6 +1,6 @@
 // AddEditDestinations.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, TextInput, Text, TouchableOpacity, Dimensions, Modal, TouchableWithoutFeedback, KeyboardAvoidingView, Image, Platform } from "react-native";
+import { View, StyleSheet, TextInput, Text, TouchableOpacity, Dimensions, Modal, TouchableWithoutFeedback, KeyboardAvoidingView, Image, Platform, BackHandler } from "react-native";
 import { useRouter } from "expo-router";
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import { storeData, getData } from '../scripts/localStore.js';
@@ -370,7 +370,7 @@ const AddEditDestinations = () => {
 
     // Tell GI to not optimize by storing this check in local storage
     useEffect(() => {
-        if (trip && tripName)
+        if (trip && tripName && tripId)
         {
             const updatedTrip = { 
                 ...trip, 
@@ -379,10 +379,42 @@ const AddEditDestinations = () => {
     
             updateTrip(tripId, updatedTrip);
     
-            storeData(tripId?.toString(), updatedTrip);
+            storeData(tripId.toString(), updatedTrip);
         }
 
     }, [optimizeCheck]);
+
+    // Store original trip name just in case the user goes back
+    const handleBack = () => {
+        if (trip && tripName && tripId)
+            {
+                const updatedTrip = { 
+                    ...trip, 
+                    tripName: tripName
+                };
+        
+                updateTrip(tripId, updatedTrip);
+        
+                storeData(tripId.toString(), updatedTrip);
+            }
+        navigation.goBack();
+    };
+
+    // When back is pressed
+    const useBackButtonListener = (callback: unknown) => {
+        useEffect(() => {
+            const backHandler = BackHandler.addEventListener(
+                "hardwareBackPress",
+                callback
+            );
+    
+            return () => backHandler.remove();
+        }, [callback]);
+    };
+    useBackButtonListener(() => {
+        console.log("Back button pressed!");
+        handleBack();
+    });
 
     return (
         <View style={styles.container}>
@@ -391,7 +423,7 @@ const AddEditDestinations = () => {
             <View style={styles.darkOverlay}></View>
 
             <View style={{ flex: 1, flexDirection: "column", marginHorizontal: 20, position: "absolute", marginTop: 50 }}>
-                <TouchableOpacity onPress={() => { navigation.goBack() }}>
+                <TouchableOpacity onPress={() => { handleBack() }}>
                     <Ionicons name="arrow-back-outline" size={30} color={"white"} />
                 </TouchableOpacity>
 

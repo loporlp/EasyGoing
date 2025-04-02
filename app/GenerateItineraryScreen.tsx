@@ -214,7 +214,7 @@ const GenerateItineraryScreen = () => {
 
                     // Optimized trip or not is checked here
                     let result;
-                    console.log("Do we optimize? The answer is:", optimizeCheck);
+                    console.log("Do we optimize (checked again)? The answer is:", optimizeCheck);
                     if (optimizeCheck) {
                         result = await calculateOptimalRoute(simplifiedDestinations, origin, mode);
                     } else {
