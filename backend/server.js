@@ -317,6 +317,7 @@ app.get('/api/place/textsearch', verifyFirebaseToken, async (req, res) => {
  */
 app.get('/api/place/photo', async (req, res) => {
     console.log("photo called");
+    return res.status(503).json({ error: 'This service is temporarily disableed'});
     try {
         // Get parameters from the client request
         const { photo_reference, maxwidth }  = req.query;
