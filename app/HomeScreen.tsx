@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, TextInput, Image, ScrollView, FlatList } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, Image, ScrollView, FlatList, ActivityIndicator } from 'react-native'
 import React, { useRef, useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useHeaderHeight } from '@react-navigation/elements';
@@ -24,6 +24,9 @@ const HomeScreen = () => {
     // Sets up navigations
     const router = useRouter();
 
+    // Used for recommended locations
+    const [isLoading, setIsLoading] = useState(true);
+
     const headerHeight = useHeaderHeight();
     const [activeIndex, setActiveIndex] = useState(0);
     const [locationType, setLocationType] = useState<string>("world travel locations");
@@ -33,6 +36,7 @@ const HomeScreen = () => {
 
     const handleTypeOfLocationPress = (locationType: string) => {
         console.log("Type of place clicked:", locationType);
+        setIsLoading(true);
         setLocationType(locationType);
     };
 
@@ -196,6 +200,7 @@ const HomeScreen = () => {
                 // Set backup array if parsing fails
                 setDestinationList(backupArray);
             }
+            setIsLoading(false);
         };
     
         fetchData();
@@ -312,18 +317,22 @@ const HomeScreen = () => {
                                 paddingVertical: 10,
                                 marginBottom: 10
                             }}>
-                                {recommendedList.map((item, index) => (
-                                    <TouchableOpacity
-                                        onPress={() => {
-                                            handleSelectCategory(index);
-                                            handleTypeOfLocationPress(item.title);
-                                        }}
-                                        style={activeIndex == index ? styles.activeRecommendBtn : styles.recommendBtn}
-                                        key={index}>
-                                        <MaterialCommunityIcons name={item.iconName as any} size={20} color={activeIndex == index ? "white" : "black"} />
-                                        <Text style={activeIndex == index ? styles.recommendBtnTextActive : styles.recommendBtnText}>{item.title}</Text>
-                                    </TouchableOpacity>
-                                ))}
+                                {isLoading ? (
+                                    <ActivityIndicator size="large" color="#0000ff" />
+                                ) : (
+                                    recommendedList.map((item, index) => (
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                handleSelectCategory(index);
+                                                handleTypeOfLocationPress(item.title);
+                                            }}
+                                            style={activeIndex === index ? styles.activeRecommendBtn : styles.recommendBtn}
+                                            key={index}>
+                                            <MaterialCommunityIcons name={item.iconName as any} size={20} color={activeIndex === index ? "white" : "black"} />
+                                            <Text style={activeIndex === index ? styles.recommendBtnTextActive : styles.recommendBtnText}>{item.title}</Text>
+                                        </TouchableOpacity>
+                                    ))
+                                )}
                             </ScrollView>
 
                             <FlatList
