@@ -49,6 +49,7 @@ const AddEditDestinations = () => {
     // Sets trip data
     const [trip, setTrip] = useState<any>(null);
     const [tripId, setTripId] = useState<string | null>(null);
+    const [tripName, setTripName] = useState<string | null>(null);
     const [destinations, setDestinations] = useState<any[]>([]); // Store destinations for rendering
     const [hasOrigin, setHasOrigin] = useState(false); // used for checking if an origin exists
     const [originText, setOriginText] = useState("");
@@ -70,6 +71,7 @@ const AddEditDestinations = () => {
                     if (tripDetails) {
                         setTripId(currentTripID);  // Store only the trip id
                         setTrip(tripDetails);  // Store the full trip data
+                        setTripName(tripDetails.tripName);
                         setDestinations(tripDetails.destinations); // Immediately update the destinations so they load on screen
                         if (destinations.length > 0 && destinations[0].dayOrigin) {
                             setHasOrigin(true);
@@ -365,6 +367,22 @@ const AddEditDestinations = () => {
     }
 
     const rightOpenValue = -150;
+
+    // Tell GI to not optimize by storing this check in local storage
+    useEffect(() => {
+        if (trip && tripName)
+        {
+            const updatedTrip = { 
+                ...trip, 
+                tripName: tripName + (optimizeCheck ? "1" : "0") // Transform optimizeCheck to single number to easily pull that number off
+            };
+    
+            updateTrip(tripId, updatedTrip);
+    
+            storeData(tripId?.toString(), updatedTrip);
+        }
+
+    }, [optimizeCheck]);
 
     return (
         <View style={styles.container}>

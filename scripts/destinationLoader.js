@@ -2,7 +2,7 @@ import { getData } from '../scripts/localStore.js';
 const defaultMode = "DRIVING";
 
 // Function to fetch destinations
-export const loadDestinations = async (setDestinations, setStartDate, setEndDate, setTransportationModes, setOrigin) => {
+export const loadDestinations = async (setDestinations, setStartDate, setEndDate, setTransportationModes, setOrigin, setOptimizeCheck) => {
     const formattedDestinations = {};
     const groupedDestinationsTemp = [];
     let currentGroup = [];
@@ -26,6 +26,9 @@ export const loadDestinations = async (setDestinations, setStartDate, setEndDate
             const destinationsCount = trip.destinations.length;
             const initialTransportationModes = new Array(destinationsCount).fill("Driving");
             setTransportationModes(initialTransportationModes);
+
+            // Get the optimalCheck (last character in name)
+            setOptimizeCheck(trip.tripName.slice(0, -1) === "1");
 
             // Iterate over destinations and format them
             trip.destinations.forEach((destination, index) => {

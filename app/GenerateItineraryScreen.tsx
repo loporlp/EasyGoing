@@ -4,7 +4,7 @@ import { Picker } from '@react-native-picker/picker';
 import { useRouter } from "expo-router";
 import MultiRoutesMap from '../components/MultiRoutesMap';
 import DirectionsList from '../components/DirectionsList';
-import { calculateOptimalRoute } from '../scripts/optimalRoute.js';
+import { calculateOptimalRoute, formatRouteInOrder } from '../scripts/optimalRoute.js';
 import { Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useState, useEffect, useRef, SetStateAction } from "react";
@@ -80,6 +80,9 @@ const GenerateItineraryScreen = () => {
     const [timeChecked, setTimeChecked] = useState<boolean>(false);
     const [changedModeOfTransport, setChangedModeOfTransport] = useState<boolean>(false);
 
+    // For GI to see whether to optimize or not
+    const [optimizeCheck, setOptimizeCheck] = useState(false);
+
     // Pop-Up for Priority 
     const confirmAction = () => {
         return new Promise((resolve, reject) => {
@@ -118,8 +121,9 @@ const GenerateItineraryScreen = () => {
     useEffect(() => {
         console.log("On GenerateItineraryScreen");
         const fetchDestinations = async () => {
-            const loadedDestinations = await loadDestinations(setDestinations, setStartDate, setEndDate, setTransportationModes, setOrigin);
+            const loadedDestinations = await loadDestinations(setDestinations, setStartDate, setEndDate, setTransportationModes, setOrigin, setOptimizeCheck);
             console.log("Loaded Destinations:", loadedDestinations);
+            console.log("Do we optimize? The answer is:", optimizeCheck);
             setDestinations(loadedDestinations); // Update state with loaded destinations
         };
 
@@ -207,8 +211,17 @@ const GenerateItineraryScreen = () => {
                     console.log("Current Origin (GI):", origin);
 
                     const mode = 'DRIVING';
-                    const result = await calculateOptimalRoute(simplifiedDestinations, origin, mode);
 
+                    // Optimized trip or not is checked here
+                    let result;
+                    console.log("Do we optimize? The answer is:", optimizeCheck);
+                    if (optimizeCheck) {
+                        result = await calculateOptimalRoute(simplifiedDestinations, origin, mode);
+                    } else {
+                        // No optimize
+                        result = formatRouteInOrder(simplifiedDestinations, origin);
+                    }
+                    
                     // Check if the result is different from the previous optimal route
                     if (JSON.stringify(result) !== JSON.stringify(prevOptimalRouteRef.current)) {
                         setOptimalRoute(result);
