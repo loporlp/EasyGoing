@@ -24,6 +24,7 @@
     "axios": "^1.7.7",
     "expo": "^52.0.27",
     "expo-auth-session": "~6.0.0",
+    "expo-checkbox": "^4.0.1",
     "expo-cli": "^6.3.12",
     "expo-constants": "~17.0.3",
     "expo-font": "~13.0.1",

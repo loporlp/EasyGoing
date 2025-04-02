@@ -12,6 +12,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import CalendarPicker from 'react-native-calendar-picker';
 import moment from "moment";
+import Checkbox from 'expo-checkbox';
 
 const { height } = Dimensions.get('window');
 
@@ -51,6 +52,9 @@ const AddEditDestinations = () => {
     const [destinations, setDestinations] = useState<any[]>([]); // Store destinations for rendering
     const [hasOrigin, setHasOrigin] = useState(false); // used for checking if an origin exists
     const [originText, setOriginText] = useState("");
+
+    // For GI to see whether to optimize or not
+    const [optimizeCheck, setOptimizeCheck] = useState(false);
 
 
     //load existing trip data and set it as 'trip'
@@ -395,6 +399,10 @@ const AddEditDestinations = () => {
                             <Ionicons name="wallet" size={22} color={"#24a6ad"} />
                             <TextInput value={trip?.budget ? trip.budget.toString() : "Enter budget"} placeholderTextColor="black" keyboardType="numeric" onChangeText={updateBudget} style={{ fontSize: 18, padding: 5 }} />
                         </TouchableOpacity>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', borderRadius: 10, padding: 10, }}>
+                        <Checkbox value={optimizeCheck} onValueChange={setOptimizeCheck} />
+                        <Text style={{ fontSize: 18, marginLeft: 5, color: 'black' }}>Optimize Trip</Text>
                     </View>
                 </View>
             </View>
