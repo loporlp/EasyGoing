@@ -27,8 +27,8 @@ export const loadDestinations = async (setDestinations, setStartDate, setEndDate
             const initialTransportationModes = new Array(destinationsCount).fill("Driving");
             setTransportationModes(initialTransportationModes);
 
-            // Get the optimalCheck (last character in name)
-            setOptimizeCheck(trip.tripName.slice(0, -1) === "1");
+            // Get the optimalCheck
+            setOptimizeCheck(trip.optimize);
 
             // Iterate over destinations and format them
             trip.destinations.forEach((destination, index) => {

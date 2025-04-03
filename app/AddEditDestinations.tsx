@@ -57,6 +57,13 @@ const AddEditDestinations = () => {
     // For GI to see whether to optimize or not
     const [optimizeCheck, setOptimizeCheck] = useState(false);
 
+    // Set the check to whatever the stored value is
+    useEffect(() => {
+        if (trip && typeof trip.optimize !== 'undefined') {
+            setOptimizeCheck(trip.optimize);
+        }
+    }, [trip]);
+
 
     //load existing trip data and set it as 'trip'
     useEffect(() => {
@@ -370,51 +377,19 @@ const AddEditDestinations = () => {
 
     // Tell GI to not optimize by storing this check in local storage
     useEffect(() => {
-        if (trip && tripName && tripId)
+        if (trip && tripId)
         {
             const updatedTrip = { 
                 ...trip, 
-                tripName: tripName + (optimizeCheck ? "1" : "0") // Transform optimizeCheck to single number to easily pull that number off
+                optimize: optimizeCheck
             };
     
-            updateTrip(tripId, updatedTrip);
+            setTrip(updatedTrip);
     
             storeData(tripId.toString(), updatedTrip);
         }
 
     }, [optimizeCheck]);
-
-    // Store original trip name just in case the user goes back
-    const handleBack = () => {
-        if (trip && tripName && tripId)
-            {
-                const updatedTrip = { 
-                    ...trip, 
-                    tripName: tripName
-                };
-        
-                updateTrip(tripId, updatedTrip);
-        
-                storeData(tripId.toString(), updatedTrip);
-            }
-        navigation.goBack();
-    };
-
-    // When back is pressed
-    const useBackButtonListener = (callback: any) => {
-        useEffect(() => {
-            const backHandler = BackHandler.addEventListener(
-                "hardwareBackPress",
-                callback
-            );
-    
-            return () => backHandler.remove();
-        }, [callback]);
-    };
-    useBackButtonListener(() => {
-        console.log("Back button pressed!");
-        handleBack();
-    });
 
     return (
         <View style={styles.container}>
@@ -422,8 +397,8 @@ const AddEditDestinations = () => {
             <DynamicImage placeName="New York City" containerStyle={styles.backgroundImage} imageStyle={styles.backgroundImage} />
             <View style={styles.darkOverlay}></View>
 
-            <View style={{ flex: 1, flexDirection: "column", marginHorizontal: 20, position: "absolute", marginTop: 50 }}>
-                <TouchableOpacity onPress={() => { handleBack() }}>
+            <View style={{ flex: 1, flexDirection: "column", marginHorizontal: 20, position: "absolute", marginTop: 10 }}>
+                <TouchableOpacity onPress={() => { navigation.goBack() }}>
                     <Ionicons name="arrow-back-outline" size={30} color={"white"} />
                 </TouchableOpacity>
 
