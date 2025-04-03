@@ -681,18 +681,189 @@ const GenerateItineraryScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        flexDirection: "column",
-        backgroundColor: '#fff',
+        height: "70%",
     },
 
-    map: {
-        flex: 1,
+    headerContainer: {
+        position: "absolute",
+        paddingTop: 50,
+        paddingBottom: 20,
+        paddingHorizontal: 20,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        zIndex: 10,
         width: "100%",
-        height: 350,
-        marginBottom: 0,
+    },
+
+    headerText: {
+        color: 'white',
+        fontSize: 25,
+        fontWeight: 'bold',
+    },
+
+    notificationButton: {
+        backgroundColor: 'white',
+        padding: 10,
+        borderRadius: 10,
+    },
+
+    searchSection: {
+        flexDirection: "row",
+        marginVertical: 20,
+        marginTop: 15,
+        paddingHorizontal: 20,
+        shadowColor: "#333333",
+        shadowOffset: { width: 1, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+    },
+
+    searchBar: {
+        flex: 1,
+        flexDirection: "row",
+        backgroundColor: "white",
+        padding: 10,
+        borderRadius: 10,
+    },
+
+    backgroundImage: {
+        width: "100%",
+        height: 150,
+        borderRadius: 10,
+        resizeMode: "cover",
+        position: "relative",
+    },
+
+    backgroundImageOverlay: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.4)",
+        width: "100%",
+        height: "100%",
+        borderRadius: 10,
+    },
+
+    currentLocationText: {
+        position: "absolute",
+        bottom: 10,
     },
 
     // ==== DESTINATION ELEMENT ==== //
+    homeSection: {
+        backgroundColor: "#F4F4F4",
+        borderRadius: 10,
+        height: "100%",
+        top: -10,
+    },
+
+    tripButton: {
+        padding: 10,
+        backgroundColor: "#24a6ad",
+        borderRadius: 10,
+        shadowColor: "#333333",
+        shadowOffset: { width: 1, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+    },
+
+    tripButtons: {
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 5,
+    },
+
+    recommendBtn: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "white",
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 10,
+        shadowColor: "#333333",
+        shadowOffset: { width: 1, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+    },
+
+    recommendBtnText: {
+        marginLeft: 5,
+        color: "black",
+    },
+
+    activeRecommendBtn: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#24a6ad",
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 10,
+        shadowColor: "#333333",
+        shadowOffset: { width: 1, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+    },
+
+    recommendBtnTextActive: {
+        marginLeft: 5,
+        color: "white",
+    },
+
+    recommendDest: {
+        backgroundColor: "white",
+        padding: 10,
+        height: 250,
+        borderRadius: 10,
+        width: 300,
+        shadowColor: "#333333",
+        shadowOffset: { width: 1, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+    },
+
+    destImage: {
+        borderRadius: 10,
+        width: "100%",
+        height: "100%",
+        resizeMode: "cover",
+    },
+
+    saveIconWrapper: {
+        position: "absolute",
+        top: 10,
+        right: 10,
+        backgroundColor: "rgba(36,166, 173, 0.8)",
+        borderRadius: 20, 
+        padding: 15,
+    },
+
+    destImageWrapper: {
+        position: "relative", 
+        borderRadius: 10,
+        width: "100%",
+        height: "70%",
+    },
+
+    destTextWrapper: {
+        flex: 1,
+        flexDirection: "column",
+        marginTop: 5,
+    },
+
+    navBar: {
+        flexDirection: "row",
+        backgroundColor: "white",
+        justifyContent: "space-between",
+        alignItems: "center",
+        height: "8%",
+        shadowColor: "#333333",
+        shadowOffset: { width: 1, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+    },
+
     destinationElement: {
         width: "100%",
         height: 75,
@@ -807,7 +978,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#dcdcdc',
     },
     selectedDateText: {
-        color: '#007aff',
+            color: '#007aff',
     },
 
     additionalInfo: {
@@ -815,7 +986,6 @@ const styles = StyleSheet.create({
         backgroundColor: "#f0f0f0",
         padding: 10,
         borderRadius: 5,
-        flex: 1,
     },
 
     additionalText: {
