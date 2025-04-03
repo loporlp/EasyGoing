@@ -4,6 +4,7 @@ import { Picker } from '@react-native-picker/picker';
 import { useRouter } from "expo-router";
 import MultiRoutesMap from '../components/MultiRoutesMap';
 import DirectionsList from '../components/DirectionsList';
+import RouteColorCodeKey from "../components/RouteColorCodeKey";
 import { calculateOptimalRoute, formatRouteInOrder } from '../scripts/optimalRoute.js';
 import { Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
@@ -486,180 +487,184 @@ const GenerateItineraryScreen = () => {
                     )}
                 </SafeAreaView>
             )}
-        <SafeAreaView>
 
-            <ScrollView
-                contentContainerStyle={styles.scrollViewContainer}
-                style={styles.scrollView}
-                nestedScrollEnabled={true}
-            >
-                {resultRoute.reduce((acc, destination) => {
-                    // If it's a new day (dayOrigin is true), start a new group
-                    if (destination.dayOrigin) {
-                        // If the last group is not empty, push it to the accumulator and start a new group
-                        if (acc.length > 0 && acc[acc.length - 1].length > 0) {
-                            acc.push([]); // Start a new group
+            <SafeAreaView>
+
+                <ScrollView
+                    contentContainerStyle={styles.scrollViewContainer}
+                    style={styles.scrollView}
+                    nestedScrollEnabled={true}
+                >
+                    {resultRoute.reduce((acc, destination) => {
+                        // If it's a new day (dayOrigin is true), start a new group
+                        if (destination.dayOrigin) {
+                            // If the last group is not empty, push it to the accumulator and start a new group
+                            if (acc.length > 0 && acc[acc.length - 1].length > 0) {
+                                acc.push([]); // Start a new group
+                            }
                         }
-                    }
 
-                    // Add the destination to the current group
-                    if (acc.length === 0) {
-                        acc.push([destination]); // Start with the first destination of the group
-                    } else {
-                        acc[acc.length - 1].push(destination); // Add destination to the current group
-                    }
-
-                    return acc;
-                }, []).map((routeGroup, routeGroupIndex) => {
-                    const destinationGroupKey = `group-${routeGroupIndex}`;
-                    let dateForThisGroup;
-
-                    console.log('routeGroup:', routeGroup);
-                    console.log('routeGroupIndex:', routeGroupIndex);
-
-                    // Calculate the date for the group 
-                    try {
-                        if (routeGroupIndex === 0) {
-                            dateForThisGroup = tripDates[0];
+                        // Add the destination to the current group
+                        if (acc.length === 0) {
+                            acc.push([destination]); // Start with the first destination of the group
                         } else {
-                            dateForThisGroup = tripDates[routeGroupIndex];
+                            acc[acc.length - 1].push(destination); // Add destination to the current group
                         }
-                    } catch (error) {
-                        console.log("Error in calculating group date:", error);
-                        dateForThisGroup = new Date(); // Fallback to current date
-                    }
 
-                    console.log('Date for this group:', dateForThisGroup);
-                    const isSelected = selectedDayIndex === routeGroupIndex;
+                        return acc;
+                    }, []).map((routeGroup, routeGroupIndex) => {
+                        const destinationGroupKey = `group-${routeGroupIndex}`;
+                        let dateForThisGroup;
 
-                    return (
-                        <View key={destinationGroupKey}>
-                            {/* Date Header */}
-                            {routeGroup.length > 0 && (routeGroupIndex === 0 || routeGroup[0].dayOrigin) ? (
-                                <TouchableOpacity
-                                    onPress={() => handleDatePress(routeGroupIndex)}
-                                    style={[styles.dateHeader, isSelected && styles.selectedDateHeader]}
-                                >
-                                    <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>
-                                        {formatDate(dateForThisGroup)}
-                                    </Text>
-                                    <Ionicons
-                                        name={isSelected ? "chevron-up" : "chevron-down"}
-                                        size={18}
-                                        color="#000"
-                                    />
-                                </TouchableOpacity>
-                            ) : null}
+                        console.log('routeGroup:', routeGroup);
+                        console.log('routeGroupIndex:', routeGroupIndex);
 
-                            {/* Loop through each destination in the current routeGroup */}
-                            {routeGroup.map((destination: { alias: any; address: any; duration: any; priority: any; picture: { url: string; }; mode: any, transportDuration: any; }, destinationIndex: any) => {
-                                const destinationKey = `${destinationGroupKey}-${destinationIndex}`;  // Unique key for each destination
-                                const destinationName = destination.alias;
-                                const destinationAddress = destination.address;
-                                const destinationDuration = destination.duration;
-                                const destinationPriority = destination.priority;
-                                const destinationImageUri = destination.picture?.url || '';
-                                const destinationTransportMode = destination.mode || defaultMode;
-                                const destinationTransportDuration = destination.transportDuration;
+                        // Calculate the date for the group 
+                        try {
+                            if (routeGroupIndex === 0) {
+                                dateForThisGroup = tripDates[0];
+                            } else {
+                                dateForThisGroup = tripDates[routeGroupIndex];
+                            }
+                        } catch (error) {
+                            console.log("Error in calculating group date:", error);
+                            dateForThisGroup = new Date(); // Fallback to current date
+                        }
 
-                                // Determine if it's the last destination in the current routeGroup
-                                const isLastDestination = destinationIndex === routeGroup.length - 1;
+                        console.log('Date for this group:', dateForThisGroup);
+                        const isSelected = selectedDayIndex === routeGroupIndex;
 
-                                return (
-                                    <View key={destinationKey}>
-                                        <TouchableOpacity 
-                                            style={styles.destinationElement} 
-                                            onPress={() => handlePress(destinationKey)}  // Update selectedDestination on click
-                                        >
-                                            <View style={styles.backgroundContainer}>
-                                                <View style={styles.backgroundOverlay}></View>
-                                            </View>
+                        return (
+                            <View key={destinationGroupKey}>
+                                {/* Date Header */}
+                                {routeGroup.length > 0 && (routeGroupIndex === 0 || routeGroup[0].dayOrigin) ? (
+                                    <TouchableOpacity
+                                        onPress={() => handleDatePress(routeGroupIndex)}
+                                        style={[styles.dateHeader, isSelected && styles.selectedDateHeader]}
+                                    >
+                                        <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>
+                                            {formatDate(dateForThisGroup)}
+                                        </Text>
+                                        <Ionicons
+                                            name={isSelected ? "chevron-up" : "chevron-down"}
+                                            size={18}
+                                            color="#000"
+                                        />
+                                    </TouchableOpacity>
+                                ) : null}
 
-                                            <View style={styles.destinationContainer}>
-                                                <Image source={{ uri: destinationImageUri }} style={styles.destinationImage} />
-                                                <View style={styles.destinationLabel}>
-                                                    <Text style={styles.destinationName}>{destinationName}</Text>
-                                                    <Text style={styles.destinationDetails}>
-                                                        Duration: {Math.floor(destinationDuration / 60)} hrs {destinationDuration % 60} mins | Priority: {destinationPriority}
-                                                    </Text>
+                                {/* Loop through each destination in the current routeGroup */}
+                                {routeGroup.map((destination: { alias: any; address: any; duration: any; priority: any; picture: { url: string; }; mode: any, transportDuration: any; }, destinationIndex: any) => {
+                                    const destinationKey = `${destinationGroupKey}-${destinationIndex}`;  // Unique key for each destination
+                                    const destinationName = destination.alias;
+                                    const destinationAddress = destination.address;
+                                    const destinationDuration = destination.duration;
+                                    const destinationPriority = destination.priority;
+                                    const destinationImageUri = destination.picture?.url || '';
+                                    const destinationTransportMode = destination.mode || defaultMode;
+                                    const destinationTransportDuration = destination.transportDuration;
+
+                                    // Determine if it's the last destination in the current routeGroup
+                                    const isLastDestination = destinationIndex === routeGroup.length - 1;
+
+                                    return (
+                                        <View key={destinationKey}>
+                                            <TouchableOpacity 
+                                                style={styles.destinationElement} 
+                                                onPress={() => handlePress(destinationKey)}  // Update selectedDestination on click
+                                            >
+                                                <View style={styles.backgroundContainer}>
+                                                    <View style={styles.backgroundOverlay}></View>
                                                 </View>
-                                            </View>
-                                        </TouchableOpacity>
 
-                                        {/* Conditional rendering of additional info */}
-                                        {selectedDestination === destinationKey && (
-                                            <View style={styles.additionalInfo}>
-                                                {/*<Text style={styles.additionalText}>{getRouteText()}</Text>*/}
-                                                
-                                                {/* Show transport mode */}
-                                                <Text style={styles.additionalText}>
-                                                    Transport Mode: {isLastDestination ? "None" : destinationTransportMode.charAt(0).toUpperCase() + destinationTransportMode.slice(1).toLowerCase()}
-                                                </Text>
-
-                                                {/* Dropdown for picking transport mode */}
-                                                {!isLastDestination && (
-                                                    isLoading ? (
-                                                        <Text style={styles.additionalText}>
-                                                            Loading new transport route...
+                                                <View style={styles.destinationContainer}>
+                                                    <Image source={{ uri: destinationImageUri }} style={styles.destinationImage} />
+                                                    <View style={styles.destinationLabel}>
+                                                        <Text style={styles.destinationName}>{destinationName}</Text>
+                                                        <Text style={styles.destinationDetails}>
+                                                            Duration: {Math.floor(destinationDuration / 60)} hrs {destinationDuration % 60} mins | Priority: {destinationPriority}
                                                         </Text>
-                                                    ) : (
-                                                        <Picker
-                                                            selectedValue={destinationTransportMode}
-                                                            onValueChange={(mode: string) => handleModeChange(mode, destinationIndex)}
-                                                        >
-                                                            <Picker.Item label="Driving" value="driving" />
-                                                            <Picker.Item label="Walking" value="walking" />
-                                                            <Picker.Item label="Bicycling" value="bicycling" />
-                                                            <Picker.Item label="Transit" value="transit" />
-                                                        </Picker>
-                                                    )
-                                                )}
-                                                
-                                                {/* Show transport duration */}
-                                                <Text style={styles.additionalText}>
-                                                    Duration: {isLastDestination ? "None" : destinationTransportDuration}
-                                                </Text>
-
-                                                {/* Directions */}
-                                                <View style={{ maxHeight: 300 }}> 
-                                                    <ScrollView nestedScrollEnabled={true}>
-                                                        <DirectionsList
-                                                            origin={destinations[String(destinationIndex)].address}
-                                                            destination={destinations[String(destinationIndex + 1)]?.address || "Unknown Destination"}
-                                                            mode={destinations[String(destinationIndex)].mode}
-                                                        />
-                                                    </ScrollView>
+                                                    </View>
                                                 </View>
-                                            </View>
-                                        )}
+                                            </TouchableOpacity>
 
-                                        {/* Move buttons */}
-                                        <View style={styles.buttonContainer}>
-                                            {destinationIndex > 0 && (
-                                                <TouchableOpacity
-                                                    onPress={() => moveDestination(destinationIndex, 'up')}
-                                                    style={styles.moveButton}
-                                                >
-                                                    <Ionicons name="arrow-up" size={20} color="#000" />
-                                                </TouchableOpacity>
+                                            {/* Conditional rendering of additional info */}
+                                            {selectedDestination === destinationKey && (
+                                                <View style={styles.additionalInfo}>
+                                                    {/*<Text style={styles.additionalText}>{getRouteText()}</Text>*/}
+                                                    
+                                                    {/* Show transport mode */}
+                                                    <Text style={styles.additionalText}>
+                                                        Transport Mode: {isLastDestination ? "None" : destinationTransportMode.charAt(0).toUpperCase() + destinationTransportMode.slice(1).toLowerCase()}
+                                                    </Text>
+
+                                                    {/* Dropdown for picking transport mode */}
+                                                    {!isLastDestination && (
+                                                        isLoading ? (
+                                                            <Text style={styles.additionalText}>
+                                                                Loading new transport route...
+                                                            </Text>
+                                                        ) : (
+                                                            <Picker
+                                                                selectedValue={destinationTransportMode}
+                                                                onValueChange={(mode: string) => handleModeChange(mode, destinationIndex)}
+                                                            >
+                                                                <Picker.Item label="Driving" value="driving" />
+                                                                <Picker.Item label="Walking" value="walking" />
+                                                                <Picker.Item label="Bicycling" value="bicycling" />
+                                                                <Picker.Item label="Transit" value="transit" />
+                                                            </Picker>
+                                                        )
+                                                    )}
+                                                    
+                                                    {/* Show transport duration */}
+                                                    <Text style={styles.additionalText}>
+                                                        Duration: {isLastDestination ? "None" : destinationTransportDuration}
+                                                    </Text>
+
+                                                    {/* Directions */}
+                                                    <View style={{ maxHeight: 300 }}> 
+                                                        <ScrollView nestedScrollEnabled={true}>
+                                                            <DirectionsList
+                                                                origin={destinations[String(destinationIndex)].address}
+                                                                destination={destinations[String(destinationIndex + 1)]?.address || "Unknown Destination"}
+                                                                mode={destinations[String(destinationIndex)].mode}
+                                                            />
+                                                        </ScrollView>
+                                                    </View>
+                                                </View>
                                             )}
-                                            {destinationIndex < routeGroup.length - 1 && (
-                                                <TouchableOpacity
-                                                    onPress={() => moveDestination(destinationIndex, 'down')}
-                                                    style={styles.moveButton}
-                                                >
-                                                    <Ionicons name="arrow-down" size={20} color="#000" />
-                                                </TouchableOpacity>
-                                            )}
+
+                                            {/* Move buttons */}
+                                            <View style={styles.buttonContainer}>
+                                                {destinationIndex > 0 && (
+                                                    <TouchableOpacity
+                                                        onPress={() => moveDestination(destinationIndex, 'up')}
+                                                        style={styles.moveButton}
+                                                    >
+                                                        <Ionicons name="arrow-up" size={20} color="#000" />
+                                                    </TouchableOpacity>
+                                                )}
+                                                {destinationIndex < routeGroup.length - 1 && (
+                                                    <TouchableOpacity
+                                                        onPress={() => moveDestination(destinationIndex, 'down')}
+                                                        style={styles.moveButton}
+                                                    >
+                                                        <Ionicons name="arrow-down" size={20} color="#000" />
+                                                    </TouchableOpacity>
+                                                )}
+                                            </View>
                                         </View>
-                                    </View>
-                                );
-                            })}
-                        </View>
-                    );
-                })}
-            </ScrollView>
-        </SafeAreaView>
+                                    );
+                                })}
+                            </View>
+                        );
+                    })}
+                </ScrollView>
+            </SafeAreaView>
+
+            {/* The color code key for routes */}
+            <RouteColorCodeKey />
 
             {/* "Review Itinerary" button */}
             <TouchableOpacity

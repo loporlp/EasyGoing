@@ -401,7 +401,7 @@ const AddEditDestinations = () => {
     };
 
     // When back is pressed
-    const useBackButtonListener = (callback: unknown) => {
+    const useBackButtonListener = (callback: any) => {
         useEffect(() => {
             const backHandler = BackHandler.addEventListener(
                 "hardwareBackPress",
