@@ -12,6 +12,7 @@ interface DirectionsListProps {
 interface DirectionStep {
   instruction: string;
   duration: string;
+  travelMode: string;
 }
 
 const DirectionsList: React.FC<DirectionsListProps> = ({ origin, destination, mode }) => {
@@ -37,12 +38,16 @@ const DirectionsList: React.FC<DirectionsListProps> = ({ origin, destination, mo
       setLoading(true);
       setError('');
       try {
-        // Get the directions
         const routeData = await getDirectionsBetweenLocations(origin, destination, mode);
         console.log("routeData:", routeData);
 
         if (routeData) {
-          setDirections(routeData.directions);
+          // Map the directions and modes together
+          setDirections(routeData.directions.map((instruction, index) => ({
+            instruction,
+            duration: routeData.duration,
+            travelMode: routeData.travel_modes[index],
+          })));
           setDuration(routeData.duration);
         } else {
           setError('Unable to fetch directions.');
@@ -64,24 +69,24 @@ const DirectionsList: React.FC<DirectionsListProps> = ({ origin, destination, mo
       {error && <Text style={styles.error}>{error}</Text>}
       {!loading && !error && (
         <>
-            {directions.map((item, index) => (
-                <View key={index} style={styles.directionStep}>
-                    <View style={styles.directionContainer}>
-                    {/* Color block next to each instruction */}
-                    <View
-                        style={{
-                        ...styles.colorBlock,
-                        backgroundColor: modeColors[mode.toUpperCase()] || '#000',
-                        }}
-                    />
-                    {/* Render HTML instruction */}
-                    <RenderHtml
-                        contentWidth={350} // Adjust here if not right size
-                        source={{ html: item }}
-                    />
-                    </View>
-                </View>
-            ))}
+          {directions.map((item, index) => (
+            <View key={index} style={styles.directionStep}>
+              <View style={styles.directionContainer}>
+                {/* Color block next to each instruction */}
+                <View
+                  style={{
+                    ...styles.colorBlock,
+                    backgroundColor: modeColors[item.travelMode.toUpperCase()] || '#000',
+                  }}
+                />
+                {/* Render HTML instruction */}
+                <RenderHtml
+                  contentWidth={350} // Adjust here if not right size
+                  source={{ html: item.instruction }}
+                />
+              </View>
+            </View>
+          ))}
         </>
       )}
     </View>
@@ -91,13 +96,6 @@ const DirectionsList: React.FC<DirectionsListProps> = ({ origin, destination, mo
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  directionsList: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    marginBottom: 20,
   },
   directionStep: {
     flexDirection: 'row',
@@ -121,15 +119,6 @@ const styles = StyleSheet.create({
     height: 20,
     marginRight: 12,
     borderRadius: 50,
-  },
-  instruction: {
-    fontSize: 16,
-    color: 'black',
-  },
-  loading: {
-    fontSize: 18,
-    color: 'gray',
-    textAlign: 'center',
   },
   error: {
     color: 'red',

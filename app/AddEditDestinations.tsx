@@ -1,6 +1,6 @@
 // AddEditDestinations.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, TextInput, Text, TouchableOpacity, Dimensions, Modal, TouchableWithoutFeedback, KeyboardAvoidingView, Image, Platform } from "react-native";
+import { View, StyleSheet, TextInput, Text, TouchableOpacity, Dimensions, Modal, TouchableWithoutFeedback, KeyboardAvoidingView, Image, Platform, BackHandler } from "react-native";
 import { useRouter } from "expo-router";
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import { storeData, getData } from '../scripts/localStore.js';
@@ -12,6 +12,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import CalendarPicker from 'react-native-calendar-picker';
 import moment from "moment";
+import Checkbox from 'expo-checkbox';
 
 const { height } = Dimensions.get('window');
 
@@ -48,9 +49,20 @@ const AddEditDestinations = () => {
     // Sets trip data
     const [trip, setTrip] = useState<any>(null);
     const [tripId, setTripId] = useState<string | null>(null);
+    const [tripName, setTripName] = useState<string | null>(null);
     const [destinations, setDestinations] = useState<any[]>([]); // Store destinations for rendering
     const [hasOrigin, setHasOrigin] = useState(false); // used for checking if an origin exists
     const [originText, setOriginText] = useState("");
+
+    // For GI to see whether to optimize or not
+    const [optimizeCheck, setOptimizeCheck] = useState(false);
+
+    // Set the check to whatever the stored value is
+    useEffect(() => {
+        if (trip && typeof trip.optimize !== 'undefined') {
+            setOptimizeCheck(trip.optimize);
+        }
+    }, [trip]);
 
 
     //load existing trip data and set it as 'trip'
@@ -66,6 +78,7 @@ const AddEditDestinations = () => {
                     if (tripDetails) {
                         setTripId(currentTripID);  // Store only the trip id
                         setTrip(tripDetails);  // Store the full trip data
+                        setTripName(tripDetails.tripName);
                         setDestinations(tripDetails.destinations); // Immediately update the destinations so they load on screen
                         if (destinations.length > 0 && destinations[0].dayOrigin) {
                             setHasOrigin(true);
@@ -362,13 +375,29 @@ const AddEditDestinations = () => {
 
     const rightOpenValue = -150;
 
+    // Tell GI to not optimize by storing this check in local storage
+    useEffect(() => {
+        if (trip && tripId)
+        {
+            const updatedTrip = { 
+                ...trip, 
+                optimize: optimizeCheck
+            };
+    
+            setTrip(updatedTrip);
+    
+            storeData(tripId.toString(), updatedTrip);
+        }
+
+    }, [optimizeCheck]);
+
     return (
         <View style={styles.container}>
             {/* Background image */}
             <DynamicImage placeName="New York City" containerStyle={styles.backgroundImage} imageStyle={styles.backgroundImage} />
             <View style={styles.darkOverlay}></View>
 
-            <View style={{ flex: 1, flexDirection: "column", marginHorizontal: 20, position: "absolute", marginTop: 50 }}>
+            <View style={{ flex: 1, flexDirection: "column", marginHorizontal: 20, position: "absolute", marginTop: 10 }}>
                 <TouchableOpacity onPress={() => { navigation.goBack() }}>
                     <Ionicons name="arrow-back-outline" size={30} color={"white"} />
                 </TouchableOpacity>
@@ -395,6 +424,10 @@ const AddEditDestinations = () => {
                             <Ionicons name="wallet" size={22} color={"#24a6ad"} />
                             <TextInput value={trip?.budget ? trip.budget.toString() : "Enter budget"} placeholderTextColor="black" keyboardType="numeric" onChangeText={updateBudget} style={{ fontSize: 18, padding: 5 }} />
                         </TouchableOpacity>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', borderRadius: 10, padding: 10, }}>
+                        <Checkbox value={optimizeCheck} onValueChange={setOptimizeCheck} />
+                        <Text style={{ fontSize: 18, marginLeft: 5, color: 'black' }}>Optimize Trip</Text>
                     </View>
                 </View>
             </View>

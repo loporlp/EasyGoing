@@ -119,8 +119,8 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({
                 pinColor={
                   transportationModes[index] === 'driving' ? 'red' :
                   transportationModes[index] === 'walking' ? 'blue' :
-                  transportationModes[index] === 'transit' ? 'green' :
-                  transportationModes[index] === 'bicycling' ? 'yellow' :
+                  transportationModes[index] === 'transit' ? 'purple' :
+                  transportationModes[index] === 'bicycling' ? 'green' :
                   'gray'
                 }
                 zIndex={10}
@@ -131,8 +131,8 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({
                 pinColor={
                   transportationModes[index] === 'driving' ? 'red' :
                   transportationModes[index] === 'walking' ? 'blue' :
-                  transportationModes[index] === 'transit' ? 'green' :
-                  transportationModes[index] === 'bicycling' ? 'yellow' :
+                  transportationModes[index] === 'transit' ? 'purple' :
+                  transportationModes[index] === 'bicycling' ? 'green' :
                   'gray'
                 }
                 zIndex={10}

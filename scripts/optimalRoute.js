@@ -144,3 +144,24 @@ calculateOptimalRoute(locations, origin).then((optimalRoute) => {
     console.error('Error calculating the optimal route:', error);
 });
 */
+
+export function formatRouteInOrder(locations, origin) {
+    try {
+        const orderedRoute = [];
+        let currentOrigin = origin;
+
+        locations.forEach((location) => {
+            orderedRoute.push([
+                [currentOrigin.name, currentOrigin.address, currentOrigin.duration, currentOrigin.priority],
+                [location.name, location.address, location.duration, location.priority]
+            ]);
+            
+            currentOrigin = location; // Update origin to last visited location
+        });
+
+        return orderedRoute;
+    } catch (error) {
+        console.log("Error occurred in formatRouteInOrder: ", error);
+        throw new Error(error);
+    }
+}
