@@ -110,9 +110,9 @@ const ReviewItineraryScreen = () => {
         //loop through destinations to add each as an event
         trip.destinations.forEach((dest: any, index: number) => {
             const startTime = new Date(dest.startDateTime);
-            const durationHours = parseFloat(dest.duration) || 1;
+            const durationMinutes = parseFloat(dest.duration) || 1;
             //compute end time using duration
-            const endTime = new Date(startTime.getTime() + durationHours * 60 * 60 * 1000);
+            const endTime = new Date(startTime.getTime() + durationMinutes * 60 * 1000);
         
             //format times to iCal date-time format (UTC).
             const formattedStart = moment(startTime).utc().format("YYYYMMDD[T]HHmmss[Z]");
