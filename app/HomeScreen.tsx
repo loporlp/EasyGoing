@@ -260,6 +260,58 @@ const HomeScreen = () => {
         }
     }, []);
 
+    // When a recommended place is bookmarked
+    const handleBookmarkClick = async (destination: Destination) => {
+        console.log("Bookmarked:", destination);
+
+        let accountInfo = await getData("savedDestinations");
+        let savedDestinations = accountInfo[0].destinations;
+
+        try {
+            // See if it was already bookmarked
+            console.log("savedDestinations:", savedDestinations);
+            const isBookmarked = savedDestinations.find((item: Destination) => item.destination === destination.destination) !== undefined;
+
+            if (isBookmarked) {
+                // If already bookmarked, remove it
+                savedDestinations = savedDestinations.filter((item: Destination) => item.destination !== destination.destination);
+                console.log("New savedDestinations:", savedDestinations);
+                updateBookmarkStyle(destination, false);
+                console.log("Removed bookmark");
+            } else {
+                // If not bookmarked, add it to the saved list
+                savedDestinations.push(destination);
+                console.log("New savedDestinations:", savedDestinations);
+                updateBookmarkStyle(destination, true);
+                console.log("Bookmarked");
+            }
+    
+            // Update the database
+            accountInfo[0].destinations = savedDestinations;
+            console.log("AccountInfo:", accountInfo);
+            updateTrip(accountInfo, accountInfo[1]);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    // Function to update the bookmark icon style based on the saved state
+    const updateBookmarkStyle = (destination: { destination: any; image?: string; time?: string; amount?: string; review?: string; reviewAmt?: string; saved?: boolean; }, isBookmarked: boolean) => {
+        // The bookmark icon color is gold when bookmarked, white when not bookmarked
+        const updatedDestinations = destinationList.map(item => {
+            if (item.destination === destination.destination) {
+                return {
+                    ...item,
+                    saved: isBookmarked,
+                };
+            }
+            return item;
+        });
+
+        // Force re-render
+        setDestinationList(updatedDestinations); 
+    };
+
     return (
         <>
             <View style={{ flex: 1, flexDirection: "column" }}>
@@ -349,7 +401,7 @@ const HomeScreen = () => {
                                         <TouchableOpacity style={styles.recommendDest}>
                                             <View style={styles.destImageWrapper}>
                                                 <Image style={styles.destImage} source={{ uri: item.image }} />
-                                                <TouchableOpacity style={styles.saveIconWrapper}>
+                                                <TouchableOpacity style={styles.saveIconWrapper} onPress={() => handleBookmarkClick(item)}>
                                                     <Ionicons name="bookmark" size={22} color={item.saved ? "#FFD700" : "white"} />
                                                 </TouchableOpacity>
                                             </View>
