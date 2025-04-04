@@ -5,13 +5,32 @@ import AutocompleteTextBox from '@/components/AutoCompleteTextBox';
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DynamicImage from '../components/DynamicImage';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SwipeListView } from 'react-native-swipe-list-view';
+import { getData } from '../scripts/localStore';
 
 const SavedDestinationsScreen = () => {
     const router = useRouter();
 
-    const destinations = [
+    // Get the saved destinations
+    useEffect(() => {
+        const fetchData = async () => {
+            let accountInfo = await getData("savedDestinations");
+            let savedDestinations = accountInfo[0].destinations;
+            if (savedDestinations.length) {
+                setDestinations(savedDestinations);  // Set the destinations in the state
+            }
+            else {
+                // Default
+                setDestinations(static_destinations);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    // Example data
+    const static_destinations = [
         {
             "name": "Empire State Builing",
             "duration": "3h",
@@ -26,6 +45,9 @@ const SavedDestinationsScreen = () => {
             "price": "$13"
         }
     ]
+
+    const [destinations, setDestinations] = useState([]);
+
     /**
      * Goes to the Home Screen
      */
@@ -123,16 +145,20 @@ const SavedDestinationsScreen = () => {
                     <Text style={{ fontSize: 22, fontWeight: "700", marginBottom: 10 }}>Saved Destinations</Text>
                 </View>
 
-                <SwipeListView
-                    data={destinations.map((item, index) => ({ ...item, key: `${index}` }))}
-                    renderItem={renderItem}
-                    renderHiddenItem={(data, rowMap) => renderHiddenItem({ ...data, index: parseInt(data.item.key) })}
-                    leftOpenValue={rightOpenValue}
-                    rightOpenValue={rightOpenValue}
-                    friction={60}
-                    tension={30}
-                    onSwipeValueChange={handleSwipeChange}>
-                </SwipeListView>
+                {destinations.length === 0 ? (
+                    <Text style={styles.text}>No saved destinations available.</Text>
+                ) : (
+                    <SwipeListView
+                        data={destinations.map((item, index) => ({ ...item, key: `${index}` }))}
+                        renderItem={renderItem}
+                        renderHiddenItem={(data, rowMap) => renderHiddenItem({ ...data, index: parseInt(data.item.key) })}
+                        leftOpenValue={rightOpenValue}
+                        rightOpenValue={rightOpenValue}
+                        friction={60}
+                        tension={30}
+                        onSwipeValueChange={handleSwipeChange}
+                    />
+                )}
 
             </ScrollView>
 
@@ -258,6 +284,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
         justifyContent: "center",
         alignItems: "center",
+    },
+
+    text: {
+        color: "black",
+        fontSize: 20,
+        marginTop: 14,
     },
 });
 
