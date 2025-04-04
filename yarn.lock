@@ -6832,6 +6832,11 @@ expo-router@~4.0.7:
     semver "~7.6.3"
     server-only "^0.0.1"
 
+expo-sharing@^13.0.1:
+  version "13.0.1"
+  resolved "https://registry.npmjs.org/expo-sharing/-/expo-sharing-13.0.1.tgz"
+  integrity sha512-qych3Nw65wlFcnzE/gRrsdtvmdV0uF4U4qVMZBJYPG90vYyWh2QM9rp1gVu0KWOBc7N8CC2dSVYn4/BXqJy6Xw==
+
 expo-splash-screen@~0.29.12:
   version "0.29.21"
   resolved "https://registry.npmjs.org/expo-splash-screen/-/expo-splash-screen-0.29.21.tgz"

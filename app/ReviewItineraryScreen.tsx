@@ -7,6 +7,7 @@ import { useRouter } from "expo-router";
 import { storeData, getData } from '../scripts/localStore.js';
 import moment from 'moment';
 import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
 /**
  *  City Header (picture of city, overlay with text -> City, Country; Dates Visiting; # travelers)
@@ -150,17 +151,16 @@ const ReviewItineraryScreen = () => {
             //write iCal content to file
             await FileSystem.writeAsStringAsync(fileUri, icalContent, { encoding: FileSystem.EncodingType.UTF8 });
 
-            // On Android, convert the file URI to a content URI.
-            let shareUri = fileUri;
-            if (Platform.OS === 'android') {
-                shareUri = await FileSystem.getContentUriAsync(fileUri);
+            // Use expo-sharing to share the file
+            if (!(await Sharing.isAvailableAsync())) {
+                Alert.alert('Sharing is not available on this device');
+                return;
             }
-            console.log("Sharing file URI:", shareUri);
 
             //share file to be used with other apps (such as GCal)
-            await Share.share({
-                message: icalContent,
-                title: 'Trip Itinerary (ICS File)',
+            await Sharing.shareAsync(fileUri, {
+                mimeType: 'text/calendar',
+                dialogTitle: 'Trip Itinerary (ICS File)',
             });
         } catch (error) {
             console.error('Error exporting iCal file:', error);
