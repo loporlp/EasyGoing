@@ -1,6 +1,6 @@
 // AddEditDestinations.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, TextInput, Text, TouchableOpacity, Dimensions, Modal, TouchableWithoutFeedback, KeyboardAvoidingView, Image, Platform, BackHandler } from "react-native";
+import { View, StyleSheet, TextInput, Text, TouchableOpacity, Dimensions, Modal, TouchableWithoutFeedback, KeyboardAvoidingView, Image, Platform, BackHandler, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import { storeData, getData } from '../scripts/localStore.js';
@@ -13,6 +13,7 @@ import { SwipeListView } from 'react-native-swipe-list-view';
 import CalendarPicker from 'react-native-calendar-picker';
 import moment from "moment";
 import Checkbox from 'expo-checkbox';
+import SavedDestinations from '../components/SavedDestinations';
 
 const { height } = Dimensions.get('window');
 
@@ -56,6 +57,10 @@ const AddEditDestinations = () => {
 
     // For GI to see whether to optimize or not
     const [optimizeCheck, setOptimizeCheck] = useState(false);
+
+    // For loading bookmarked locations
+    const [importingLocation, setImportingLocation] = useState(false);
+    const [savedDestinations, setSavedDestinations] = useState([]);
 
     // Set the check to whatever the stored value is
     useEffect(() => {
@@ -391,6 +396,51 @@ const AddEditDestinations = () => {
 
     }, [optimizeCheck]);
 
+
+    // Get the saved destinations
+    useEffect(() => {
+        const fetchData = async () => {
+            let accountInfo = await getData("savedDestinations");
+            let savedDestinations = accountInfo[0].destinations;
+            if (savedDestinations.length) {
+                setSavedDestinations(savedDestinations);  // Set the destinations in the state
+            }
+        };
+
+        fetchData();
+    }, []);
+
+
+    function handleImport() {
+        console.log("handleImport clicked");
+        if (savedDestinations.length) {
+            // Setting this true shows the modal
+            setImportingLocation(true)
+        } else {
+            // Show an alert if there are no saved destinations
+            Alert.alert(
+                'No Saved Destinations',
+                'You have no saved destinations to import.',
+                [{ text: 'OK' }]
+            );
+        }
+    }
+
+    // Load the data into the Add Location modal
+    const handleBookmarkImport = (destination: any) => {
+        // Hide the modal
+        setImportingLocation(false);
+
+        console.log("Bookmarked Location to Import:", destination);
+
+        // Populate the fields with data from the destination
+        setTempAlias(destination.destination || "Unknown");  // It's called 'destination' and not 'name'
+        setTempDuration(destination.time || "60 mins"); // 'time' and not 'duration'
+
+        // Show the Add Destination modal
+        setVisible(true);
+    };
+
     return (
         <View style={styles.container}>
             {/* Background image */}
@@ -470,6 +520,14 @@ const AddEditDestinations = () => {
                 </TouchableOpacity>
             </View>
 
+            {importingLocation ? (
+                <SavedDestinations
+                    SavedDestinations={savedDestinations}
+                    handlePress={ handleBookmarkImport }
+                    deleteLocation={function (index: number): void { } }
+                />
+            ) : null}
+
             <Modal
                 visible={isAddTripVisible}
                 transparent={true}
@@ -487,7 +545,12 @@ const AddEditDestinations = () => {
 
                         <View style={styles.divider}></View>
 
-                        <TouchableOpacity style={styles.menuItem} onPress={() => { setAddTripVisible(false) }}>
+                        <TouchableOpacity
+                            style={styles.menuItem}
+                            onPress={() => { 
+                                setAddTripVisible(false); 
+                                handleImport();
+                        }}>
                             <Ionicons name="bookmark" size={20} color={"#24a6ad"} />
                             <Text style={{ fontSize: 18 }}>Import from Saved</Text>
                         </TouchableOpacity>
