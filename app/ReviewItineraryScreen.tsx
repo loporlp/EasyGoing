@@ -134,7 +134,7 @@ const ReviewItineraryScreen = () => {
                 icalContent += `LOCATION:${dest.address}\r\n`;
             }
             if (dest.notes) {
-                // Replace newlines to ensure the description is on one line.
+                //replace newlines to ensure the description is on one line.
                 const description = dest.notes.replace(/\n/g, " ");
                 icalContent += `DESCRIPTION:${description}\r\n`;
             }
@@ -151,17 +151,15 @@ const ReviewItineraryScreen = () => {
             //write iCal content to file
             await FileSystem.writeAsStringAsync(fileUri, icalContent, { encoding: FileSystem.EncodingType.UTF8 });
 
-            // Use expo-sharing to share the file
             if (!(await Sharing.isAvailableAsync())) {
-                Alert.alert('Sharing is not available on this device');
-                return;
+            Alert.alert('Sharing not available on this device');
+            return;
             }
-
-            //share file to be used with other apps (such as GCal)
+            
             await Sharing.shareAsync(fileUri, {
-                mimeType: 'text/calendar',
-                dialogTitle: 'Trip Itinerary (ICS File)',
-            });
+            mimeType: 'text/calendar',
+            dialogTitle: 'Share your Trip Itinerary (ICS File)',
+            });  
         } catch (error) {
             console.error('Error exporting iCal file:', error);
             Alert.alert('Error exporting iCal file');
