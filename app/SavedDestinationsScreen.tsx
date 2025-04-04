@@ -8,6 +8,7 @@ import DynamicImage from '../components/DynamicImage';
 import { useEffect, useState } from 'react';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import { getData } from '../scripts/localStore';
+import SavedDestinations from '../components/SavedDestinations';
 
 const SavedDestinationsScreen = () => {
     const router = useRouter();
@@ -148,16 +149,12 @@ const SavedDestinationsScreen = () => {
                 {destinations.length === 0 ? (
                     <Text style={styles.text}>No saved destinations available.</Text>
                 ) : (
-                    <SwipeListView
-                        data={destinations.map((item, index) => ({ ...item, key: `${index}` }))}
-                        renderItem={renderItem}
-                        renderHiddenItem={(data, rowMap) => renderHiddenItem({ ...data, index: parseInt(data.item.key) })}
-                        leftOpenValue={rightOpenValue}
-                        rightOpenValue={rightOpenValue}
-                        friction={60}
-                        tension={30}
-                        onSwipeValueChange={handleSwipeChange}
-                    />
+                    <SavedDestinations
+                        SavedDestinations={destinations}
+                        handlePress={function (destination: any): void { } }
+                        deleteLocation={function (index: number): void {
+                            deleteLocation(index);
+                        } } />
                 )}
 
             </ScrollView>

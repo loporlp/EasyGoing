@@ -57,6 +57,8 @@ const AddEditDestinations = () => {
     // For GI to see whether to optimize or not
     const [optimizeCheck, setOptimizeCheck] = useState(false);
 
+    const [savedDestinations, setSavedDestinations] = useState([]);
+
     // Set the check to whatever the stored value is
     useEffect(() => {
         if (trip && typeof trip.optimize !== 'undefined') {
@@ -391,6 +393,26 @@ const AddEditDestinations = () => {
 
     }, [optimizeCheck]);
 
+
+    // Get the saved destinations
+    useEffect(() => {
+        const fetchData = async () => {
+            let accountInfo = await getData("savedDestinations");
+            let savedDestinations = accountInfo[0].destinations;
+            if (savedDestinations.length) {
+                setSavedDestinations(savedDestinations);  // Set the destinations in the state
+            }
+        };
+
+        fetchData();
+    }, []);
+
+
+    function handleImport() {
+        setAddTripVisible(false);
+        show();
+    }
+
     return (
         <View style={styles.container}>
             {/* Background image */}
@@ -489,7 +511,7 @@ const AddEditDestinations = () => {
 
                         <TouchableOpacity style={styles.menuItem} onPress={() => { setAddTripVisible(false) }}>
                             <Ionicons name="bookmark" size={20} color={"#24a6ad"} />
-                            <Text style={{ fontSize: 18 }}>Import from Saved</Text>
+                            <Text style={{ fontSize: 18 }} onPress={() => { handleImport() }}>Import from Saved</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
