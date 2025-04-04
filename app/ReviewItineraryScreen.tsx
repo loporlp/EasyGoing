@@ -1,12 +1,13 @@
-import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image } from "react-native";
+import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image, Alert, Platform, Share } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { CommonActions } from '@react-navigation/native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "expo-router";
 import { storeData, getData } from '../scripts/localStore.js';
-import { Share } from "react-native";
 import moment from 'moment';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
 /**
  *  City Header (picture of city, overlay with text -> City, Country; Dates Visiting; # travelers)
@@ -73,7 +74,7 @@ const ReviewItineraryScreen = () => {
     };
 
     //export trip data in json as a text message
-    const exportTripData = async () => {
+    const exportTripDataOld = async () => {
         if (!trip) {
             alert("No trip data available to export.");
             return;
@@ -91,6 +92,79 @@ const ReviewItineraryScreen = () => {
             console.error("Error exporting trip data:", error);
         }
     };
+
+    // exports the trip's destinations as an ICal file (to be used with things like google calendar)
+    const exportTripData = async () => {
+        //ensure there is a trip to export
+        if (!trip || !trip.destinations || trip.destinations.length === 0) {
+            Alert.alert('No destinations available in the trip');
+            return;
+        }
+    
+        //start iCal file
+        let icalContent = "BEGIN:VCALENDAR\r\n";
+        icalContent += "VERSION:2.0\r\n";
+        icalContent += "PRODID:-//EasyGoing//Easygoing//EN\r\n";
+        icalContent += "CALSCALE:GREGORIAN\r\n";
+    
+        //loop through destinations to add each as an event
+        trip.destinations.forEach((dest: any, index: number) => {
+            const startTime = new Date(dest.startDateTime);
+            const durationHours = parseFloat(dest.duration) || 1;
+            //compute end time using duration
+            const endTime = new Date(startTime.getTime() + durationHours * 60 * 60 * 1000);
+        
+            //format times to iCal date-time format (UTC).
+            const formattedStart = moment(startTime).utc().format("YYYYMMDD[T]HHmmss[Z]");
+            const formattedEnd = moment(endTime).utc().format("YYYYMMDD[T]HHmmss[Z]");
+            const dtStamp = moment().utc().format("YYYYMMDD[T]HHmmss[Z]");
+            //generate a unique identifier for the event.
+            const uid = `${trip.tripName}-${index}@easygoing.app`;
+            
+            //add event for destination
+            icalContent += "BEGIN:VEVENT\r\n";
+            icalContent += `UID:${uid}\r\n`;
+            icalContent += `DTSTAMP:${dtStamp}\r\n`;
+            icalContent += `DTSTART:${formattedStart}\r\n`;
+            icalContent += `DTEND:${formattedEnd}\r\n`;
+            icalContent += `SUMMARY:${dest.alias}\r\n`;
+        
+            //add optional content if included
+            if (dest.address) {
+                icalContent += `LOCATION:${dest.address}\r\n`;
+            }
+            if (dest.notes) {
+                //replace newlines to ensure the description is on one line.
+                const description = dest.notes.replace(/\n/g, " ");
+                icalContent += `DESCRIPTION:${description}\r\n`;
+            }
+            icalContent += "END:VEVENT\r\n";
+        });
+        //end iCal file
+        icalContent += "END:VCALENDAR\r\n";
+    
+        //set file path
+        const fileUri = FileSystem.documentDirectory + 'trip.ics';
+        console.log("File will be saved to:", fileUri);
+    
+        try {
+            //write iCal content to file
+            await FileSystem.writeAsStringAsync(fileUri, icalContent, { encoding: FileSystem.EncodingType.UTF8 });
+
+            if (!(await Sharing.isAvailableAsync())) {
+            Alert.alert('Sharing not available on this device');
+            return;
+            }
+            
+            await Sharing.shareAsync(fileUri, {
+            mimeType: 'text/calendar',
+            dialogTitle: 'Share your Trip Itinerary (ICS File)',
+            });  
+        } catch (error) {
+            console.error('Error exporting iCal file:', error);
+            Alert.alert('Error exporting iCal file');
+        }
+    }
 
     const goToHome = () => {
         router.replace("/HomeScreen")
