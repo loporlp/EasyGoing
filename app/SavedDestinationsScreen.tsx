@@ -1,12 +1,9 @@
 // SearchScreen.tsx
 import { View, Text, TouchableOpacity, StyleSheet, TextInput, ScrollView, Image, TouchableWithoutFeedback } from 'react-native';
 import { useRouter } from 'expo-router'
-import AutocompleteTextBox from '@/components/AutoCompleteTextBox';
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DynamicImage from '../components/DynamicImage';
 import { useEffect, useState } from 'react';
-import { SwipeListView } from 'react-native-swipe-list-view';
 import { getData } from '../scripts/localStore';
 import SavedDestinations from '../components/SavedDestinations';
 

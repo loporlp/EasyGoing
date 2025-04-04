@@ -1,6 +1,6 @@
 // AddEditDestinations.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, TextInput, Text, TouchableOpacity, Dimensions, Modal, TouchableWithoutFeedback, KeyboardAvoidingView, Image, Platform, BackHandler } from "react-native";
+import { View, StyleSheet, TextInput, Text, TouchableOpacity, Dimensions, Modal, TouchableWithoutFeedback, KeyboardAvoidingView, Image, Platform, BackHandler, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import { storeData, getData } from '../scripts/localStore.js';
@@ -13,6 +13,7 @@ import { SwipeListView } from 'react-native-swipe-list-view';
 import CalendarPicker from 'react-native-calendar-picker';
 import moment from "moment";
 import Checkbox from 'expo-checkbox';
+import SavedDestinations from '../components/SavedDestinations';
 
 const { height } = Dimensions.get('window');
 
@@ -57,6 +58,8 @@ const AddEditDestinations = () => {
     // For GI to see whether to optimize or not
     const [optimizeCheck, setOptimizeCheck] = useState(false);
 
+    // For loading bookmarked locations
+    const [importingLocation, setImportingLocation] = useState(false);
     const [savedDestinations, setSavedDestinations] = useState([]);
 
     // Set the check to whatever the stored value is
@@ -409,8 +412,18 @@ const AddEditDestinations = () => {
 
 
     function handleImport() {
-        setAddTripVisible(false);
-        show();
+        if (savedDestinations.length) {
+            setImportingLocation(true)
+            setAddTripVisible(false);
+            show();
+        } else {
+            // Show an alert if there are no saved destinations
+            Alert.alert(
+                'No Saved Destinations',
+                'You have no saved destinations to import.',
+                [{ text: 'OK' }]
+            );
+        }
     }
 
     return (
