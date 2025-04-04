@@ -1,11 +1,10 @@
-import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image, Alert } from "react-native";
+import { View, StyleSheet, Text, ScrollView, TouchableOpacity, Image, Alert, Platform, Share } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { CommonActions } from '@react-navigation/native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "expo-router";
 import { storeData, getData } from '../scripts/localStore.js';
-import { Share } from "react-native";
 import moment from 'moment';
 import * as FileSystem from 'expo-file-system';
 
@@ -145,13 +144,22 @@ const ReviewItineraryScreen = () => {
     
         //set file path
         const fileUri = FileSystem.documentDirectory + 'trip.ics';
+        console.log("File will be saved to:", fileUri);
     
         try {
             //write iCal content to file
             await FileSystem.writeAsStringAsync(fileUri, icalContent, { encoding: FileSystem.EncodingType.UTF8 });
+
+            // On Android, convert the file URI to a content URI.
+            let shareUri = fileUri;
+            if (Platform.OS === 'android') {
+                shareUri = await FileSystem.getContentUriAsync(fileUri);
+            }
+            console.log("Sharing file URI:", shareUri);
+
             //share file to be used with other apps (such as GCal)
             await Share.share({
-                url: fileUri,
+                message: icalContent,
                 title: 'Trip Itinerary (ICS File)',
             });
         } catch (error) {
