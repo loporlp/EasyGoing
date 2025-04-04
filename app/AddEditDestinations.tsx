@@ -135,16 +135,13 @@ const AddEditDestinations = () => {
         if (!tempDuration) {
             errorMessage += "Duration is required.\n";
         }
-        if (!tempPriority) {
-            errorMessage += "Priority is required.\n";
-        }
         if (errorMessage) {
             alert(errorMessage.trim());
             return;
         }
 
-        // Set default priority to -1 (as an integer) if it's empty or invalid
-        const priorityValue = tempPriority.trim() === "" || isNaN(Number(tempPriority)) ? -1 : parseInt(tempPriority);
+        // Set default priority to 1 (as an integer) if it's empty or invalid
+        const priorityValue = tempPriority.trim() === "" || isNaN(Number(tempPriority)) ? 1 : parseInt(tempPriority);
 
         const newDestination = {
             alias: tempAlias,
