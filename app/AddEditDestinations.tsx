@@ -412,10 +412,10 @@ const AddEditDestinations = () => {
 
 
     function handleImport() {
+        console.log("handleImport clicked");
         if (savedDestinations.length) {
+            // Setting this true shows the modal
             setImportingLocation(true)
-            setAddTripVisible(false);
-            show();
         } else {
             // Show an alert if there are no saved destinations
             Alert.alert(
@@ -425,6 +425,21 @@ const AddEditDestinations = () => {
             );
         }
     }
+
+    // Load the data into the Add Location modal
+    const handleBookmarkImport = (destination: any) => {
+        // Hide the modal
+        setImportingLocation(false);
+
+        console.log("Bookmarked Location to Import:", destination);
+
+        // Populate the fields with data from the destination
+        setTempAlias(destination.destination || "Unknown");  // It's called 'destination' and not 'name'
+        setTempDuration(destination.time || "60 mins"); // 'time' and not 'duration'
+
+        // Show the Add Destination modal
+        setVisible(true);
+    };
 
     return (
         <View style={styles.container}>
@@ -505,6 +520,14 @@ const AddEditDestinations = () => {
                 </TouchableOpacity>
             </View>
 
+            {importingLocation ? (
+                <SavedDestinations
+                    SavedDestinations={savedDestinations}
+                    handlePress={ handleBookmarkImport }
+                    deleteLocation={function (index: number): void { } }
+                />
+            ) : null}
+
             <Modal
                 visible={isAddTripVisible}
                 transparent={true}
@@ -522,9 +545,14 @@ const AddEditDestinations = () => {
 
                         <View style={styles.divider}></View>
 
-                        <TouchableOpacity style={styles.menuItem} onPress={() => { setAddTripVisible(false) }}>
+                        <TouchableOpacity
+                            style={styles.menuItem}
+                            onPress={() => { 
+                                setAddTripVisible(false); 
+                                handleImport();
+                        }}>
                             <Ionicons name="bookmark" size={20} color={"#24a6ad"} />
-                            <Text style={{ fontSize: 18 }} onPress={() => { handleImport() }}>Import from Saved</Text>
+                            <Text style={{ fontSize: 18 }}>Import from Saved</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
