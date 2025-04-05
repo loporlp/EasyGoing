@@ -239,7 +239,7 @@ export const createHistory = async (tag, value, description, date, tripID) => {
     const data = await response.json();
     console.log(response);
     var histories = await getHistories();
-    storeData("history", histories);
+    storeData(`history ${tripID}`, histories[tripID]);
     return true;
 
   } catch (error) {
@@ -271,9 +271,10 @@ export const deleteHistory = async (historyId) => {
       },
     });
 
-    //const data = await response.json();
+    const data = await response.json();
+    const tripId = data.deletedHistory.trip_id;
     var histories = await getHistories();
-    storeData("history", histories);
+    storeData(`history ${tripId}`, histories[tripId] ? histories[tripId] : []);
     return true;
 
   } catch (error) {

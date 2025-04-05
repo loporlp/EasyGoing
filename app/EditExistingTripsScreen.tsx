@@ -63,8 +63,9 @@ const EditExistingTripsScreen = () => {
         router.push("/AddEditDestinations");
     }
 
-    const budgetManagerScreen = () => {
+    const budgetManagerScreen = async () => {
         setModalVisible(false);
+        await storeData("currentTrip", selectedTripId);
         router.push("/BudgetManagerScreen");
     }
 
