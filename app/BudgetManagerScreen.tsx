@@ -20,6 +20,7 @@ const BudgetManagerScreen = () => {
     const [thingsToDoBudget, setThingsToDoBudget] = useState(0);
     const [otherBudget, setOtherBudget] = useState(0);
     const [totalBudget, setTotalBudget] = useState(0);
+    const [currentTripID, setCurrentTrip] = useState(0);
 
     // Add to history params
     const [expenseTag, setExpenseTag] = useState("");
@@ -90,6 +91,8 @@ const BudgetManagerScreen = () => {
         { label: 'Other', symbol: 'more-horiz', color: '#800080', value: '5' },
     ];
 
+
+
     // Load history when the component mounts
     useEffect(() => {
         let hotelExpense = 0;
@@ -99,8 +102,14 @@ const BudgetManagerScreen = () => {
         let otherExpense = 0;
 
         const loadHistory = async () => {
+
+            var current = await getData("currentTrip");
+            setCurrentTrip(parseInt(current));
+            console.log("CURRENT ID IS: ", currentTripID);
+
+
             // Get the list of trip IDs from local storage
-            const historyIds = await getData("history");
+            const historyIds = await getData(`history ${current}`);
             if (historyIds && historyIds.length > 0) {
                 const loadedHistory = [];
 
@@ -208,7 +217,7 @@ const BudgetManagerScreen = () => {
             //const formattedDate = moment(currentDate).format('MMMM DD, YYYY');
             let formatNumber = parseFloat(expensePrice).toFixed(2);
             console.log("Format number: " + formatNumber)
-            const createExpense = await createHistory(expenseTag, formatNumber, expenseLabel, null);
+            const createExpense = await createHistory(expenseTag, formatNumber, expenseLabel, null, currentTripID);
 
             if (!createExpense) {
                 console.error("Failed to create expense!");
@@ -378,93 +387,89 @@ const BudgetManagerScreen = () => {
     const rightOpenValue = -150 / 2;
 
     return (
-        <ScrollView style={styles.container}>
-            <View style={styles.containerContent}>
-
-                {/* The header (includes back arrow + title of the screen) */}
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                    <TouchableOpacity onPress={() => { navigation.goBack() }}>
-                        <Ionicons name="arrow-back-outline" size={22} color={"black"} />
-                    </TouchableOpacity>
-                    <Text style={{ fontSize: 22, fontWeight: "700" }}>Budget Manager</Text>
-                </View>
-
-                {/* Replace this with DynamicImage from placeName = trip.origin */}
-                <Image style={styles.backgroundImage} source={require("../assets/images/newyorkcity.jpg")} />
-                <View style={styles.darkOverlay}>
-                    <Text style={{ color: "white", fontSize: 18, fontWeight: "bold" }}>#trip.origin/destination#</Text>
-                    <Text style={{ color: "white", fontSize: 16 }}>Initial Budget: $#budget#</Text>
-                    <Text style={{ color: "white", fontSize: 16 }}>Remaining: $#remainingBudget#</Text>
-                </View>
-
-                {/* Calculate this */}
-                <Text style={{ fontWeight: "700", fontSize: 18, marginTop: 10 }}>Summary</Text>
-                <View style={[styles.divider, { marginTop: 0 }]}></View>
-
-                {/* Bar showing how much someone spent */}
-                <View style={styles.bar}>
-                    {categories.map((category) => (
-                        <View style={{ height: 30, backgroundColor: category.color, width: category.percentage }}></View>
-                    ))}
-                </View>
-
-                {/* Container showing how much someone spent in each category */}
-                <View style={styles.totalSpentContainer}>
-                    {categories.map((category, index) => (
-                        category.label === "Transportation" || category.label === "Things To Do" ? (
-                            <>
-                                <TouchableOpacity style={[styles.hotelSection, { borderWidth: 1, borderColor: "#F4F4F4" }]} onPress={() => { setSelectedCategory(category.label); setCategoryVisible(true); }}>
-                                    <View style={styles.hotelLabel}>
-                                        <Ionicons name={category.symbol} color={category.color} size={20} />
-                                        <Text style={{ fontSize: 18 }}>{category.label}</Text>
-                                    </View>
-                                    <Text style={{ fontSize: 18, color: "gray" }}>${category.totalPrice.toFixed(2)} ({category.percentage})</Text>
-                                </TouchableOpacity>
-                            </>
-
-                        ) : (
-                                <>
-                                    <TouchableOpacity style={[styles.hotelSection, { borderWidth: 1, borderColor: "#F4F4F4" }]} onPress={() => { setSelectedCategory(category.label); setCategoryVisible(true); }}>
+        <View style={styles.container}>
+            <SwipeListView
+                data={budgetHistory.map((item, index) => ({ ...item, key: `${index}` }))}
+                renderItem={renderItem}
+                renderHiddenItem={(data, rowMap) => renderHiddenItem({ ...data, index: parseInt(data.item.key) })}
+                leftOpenValue={rightOpenValue}
+                rightOpenValue={rightOpenValue}
+                friction={60}
+                tension={30}
+                onSwipeValueChange={handleSwipeChange}
+                ListEmptyComponent={<Text style={{ fontSize: 18, textAlign: "center" }}>No expenses found!</Text>}
+                ListHeaderComponent={
+                    <View style={styles.containerContent}>
+                        {/* Header */}
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                            <TouchableOpacity onPress={() => { navigation.goBack() }}>
+                                <Ionicons name="arrow-back-outline" size={22} color={"black"} />
+                            </TouchableOpacity>
+                            <Text style={{ fontSize: 22, fontWeight: "700" }}>Budget Manager</Text>
+                        </View>
+    
+                        {/* Banner */}
+                        <Image style={styles.backgroundImage} source={require("../assets/images/newyorkcity.jpg")} />
+                        <View style={styles.darkOverlay}>
+                            <Text style={{ color: "white", fontSize: 18, fontWeight: "bold" }}>#trip.origin/destination#</Text>
+                            <Text style={{ color: "white", fontSize: 16 }}>Initial Budget: $#budget#</Text>
+                            <Text style={{ color: "white", fontSize: 16 }}>Remaining: $#remainingBudget#</Text>
+                        </View>
+    
+                        {/* Summary */}
+                        <Text style={{ fontWeight: "700", fontSize: 18, marginTop: 10 }}>Summary</Text>
+                        <View style={[styles.divider, { marginTop: 0 }]}></View>
+    
+                        {/* Expense Bar */}
+                        <View style={styles.bar}>
+                            {categories.map((category, index) => (
+                                <View key={index} style={{ height: 30, backgroundColor: category.color, width: category.percentage }} />
+                            ))}
+                        </View>
+    
+                        {/* Category Summary */}
+                        <View style={styles.totalSpentContainer}>
+                            {categories.map((category, index) => {
+                                const isIonicon = category.label === "Transportation" || category.label === "Things To Do";
+                                const IconComponent = isIonicon ? Ionicons : MaterialIcons;
+    
+                                return (
+                                    <TouchableOpacity
+                                        key={index}
+                                        style={[styles.hotelSection, { borderWidth: 1, borderColor: "#F4F4F4" }]}
+                                        onPress={() => { setSelectedCategory(category.label); setCategoryVisible(true); }}
+                                    >
                                         <View style={styles.hotelLabel}>
-                                            <MaterialIcons name={category.symbol} color={category.color} size={20} />
+                                            <IconComponent name={category.symbol} color={category.color} size={20} />
                                             <Text style={{ fontSize: 18 }}>{category.label}</Text>
                                         </View>
-                                        <Text style={{ fontSize: 18, color: "gray" }}>${category.totalPrice.toFixed(2)} ({category.percentage})</Text>
+                                        <Text style={{ fontSize: 18, color: "gray" }}>
+                                            ${category.totalPrice.toFixed(2)} ({category.percentage})
+                                        </Text>
                                     </TouchableOpacity>
-                                </>
-                            )
-                    )
-                    )}
-                    <View style={styles.hotelSection}>
-                        <Text style={{fontSize: 18, fontWeight: "700"}}>Total:</Text>
-                        <Text style={{fontSize: 18, fontWeight: "700"}}>${totalBudget.toFixed(2)}</Text>
+                                );
+                            })}
+                            <View style={styles.hotelSection}>
+                                <Text style={{ fontSize: 18, fontWeight: "700" }}>Total:</Text>
+                                <Text style={{ fontSize: 18, fontWeight: "700" }}>${totalBudget.toFixed(2)}</Text>
+                            </View>
+                        </View>
+    
+                        {/* History Header */}
+                        <View style={styles.historyView}>
+                            <Text style={styles.textLabel}>History</Text>
+                            <TouchableOpacity onPress={() => { setAddHistoryVisible(true) }}>
+                                <Ionicons style={{ marginTop: 5 }} name="add-circle" size={25} color="#24a6ad" />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={[styles.divider, { marginTop: 0 }]}></View>
                     </View>
-                </View>
-
-                {/* Add a payment history here */}
-                <View style={styles.historyView}>
-                    <Text style={styles.textLabel}>History</Text>
-                    <TouchableOpacity onPress={() => { setAddHistoryVisible(true) }}>
-                        <Ionicons style={{ marginTop: 5 }} name="add-circle" size={25} color="#24a6ad" />
-                    </TouchableOpacity>
-                </View>
-
-                <View style={[styles.divider, { marginTop: 0 }]}></View>
-
-                <SwipeListView
-                    data={budgetHistory.map((item, index) => ({ ...item, key: `${index}` }))}
-                    renderItem={renderItem}
-                    renderHiddenItem={(data, rowMap) => renderHiddenItem({ ...data, index: parseInt(data.item.key) })}
-                    leftOpenValue={rightOpenValue}
-                    rightOpenValue={rightOpenValue}
-                    friction={60}
-                    tension={30}
-                    onSwipeValueChange={handleSwipeChange}
-                    ListEmptyComponent={<Text style={{fontSize: 18, textAlign: "center"}}>No expenses found!</Text>}
-                    style={styles.historyContainer}>
-                </SwipeListView>
-            </View>
-
+                }
+                contentContainerStyle={{ paddingBottom: 100 }}
+                style={styles.historyContainer}
+            />
+    
+            {/* Category Modal */}
             <Modal
                 visible={isCategoryVisible}
                 transparent={true}
@@ -475,7 +480,7 @@ const BudgetManagerScreen = () => {
                     <View style={{ width: "95%", height: 425, backgroundColor: "#F4F4F4", padding: 20, borderRadius: 10, gap: 10 }}>
                         <View style={{ flexDirection: "column" }}>
                             <View style={{ width: "100%", flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                                <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", gap: 10 }}>
+                                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                                     {(() => {
                                         switch (selectedTag.label) {
                                             case 'Hotel':
@@ -498,11 +503,11 @@ const BudgetManagerScreen = () => {
                                     <MaterialCommunityIcons name={"close-box"} size={22} color={"red"} />
                                 </TouchableOpacity>
                             </View>
-
+    
                             <ScrollView style={{ width: "100%", height: 300, backgroundColor: "white", borderTopLeftRadius: 10, borderTopRightRadius: 10, padding: 10, marginTop: 10 }} contentContainerStyle={{ alignItems: "center" }}>
                                 {selectedCategoryList.length > 0 ? (
-                                    selectedCategoryList.map((expense) => (
-                                        <View style={{ flexDirection: "column", alignItems: "center", width: "100%" }}>
+                                    selectedCategoryList.map((expense, index) => (
+                                        <View key={index} style={{ flexDirection: "column", alignItems: "center", width: "100%" }}>
                                             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
                                                 <View style={{ flexDirection: "column" }}>
                                                     <Text style={{ color: "gray", fontSize: 14 }}>{moment(expense.date).format('MMMM DD, YYYY')}</Text>
@@ -510,24 +515,23 @@ const BudgetManagerScreen = () => {
                                                 </View>
                                                 <Text style={{ fontSize: 16, color: "#24a6ad", fontWeight: "700" }}>${expense.value}</Text>
                                             </View>
-
                                             <View style={styles.divider}></View>
                                         </View>
                                     ))
                                 ) : (
-                                        <Text>No expenses found!</Text>
-                                    )}
+                                    <Text>No expenses found!</Text>
+                                )}
                             </ScrollView>
-                            <View style={{flexDirection: "row", justifyContent: "space-between", padding: 10, backgroundColor: "white", borderTopWidth: 1, borderTopColor: "lightgray", borderBottomLeftRadius: 10, borderBottomRightRadius: 10}}>
-                                <Text style={{fontSize: 18, fontWeight: "700"}}>Total:</Text>
-                                <Text style={{fontSize: 18, fontWeight: "700"}}>${getCategoryTotal()}</Text>
+                            <View style={{ flexDirection: "row", justifyContent: "space-between", padding: 10, backgroundColor: "white", borderTopWidth: 1, borderTopColor: "lightgray", borderBottomLeftRadius: 10, borderBottomRightRadius: 10 }}>
+                                <Text style={{ fontSize: 18, fontWeight: "700" }}>Total:</Text>
+                                <Text style={{ fontSize: 18, fontWeight: "700" }}>${getCategoryTotal()}</Text>
                             </View>
                         </View>
                     </View>
                 </View>
-
             </Modal>
-
+    
+            {/* Add History Modal */}
             <Modal
                 visible={isAddHistoryVisible}
                 transparent={true}
@@ -537,7 +541,7 @@ const BudgetManagerScreen = () => {
                 <View style={[styles.modalOverlay, { justifyContent: "center" }]}>
                     <View style={{ width: "95%", height: 220, backgroundColor: "#F4F4F4", padding: 20, borderRadius: 10, gap: 10 }}>
                         <Text style={[styles.textLabel, { marginTop: 0 }]}>Add History</Text>
-
+    
                         <Dropdown
                             style={styles.dropdown}
                             placeholderStyle={styles.placeholderStyle}
@@ -552,96 +556,55 @@ const BudgetManagerScreen = () => {
                                 setValue(item.value);
                             }}
                             renderLeftIcon={() => {
-                                // Dynamically render the icon based on the 'symbol' value
                                 const tag = tags[(value as unknown as number) - 1];
-                                if (tag) {
-                                    // Use the correct icon component based on the symbol
-                                    if (tag.symbol === 'hotel') {
-                                        return <MaterialIcons name="hotel" size={20} color={tag.color} style={{ marginRight: 5 }} />;
-                                    } else if (tag.symbol === 'airplane') {
-                                        return <Ionicons name="airplane" size={20} color={tag.color} style={{ marginRight: 5 }} />;
-                                    } else if (tag.symbol === 'local-dining') {
-                                        return <MaterialIcons name="local-dining" size={20} color={tag.color} style={{ marginRight: 5 }} />;
-                                    } else if (tag.symbol === 'location') {
-                                        return <Ionicons name="location" size={20} color={tag.color} style={{ marginRight: 5 }} />;
-                                    } else if (tag.symbol === 'more-horiz') {
-                                        return <MaterialIcons name="more-horiz" size={20} color={tag.color} style={{ marginRight: 5 }} />;
-                                    }
+                                if (!tag) return null;
+                                const iconProps = { size: 20, color: tag.color, style: { marginRight: 5 } };
+    
+                                switch (tag.symbol) {
+                                    case 'hotel': return <MaterialIcons name="hotel" {...iconProps} />;
+                                    case 'airplane': return <Ionicons name="airplane" {...iconProps} />;
+                                    case 'local-dining': return <MaterialIcons name="local-dining" {...iconProps} />;
+                                    case 'location': return <Ionicons name="location" {...iconProps} />;
+                                    case 'more-horiz': return <MaterialIcons name="more-horiz" {...iconProps} />;
+                                    default: return null;
                                 }
-
-                                return null; // Default case if no match is found
                             }}
                         />
-
-                        <View style={{
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                            gap: 5
-                        }}>
-                            <TextInput value={expenseLabel} onChangeText={text => setExpenseLabel(text)} placeholder="Name" placeholderTextColor="lightgray" style={{
-                                height: 40,
-                                fontSize: 16,
-                                width: "65%",
-                                backgroundColor: "white",
-                                borderRadius: 10,
-                                padding: 10,
-                                shadowColor: "lightgray",
-                                shadowOffset: { width: 1, height: 2 },
-                                shadowOpacity: 0.3,
-                                shadowRadius: 3,
-                            }}></TextInput>
-
-                            <TextInput value={expensePrice} onChangeText={text => setExpensePrice(text)} keyboardType="numeric" style={{
-                                height: 40,
-                                fontSize: 16,
-                                width: "30%",
-                                backgroundColor: "white",
-                                borderRadius: 10,
-                                padding: 10,
-                                shadowColor: "lightgray",
-                                shadowOffset: { width: 1, height: 2 },
-                                shadowOpacity: 0.3,
-                                shadowRadius: 3,
-                            }}></TextInput>
+    
+                        <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 5 }}>
+                            <TextInput value={expenseLabel} onChangeText={setExpenseLabel} placeholder="Name" placeholderTextColor="lightgray" style={{
+                                height: 40, fontSize: 16, width: "65%", backgroundColor: "white",
+                                borderRadius: 10, padding: 10, shadowColor: "lightgray", shadowOffset: { width: 1, height: 2 },
+                                shadowOpacity: 0.3, shadowRadius: 3
+                            }} />
+                            <TextInput value={expensePrice} onChangeText={setExpensePrice} keyboardType="numeric" style={{
+                                height: 40, fontSize: 16, width: "30%", backgroundColor: "white",
+                                borderRadius: 10, padding: 10, shadowColor: "lightgray", shadowOffset: { width: 1, height: 2 },
+                                shadowOpacity: 0.3, shadowRadius: 3
+                            }} />
                         </View>
-
+    
                         <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 15, gap: 30 }}>
                             <TouchableOpacity onPress={resetHistory} style={{
-                                backgroundColor: "red",
-                                height: 35,
-                                width: 70,
-                                alignItems: "center",
-                                justifyContent: "center",
-                                shadowColor: "#333333",
-                                shadowOffset: { width: 1, height: 2 },
-                                shadowOpacity: 0.1,
-                                shadowRadius: 3,
-                                borderRadius: 10
+                                backgroundColor: "red", height: 35, width: 70, alignItems: "center",
+                                justifyContent: "center", borderRadius: 10
                             }}>
                                 <Text style={{ fontSize: 12, color: "white", fontWeight: "700" }}>CANCEL</Text>
                             </TouchableOpacity>
-
-                            <TouchableOpacity onPress={() => { addHistory() }} style={{
-                                backgroundColor: "green",
-                                height: 35,
-                                width: 70,
-                                alignItems: "center",
-                                justifyContent: "center",
-                                shadowColor: "#333333",
-                                shadowOffset: { width: 1, height: 2 },
-                                shadowOpacity: 0.1,
-                                shadowRadius: 3,
-                                borderRadius: 10
+    
+                            <TouchableOpacity onPress={addHistory} style={{
+                                backgroundColor: "green", height: 35, width: 70, alignItems: "center",
+                                justifyContent: "center", borderRadius: 10
                             }}>
                                 <Text style={{ fontSize: 12, color: "white", fontWeight: "700" }}>OK</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
                 </View>
-
             </Modal>
-        </ScrollView>
+        </View>
     );
+    
 };
 
 const styles = StyleSheet.create({
