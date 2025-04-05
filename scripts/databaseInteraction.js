@@ -1,6 +1,6 @@
 import { getIdToken } from './getFirebaseID'
 import { auth } from '../firebaseConfig';
-import { deleteData, getData, storeData } from './localStore';
+import { deleteData, fillLocal, getData, storeData } from './localStore';
 
 /**
  * 
@@ -165,6 +165,7 @@ export const updateTrip = async (tripId, updatedTrip) => {
 
     const data = await response.json();
     console.log(data)
+    fillLocal(true);
     return true;
 
   } catch (error) {
