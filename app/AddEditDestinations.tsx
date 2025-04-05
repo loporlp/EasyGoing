@@ -397,7 +397,9 @@ const AddEditDestinations = () => {
     // Get the saved destinations
     useEffect(() => {
         const fetchData = async () => {
+            console.log("RAHAHHA");
             let accountInfo = await getData("savedDestinations");
+            console.log("SAVED DESTS: ", accountInfo)
             let savedDestinations = accountInfo[0].destinations;
             if (savedDestinations.length) {
                 setSavedDestinations(savedDestinations);  // Set the destinations in the state

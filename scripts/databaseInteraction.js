@@ -165,7 +165,7 @@ export const updateTrip = async (tripId, updatedTrip) => {
 
     const data = await response.json();
     console.log(data)
-    fillLocal();
+    fillLocal(true);
     return true;
 
   } catch (error) {
