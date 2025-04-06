@@ -12,6 +12,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import CalendarPicker from 'react-native-calendar-picker';
 import moment from "moment";
+import { TimerPicker } from "react-native-timer-picker";
+import LinearGradient from "react-native-linear-gradient"
 
 const { height } = Dimensions.get('window');
 
@@ -52,6 +54,7 @@ const AddEditDestinations = () => {
     const [hasOrigin, setHasOrigin] = useState(false); // used for checking if an origin exists
     const [originText, setOriginText] = useState("");
 
+    const [showPicker, setShowPicker] = useState(false);
 
     //load existing trip data and set it as 'trip'
     useEffect(() => {
@@ -356,6 +359,39 @@ const AddEditDestinations = () => {
         );
     }
 
+    const timePicker = () => {
+        return (
+            <LinearGradient
+                colors={["#202020", "#220578"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{ alignItems: "center", justifyContent: "center" }}>
+                <TimerPicker
+                    padWithNItems={3}
+                    hourLabel="hr"
+                    minuteLabel="min"
+                    hideSeconds
+                    styles={{
+                        theme: "light",
+                        pickerItem: {
+                            fontSize: 34,
+                        },
+                        pickerLabel: {
+                            fontSize: 26,
+                            right: -20,
+                        },
+                        pickerLabelContainer: {
+                            width: 60,
+                        },
+                        pickerItemContainer: {
+                            width: 150,
+                        },
+                    }}
+                />
+            </LinearGradient>
+        )
+    }
+
     const rightOpenValue = -150;
 
     return (
@@ -378,7 +414,7 @@ const AddEditDestinations = () => {
 
                     <TouchableOpacity style={[styles.input, { flex: 1, flexDirection: "row", alignItems: 'center' }]} onPress={() => setModalVisible(true)}>
                         <Ionicons name="calendar-sharp" size={22} color={"#24a6ad"} />
-                        <Text style={{ fontSize: 18, marginLeft: 5, width: "100%", color: 'black' }}>{datesText || "Sat. Jul 13 - Sun. Jul 14"}</Text>
+                        <Text style={{ fontSize: 18, marginLeft: 5, width: "100%", color: 'black' }}>{datesText}</Text>
                     </TouchableOpacity>
 
                     <View style={styles.travelersAndBudgetTextField}>
@@ -475,16 +511,16 @@ const AddEditDestinations = () => {
                             {(tempAlias == "") ? (
                                 <Image source={require("../assets/images/blue.png")} style={[styles.destinationImage, { marginLeft: 0 }]} />
                             ) : (
-                                <DynamicImage placeName={tempAlias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
-                            )}
+                                    <DynamicImage placeName={tempAlias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
+                                )}
                             <View style={{ flexDirection: "column", justifyContent: "flex-start", gap: 5, marginLeft: 10, paddingRight: 140 }}>
                                 <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                                     <Ionicons name="location" size={20} color={"#24a6ad"} />
                                     {(tempAlias == "") ? (
                                         <Text style={{ fontSize: 20, fontWeight: "700", marginLeft: 5 }}>Destination</Text>
                                     ) : (
-                                        <Text numberOfLines={1} ellipsizeMode="tail" style={{ fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{tempAlias}</Text>
-                                    )}
+                                            <Text numberOfLines={1} ellipsizeMode="tail" style={{ fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{tempAlias}</Text>
+                                        )}
                                 </View>
 
 
@@ -493,8 +529,8 @@ const AddEditDestinations = () => {
                                     {(tempLocation == "") ? (
                                         <Text style={{ marginLeft: 5, color: "gray", marginTop: -5 }}>Address</Text>
                                     ) : (
-                                        <Text numberOfLines={1} ellipsizeMode="tail" style={{ marginLeft: 5, color: "gray", marginTop: -5 }}>{tempLocation}</Text>
-                                    )}
+                                            <Text numberOfLines={1} ellipsizeMode="tail" style={{ marginLeft: 5, color: "gray", marginTop: -5 }}>{tempLocation}</Text>
+                                        )}
                                 </View>
 
                                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5, gap: 15 }}>
@@ -503,8 +539,8 @@ const AddEditDestinations = () => {
                                         {(tempDuration == "") ? (
                                             <Text style={{ marginLeft: 5 }}>Duration</Text>
                                         ) : (
-                                            <Text style={{ marginLeft: 5 }}>{tempDuration} mins</Text>
-                                        )}
+                                                <Text style={{ marginLeft: 5 }}>{tempDuration} mins</Text>
+                                            )}
                                     </View>
 
                                     <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginRight: 5 }}>
@@ -512,8 +548,8 @@ const AddEditDestinations = () => {
                                         {(tempPriority == "") ? (
                                             <Text style={{ marginLeft: 5 }}>Priority</Text>
                                         ) : (
-                                            <Text style={{ marginLeft: 5 }}>Priority: {tempPriority}</Text>
-                                        )}
+                                                <Text style={{ marginLeft: 5 }}>Priority: {tempPriority}</Text>
+                                            )}
                                     </View>
                                 </View>
                             </View>
@@ -540,6 +576,7 @@ const AddEditDestinations = () => {
                             }} />
                         </View>
 
+                        {/* INSERT TIME PICKER HERE */}
                         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                             <TouchableWithoutFeedback onPress={() => infoInputRef.current.focus()}>
                                 <View style={{ flexDirection: "column", marginTop: 15, width: "45%" }}>
@@ -547,7 +584,9 @@ const AddEditDestinations = () => {
                                         <Ionicons name={"time"} color={"#24a6ad"} />
                                         <Text>Duration:</Text>
                                     </View>
-                                    <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5 }]} value={tempDuration} onChangeText={setTempDuration} keyboardType="numeric" ref={infoInputRef} returnKeyType="done"></TextInput>
+                                    <TouchableOpacity style={[styles.addDestinationTextInputs, { paddingHorizontal: 5 }]} onPress={() => setShowPicker(true)}>
+                                        <Text>Testing duration</Text>
+                                    </TouchableOpacity>
                                 </View>
                             </TouchableWithoutFeedback>
 
@@ -575,6 +614,18 @@ const AddEditDestinations = () => {
                 </View>
             </Modal>
 
+            <Modal
+                visible={showPicker}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowPicker(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={{ width: '100%', backgroundColor: '#F4F4F4', padding: 20, borderRadius: 10, height: 460 }}>
+                        {timePicker()}
+                    </View>
+                </View>
+            </Modal>
 
             {/* Pop-up for Date Interval picker */}
             {/* Modal with CalendarPicker */}
