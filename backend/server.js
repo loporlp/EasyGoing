@@ -385,6 +385,7 @@ app.get('/api/place/photo', async (req, res) => {
         );
 
         if (rows.length > 0) {
+            console.log("Photo already exists fetch from s3");
             // Fetch from S3 and stream to client
             const { s3_key, content_type } = rows[0];
             const s3Stream = s3.getObject({
@@ -396,6 +397,7 @@ app.get('/api/place/photo', async (req, res) => {
             return s3Stream.pipe(res);
         }
 
+        console.log("Get photo from google");
         // Fetch from Google API
         const response = await axios.get('https://maps.googleapis.com/maps/api/place/photo', {
             params: {
