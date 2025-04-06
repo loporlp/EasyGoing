@@ -20,6 +20,14 @@ const { swaggerOptions } = require('./swagger.js');
 
 require('dotenv').config();
 
+const AWS = require('aws-sdk');
+const { v4: uuidv4 } = require('uuid');
+const stream = require('stream');
+
+// Initialize S3
+const s3 = new AWS.S3();
+const S3_BUCKET = 'easygoing-photo-cache';
+
 
 const GOOGLE_API_KEY = process.env.GOOGLEMAPS_API_KEY;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -315,38 +323,126 @@ app.get('/api/place/textsearch', verifyFirebaseToken, async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-app.get('/api/place/photo', async (req, res) => {
-    console.log("photo called");
-    return res.status(503).json({ error: 'This service is temporarily disableed'});
-    try {
-        // Get parameters from the client request
-        const { photo_reference, maxwidth }  = req.query;
-        // Validate required parameters
-        if (!photo_reference || !maxwidth) {
-            return res.status(400).json({ error: 'Missing required parameters: photo_reference or maxwidth' });
-        }
+// app.get('/api/place/photo', async (req, res) => {
+//     console.log("photo called");
+//     //return res.status(503).json({ error: 'This service is temporarily disableed'});
+//     try {
+//         // Get parameters from the client request
+//         const { photo_reference, maxwidth }  = req.query;
+//         // Validate required parameters
+//         if (!photo_reference || !maxwidth) {
+//             return res.status(400).json({ error: 'Missing required parameters: photo_reference or maxwidth' });
+//         }
 
         
-        const apiUrl = 'https://maps.googleapis.com/maps/api/place/photo';
+//         const apiUrl = 'https://maps.googleapis.com/maps/api/place/photo';
         
-        // Make the API request
-        const response = await axios.get(apiUrl, {
+//         // Make the API request
+//         const response = await axios.get(apiUrl, {
+//             params: {
+//                 photo_reference: photo_reference,
+//                 maxwidth: maxwidth,
+//                 key: GOOGLE_API_KEY, 
+//             },
+//             responseType: 'stream',
+//         });
+
+//         // Send back the response from Google Photos API to the client
+//         res.setHeader('Content-Type', response.headers['content-type']);
+//         response.data.pipe(res);
+//     } catch (error) {
+//         console.error('Error fetching directions:', error.message);
+//         res.status(500).json({ error: 'An error occurred while fetching photos' });
+//     }
+// });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+app.get('/api/place/photo', async (req, res) => {
+    console.log("photo called");
+
+    const { photo_reference, maxwidth } = req.query;
+    if (!photo_reference || !maxwidth) {
+        return res.status(400).json({ error: 'Missing required parameters: photo_reference or maxwidth' });
+    }
+
+    try {
+        // Check if photo is already cached
+        const { rows } = await pool.query(
+            'SELECT s3_key, content_type FROM cached_photos WHERE photo_reference = $1 AND maxwidth = $2',
+            [photo_reference, maxwidth]
+        );
+
+        if (rows.length > 0) {
+            // Fetch from S3 and stream to client
+            const { s3_key, content_type } = rows[0];
+            const s3Stream = s3.getObject({
+                Bucket: S3_BUCKET,
+                Key: s3_key,
+            }).createReadStream();
+
+            res.setHeader('Content-Type', content_type);
+            return s3Stream.pipe(res);
+        }
+
+        // Fetch from Google API
+        const response = await axios.get('https://maps.googleapis.com/maps/api/place/photo', {
             params: {
-                photo_reference: photo_reference,
-                maxwidth: maxwidth,
-                key: GOOGLE_API_KEY, 
+                photo_reference,
+                maxwidth,
+                key: GOOGLE_API_KEY,
             },
             responseType: 'stream',
         });
 
-        // Send back the response from Google Photos API to the client
-        res.setHeader('Content-Type', response.headers['content-type']);
+        const contentType = response.headers['content-type'];
+        const s3Key = `photos/${uuidv4()}`;
+
+        // Pipe image to S3
+        const pass = new stream.PassThrough();
+        response.data.pipe(pass);
+
+        await s3.upload({
+            Bucket: S3_BUCKET,
+            Key: s3Key,
+            Body: pass,
+            ContentType: contentType,
+        }).promise();
+
+        // Store metadata in DB
+        await pool.query(
+            'INSERT INTO cached_photos (photo_reference, s3_key, maxwidth, content_type) VALUES ($1, $2, $3, $4)',
+            [photo_reference, s3Key, maxwidth, contentType]
+        );
+
+        // Stream back to user
+        res.setHeader('Content-Type', contentType);
         response.data.pipe(res);
+
     } catch (error) {
-        console.error('Error fetching directions:', error.message);
+        console.error('Error fetching photo:', error.message);
         res.status(500).json({ error: 'An error occurred while fetching photos' });
     }
 });
+
+
+
+
+
+
+
+
 
 
 /**
@@ -980,3 +1076,6 @@ app.post('/api/openai/chat', verifyFirebaseToken, async (req, res) => {
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+
+
+
