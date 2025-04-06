@@ -12,13 +12,9 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import CalendarPicker from 'react-native-calendar-picker';
 import moment from "moment";
-<<<<<<< HEAD
 import { TimerPicker } from "react-native-timer-picker";
-import LinearGradient from "react-native-linear-gradient"
-=======
 import Checkbox from 'expo-checkbox';
 import SavedDestinations from '../components/SavedDestinations';
->>>>>>> e8650e347ae70a3d5595b31fe4de52014227864a
 
 const { height } = Dimensions.get('window');
 
@@ -33,6 +29,7 @@ const AddEditDestinations = () => {
         setTempDuration("")
         setTempLocation("")
         setTempPriority("")
+        setTimeDuration(null);
         setVisible(false);
     }
 
@@ -60,9 +57,7 @@ const AddEditDestinations = () => {
     const [hasOrigin, setHasOrigin] = useState(false); // used for checking if an origin exists
     const [originText, setOriginText] = useState("");
 
-<<<<<<< HEAD
     const [showPicker, setShowPicker] = useState(false);
-=======
     // For GI to see whether to optimize or not
     const [optimizeCheck, setOptimizeCheck] = useState(false);
 
@@ -77,7 +72,6 @@ const AddEditDestinations = () => {
         }
     }, [trip]);
 
->>>>>>> e8650e347ae70a3d5595b31fe4de52014227864a
 
     //load existing trip data and set it as 'trip'
     useEffect(() => {
@@ -293,6 +287,13 @@ const AddEditDestinations = () => {
 
     const infoInputRef = useRef(null);
 
+    const [timeDuration, setTimeDuration] = useState<{ hours: number; minutes: number } | null>(null);
+
+    const handleDurationChange = (value: { hours: any; minutes: any; }) => {
+        setTimeDuration({ hours: value.hours, minutes: value.minutes });
+    };
+
+
     // Handle changed date
     const handleDateChange = (date: Date, type: 'START_DATE' | 'END_DATE') => {
         if (type === "END_DATE") {
@@ -386,20 +387,16 @@ const AddEditDestinations = () => {
 
     const timePicker = () => {
         return (
-            <LinearGradient
-                colors={["#202020", "#220578"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{ alignItems: "center", justifyContent: "center" }}>
+            <View style={{ backgroundColor: "#F1F1F1", alignItems: "center", justifyContent: "center" }}>
                 <TimerPicker
-                    padWithNItems={3}
+                    padWithNItems={2}
                     hourLabel="hr"
                     minuteLabel="min"
                     hideSeconds
+                    onDurationChange={handleDurationChange}
                     styles={{
-                        theme: "light",
                         pickerItem: {
-                            fontSize: 34,
+                            fontSize: 32,
                         },
                         pickerLabel: {
                             fontSize: 26,
@@ -413,23 +410,26 @@ const AddEditDestinations = () => {
                         },
                     }}
                 />
-            </LinearGradient>
+            </View>
         )
+    }
+
+    const selectDuration = () => {
+        setShowPicker(false);
     }
 
     const rightOpenValue = -150;
 
     // Tell GI to not optimize by storing this check in local storage
     useEffect(() => {
-        if (trip && tripId)
-        {
-            const updatedTrip = { 
-                ...trip, 
+        if (trip && tripId) {
+            const updatedTrip = {
+                ...trip,
                 optimize: optimizeCheck
             };
-    
+
             setTrip(updatedTrip);
-    
+
             storeData(tripId.toString(), updatedTrip);
         }
 
@@ -564,8 +564,8 @@ const AddEditDestinations = () => {
             {importingLocation ? (
                 <SavedDestinations
                     SavedDestinations={savedDestinations}
-                    handlePress={ handleBookmarkImport }
-                    deleteLocation={function (index: number): void { } }
+                    handlePress={handleBookmarkImport}
+                    deleteLocation={function (index: number): void { }}
                 />
             ) : null}
 
@@ -588,10 +588,10 @@ const AddEditDestinations = () => {
 
                         <TouchableOpacity
                             style={styles.menuItem}
-                            onPress={() => { 
-                                setAddTripVisible(false); 
+                            onPress={() => {
+                                setAddTripVisible(false);
                                 handleImport();
-                        }}>
+                            }}>
                             <Ionicons name="bookmark" size={20} color={"#24a6ad"} />
                             <Text style={{ fontSize: 18 }}>Import from Saved</Text>
                         </TouchableOpacity>
@@ -666,7 +666,7 @@ const AddEditDestinations = () => {
                                     <Ionicons name={"location"} color={"#24a6ad"} />
                                     <Text>Destination:</Text>
                                 </View>
-                                <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5 }]} value={tempAlias} onChangeText={setTempAlias} ref={infoInputRef}></TextInput>
+                                <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5, justifyContent: "center", textAlignVertical: "center" }]} value={tempAlias} onChangeText={setTempAlias} ref={infoInputRef}></TextInput>
                             </View>
                         </TouchableWithoutFeedback>
 
@@ -689,8 +689,8 @@ const AddEditDestinations = () => {
                                         <Ionicons name={"time"} color={"#24a6ad"} />
                                         <Text>Duration:</Text>
                                     </View>
-                                    <TouchableOpacity style={[styles.addDestinationTextInputs, { paddingHorizontal: 5 }]} onPress={() => setShowPicker(true)}>
-                                        <Text>Testing duration</Text>
+                                    <TouchableOpacity style={[styles.addDestinationTextInputs, { paddingHorizontal: 5, justifyContent: 'center', alignItems: 'flex-start' }]} onPress={() => setShowPicker(true)}>
+                                        <Text style={{fontSize: 18 }}>{timeDuration ? `${timeDuration.hours}hr ${timeDuration.minutes}min` : ''}</Text>
                                     </TouchableOpacity>
                                 </View>
                             </TouchableWithoutFeedback>
@@ -726,8 +726,39 @@ const AddEditDestinations = () => {
                 onRequestClose={() => setShowPicker(false)}
             >
                 <View style={styles.modalOverlay}>
-                    <View style={{ width: '100%', backgroundColor: '#F4F4F4', padding: 20, borderRadius: 10, height: 460 }}>
+                    <View style={{ width: '95%', backgroundColor: '#F4F4F4', padding: 20, borderRadius: 10, height: 350 }}>
                         {timePicker()}
+                        <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 20, gap: 30 }}>
+                            <TouchableOpacity onPress={() => { setShowPicker(false); }} style={{
+                                backgroundColor: "red",
+                                height: 35,
+                                width: 70,
+                                alignItems: "center",
+                                justifyContent: "center",
+                                shadowColor: "#333333",
+                                shadowOffset: { width: 1, height: 2 },
+                                shadowOpacity: 0.1,
+                                shadowRadius: 3,
+                                borderRadius: 10
+                            }}>
+                                <Text style={{ fontSize: 12, color: "white", fontWeight: "700" }}>CANCEL</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={() => { selectDuration(); }} style={{
+                                backgroundColor: "green",
+                                height: 35,
+                                width: 70,
+                                alignItems: "center",
+                                justifyContent: "center",
+                                shadowColor: "#333333",
+                                shadowOffset: { width: 1, height: 2 },
+                                shadowOpacity: 0.1,
+                                shadowRadius: 3,
+                                borderRadius: 10
+                            }}>
+                                <Text style={{ fontSize: 12, color: "white", fontWeight: "700" }}>OK</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </Modal>
