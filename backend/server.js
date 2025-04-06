@@ -433,7 +433,7 @@ app.get('/api/place/photo', async (req, res) => {
 
         // Stream back to user
         res.setHeader('Content-Type', contentType);
-        clientStream.data.pipe(res);
+        clientStream.pipe(res);
 
     } catch (error) {
         console.error('Error fetching photo:', error.message);
