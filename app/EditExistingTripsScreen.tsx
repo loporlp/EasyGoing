@@ -33,7 +33,7 @@ const EditExistingTripsScreen = () => {
                 for (const tripID of tripIDs) {
                     const tripDetails = await getData(tripID);
                     if (tripDetails) {
-                        loadedTrips.push({ id: tripID, details: tripDetails.details });
+                        loadedTrips.push({ id: tripID, details: tripDetails });
                     }
                 }
 
@@ -63,8 +63,9 @@ const EditExistingTripsScreen = () => {
         router.push("/AddEditDestinations");
     }
 
-    const budgetManagerScreen = () => {
+    const budgetManagerScreen = async () => {
         setModalVisible(false);
+        await storeData("currentTrip", selectedTripId);
         router.push("/BudgetManagerScreen");
     }
 

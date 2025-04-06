@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, TextInput, Image, ScrollView, FlatList } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, Image, ScrollView, FlatList, ActivityIndicator } from 'react-native'
 import React, { useRef, useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useHeaderHeight } from '@react-navigation/elements';
@@ -24,6 +24,9 @@ const HomeScreen = () => {
     // Sets up navigations
     const router = useRouter();
 
+    // Used for recommended locations
+    const [isLoading, setIsLoading] = useState(true);
+
     const headerHeight = useHeaderHeight();
     const [activeIndex, setActiveIndex] = useState(0);
     const [locationType, setLocationType] = useState<string>("world travel locations");
@@ -33,6 +36,7 @@ const HomeScreen = () => {
 
     const handleTypeOfLocationPress = (locationType: string) => {
         console.log("Type of place clicked:", locationType);
+        setIsLoading(true);
         setLocationType(locationType);
     };
 
@@ -196,6 +200,7 @@ const HomeScreen = () => {
                 // Set backup array if parsing fails
                 setDestinationList(backupArray);
             }
+            setIsLoading(false);
         };
     
         fetchData();
@@ -255,6 +260,58 @@ const HomeScreen = () => {
         }
     }, []);
 
+    // When a recommended place is bookmarked
+    const handleBookmarkClick = async (destination: Destination) => {
+        console.log("Bookmarked:", destination);
+
+        let accountInfo = await getData("savedDestinations");
+        let savedDestinations = accountInfo[0].destinations;
+
+        try {
+            // See if it was already bookmarked
+            console.log("savedDestinations:", savedDestinations);
+            const isBookmarked = savedDestinations.find((item: Destination) => item.destination === destination.destination) !== undefined;
+
+            if (isBookmarked) {
+                // If already bookmarked, remove it
+                savedDestinations = savedDestinations.filter((item: Destination) => item.destination !== destination.destination);
+                console.log("New savedDestinations:", savedDestinations);
+                updateBookmarkStyle(destination, false);
+                console.log("Removed bookmark");
+            } else {
+                // If not bookmarked, add it to the saved list
+                savedDestinations.push(destination);
+                console.log("New savedDestinations:", savedDestinations);
+                updateBookmarkStyle(destination, true);
+                console.log("Bookmarked");
+            }
+    
+            // Update the database
+            accountInfo[0].destinations = savedDestinations;
+            console.log("AccountInfo:", accountInfo);
+            updateTrip(accountInfo[1], accountInfo[0]);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    // Function to update the bookmark icon style based on the saved state
+    const updateBookmarkStyle = (destination: { destination: any; image?: string; time?: string; amount?: string; review?: string; reviewAmt?: string; saved?: boolean; }, isBookmarked: boolean) => {
+        // The bookmark icon color is gold when bookmarked, white when not bookmarked
+        const updatedDestinations = destinationList.map(item => {
+            if (item.destination === destination.destination) {
+                return {
+                    ...item,
+                    saved: isBookmarked,
+                };
+            }
+            return item;
+        });
+
+        // Force re-render
+        setDestinationList(updatedDestinations); 
+    };
+
     return (
         <>
             <View style={{ flex: 1, flexDirection: "column" }}>
@@ -312,18 +369,22 @@ const HomeScreen = () => {
                                 paddingVertical: 10,
                                 marginBottom: 10
                             }}>
-                                {recommendedList.map((item, index) => (
-                                    <TouchableOpacity
-                                        onPress={() => {
-                                            handleSelectCategory(index);
-                                            handleTypeOfLocationPress(item.title);
-                                        }}
-                                        style={activeIndex == index ? styles.activeRecommendBtn : styles.recommendBtn}
-                                        key={index}>
-                                        <MaterialCommunityIcons name={item.iconName as any} size={20} color={activeIndex == index ? "white" : "black"} />
-                                        <Text style={activeIndex == index ? styles.recommendBtnTextActive : styles.recommendBtnText}>{item.title}</Text>
-                                    </TouchableOpacity>
-                                ))}
+                                {isLoading ? (
+                                    <ActivityIndicator size="large" color="#0000ff" />
+                                ) : (
+                                    recommendedList.map((item, index) => (
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                handleSelectCategory(index);
+                                                handleTypeOfLocationPress(item.title);
+                                            }}
+                                            style={activeIndex === index ? styles.activeRecommendBtn : styles.recommendBtn}
+                                            key={index}>
+                                            <MaterialCommunityIcons name={item.iconName as any} size={20} color={activeIndex === index ? "white" : "black"} />
+                                            <Text style={activeIndex === index ? styles.recommendBtnTextActive : styles.recommendBtnText}>{item.title}</Text>
+                                        </TouchableOpacity>
+                                    ))
+                                )}
                             </ScrollView>
 
                             <FlatList
@@ -340,7 +401,7 @@ const HomeScreen = () => {
                                         <TouchableOpacity style={styles.recommendDest}>
                                             <View style={styles.destImageWrapper}>
                                                 <Image style={styles.destImage} source={{ uri: item.image }} />
-                                                <TouchableOpacity style={styles.saveIconWrapper}>
+                                                <TouchableOpacity style={styles.saveIconWrapper} onPress={() => handleBookmarkClick(item)}>
                                                     <Ionicons name="bookmark" size={22} color={item.saved ? "#FFD700" : "white"} />
                                                 </TouchableOpacity>
                                             </View>

@@ -100,16 +100,18 @@ export async function getDirectionsBetweenLocations(origin, destination, mode) {
 
     // Check if the response is valid
     if (data.status === 'OK') {
-        // Extract directions (steps) and duration
+      // Extract directions (steps), duration, and modes of transit
         const routeSteps = [];
+        const travelModes = [];
         const legs = data.routes[0].legs;
 
         // Loop through each leg of the route
         legs.forEach(leg => {
             // Loop through each step in the leg (exp: step is a part of the journey like "Turn right onto X street")
             leg.steps.forEach(step => {
-              // This contains the textual instructions
-                routeSteps.push(step.html_instructions);
+              // This contains the textual instructions and the corresponding travel mode
+              routeSteps.push(step.html_instructions);
+              travelModes.push(step.travel_mode);
             });
         });
 
@@ -119,6 +121,7 @@ export async function getDirectionsBetweenLocations(origin, destination, mode) {
         return {
             directions: routeSteps,
             duration: duration,
+            travel_modes: travelModes
         };
     } else {
         console.error('Error fetching route (data):', data.status);

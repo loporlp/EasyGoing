@@ -1,6 +1,6 @@
 import { getIdToken } from './getFirebaseID'
 import { auth } from '../firebaseConfig';
-import { deleteData, getData, storeData } from './localStore';
+import { deleteData, fillLocal, getData, storeData } from './localStore';
 
 /**
  * 
@@ -165,6 +165,7 @@ export const updateTrip = async (tripId, updatedTrip) => {
 
     const data = await response.json();
     console.log(data)
+    fillLocal(true);
     return true;
 
   } catch (error) {
@@ -209,12 +210,12 @@ export const registerUser = async () => {
  * Creates a history in the database and in local storage with specified information then 
  * sets the current trip to that trip
  */
-export const createHistory = async (tag, value, description, date) => {
+export const createHistory = async (tag, value, description, date, tripID) => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5000); // Set timeout to 5 seconds
 
   try {
-    console.log("tag: " + tag + "; value:" + value + "; Description: " + description);
+    console.log("tag: " + tag + "; value:" + value + "; Description: " + description + "; TripID: " + tripID);
     const idToken = await getIdToken(auth);
     console.log(idToken)
     const response = await fetch(`https://ezgoing.app/api/history`, {
@@ -230,6 +231,7 @@ export const createHistory = async (tag, value, description, date) => {
         "value": value,
         "description": description,
         "date": date,
+        "tripID": tripID,
       }
       ),
 
@@ -238,7 +240,7 @@ export const createHistory = async (tag, value, description, date) => {
     const data = await response.json();
     console.log(response);
     var histories = await getHistories();
-    storeData("history", histories);
+    storeData(`history ${tripID}`, histories[tripID]);
     return true;
 
   } catch (error) {
@@ -270,9 +272,10 @@ export const deleteHistory = async (historyId) => {
       },
     });
 
-    //const data = await response.json();
+    const data = await response.json();
+    const tripId = data.deletedHistory.trip_id;
     var histories = await getHistories();
-    storeData("history", histories);
+    storeData(`history ${tripId}`, histories[tripId] ? histories[tripId] : []);
     return true;
 
   } catch (error) {
@@ -290,7 +293,6 @@ export const deleteHistory = async (historyId) => {
  * @returns {Promise<Array<Object>>} A list of history objects.
  */
 export const getHistories = async () => {
-  console.log("RAHAHAHAHHAHAHAHAH")
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5000); // Set timeout to 5 seconds
 
@@ -314,11 +316,24 @@ export const getHistories = async () => {
       throw new Error("Invalid response from server");
     }
 
-    return data.histories; // Just return the list as it is
+    // Dictionary of each tripID and all of it's histories
+    const dictionary = {};
+
+    for (const history of data.histories) {
+      const tripId = history.trip_id;
+    
+      if (!dictionary[tripId]) {
+        dictionary[tripId] = [];
+      }
+    
+      dictionary[tripId].push(history);
+    }
+
+    return dictionary; 
 
   } catch (error) {
     console.error('Error fetching user histories:', error);
-    return []; // Return an empty list on failure instead of null
+    return {}; // Return an empty dict on failure instead of null
   } finally {
     clearTimeout(timeout); // Clear the timeout once the request completes
   }

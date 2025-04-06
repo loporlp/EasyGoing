@@ -38,6 +38,6 @@ export const travelAgentApi = async (user_input: string) => {
     return response.data;
   } catch (error) {
     console.error('Error calling travel agent API:', error);
-    throw error;
+    return "Sorry, something went wrong.";
   }
 };

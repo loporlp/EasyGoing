@@ -60,20 +60,26 @@ export const deleteData = async (key) => {
 
 };
 
-export const fillLocal = async () => {
+export const fillLocal = async (forceRun) => {
     console.log("called fill localStorage");
     hasTrips = await storage.getItem("tripIDs");
     console.log(`HasTrips: ${hasTrips}`)
-    if(!hasTrips || JSON.parse(hasTrips).length === 0){
+    if(!hasTrips || JSON.parse(hasTrips).length === 0 || forceRun){
         trips = await getTrips();
+        histories = await getHistories();
         tripIDs = Object.keys(trips);
         await storeData("tripIDs", tripIDs); // Must await because later in this same function we will be checking if this information is stored
         for (const ID of tripIDs){
+            console.log("START DATE: ", trips[ID].tripStartDate);
             if(trips[ID].tripStartDate === "saved"){
                 console.log("Stored Saved Destinations")
                 await storeData("savedDestinations", [trips[ID], ID]);
             } else{
-            storeData(ID, trips[ID]);
+                // Store Trip Details
+                storeData(ID, trips[ID]);
+
+                // Store Trip Budget History
+                storeData(`history ${ID}`, histories[ID] ? histories[ID] : []);
             }
         }
         console.log(`Storing new: ${hasTrips}`)
@@ -87,15 +93,6 @@ export const fillLocal = async () => {
     if(!savedTrips){
         console.log("no saved destinations, creating trip");
         await createTrip("saved", 0, 0, 0);
-    }
-
-    // If a user doesn't have saved histories we need to make an empty list and fill it
-    savedHistories = await getData("history");
-    
-    if(savedHistories == null){
-        histories = await getHistories();
-        console.log(histories)
-        storeData("history", histories);
     }
 }
 

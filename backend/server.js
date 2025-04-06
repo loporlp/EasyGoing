@@ -317,6 +317,7 @@ app.get('/api/place/textsearch', verifyFirebaseToken, async (req, res) => {
  */
 app.get('/api/place/photo', async (req, res) => {
     console.log("photo called");
+    return res.status(503).json({ error: 'This service is temporarily disableed'});
     try {
         // Get parameters from the client request
         const { photo_reference, maxwidth }  = req.query;
@@ -751,10 +752,10 @@ app.delete('/api/trips/:id', verifyFirebaseToken, async (req, res) => {
 app.post('/api/history', verifyFirebaseToken, async (req, res) => {
     console.log("create history called");
     const { uid } = req.user;
-    const { tag, value, description, date } = req.body; 
+    const { tag, value, description, date, tripID } = req.body; 
 
     // Validate input
-    if (!tag || !value || !description || description.length > 50) {
+    if (!tag || !value || !description || !tripID || description.length > 50) {
         return res.status(400).json({ success: false, error: "Invalid input. Ensure all required fields are provided and description is ≤ 50 chars." });
     }
 
@@ -766,12 +767,12 @@ app.post('/api/history', verifyFirebaseToken, async (req, res) => {
 
     try {
         const query = `
-            INSERT INTO history (user_id, tag, value, description, date)
-            VALUES ($1, $2, $3, $4, COALESCE($5, CURRENT_DATE))
+            INSERT INTO history (user_id, tag, value, description, date, trip_id)
+            VALUES ($1, $2, $3, $4, COALESCE($5, CURRENT_DATE), $6)
             RETURNING *;
         `;
 
-        const result = await pool.query(query, [uid, tag, value, description, date || null]);
+        const result = await pool.query(query, [uid, tag, value, description, date || null, tripID]);
 
         res.status(201).json({ success: true, history: result.rows[0] });
     } catch (error) {

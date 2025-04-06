@@ -1,6 +1,6 @@
 // AddEditDestinations.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, TextInput, Text, TouchableOpacity, Dimensions, Modal, TouchableWithoutFeedback, KeyboardAvoidingView, Image, Platform } from "react-native";
+import { View, StyleSheet, TextInput, Text, TouchableOpacity, Dimensions, Modal, TouchableWithoutFeedback, KeyboardAvoidingView, Image, Platform, BackHandler, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
 import { storeData, getData } from '../scripts/localStore.js';
@@ -12,8 +12,13 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import CalendarPicker from 'react-native-calendar-picker';
 import moment from "moment";
+<<<<<<< HEAD
 import { TimerPicker } from "react-native-timer-picker";
 import LinearGradient from "react-native-linear-gradient"
+=======
+import Checkbox from 'expo-checkbox';
+import SavedDestinations from '../components/SavedDestinations';
+>>>>>>> e8650e347ae70a3d5595b31fe4de52014227864a
 
 const { height } = Dimensions.get('window');
 
@@ -50,11 +55,29 @@ const AddEditDestinations = () => {
     // Sets trip data
     const [trip, setTrip] = useState<any>(null);
     const [tripId, setTripId] = useState<string | null>(null);
+    const [tripName, setTripName] = useState<string | null>(null);
     const [destinations, setDestinations] = useState<any[]>([]); // Store destinations for rendering
     const [hasOrigin, setHasOrigin] = useState(false); // used for checking if an origin exists
     const [originText, setOriginText] = useState("");
 
+<<<<<<< HEAD
     const [showPicker, setShowPicker] = useState(false);
+=======
+    // For GI to see whether to optimize or not
+    const [optimizeCheck, setOptimizeCheck] = useState(false);
+
+    // For loading bookmarked locations
+    const [importingLocation, setImportingLocation] = useState(false);
+    const [savedDestinations, setSavedDestinations] = useState([]);
+
+    // Set the check to whatever the stored value is
+    useEffect(() => {
+        if (trip && typeof trip.optimize !== 'undefined') {
+            setOptimizeCheck(trip.optimize);
+        }
+    }, [trip]);
+
+>>>>>>> e8650e347ae70a3d5595b31fe4de52014227864a
 
     //load existing trip data and set it as 'trip'
     useEffect(() => {
@@ -69,6 +92,7 @@ const AddEditDestinations = () => {
                     if (tripDetails) {
                         setTripId(currentTripID);  // Store only the trip id
                         setTrip(tripDetails);  // Store the full trip data
+                        setTripName(tripDetails.tripName);
                         setDestinations(tripDetails.destinations); // Immediately update the destinations so they load on screen
                         if (destinations.length > 0 && destinations[0].dayOrigin) {
                             setHasOrigin(true);
@@ -88,12 +112,16 @@ const AddEditDestinations = () => {
     }, []); // Empty dependency array ensures this runs only once    
 
     useEffect(() => {
-        if (trip?.destinations?.length > 0 && trip.destinations[0].dayOrigin) {
-            setHasOrigin(true);
-            setOriginText(trip.destinations[0].address);
-        } else {
-            setHasOrigin(false);
-            setOriginText("");
+        try {
+            if (trip?.destinations?.length > 0 && trip.destinations[0].dayOrigin) {
+                setHasOrigin(true);
+                setOriginText(trip.destinations[0].address);
+            } else {
+                setHasOrigin(false);
+                setOriginText("");
+            }
+        } catch (error) {
+            console.log("Trip has no destinations! Need to delete or handle otherwise.");
         }
     }, [trip]); // Runs every time `trip` updates
 
@@ -116,16 +144,13 @@ const AddEditDestinations = () => {
         if (!tempDuration) {
             errorMessage += "Duration is required.\n";
         }
-        if (!tempPriority) {
-            errorMessage += "Priority is required.\n";
-        }
         if (errorMessage) {
             alert(errorMessage.trim());
             return;
         }
 
-        // Set default priority to -1 (as an integer) if it's empty or invalid
-        const priorityValue = tempPriority.trim() === "" || isNaN(Number(tempPriority)) ? -1 : parseInt(tempPriority);
+        // Set default priority to 1 (as an integer) if it's empty or invalid
+        const priorityValue = tempPriority.trim() === "" || isNaN(Number(tempPriority)) ? 1 : parseInt(tempPriority);
 
         const newDestination = {
             alias: tempAlias,
@@ -394,13 +419,76 @@ const AddEditDestinations = () => {
 
     const rightOpenValue = -150;
 
+    // Tell GI to not optimize by storing this check in local storage
+    useEffect(() => {
+        if (trip && tripId)
+        {
+            const updatedTrip = { 
+                ...trip, 
+                optimize: optimizeCheck
+            };
+    
+            setTrip(updatedTrip);
+    
+            storeData(tripId.toString(), updatedTrip);
+        }
+
+    }, [optimizeCheck]);
+
+
+    // Get the saved destinations
+    useEffect(() => {
+        const fetchData = async () => {
+            console.log("RAHAHHA");
+            let accountInfo = await getData("savedDestinations");
+            console.log("SAVED DESTS: ", accountInfo)
+            let savedDestinations = accountInfo[0].destinations;
+            if (savedDestinations.length) {
+                setSavedDestinations(savedDestinations);  // Set the destinations in the state
+            }
+        };
+
+        fetchData();
+    }, []);
+
+
+    function handleImport() {
+        console.log("handleImport clicked");
+        if (savedDestinations.length) {
+            // Setting this true shows the modal
+            setImportingLocation(true)
+        } else {
+            // Show an alert if there are no saved destinations
+            Alert.alert(
+                'No Saved Destinations',
+                'You have no saved destinations to import.',
+                [{ text: 'OK' }]
+            );
+        }
+    }
+
+    // Load the data into the Add Location modal
+    const handleBookmarkImport = (destination: any) => {
+        // Hide the modal
+        setImportingLocation(false);
+
+        console.log("Bookmarked Location to Import:", destination);
+
+        // Populate the fields with data from the destination
+        setTempAlias(destination.destination || "Unknown");  // It's called 'destination' and not 'name'
+        setTempDuration(destination.time || "60 mins"); // 'time' and not 'duration'
+
+        // Show the Add Destination modal
+        setVisible(true);
+    };
+
     return (
         <View style={styles.container}>
             {/* Background image */}
             <DynamicImage placeName="New York City" containerStyle={styles.backgroundImage} imageStyle={styles.backgroundImage} />
             <View style={styles.darkOverlay}></View>
 
-            <View style={{ flex: 1, flexDirection: "column", marginHorizontal: 20, position: "absolute", marginTop: 50 }}>
+            <View style={{ flex: 1, flexDirection: "column", marginHorizontal: 20, position: "absolute", marginTop: 10 }}>
                 <TouchableOpacity onPress={() => { navigation.goBack() }}>
                     <Ionicons name="arrow-back-outline" size={30} color={"white"} />
                 </TouchableOpacity>
@@ -427,6 +515,10 @@ const AddEditDestinations = () => {
                             <Ionicons name="wallet" size={22} color={"#24a6ad"} />
                             <TextInput value={trip?.budget ? trip.budget.toString() : "Enter budget"} placeholderTextColor="black" keyboardType="numeric" onChangeText={updateBudget} style={{ fontSize: 18, padding: 5 }} />
                         </TouchableOpacity>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', borderRadius: 10, padding: 10, }}>
+                        <Checkbox value={optimizeCheck} onValueChange={setOptimizeCheck} />
+                        <Text style={{ fontSize: 18, marginLeft: 5, color: 'black' }}>Optimize Trip</Text>
                     </View>
                 </View>
             </View>
@@ -469,6 +561,14 @@ const AddEditDestinations = () => {
                 </TouchableOpacity>
             </View>
 
+            {importingLocation ? (
+                <SavedDestinations
+                    SavedDestinations={savedDestinations}
+                    handlePress={ handleBookmarkImport }
+                    deleteLocation={function (index: number): void { } }
+                />
+            ) : null}
+
             <Modal
                 visible={isAddTripVisible}
                 transparent={true}
@@ -486,7 +586,12 @@ const AddEditDestinations = () => {
 
                         <View style={styles.divider}></View>
 
-                        <TouchableOpacity style={styles.menuItem} onPress={() => { setAddTripVisible(false) }}>
+                        <TouchableOpacity
+                            style={styles.menuItem}
+                            onPress={() => { 
+                                setAddTripVisible(false); 
+                                handleImport();
+                        }}>
                             <Ionicons name="bookmark" size={20} color={"#24a6ad"} />
                             <Text style={{ fontSize: 18 }}>Import from Saved</Text>
                         </TouchableOpacity>
