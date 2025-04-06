@@ -135,7 +135,7 @@ const AddEditDestinations = () => {
         if (!tempLocation) {
             errorMessage += "Address is required.\n";
         }
-        if (!tempDuration) {
+        if (!timeDuration) {
             errorMessage += "Duration is required.\n";
         }
         if (errorMessage) {
@@ -146,6 +146,11 @@ const AddEditDestinations = () => {
         // Set default priority to 1 (as an integer) if it's empty or invalid
         const priorityValue = tempPriority.trim() === "" || isNaN(Number(tempPriority)) ? 1 : parseInt(tempPriority);
 
+        let timeInMinutes;
+        if (timeDuration) {
+            timeInMinutes = timeDuration.hours * 60 + timeDuration.minutes;
+          }
+
         const newDestination = {
             alias: tempAlias,
             address: tempLocation,
@@ -154,7 +159,7 @@ const AddEditDestinations = () => {
             transportToNext: "", //TODO: implement this in app
             transportDuration: "", //TODO: implement this in app
             startDateTime: new Date().toISOString(), //TODO: implement this in app
-            duration: tempDuration,
+            duration: timeInMinutes,
             notes: typedNotes,
             dayOrigin: false, //TODO: figure out how to check if this is the day's origin (will require existing data to compare to)
             cost: 40, // TODO: implement this in app
