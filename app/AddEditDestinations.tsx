@@ -432,7 +432,7 @@ const AddEditDestinations = () => {
 
         // Populate the fields with data from the destination
         setTempAlias(destination.destination || "Unknown");  // It's called 'destination' and not 'name'
-        setTempDuration(destination.time || "60 mins"); // 'time' and not 'duration'
+        setTempDuration((parseInt(destination.time) * 60).toString() || "60"); // 'time' and not 'duration'
 
         // Show the Add Destination modal
         setVisible(true);
