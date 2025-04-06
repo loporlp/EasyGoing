@@ -12,6 +12,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import CalendarPicker from 'react-native-calendar-picker';
 import moment from "moment";
+import { TimerPicker } from "react-native-timer-picker";
 import Checkbox from 'expo-checkbox';
 import SavedDestinations from '../components/SavedDestinations';
 
@@ -28,6 +29,7 @@ const AddEditDestinations = () => {
         setTempDuration("")
         setTempLocation("")
         setTempPriority("")
+        setTimeDuration(null);
         setVisible(false);
     }
 
@@ -55,6 +57,7 @@ const AddEditDestinations = () => {
     const [hasOrigin, setHasOrigin] = useState(false); // used for checking if an origin exists
     const [originText, setOriginText] = useState("");
 
+    const [showPicker, setShowPicker] = useState(false);
     // For GI to see whether to optimize or not
     const [optimizeCheck, setOptimizeCheck] = useState(false);
 
@@ -132,7 +135,7 @@ const AddEditDestinations = () => {
         if (!tempLocation) {
             errorMessage += "Address is required.\n";
         }
-        if (!tempDuration) {
+        if (!timeDuration) {
             errorMessage += "Duration is required.\n";
         }
         if (errorMessage) {
@@ -143,6 +146,11 @@ const AddEditDestinations = () => {
         // Set default priority to 1 (as an integer) if it's empty or invalid
         const priorityValue = tempPriority.trim() === "" || isNaN(Number(tempPriority)) ? 1 : parseInt(tempPriority);
 
+        let timeInMinutes;
+        if (timeDuration) {
+            timeInMinutes = timeDuration.hours * 60 + timeDuration.minutes;
+          }
+
         const newDestination = {
             alias: tempAlias,
             address: tempLocation,
@@ -151,7 +159,7 @@ const AddEditDestinations = () => {
             transportToNext: "", //TODO: implement this in app
             transportDuration: "", //TODO: implement this in app
             startDateTime: new Date().toISOString(), //TODO: implement this in app
-            duration: tempDuration,
+            duration: timeInMinutes,
             notes: typedNotes,
             dayOrigin: false, //TODO: figure out how to check if this is the day's origin (will require existing data to compare to)
             cost: 40, // TODO: implement this in app
@@ -284,6 +292,13 @@ const AddEditDestinations = () => {
 
     const infoInputRef = useRef(null);
 
+    const [timeDuration, setTimeDuration] = useState<{ hours: number; minutes: number } | null>(null);
+
+    const handleDurationChange = (value: { hours: any; minutes: any; }) => {
+        setTimeDuration({ hours: value.hours, minutes: value.minutes });
+    };
+
+
     // Handle changed date
     const handleDateChange = (date: Date, type: 'START_DATE' | 'END_DATE') => {
         if (type === "END_DATE") {
@@ -375,19 +390,51 @@ const AddEditDestinations = () => {
         );
     }
 
+    const timePicker = () => {
+        return (
+            <View style={{ backgroundColor: "#F1F1F1", alignItems: "center", justifyContent: "center" }}>
+                <TimerPicker
+                    padWithNItems={2}
+                    hourLabel="hr"
+                    minuteLabel="min"
+                    hideSeconds
+                    onDurationChange={handleDurationChange}
+                    styles={{
+                        pickerItem: {
+                            fontSize: 32,
+                        },
+                        pickerLabel: {
+                            fontSize: 26,
+                            right: -20,
+                        },
+                        pickerLabelContainer: {
+                            width: 60,
+                        },
+                        pickerItemContainer: {
+                            width: 150,
+                        },
+                    }}
+                />
+            </View>
+        )
+    }
+
+    const selectDuration = () => {
+        setShowPicker(false);
+    }
+
     const rightOpenValue = -150;
 
     // Tell GI to not optimize by storing this check in local storage
     useEffect(() => {
-        if (trip && tripId)
-        {
-            const updatedTrip = { 
-                ...trip, 
+        if (trip && tripId) {
+            const updatedTrip = {
+                ...trip,
                 optimize: optimizeCheck
             };
-    
+
             setTrip(updatedTrip);
-    
+
             storeData(tripId.toString(), updatedTrip);
         }
 
@@ -460,7 +507,7 @@ const AddEditDestinations = () => {
 
                     <TouchableOpacity style={[styles.input, { flex: 1, flexDirection: "row", alignItems: 'center' }]} onPress={() => setModalVisible(true)}>
                         <Ionicons name="calendar-sharp" size={22} color={"#24a6ad"} />
-                        <Text style={{ fontSize: 18, marginLeft: 5, width: "100%", color: 'black' }}>{datesText || "Sat. Jul 13 - Sun. Jul 14"}</Text>
+                        <Text style={{ fontSize: 18, marginLeft: 5, width: "100%", color: 'black' }}>{datesText}</Text>
                     </TouchableOpacity>
 
                     <View style={styles.travelersAndBudgetTextField}>
@@ -522,8 +569,8 @@ const AddEditDestinations = () => {
             {importingLocation ? (
                 <SavedDestinations
                     SavedDestinations={savedDestinations}
-                    handlePress={ handleBookmarkImport }
-                    deleteLocation={function (index: number): void { } }
+                    handlePress={handleBookmarkImport}
+                    deleteLocation={function (index: number): void { }}
                 />
             ) : null}
 
@@ -546,10 +593,10 @@ const AddEditDestinations = () => {
 
                         <TouchableOpacity
                             style={styles.menuItem}
-                            onPress={() => { 
-                                setAddTripVisible(false); 
+                            onPress={() => {
+                                setAddTripVisible(false);
                                 handleImport();
-                        }}>
+                            }}>
                             <Ionicons name="bookmark" size={20} color={"#24a6ad"} />
                             <Text style={{ fontSize: 18 }}>Import from Saved</Text>
                         </TouchableOpacity>
@@ -574,16 +621,16 @@ const AddEditDestinations = () => {
                             {(tempAlias == "") ? (
                                 <Image source={require("../assets/images/blue.png")} style={[styles.destinationImage, { marginLeft: 0 }]} />
                             ) : (
-                                <DynamicImage placeName={tempAlias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
-                            )}
+                                    <DynamicImage placeName={tempAlias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
+                                )}
                             <View style={{ flexDirection: "column", justifyContent: "flex-start", gap: 5, marginLeft: 10, paddingRight: 140 }}>
                                 <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                                     <Ionicons name="location" size={20} color={"#24a6ad"} />
                                     {(tempAlias == "") ? (
                                         <Text style={{ fontSize: 20, fontWeight: "700", marginLeft: 5 }}>Destination</Text>
                                     ) : (
-                                        <Text numberOfLines={1} ellipsizeMode="tail" style={{ fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{tempAlias}</Text>
-                                    )}
+                                            <Text numberOfLines={1} ellipsizeMode="tail" style={{ fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{tempAlias}</Text>
+                                        )}
                                 </View>
 
 
@@ -592,8 +639,8 @@ const AddEditDestinations = () => {
                                     {(tempLocation == "") ? (
                                         <Text style={{ marginLeft: 5, color: "gray", marginTop: -5 }}>Address</Text>
                                     ) : (
-                                        <Text numberOfLines={1} ellipsizeMode="tail" style={{ marginLeft: 5, color: "gray", marginTop: -5 }}>{tempLocation}</Text>
-                                    )}
+                                            <Text numberOfLines={1} ellipsizeMode="tail" style={{ marginLeft: 5, color: "gray", marginTop: -5 }}>{tempLocation}</Text>
+                                        )}
                                 </View>
 
                                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5, gap: 15 }}>
@@ -602,8 +649,8 @@ const AddEditDestinations = () => {
                                         {(tempDuration == "") ? (
                                             <Text style={{ marginLeft: 5 }}>Duration</Text>
                                         ) : (
-                                            <Text style={{ marginLeft: 5 }}>{tempDuration} mins</Text>
-                                        )}
+                                                <Text style={{ marginLeft: 5 }}>{tempDuration} mins</Text>
+                                            )}
                                     </View>
 
                                     <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginRight: 5 }}>
@@ -611,8 +658,8 @@ const AddEditDestinations = () => {
                                         {(tempPriority == "") ? (
                                             <Text style={{ marginLeft: 5 }}>Priority</Text>
                                         ) : (
-                                            <Text style={{ marginLeft: 5 }}>Priority: {tempPriority}</Text>
-                                        )}
+                                                <Text style={{ marginLeft: 5 }}>Priority: {tempPriority}</Text>
+                                            )}
                                     </View>
                                 </View>
                             </View>
@@ -624,7 +671,7 @@ const AddEditDestinations = () => {
                                     <Ionicons name={"location"} color={"#24a6ad"} />
                                     <Text>Destination:</Text>
                                 </View>
-                                <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5 }]} value={tempAlias} onChangeText={setTempAlias} ref={infoInputRef}></TextInput>
+                                <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5, justifyContent: "center", textAlignVertical: "center" }]} value={tempAlias} onChangeText={setTempAlias} ref={infoInputRef}></TextInput>
                             </View>
                         </TouchableWithoutFeedback>
 
@@ -639,6 +686,7 @@ const AddEditDestinations = () => {
                             }} />
                         </View>
 
+                        {/* INSERT TIME PICKER HERE */}
                         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                             <TouchableWithoutFeedback onPress={() => infoInputRef.current.focus()}>
                                 <View style={{ flexDirection: "column", marginTop: 15, width: "45%" }}>
@@ -646,7 +694,9 @@ const AddEditDestinations = () => {
                                         <Ionicons name={"time"} color={"#24a6ad"} />
                                         <Text>Duration:</Text>
                                     </View>
-                                    <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5 }]} value={tempDuration} onChangeText={setTempDuration} keyboardType="numeric" ref={infoInputRef} returnKeyType="done"></TextInput>
+                                    <TouchableOpacity style={[styles.addDestinationTextInputs, { paddingHorizontal: 5, justifyContent: 'center', alignItems: 'flex-start' }]} onPress={() => setShowPicker(true)}>
+                                        <Text style={{fontSize: 18 }}>{timeDuration ? `${timeDuration.hours}hr ${timeDuration.minutes}min` : ''}</Text>
+                                    </TouchableOpacity>
                                 </View>
                             </TouchableWithoutFeedback>
 
@@ -674,6 +724,49 @@ const AddEditDestinations = () => {
                 </View>
             </Modal>
 
+            <Modal
+                visible={showPicker}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowPicker(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={{ width: '95%', backgroundColor: '#F4F4F4', padding: 20, borderRadius: 10, height: 350 }}>
+                        {timePicker()}
+                        <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 20, gap: 30 }}>
+                            <TouchableOpacity onPress={() => { setShowPicker(false); }} style={{
+                                backgroundColor: "red",
+                                height: 35,
+                                width: 70,
+                                alignItems: "center",
+                                justifyContent: "center",
+                                shadowColor: "#333333",
+                                shadowOffset: { width: 1, height: 2 },
+                                shadowOpacity: 0.1,
+                                shadowRadius: 3,
+                                borderRadius: 10
+                            }}>
+                                <Text style={{ fontSize: 12, color: "white", fontWeight: "700" }}>CANCEL</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={() => { selectDuration(); }} style={{
+                                backgroundColor: "green",
+                                height: 35,
+                                width: 70,
+                                alignItems: "center",
+                                justifyContent: "center",
+                                shadowColor: "#333333",
+                                shadowOffset: { width: 1, height: 2 },
+                                shadowOpacity: 0.1,
+                                shadowRadius: 3,
+                                borderRadius: 10
+                            }}>
+                                <Text style={{ fontSize: 12, color: "white", fontWeight: "700" }}>OK</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
 
             {/* Pop-up for Date Interval picker */}
             {/* Modal with CalendarPicker */}
