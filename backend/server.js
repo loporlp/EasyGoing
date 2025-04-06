@@ -413,7 +413,10 @@ app.get('/api/place/photo', async (req, res) => {
 
         // Pipe image to S3
         const pass = new stream.PassThrough();
+        const clientStream = new stream.PassThrough();
+
         response.data.pipe(pass);
+        response.data.pipe(clientStream);
 
         await s3.upload({
             Bucket: S3_BUCKET,
@@ -430,7 +433,7 @@ app.get('/api/place/photo', async (req, res) => {
 
         // Stream back to user
         res.setHeader('Content-Type', contentType);
-        response.data.pipe(res);
+        clientStream.data.pipe(res);
 
     } catch (error) {
         console.error('Error fetching photo:', error.message);
