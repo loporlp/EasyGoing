@@ -30,15 +30,15 @@ const SavedDestinationsScreen = () => {
     // Example data
     const static_destinations = [
         {
-            "name": "Empire State Builing",
-            "duration": "3h",
+            "destination": "Empire State Builing",
+            "time": "3h",
             "review": "4.7(105k)",
             "price": "$25"
         },
 
         {
-            "name": "Tokyo Skytree",
-            "duration": "3h",
+            "destination": "Tokyo Skytree",
+            "time": "3h",
             "review": "4.4(95k)",
             "price": "$13"
         }

@@ -265,21 +265,24 @@ const HomeScreen = () => {
         console.log("Bookmarked:", destination);
 
         let accountInfo = await getData("savedDestinations");
+        console.log("Account Info from getData():", accountInfo);
         let savedDestinations = accountInfo[0].destinations;
 
         try {
             // See if it was already bookmarked
-            console.log("savedDestinations:", savedDestinations);
+            console.log("Loaded savedDestinations:", savedDestinations);
             const isBookmarked = savedDestinations.find((item: Destination) => item.destination === destination.destination) !== undefined;
 
             if (isBookmarked) {
                 // If already bookmarked, remove it
                 savedDestinations = savedDestinations.filter((item: Destination) => item.destination !== destination.destination);
+                destination.saved = false;
                 console.log("New savedDestinations:", savedDestinations);
                 updateBookmarkStyle(destination, false);
                 console.log("Removed bookmark");
             } else {
                 // If not bookmarked, add it to the saved list
+                destination.saved = true;
                 savedDestinations.push(destination);
                 console.log("New savedDestinations:", savedDestinations);
                 updateBookmarkStyle(destination, true);

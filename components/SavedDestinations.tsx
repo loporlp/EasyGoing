@@ -39,17 +39,17 @@ const SavedDestinations: React.FC<SavedDestinationsProps> = ({ SavedDestinations
             style={[styles.destination, { flexDirection: "row", alignItems: "center", borderRadius: isSwiped ? 0 : 10 }]}
             onPress={() => handlePress(item)}
         >
-            <DynamicImage placeName={item.name} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
+            <DynamicImage placeName={item.destination} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
             <View style={{ flexDirection: "column", justifyContent: "flex-start", gap: 5, marginLeft: 10, paddingRight: 140 }}>
                 <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                     <Ionicons name="location" size={20} color={"#24a6ad"} />
-                    <Text numberOfLines={1} ellipsizeMode="tail" style={{ fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{item.name}</Text>
+                    <Text numberOfLines={1} ellipsizeMode="tail" style={{ fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{item.destination}</Text>
                 </View>
 
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5, gap: 5, width: "100%" }}>
                     <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                         <Ionicons name="time" size={18} color={"#24a6ad"} />
-                        <Text style={{ marginLeft: 5 }}>{item.duration}</Text>
+                        <Text style={{ marginLeft: 5 }}>{item.time}</Text>
                     </View>
 
                     <View style={{ flexDirection: "row", alignItems: "center" }}>

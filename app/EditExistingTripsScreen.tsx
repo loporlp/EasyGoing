@@ -120,7 +120,7 @@ const EditExistingTripsScreen = () => {
             },
         };
 
-        const updateSuccess = await updateTrip(getTrip.id, updatedTrip);
+        const updateSuccess = await updateTrip(getTrip.id, updatedTrip.details);
 
         if (updateSuccess) {
             const updatedTrips = [...trips];
