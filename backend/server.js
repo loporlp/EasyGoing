@@ -385,8 +385,7 @@ app.get('/api/place/photo', async (req, res) => {
         );
 
         if (rows.length > 0) {
-            console.log("Photo already exists fetch from s3");
-            // Fetch from S3 and stream to client
+            console.log("Photo already exists, fetch from S3");
             const { s3_key, content_type } = rows[0];
             const s3Stream = s3.getObject({
                 Bucket: S3_BUCKET,
@@ -397,8 +396,7 @@ app.get('/api/place/photo', async (req, res) => {
             return s3Stream.pipe(res);
         }
 
-        console.log("Get photo from google");
-        // Fetch from Google API
+        console.log("Get photo from Google");
         const response = await axios.get('https://maps.googleapis.com/maps/api/place/photo', {
             params: {
                 photo_reference,
@@ -411,35 +409,43 @@ app.get('/api/place/photo', async (req, res) => {
         const contentType = response.headers['content-type'];
         const s3Key = `photos/${uuidv4()}`;
 
-        // Pipe image to S3
-        const pass = new stream.PassThrough();
+        // Fork the response stream
+        const s3Stream = new stream.PassThrough();
         const clientStream = new stream.PassThrough();
 
-        response.data.pipe(pass);
+        response.data.pipe(s3Stream);
         response.data.pipe(clientStream);
 
-        await s3.upload({
+        // Stream to client FIRST (non-blocking)
+        res.setHeader('Content-Type', contentType);
+        clientStream.pipe(res);
+
+        // Do S3 upload + DB write in background
+        const uploadPromise = s3.upload({
             Bucket: S3_BUCKET,
             Key: s3Key,
-            Body: pass,
+            Body: s3Stream,
             ContentType: contentType,
         }).promise();
 
-        // Store metadata in DB
+        // Await after streaming to client starts
+        await uploadPromise;
+
         await pool.query(
             'INSERT INTO cached_photos (photo_reference, s3_key, maxwidth, content_type) VALUES ($1, $2, $3, $4)',
             [photo_reference, s3Key, maxwidth, contentType]
         );
 
-        // Stream back to user
-        res.setHeader('Content-Type', contentType);
-        clientStream.pipe(res);
-
     } catch (error) {
         console.error('Error fetching photo:', error.message);
-        res.status(500).json({ error: 'An error occurred while fetching photos' });
+        if (!res.headersSent) {
+            res.status(500).json({ error: 'An error occurred while fetching the photo' });
+        } else {
+            res.end(); // in case headers already sent
+        }
     }
 });
+
 
 
 
