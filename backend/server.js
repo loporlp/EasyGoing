@@ -371,7 +371,7 @@ app.get('/api/place/textsearch', verifyFirebaseToken, async (req, res) => {
 
 app.get('/api/place/photo', async (req, res) => {
     console.log("photo called");
-
+    return res.status(503).json({ error: 'This service is temporarily disableed'});
     const { photo_reference, maxwidth } = req.query;
     if (!photo_reference || !maxwidth) {
         return res.status(400).json({ error: 'Missing required parameters: photo_reference or maxwidth' });
