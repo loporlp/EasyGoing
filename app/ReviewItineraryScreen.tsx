@@ -119,7 +119,7 @@ const ReviewItineraryScreen = () => {
             const formattedEnd = moment(endTime).utc().format("YYYYMMDD[T]HHmmss[Z]");
             const dtStamp = moment().utc().format("YYYYMMDD[T]HHmmss[Z]");
             //generate a unique identifier for the event.
-            const uid = `${trip.tripName}-${index}@easygoing.app`;
+            const uid = `${trip.tripName}-${index}@ezgoing.app`;
             
             //add event for destination
             icalContent += "BEGIN:VEVENT\r\n";
