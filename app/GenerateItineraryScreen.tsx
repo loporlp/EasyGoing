@@ -425,43 +425,51 @@ const GenerateItineraryScreen = () => {
     
     // Function to move the destination up or down
     const moveDestination = async (destinationIndex: number, direction: string) => {
-        const newResultRoute= [...resultRoute];
-        
+        const newResultRoute = [...resultRoute];
+    
         // Ensure destinationIndex is valid
-        if (destinationIndex < 0 || destinationIndex >= newResultRoute.length) {
-            return;
-        }
-
-        // Retain only alias and address for each element
-        const simplifiedRoute = newResultRoute.map(destination => ({
-            alias: destination.alias,
-            address: destination.address
-        }));
-
+        if (destinationIndex < 0 || destinationIndex >= newResultRoute.length) return;
+    
+        let newIndex = destinationIndex;
+    
         if (direction === 'up' && destinationIndex > 0) {
             // Move the destination up
-            const [movedDestination] = simplifiedRoute.splice(destinationIndex, 1);
-            simplifiedRoute.splice(destinationIndex - 1, 0, movedDestination);
-        } else if (direction === 'down' && destinationIndex < simplifiedRoute.length - 1) {
+            const [moved] = newResultRoute.splice(destinationIndex, 1);
+            newIndex = destinationIndex - 1;
+            newResultRoute.splice(newIndex, 0, moved);
+        } else if (direction === 'down' && destinationIndex < newResultRoute.length - 1) {
             // Move the destination down
-            const [movedDestination] = simplifiedRoute.splice(destinationIndex, 1);
-            simplifiedRoute.splice(destinationIndex + 1, 0, movedDestination);
+            const [moved] = newResultRoute.splice(destinationIndex, 1);
+            newIndex = destinationIndex + 1;
+            newResultRoute.splice(newIndex, 0, moved);
         } else {
             return;
         }
-
-        // Recalculate the new path before saving it
+    
+        // Determine the range of affected destinations (since we have prev, current, next locations)
+        const start = Math.max(0, newIndex - 1);
+        const end = Math.min(newResultRoute.length, newIndex + 2); // non-inclusive
+    
+        const affectedSlice = newResultRoute.slice(start, end);
+    
         try {
-            const reorganizedDestinations = await recalculatePaths(simplifiedRoute);
-            
-            // Ensure that reorderDestinations is set to the reorganizedDestinations
-            setToSaveData(reorganizedDestinations);
+            // Recalculate only the affected locations (to save API calls)
+            const recalculatedSlice = await recalculatePaths(affectedSlice);
+    
+            // Replace the affected section in newResultRoute
+            for (let i = start, j = 0; i < end; i++, j++) {
+                newResultRoute[i] = {
+                    ...newResultRoute[i],
+                    ...recalculatedSlice[j]
+                };
+            }
+
+            // This wil lthen show on the map updated
+            setToSaveData(newResultRoute);
         } catch (error) {
             console.error("Error recalculating paths or saving data:", error);
         }
-    };
-   
-    
+    };    
 
     return (
         <View style={styles.container}>    
