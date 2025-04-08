@@ -71,7 +71,7 @@ const modeColors = {
 };
 
 // Transit Polylines
-async function getTransitRoutePolylines(originAddress, originCoords, destinationAddress, destinationCoords, mode) {
+async function getTransitRoutePolylines(originAddress, originCoords, destinationAddress, destinationCoords) {
     try {
         const transitData = await getTransitRoute(originCoords, destinationCoords);
 
@@ -134,15 +134,12 @@ async function getTransitRoutePolylines(originAddress, originCoords, destination
                 }
             } else {
                 console.log("Transit data is not an array or is empty");
-                console.log("Switching to driving mode due to error.");
-                return await getRoutePolyline(originAddress, originCoords, destinationAddress, destinationCoords, "DRIVING", false);
+                throw new Error("Failed");
             }
 
             return polylineSegments;  // Return the array of polylines for the transit route
         } else {
-            console.error('No transit data returned.');
-            console.log("Switching to driving mode due to error.");
-            return await getRoutePolyline(originAddress, originCoords, destinationAddress, destinationCoords, "DRIVING", false);
+            throw new Error("Failed");
         }
     } catch (error) {
         console.error('Error fetching transit route: (error)', error);
@@ -167,7 +164,7 @@ export async function getRoutePolyline(origin, originCoords, destination, destin
 
         if (mode.toUpperCase() == "TRANSIT") {
             // Transit Polyline
-            const transitPolylines = await getTransitRoutePolylines(originAddress, originCoords, destinationAddress, destinationCoords, mode);
+            const transitPolylines = await getTransitRoutePolylines(originAddress, originCoords, destinationAddress, destinationCoords);
             return transitPolylines;
         }
 
@@ -211,11 +208,7 @@ export async function getRoutePolyline(origin, originCoords, destination, destin
             return routePolyline; // Return path strokeColor, opacity weight, and duration
         } else {
             console.error('Error fetching route (data):', data.status);
-            console.log("Switching to transit mode");
-
-            // Transit Polyline
-            const transitPolylines = await getTransitRoutePolylines(originAddress, originCoords, destinationAddress, destinationCoords, mode);
-            return transitPolylines;  // Return the polyline segments for the transit route
+            return []; // No possible path?!
         }
     } catch (error) {
         console.error('Error fetching route: (error)', error);
@@ -228,7 +221,7 @@ export async function getRoutePolyline(origin, originCoords, destination, destin
             return await getRoutePolyline(originAddress, originCoords, destinationAddress, destinationCoords, "DRIVING", false);  // Retry with driving as fallback
         }
 
-        return null;
+        return [];
     }
 }
 
