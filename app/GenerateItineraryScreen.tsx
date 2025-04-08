@@ -64,7 +64,7 @@ const GenerateItineraryScreen = () => {
     const [origin, setOrigin] = useState<{ name: string; address: string; duration: number; priority: number}>();
     const [startDate, setStartDate] = useState<Date>();
     const [endDate, setEndDate] = useState<Date>();
-    const [isDateSelected, setIsDateSelected] = useState(false);
+    const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
     const [tripDates, setTripDates] = useState<Date[]>([])
 
     // Initial empties
@@ -75,8 +75,6 @@ const GenerateItineraryScreen = () => {
     const [resultRoute, setResultRoute] = useState<any[][]>([]);
     const [frontendOptimalRoute, setFrontendOptimalRoute] = useState<any[][]>([]);
     const [transportationModes, setTransportationModes] = useState<string[]>([]);
-
-    const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
 
     const [timeChecked, setTimeChecked] = useState<boolean>(false);
     const [changedModeOfTransport, setChangedModeOfTransport] = useState<boolean>(false);
@@ -425,6 +423,7 @@ const GenerateItineraryScreen = () => {
     
     // Function to move the destination up or down
     const moveDestination = async (destinationIndex: number, direction: string) => {
+        setIsLoading(true);
         const newResultRoute = [...resultRoute];
     
         // Ensure destinationIndex is valid
@@ -464,11 +463,26 @@ const GenerateItineraryScreen = () => {
                 };
             }
 
-            // This wil lthen show on the map updated
+            // Save
             setToSaveData(newResultRoute);
+            console.log("newResultRoute:", newResultRoute)
+
+            // Update the frontend map
+            const simplifiedDestinations = newResultRoute
+                        .filter(destination => destination.alias !== origin.name)  // Exclude origin
+                        .map(destination => ({
+                            name: destination.alias,
+                            address: destination.address,
+                            duration: destination.duration,
+                            priority: destination.priority
+                        }));
+            const newRouteOrderedArray = formatRouteInOrder(simplifiedDestinations, origin);
+            console.log("newRouteOrderedArray:", newRouteOrderedArray);
+            setFrontendOptimalRoute(newRouteOrderedArray);
         } catch (error) {
             console.error("Error recalculating paths or saving data:", error);
         }
+        setIsLoading(false);
     };    
 
     return (
@@ -645,18 +659,23 @@ const GenerateItineraryScreen = () => {
 
                                             {/* Move buttons */}
                                             <View style={styles.buttonContainer}>
-                                                {destinationIndex > 0 && (
+                                                {/* Up Button - But not w/ Origin */}
+                                                {!isLoading && destinationIndex > 1 && (
                                                     <TouchableOpacity
                                                         onPress={() => moveDestination(destinationIndex, 'up')}
                                                         style={styles.moveButton}
+                                                        disabled={isLoading}
                                                     >
                                                         <Ionicons name="arrow-up" size={20} color="#000" />
                                                     </TouchableOpacity>
                                                 )}
-                                                {destinationIndex < routeGroup.length - 1 && (
+
+                                                {/* Down Button - But not w/ Origin */}
+                                                {!isLoading && destinationIndex > 0 && destinationIndex < routeGroup.length - 1 && (
                                                     <TouchableOpacity
                                                         onPress={() => moveDestination(destinationIndex, 'down')}
                                                         style={styles.moveButton}
+                                                        disabled={isLoading}
                                                     >
                                                         <Ionicons name="arrow-down" size={20} color="#000" />
                                                     </TouchableOpacity>
