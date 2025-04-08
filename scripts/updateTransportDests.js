@@ -85,37 +85,54 @@ export const updateDayOrigin = (updatedDests, grouped2DDestinations) => {
     });
 };
 
-// Function to add tripDates to startDateTime for each destination
+// Function to add tripDates to startDateTime for each destination (based on dayOrigin)
 export const addTripDatesToStartDateTime = (updatedDest, tripDates) => {
     console.log("Updated Destinations (Before Trip Dates):", updatedDest);
     console.log("Trip Dates:", tripDates);
 
-    return updatedDest.map((destination, index) => {
-        // Check if there's a corresponding trip date for this destination
-        if (tripDates[index]) {
-            const tripDate = tripDates[index];
+    // Track the current index of tripDates to use for dayOrigin=true
+    let nextTripDateIndex = 0;
 
-            // Ensure the destination has a startDateTime field
-            const startDateTime = new Date(destination.startDateTime);
-
-            // Update startDateTime with the corresponding trip date
-            const updatedStartDateTime = new Date(tripDate);
-
-            // Set the time of day based on the original startDateTime
-            updatedStartDateTime.setHours(startDateTime.getHours());
-            updatedStartDateTime.setMinutes(startDateTime.getMinutes());
-            updatedStartDateTime.setSeconds(startDateTime.getSeconds());
-
-            console.log(`Updating startDateTime for ${destination.alias} to: ${updatedStartDateTime}`);
-
-            return {
-                ...destination,
-                startDateTime: updatedStartDateTime.toISOString(),
-            };
-        } else {
-            // If no trip date, leave the startDateTime unchanged
-            console.log(`No trip date for ${destination.alias}. Keeping original startDateTime.`);
-            return destination;
-        }
-    });
+    try {
+        return updatedDest.map((destination, index) => {
+            // Set the basic first one
+            let updatedStartDateTime = new Date(tripDates[0]);;
+    
+            // A new day (use NEW DATE)
+            if (destination.dayOrigin && tripDates[nextTripDateIndex]) {
+                // Current tripDate
+                const tripDate = tripDates[nextTripDateIndex];
+                
+                // Ensure the destination has a startDateTime field
+                const startDateTime = new Date(destination.startDateTime);
+    
+                // Update startDateTime with the corresponding trip date
+                updatedStartDateTime = new Date(tripDate);
+    
+                // Set the time of day based on the original startDateTime
+                updatedStartDateTime.setHours(startDateTime.getHours());
+                updatedStartDateTime.setMinutes(startDateTime.getMinutes());
+                updatedStartDateTime.setSeconds(startDateTime.getSeconds());
+    
+                console.log(`Updating startDateTime for ${destination.alias} to: ${updatedStartDateTime}`);
+    
+                // The next time dayOrigin=true, we have a new date
+                nextTripDateIndex++;
+    
+                return {
+                    ...destination,
+                    startDateTime: updatedStartDateTime.toISOString(),
+                };
+            } else {
+                // If dayOrigin is false or no trip date for this destination, leave the startDateTime unchanged (since it's the same day)
+                console.log(`No trip date for ${destination.alias}. Keeping same startDateTime.`);
+                return {
+                    ...destination,
+                    startDateTime: updatedStartDateTime.toISOString(), // Same as the closest dayOrigin above
+                };
+            }
+        });
+    } catch (error) {
+        console.log("Failed to set dates in updateTransportDests.js:", error);
+    }
 };
