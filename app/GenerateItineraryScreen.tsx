@@ -571,7 +571,7 @@ const GenerateItineraryScreen = () => {
                                 ) : null}
 
                                 {/* Loop through each destination in the current routeGroup */}
-                                {routeGroup.map((destination: { alias: any; address: any; duration: any; priority: any; picture: { url: string; }; mode: any, transportDuration: any; }, destinationIndex: any) => {
+                                {routeGroup.map((destination: { alias: any; address: any; duration: any; priority: any; picture: { url: string; }; mode: string; transportDuration: any; }, destinationIndex: number) => {
                                     const destinationKey = `${destinationGroupKey}-${destinationIndex}`;  // Unique key for each destination
                                     const destinationName = destination.alias;
                                     const destinationAddress = destination.address;
@@ -608,8 +608,6 @@ const GenerateItineraryScreen = () => {
                                             {/* Conditional rendering of additional info */}
                                             {selectedDestination === destinationKey && (
                                                 <View style={styles.additionalInfo}>
-                                                    {/*<Text style={styles.additionalText}>{getRouteText()}</Text>*/}
-                                                    
                                                     {/* Show transport mode */}
                                                     <Text style={styles.additionalText}>
                                                         Transport Mode: {isLastDestination ? "None" : destinationTransportMode.charAt(0).toUpperCase() + destinationTransportMode.slice(1).toLowerCase()}
@@ -633,7 +631,7 @@ const GenerateItineraryScreen = () => {
                                                             </Picker>
                                                         )
                                                     )}
-                                                    
+
                                                     {/* Show transport duration */}
                                                     <Text style={styles.additionalText}>
                                                         Duration: {isLastDestination ? "None" : destinationTransportDuration}
@@ -643,9 +641,9 @@ const GenerateItineraryScreen = () => {
                                                     <View style={{ maxHeight: 300 }}> 
                                                         <ScrollView nestedScrollEnabled={true}>
                                                             <DirectionsList
-                                                                origin={destinations[String(destinationIndex)].address}
-                                                                destination={destinations[String(destinationIndex + 1)]?.address || "Unknown Destination"}
-                                                                mode={destinations[String(destinationIndex)].mode}
+                                                                origin={routeGroup[destinationIndex]?.address} 
+                                                                destination={routeGroup[destinationIndex + 1]?.address || "Unknown Destination"}
+                                                                mode={destinationTransportMode}
                                                             />
                                                         </ScrollView>
                                                     </View>
@@ -655,7 +653,7 @@ const GenerateItineraryScreen = () => {
                                             {/* Move buttons */}
                                             <View style={styles.buttonContainer}>
                                                 {/* Up Button - But not w/ Origin */}
-                                                {!isLoading && destinationIndex > 1 && (
+                                                {!isLoading && (routeGroupIndex !== 0 || destinationIndex > 1) && (
                                                     <TouchableOpacity
                                                         onPress={() => moveDestination(destinationIndex, 'up')}
                                                         style={styles.moveButton}
@@ -666,7 +664,11 @@ const GenerateItineraryScreen = () => {
                                                 )}
 
                                                 {/* Down Button - But not w/ Origin */}
-                                                {!isLoading && destinationIndex > 0 && destinationIndex < routeGroup.length - 1 && (
+                                                {!isLoading && (
+                                                    (routeGroupIndex !== 0 || 
+                                                    (routeGroupIndex !== 0 || destinationIndex > 0)) &&
+                                                    destinationIndex < routeGroup.length - 1
+                                                ) && (
                                                     <TouchableOpacity
                                                         onPress={() => moveDestination(destinationIndex, 'down')}
                                                         style={styles.moveButton}
