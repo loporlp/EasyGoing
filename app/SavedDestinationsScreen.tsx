@@ -20,7 +20,7 @@ const SavedDestinationsScreen = () => {
             }
             else {
                 // Default
-                setDestinations(static_destinations);
+                setDestinations([]);
             }
         };
 
