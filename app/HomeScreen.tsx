@@ -1,9 +1,9 @@
 import { View, Text, TouchableOpacity, StyleSheet, TextInput, Image, ScrollView, FlatList, ActivityIndicator } from 'react-native'
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { Link } from 'expo-router'
 import { getAuth } from 'firebase/auth';
 import {storeData, getData, fillLocal} from "../scripts/localStore";
@@ -155,7 +155,11 @@ const HomeScreen = () => {
 
     useEffect(() => {
         const fetchData = async () => {
+            const accountInfo = await getData("savedDestinations");
+            const savedList = accountInfo?.[0]?.destinations ?? [];
+
             try {
+                
                 const dataString = await recommended_places(3, locationType); // Get 3 recommendations with location type
                 
                 // Extract AI message content
@@ -163,7 +167,20 @@ const HomeScreen = () => {
                 
                 if (!recommendations) {
                     console.error("Error: No recommendations received");
-                    setDestinationList(backupArray);
+
+                    const updatedBackup = backupArray.map((item) => {
+                        const isSaved = savedList.some(
+                            (savedItem: Destination) => savedItem.destination === item.destination
+                        );
+                        return {
+                            ...item,
+                            saved: isSaved,
+                        };
+                    });
+                      
+                    setDestinationList(updatedBackup);
+                    setIsLoading(false);
+
                     return;
                 }
     
@@ -184,9 +201,15 @@ const HomeScreen = () => {
                 const updatedData = await Promise.all(
                     parsedData.map(async (item: Destination) => {
                         const updatedImage = await getImageUrl(item.image);
+
+                        // Check if this destination is in the saved list
+                        const isSaved = savedList.some(
+                            (savedItem: Destination) => savedItem.destination === item.destination
+                        );
                         return {
                             ...item,
-                            image: updatedImage
+                            image: updatedImage,
+                            saved: isSaved
                         };
                     })
                 );
@@ -198,13 +221,46 @@ const HomeScreen = () => {
                 console.error("Error parsing JSON:", error);
     
                 // Set backup array if parsing fails
-                setDestinationList(backupArray);
+                const updatedBackup = backupArray.map((item) => {
+                const isSaved = savedList.some(
+                    (savedItem: Destination) => savedItem.destination === item.destination
+                );
+                return {
+                    ...item,
+                    saved: isSaved,
+                };
+                });
+
+                setDestinationList(updatedBackup);
             }
             setIsLoading(false);
         };
     
         fetchData();
     }, [locationType]);
+
+    useFocusEffect(
+        useCallback(() => {
+          const refreshSavedBookmarks = async () => {
+            const accountInfo = await getData("savedDestinations");
+            const savedList = accountInfo?.[0]?.destinations ?? [];
+      
+            const updatedList = destinationList.map((item) => {
+              const isSaved = savedList.some(
+                (savedItem: Destination) => savedItem.destination === item.destination
+              );
+              return {
+                ...item,
+                saved: isSaved
+              };
+            });
+      
+            setDestinationList(updatedList);
+          };
+      
+          refreshSavedBookmarks();
+        }, [])
+      );      
     
       
 
