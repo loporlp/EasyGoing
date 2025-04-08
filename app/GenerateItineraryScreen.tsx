@@ -348,13 +348,7 @@ const GenerateItineraryScreen = () => {
     
         console.log("What happens to transportationModes 2:", updatedTransportationModes);
     };
-
-    const getRouteText = () => {
-        if (!selectedDestination) return "";
-        const routeDestination = destinations[selectedDestination];
-        return `${transportationText} instructions to ${routeDestination?.alias}.`;
-    };
-
+    
     const reviewItinerary = () => {
         router.push("/ReviewItineraryScreen");
     };
@@ -464,7 +458,8 @@ const GenerateItineraryScreen = () => {
             }
 
             // Save
-            setToSaveData(newResultRoute);
+            const newDatesDestinations = addTripDatesToStartDateTime(newResultRoute, tripDates);
+            setToSaveData(newDatesDestinations);
             console.log("newResultRoute:", newResultRoute)
 
             // Update the frontend map
