@@ -64,7 +64,7 @@ const GenerateItineraryScreen = () => {
     const [origin, setOrigin] = useState<{ name: string; address: string; duration: number; priority: number}>();
     const [startDate, setStartDate] = useState<Date>();
     const [endDate, setEndDate] = useState<Date>();
-    const [isDateSelected, setIsDateSelected] = useState(false);
+    const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
     const [tripDates, setTripDates] = useState<Date[]>([])
 
     // Initial empties
@@ -75,8 +75,6 @@ const GenerateItineraryScreen = () => {
     const [resultRoute, setResultRoute] = useState<any[][]>([]);
     const [frontendOptimalRoute, setFrontendOptimalRoute] = useState<any[][]>([]);
     const [transportationModes, setTransportationModes] = useState<string[]>([]);
-
-    const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
 
     const [timeChecked, setTimeChecked] = useState<boolean>(false);
     const [changedModeOfTransport, setChangedModeOfTransport] = useState<boolean>(false);
@@ -350,13 +348,7 @@ const GenerateItineraryScreen = () => {
     
         console.log("What happens to transportationModes 2:", updatedTransportationModes);
     };
-
-    const getRouteText = () => {
-        if (!selectedDestination) return "";
-        const routeDestination = destinations[selectedDestination];
-        return `${transportationText} instructions to ${routeDestination?.alias}.`;
-    };
-
+    
     const reviewItinerary = () => {
         router.push("/ReviewItineraryScreen");
     };
@@ -425,43 +417,68 @@ const GenerateItineraryScreen = () => {
     
     // Function to move the destination up or down
     const moveDestination = async (destinationIndex: number, direction: string) => {
-        const newResultRoute= [...resultRoute];
-        
+        setIsLoading(true);
+        const newResultRoute = [...resultRoute];
+    
         // Ensure destinationIndex is valid
-        if (destinationIndex < 0 || destinationIndex >= newResultRoute.length) {
-            return;
-        }
-
-        // Retain only alias and address for each element
-        const simplifiedRoute = newResultRoute.map(destination => ({
-            alias: destination.alias,
-            address: destination.address
-        }));
-
+        if (destinationIndex < 0 || destinationIndex >= newResultRoute.length) return;
+    
+        let newIndex = destinationIndex;
+    
         if (direction === 'up' && destinationIndex > 0) {
             // Move the destination up
-            const [movedDestination] = simplifiedRoute.splice(destinationIndex, 1);
-            simplifiedRoute.splice(destinationIndex - 1, 0, movedDestination);
-        } else if (direction === 'down' && destinationIndex < simplifiedRoute.length - 1) {
+            const [moved] = newResultRoute.splice(destinationIndex, 1);
+            newIndex = destinationIndex - 1;
+            newResultRoute.splice(newIndex, 0, moved);
+        } else if (direction === 'down' && destinationIndex < newResultRoute.length - 1) {
             // Move the destination down
-            const [movedDestination] = simplifiedRoute.splice(destinationIndex, 1);
-            simplifiedRoute.splice(destinationIndex + 1, 0, movedDestination);
+            const [moved] = newResultRoute.splice(destinationIndex, 1);
+            newIndex = destinationIndex + 1;
+            newResultRoute.splice(newIndex, 0, moved);
         } else {
             return;
         }
-
-        // Recalculate the new path before saving it
+    
+        // Determine the range of affected destinations (since we have prev, current, next locations)
+        const start = Math.max(0, newIndex - 1);
+        const end = Math.min(newResultRoute.length, newIndex + 2); // non-inclusive
+    
+        const affectedSlice = newResultRoute.slice(start, end);
+    
         try {
-            const reorganizedDestinations = await recalculatePaths(simplifiedRoute);
-            
-            // Ensure that reorderDestinations is set to the reorganizedDestinations
-            setToSaveData(reorganizedDestinations);
+            // Recalculate only the affected locations (to save API calls)
+            const recalculatedSlice = await recalculatePaths(affectedSlice);
+    
+            // Replace the affected section in newResultRoute
+            for (let i = start, j = 0; i < end; i++, j++) {
+                newResultRoute[i] = {
+                    ...newResultRoute[i],
+                    ...recalculatedSlice[j]
+                };
+            }
+
+            // Save
+            const newDatesDestinations = addTripDatesToStartDateTime(newResultRoute, tripDates);
+            setToSaveData(newDatesDestinations);
+            console.log("newResultRoute:", newResultRoute)
+
+            // Update the frontend map
+            const simplifiedDestinations = newResultRoute
+                        .filter(destination => destination.alias !== origin.name)  // Exclude origin
+                        .map(destination => ({
+                            name: destination.alias,
+                            address: destination.address,
+                            duration: destination.duration,
+                            priority: destination.priority
+                        }));
+            const newRouteOrderedArray = formatRouteInOrder(simplifiedDestinations, origin);
+            console.log("newRouteOrderedArray:", newRouteOrderedArray);
+            setFrontendOptimalRoute(newRouteOrderedArray);
         } catch (error) {
             console.error("Error recalculating paths or saving data:", error);
         }
-    };
-   
-    
+        setIsLoading(false);
+    };    
 
     return (
         <View style={styles.container}>    
@@ -637,18 +654,23 @@ const GenerateItineraryScreen = () => {
 
                                             {/* Move buttons */}
                                             <View style={styles.buttonContainer}>
-                                                {destinationIndex > 0 && (
+                                                {/* Up Button - But not w/ Origin */}
+                                                {!isLoading && destinationIndex > 1 && (
                                                     <TouchableOpacity
                                                         onPress={() => moveDestination(destinationIndex, 'up')}
                                                         style={styles.moveButton}
+                                                        disabled={isLoading}
                                                     >
                                                         <Ionicons name="arrow-up" size={20} color="#000" />
                                                     </TouchableOpacity>
                                                 )}
-                                                {destinationIndex < routeGroup.length - 1 && (
+
+                                                {/* Down Button - But not w/ Origin */}
+                                                {!isLoading && destinationIndex > 0 && destinationIndex < routeGroup.length - 1 && (
                                                     <TouchableOpacity
                                                         onPress={() => moveDestination(destinationIndex, 'down')}
                                                         style={styles.moveButton}
+                                                        disabled={isLoading}
                                                     >
                                                         <Ionicons name="arrow-down" size={20} color="#000" />
                                                     </TouchableOpacity>
