@@ -655,7 +655,7 @@ const GenerateItineraryScreen = () => {
                                             {/* Move buttons */}
                                             <View style={styles.buttonContainer}>
                                                 {/* Up Button - But not w/ Origin */}
-                                                {!isLoading && destinationIndex > 1 && (
+                                                {!isLoading && (routeGroupIndex !== 0 || destinationIndex > 1) && (
                                                     <TouchableOpacity
                                                         onPress={() => moveDestination(destinationIndex, 'up')}
                                                         style={styles.moveButton}
@@ -666,7 +666,11 @@ const GenerateItineraryScreen = () => {
                                                 )}
 
                                                 {/* Down Button - But not w/ Origin */}
-                                                {!isLoading && destinationIndex > 0 && destinationIndex < routeGroup.length - 1 && (
+                                                {!isLoading && (
+                                                    (routeGroupIndex !== 0 || 
+                                                    (routeGroupIndex !== 0 || destinationIndex > 0)) &&
+                                                    destinationIndex < routeGroup.length - 1
+                                                ) && (
                                                     <TouchableOpacity
                                                         onPress={() => moveDestination(destinationIndex, 'down')}
                                                         style={styles.moveButton}
