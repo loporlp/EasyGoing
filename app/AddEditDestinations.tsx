@@ -619,9 +619,9 @@ const AddEditDestinations = () => {
                         <Text style={{ color: "black", fontWeight: "700", fontSize: 22 }}>Add Destination</Text>
                         <View style={[styles.destination, { marginTop: 10, flexDirection: "row", alignItems: "center" }]}>
                             {(tempAlias == "") ? (
-                                <Image source={require("../assets/images/blue.png")} style={[styles.destinationImage, { marginLeft: 0 }]} />
+                                <DynamicImage placeName={tempAlias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
                             ) : (
-                                    <DynamicImage placeName={tempAlias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
+                                <Image source={require("../assets/images/blue.png")} style={[styles.destinationImage, { marginLeft: 0 }]} />
                                 )}
                             <View style={{ flexDirection: "column", justifyContent: "flex-start", gap: 5, marginLeft: 10, paddingRight: 140 }}>
                                 <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
