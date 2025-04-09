@@ -435,8 +435,8 @@ app.get('/api/place/photo', async (req, res) => {
         await uploadPromise;
 
         await pool.query(
-            'INSERT INTO cached_photos (photo_reference, s3_key, maxwidth, content_type) VALUES ($1, $2, $3, $4)',
-            [photo_reference, s3Key, maxwidth, contentType]
+            'INSERT INTO cached_photos (photo_reference, s3_key, maxwidth, content_type, place_id) VALUES ($1, $2, $3, $4, $5)',
+            [photo_reference, s3Key, maxwidth, contentType, place_id]
         );
 
     } catch (error) {
