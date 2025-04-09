@@ -82,6 +82,44 @@ const GenerateItineraryScreen = () => {
     // For GI to see whether to optimize or not
     const [optimizeCheck, setOptimizeCheck] = useState(false);
 
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const startTimer = () => {
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+  
+        timeoutRef.current = setTimeout(() => {
+            if (isLoading) {
+                console.log("Timeout after 60 seconds");
+                failedPopup();
+            }
+        }, 60 * 1000); // 60 seconds
+    };
+  
+    useEffect(() => {
+        if (isLoading) {
+            startTimer();
+        }
+  
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+        };
+    }, []);
+  
+    // Watch isLoading changes
+    useEffect(() => {
+        if (isLoading) {
+            // Restart timer if it turns true
+            startTimer();
+        } else if (timeoutRef.current) {
+            // Cancel timer if it turns false
+            clearTimeout(timeoutRef.current);
+        }
+    }, [isLoading]);
+
     // Pop-Up for Priority 
     const confirmAction = () => {
         return new Promise((resolve, reject) => {
