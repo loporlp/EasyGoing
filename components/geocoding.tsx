@@ -57,7 +57,7 @@ const HomeScreen = () => {
                 console.log("No coordinates found for the selected place.");
             }
         } catch (error) {
-            console.error("Error while fetching coordinates:", error);
+            console.error("Error while fetching coordinates (Geo):", error);
         }
     };
 

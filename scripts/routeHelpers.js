@@ -15,9 +15,16 @@ export const fetchPolylinesAndDurations = async (locations, transportationModes)
     const mode = transportationModes[i];
 
     // Fetch coordinates for origin and destination
-    const originCoords = await getCoords({ description: origin, place_id: '' });
-    const destinationCoords = await getCoords({ description: destination, place_id: '' });
+    let originCoords;
+    let destinationCoords
 
+    try {
+      originCoords = await getCoords({ description: origin, place_id: '' });
+      destinationCoords = await getCoords({ description: destination, place_id: '' });
+    } catch (error) {
+      console.log("Error here in routeHelpers.js");
+    }
+    
     // Store markers
     allMarkers.push({
       origin: originCoords,
@@ -73,8 +80,14 @@ export async function getDirectionsBetweenLocations(origin, destination, mode) {
   console.log("(Get Directions - Mode: ", mode);
 
   // Fetch coordinates for origin and destination
-  const originCoords = await getCoords({ description: origin, place_id: '' });
-  const destinationCoords = await getCoords({ description: destination, place_id: '' });
+  let originCoords;
+  let destinationCoords;
+  try {
+    originCoords = await getCoords({ description: origin, place_id: '' });
+    destinationCoords = await getCoords({ description: destination, place_id: '' });
+  } catch (error) {
+    console.log("Error in coords for routeHelpers.js");
+  }
 
   // Retrieve the ID token from Firebase
   const idToken = await getIdToken(auth);

@@ -18,7 +18,7 @@ export const getCoords = async (place) => {
                 throw new Error("No coordinates found");
             }
         } catch (error) {
-            console.error("Error while fetching coordinates:", error);
+            console.error("Error while fetching coordinate (nTC)s:", error);
             throw error;
         }
 }
