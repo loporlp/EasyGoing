@@ -210,6 +210,7 @@ const BudgetManagerScreen = () => {
 
     // add to history
     const addHistory = async () => {
+        setAddHistoryVisible(false);
 
         if (expenseLabel != "" && expensePrice != "" && expensePrice != "" && expenseTag != "") {
             // date
