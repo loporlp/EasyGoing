@@ -1,0 +1,43 @@
+.team-member {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 2rem;
+  }
+  
+  .team-member img {
+    width: 150px;
+    height: 150px;
+    border-radius: 8px;
+    object-fit: cover;
+    object-position: center 20%;
+  }
+  
+  .bio {
+    max-width: 600px;
+  }
+  
+  .bio h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+    color: #333;
+  }
+  
+  .bio p {
+    margin: 0.5rem 0;
+    color: #555;
+    line-height: 1.5;
+  }
+  
+  .bio a {
+    color: #0077cc;
+    text-decoration: none;
+  }
+  
+  .bio a:hover {
+    text-decoration: underline;
+  }
+  

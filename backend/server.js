@@ -43,6 +43,9 @@ admin.initializeApp({
   credential: admin.credential.cert(require('./admin.json'))
 });
 
+// Webpage for Web Presence
+app.use(express.static('public'));
+
 
 // Middleware to verify firebase token
 const verifyFirebaseToken = async (req, res, next) => {
