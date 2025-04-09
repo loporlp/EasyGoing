@@ -347,7 +347,7 @@ const HomeScreen = () => {
     
             // Update the database
             accountInfo[0].destinations = savedDestinations;
-            console.log("AccountInfo:", accountInfo);
+            console.log("AccountInfo:", accountInfo[1],accountInfo[0]);
             updateTrip(accountInfo[1], accountInfo[0]);
         } catch (error) {
             console.log(error);
