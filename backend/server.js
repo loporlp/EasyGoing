@@ -375,18 +375,18 @@ app.get('/api/place/textsearch', verifyFirebaseToken, async (req, res) => {
 app.get('/api/place/photo', async (req, res) => {
     console.log("photo called");
     //return res.status(503).json({ error: 'This service is temporarily disableed'});
-    const { photo_reference, maxwidth } = req.query;
+    const { photo_reference, maxwidth, place_id } = req.query;
     if (!photo_reference || !maxwidth) {
-        return res.status(400).json({ error: 'Missing required parameters: photo_reference or maxwidth' });
+        return res.status(400).json({ error: 'Missing required parameters: photo_reference or maxwidth or place_id' });
     }
 
     try {
         // Check if photo is already cached
         const { rows } = await pool.query(
-            'SELECT s3_key, content_type FROM cached_photos WHERE photo_reference = $1 AND maxwidth = $2',
-            [photo_reference, maxwidth]
+            'SELECT s3_key, content_type FROM cached_photos WHERE place_id = $1 AND maxwidth = $2',
+            [place_id, maxwidth]
         );
-
+        
         if (rows.length > 0) {
             console.log("Photo already exists, fetch from S3");
             const { s3_key, content_type } = rows[0];

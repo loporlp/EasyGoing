@@ -30,9 +30,10 @@ const DynamicImage = ({ placeName, containerStyle, imageStyle } : DynamicImagePr
 
       const place = placeSearchResponse.data.results[0];
       const photoReference = place.photos[0].photo_reference;
+      const place_id = place.place_id;
 
       // Step 2: Get Photo URL
-      const photoUrl = `https://ezgoing.app/api/place/photo?maxwidth=400&photo_reference=${photoReference}`;
+      const photoUrl = `https://ezgoing.app/api/place/photo?maxwidth=400&photo_reference=${photoReference}&place_id=${place_id}`;
 
       setPhotoUrl(photoUrl);
       console.log("PHOTO URL IS: ", photoUrl);
