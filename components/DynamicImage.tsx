@@ -36,7 +36,6 @@ const DynamicImage = ({ placeName, containerStyle, imageStyle } : DynamicImagePr
       const photoUrl = `https://ezgoing.app/api/place/photo?maxwidth=400&photo_reference=${photoReference}&place_id=${place_id}`;
 
       setPhotoUrl(photoUrl);
-      console.log("PHOTO URL IS: ", photoUrl);
     } catch (err) {
       setError('Unknown Photo');
       console.error(err);

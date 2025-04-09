@@ -68,12 +68,12 @@ export const fillLocal = async (forceRun) => {
         trips = await getTrips();
         histories = await getHistories();
         tripIDs = Object.keys(trips);
-        await storeData("tripIDs", tripIDs); // Must await because later in this same function we will be checking if this information is stored
         for (const ID of tripIDs){
             console.log("START DATE: ", trips[ID].tripStartDate);
             if(trips[ID].tripStartDate === "saved"){
                 console.log("Stored Saved Destinations")
                 await storeData("savedDestinations", [trips[ID], ID]);
+                delete trips[ID]; // Remove so the saved trip does not end up in the trips list
             } else{
                 // Store Trip Details
                 storeData(ID, trips[ID]);
@@ -82,6 +82,7 @@ export const fillLocal = async (forceRun) => {
                 storeData(`history ${ID}`, histories[ID] ? histories[ID] : []);
             }
         }
+        await storeData("tripIDs", tripIDs); 
         console.log(`Storing new: ${hasTrips}`)
     }
     else {

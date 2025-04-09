@@ -21,6 +21,15 @@ const EditExistingTripsScreen = () => {
     const [renameTripName, setRenameTripName] = useState("");
     const [getTrip, setRenameTrip] = useState<any | null>(null);
 
+    const images = [
+        require("../assets/images/createTripImage.jpg"),
+        require("../assets/images/city.jpg"),
+        require("../assets/images/airplane.jpg"),
+        require("../assets/images/hotel.jpg"),
+        require("../assets/images/venice.jpg"),
+        require("../assets/images/food.jpg"),
+      ]
+
     // Load trips when the component mounts
     useEffect(() => {
         const loadTrips = async () => {
@@ -164,7 +173,7 @@ const EditExistingTripsScreen = () => {
                             {/* Make this dynamic to take in trip.origin*/}
                             <Image
                                 style={styles.backgroundImage}
-                                source={require("../assets/images/newyorkcity.jpg")}
+                                source={images[trip.id % images.length]}
                             />
                             <View style={styles.darkOverlay} />
                             <View style={{ flexDirection: "row", justifyContent: "flex-end", position: "absolute", marginTop: 30, right: 0 }}>
