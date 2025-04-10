@@ -1,5 +1,5 @@
 // CreateNewTrip.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Image, TextInput, Modal, Button } from 'react-native';
 import { useRouter } from "expo-router";
 import AutocompleteTextBox from '../components/AutoCompleteTextBox';
@@ -29,6 +29,10 @@ const CreateNewTrip = () => {
     // Budget Input State
     const [budget, setBudget] = useState('');
 
+    // Trip Name
+    const [tripName, setTripName] = useState("");
+    const [tripModal, showTripModal] = useState(true);
+
     // Autocomplete Modal State
     const [isAutocompleteModalVisible, setAutocompleteModalVisible] = useState(false);
     const [selectedAutocompletePlace, setSelectedAutocompletePlace] = useState<string>('');
@@ -41,7 +45,7 @@ const CreateNewTrip = () => {
     const startPlanning = async () => {
         console.log('Selected place before navigation:', selectedAutocompletePlace);
         //makes sure that trip is finished being made (so currentID is properly being set)
-        const isTripCreated = await createTrip(selectedStartDate, selectedEndDate, budget, selectedAutocompletePlace);
+        const isTripCreated = await createTrip(tripName, selectedStartDate, selectedEndDate, budget, selectedAutocompletePlace);
         //only proceed if the trip was successfully created
         if (isTripCreated) {
             router.replace("/AddEditDestinations");
@@ -104,10 +108,10 @@ const CreateNewTrip = () => {
                                 {selectedAutocompletePlace}
                             </Text>
                         ) : (
-                            <Text style={{ fontSize: 18, color: "lightgray" }} numberOfLines={1} ellipsizeMode="tail">
-                                Destination
-                            </Text>
-                        )}
+                                <Text style={{ fontSize: 18, color: "lightgray" }} numberOfLines={1} ellipsizeMode="tail">
+                                    Destination
+                                </Text>
+                            )}
                     </View>
                 </TouchableOpacity>
 
@@ -126,15 +130,32 @@ const CreateNewTrip = () => {
                 {/* Budget Input */}
                 <TouchableOpacity style={styles.destinationInput}>
                     <Ionicons name="wallet" size={22} color={"#24a6ad"} />
-                    <TextInput placeholder="Budget" placeholderTextColor="lightgray" keyboardType="numeric" style={{ fontSize: 18, paddingLeft: 5, width: "100%" }} returnKeyType="done" onChangeText={setBudget}/>
+                    <TextInput placeholder="Budget" placeholderTextColor="lightgray" keyboardType="numeric" style={{ fontSize: 18, paddingLeft: 5, width: "100%" }} returnKeyType="done" onChangeText={setBudget} />
                 </TouchableOpacity>
 
                 {/* Start Planning Button */}
-                <TouchableOpacity style={[styles.createPlanButton, !isFormValid && {backgroundColor: "gray"}]} onPress={startPlanning} disabled={!isFormValid}>
+                <TouchableOpacity style={[styles.createPlanButton, !isFormValid && { backgroundColor: "gray" }]} onPress={startPlanning} disabled={!isFormValid}>
                     <Text style={styles.startPlanningButtonText}>Start Planning!</Text>
                 </TouchableOpacity>
 
             </View>
+
+            {/* Modal for naming a trip */}
+            <Modal visible={tripModal} transparent={true} onRequestClose={() => showTripModal(false)}>
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <TextInput placeholder="Trip name" placeholderTextColor="gray" style={{ fontSize: 18, paddingLeft: 5, width: "100%", backgroundColor: "white", borderRadius: 10, borderWidth: 1, borderColor: "gray" }} returnKeyType="done" onChangeText={setTripName} />
+                        <View style={{flexDirection: "row", justifyContent: "flex-end", gap: 10, marginTop: 15, width: "100%"}}>
+                            <TouchableOpacity style={{backgroundColor: "red", width: "30%", height: 40, alignItems: "center", justifyContent: "center", borderRadius: 10}} onPress={() => showTripModal(false)}>
+                                <Text style={{fontWeight: "700", color: "white"}}>LATER</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={{backgroundColor: "#24a6ad", width: "30%", height: 40, alignItems: "center", justifyContent: "center", borderRadius: 10}} onPress={() => showTripModal(false)}>
+                                <Text style={{fontWeight: "700", color: "white"}}>CONFIRM</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
 
             {/* Modal with CalendarPicker */}
             <Modal visible={isModalVisible} transparent={true} onRequestClose={() => setModalVisible(false)}>
@@ -340,8 +361,8 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
-        width: '100%',
-        backgroundColor: 'white',
+        width: '95%',
+        backgroundColor: '#F4F4F4',
         padding: 20,
         borderRadius: 10,
     },
