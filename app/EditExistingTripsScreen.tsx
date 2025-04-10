@@ -21,7 +21,6 @@ const EditExistingTripsScreen = () => {
     const [renameTripName, setRenameTripName] = useState("");
     const [getTrip, setRenameTrip] = useState<any | null>(null);
 
-    // For anyone viewing this in the future, the 'error' in logs is because you're on Windows. These assets are being called correctly and do work.
     const tripImages = [
         require("../assets/images/editlocations/Africa.jpg"),
         require("../assets/images/editlocations/Alaska.jpg"),
