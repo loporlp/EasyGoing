@@ -88,6 +88,18 @@ const AddEditDestinations = () => {
                         setTrip(tripDetails);  // Store the full trip data
                         setTripName(tripDetails.tripName);
                         setDestinations(tripDetails.destinations); // Immediately update the destinations so they load on screen
+                        // Set start and end date of trip text
+                        if (tripDetails?.startDate && tripDetails?.endDate) {
+                            const start = new Date(tripDetails.startDate);
+                            const end = new Date(tripDetails.endDate);
+                            setSelectedStartDate(start);
+                            setSelectedEndDate(end);
+                        
+                            const startFormatted = moment(start).format("ddd, MMM D");
+                            const endFormatted = moment(end).format("ddd, MMM D");
+                            setDatesText(`${startFormatted} - ${endFormatted}`);
+                        }
+                        // Set origin text
                         if (destinations.length > 0 && destinations[0].dayOrigin) {
                             setHasOrigin(true);
                             setOriginText(tripDetails.destinations[0].address)
