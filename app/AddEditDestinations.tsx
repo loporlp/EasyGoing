@@ -31,6 +31,9 @@ const AddEditDestinations = () => {
         setTempPriority("")
         setTimeDuration(null);
         setVisible(false);
+        setIsEditing(false);
+        setEditIndex(-1);
+        setIsOriginEdit(false);
     }
 
     // Setting add values
@@ -45,10 +48,12 @@ const AddEditDestinations = () => {
     const [tempLocation, setTempLocation] = useState("");
     const [tempDuration, setTempDuration] = useState("");
     const [tempPriority, setTempPriority] = useState("");
+    const [tempTimeDuration, setTempTimeDuration] = useState<{ hours: number; minutes: number } | null>(null);
 
     // Track if user is currently editing a destionation (and if so, what index)
     const [isEditing, setIsEditing] = useState(false);
     const [editIndex, setEditIndex] = useState<number>(-1); // To store the index of the item being edited, -1 is default as it shouldn't ever be called if isEditing is false
+    const [isOriginEdit, setIsOriginEdit] = useState(false);
     // Sets trip data
     const [trip, setTrip] = useState<any>(null);
     const [tripId, setTripId] = useState<string | null>(null);
@@ -150,10 +155,42 @@ const AddEditDestinations = () => {
         if (!timeDuration) {
             errorMessage += "Duration is required.\n";
         }
+        // Special check: Alias can't be "Origin" unless editing an existing "Origin"
+        if (!isEditing && tempAlias.trim().toLowerCase() === "origin") {
+            errorMessage += "You cannot use 'Origin' as an alias for a destination.\n";
+        }
         if (errorMessage) {
             alert(errorMessage.trim());
             return;
         }
+
+        // Check for duplicate alias or location (address)
+        // Normalize inputs
+        const normalizedAlias = tempAlias.toLowerCase().trim();
+        const normalizedLocation = tempLocation.toLowerCase().trim();
+
+        let aliasConflict = false;
+        let locationConflict = false;
+
+        trip.destinations.forEach((dest: any, index: number) => {
+            if (isEditing && index === editIndex) return; // Skip the item being edited
+
+            const existingAlias = dest.alias.toLowerCase().trim();
+            const existingLocation = dest.address.toLowerCase().trim();
+
+            if (existingAlias === normalizedAlias) aliasConflict = true;
+            if (existingLocation === normalizedLocation) locationConflict = true;
+        });
+
+        if (aliasConflict || locationConflict) {
+            let conflictMessage = "Duplicate detected:\n";
+            if (aliasConflict) conflictMessage += "- This alias already exists.\n";
+            if (locationConflict) conflictMessage += "- This location already exists.";
+            alert(conflictMessage.trim());
+            return;
+        }
+
+
 
         // Set default priority to 1 (as an integer) if it's empty or invalid
         const priorityValue = tempPriority.trim() === "" || isNaN(Number(tempPriority)) ? 1 : parseInt(tempPriority);
@@ -187,7 +224,7 @@ const AddEditDestinations = () => {
             newDestination.dayOrigin = oldDestination.dayOrigin;
             newDestination.cost = oldDestination.cost;
             // Replaces existing destination with the newly edited one
-            trip.destinations.push(newDestination);
+            trip.destinations[editIndex] = newDestination;
             setDestinations([...trip.destinations]);
             updateTrip(tripId, trip); // Ensure tripId is used here
             setIsEditing(false), setEditIndex(-1);
@@ -216,6 +253,8 @@ const AddEditDestinations = () => {
     const editLocation = (index: number) => {
         setIsEditing(true), setEditIndex(index);
         const oldDestination = trip.destinations[index];
+        //check if origin is being edited
+        setIsOriginEdit(oldDestination.alias.trim().toLowerCase() === "origin");
         //set the values
         setAlias(oldDestination.alias);
         setLocation(oldDestination.address);
@@ -227,6 +266,11 @@ const AddEditDestinations = () => {
         setTempLocation(oldDestination.address);
         setTempDuration(oldDestination.duration);
         setTempPriority(oldDestination.priority.toString());
+        //set timepicker
+        const minutes = oldDestination.duration || 0;
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        setTimeDuration({ hours, minutes: mins });
         //shows the edit screen
         show()
     }
@@ -301,14 +345,12 @@ const AddEditDestinations = () => {
     const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null); // Explicitly define state type
     const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null); // Explicitly define state type
     const [datesText, setDatesText] = useState("");
-
-    const infoInputRef = useRef(null);
-
+    const infoInputRef = useRef<TextInput>(null);  //set to textinput to allow null value
     const [timeDuration, setTimeDuration] = useState<{ hours: number; minutes: number } | null>(null);
 
     const handleDurationChange = (value: { hours: any; minutes: any; }) => {
-        setTimeDuration({ hours: value.hours, minutes: value.minutes });
-    };
+        setTempTimeDuration({ hours: value.hours, minutes: value.minutes });
+    };    
 
 
     // Handle changed date
@@ -431,6 +473,7 @@ const AddEditDestinations = () => {
                     minuteLabel="min"
                     hideSeconds
                     onDurationChange={handleDurationChange}
+                    initialValue={tempTimeDuration || { hours: 0, minutes: 0 }}
                     styles={{
                         pickerItem: {
                             fontSize: 32,
@@ -452,8 +495,19 @@ const AddEditDestinations = () => {
     }
 
     const selectDuration = () => {
+        if (tempTimeDuration) {
+            setTimeDuration(tempTimeDuration);
+            const totalMinutes = tempTimeDuration.hours * 60 + tempTimeDuration.minutes;
+            setTempDuration(totalMinutes.toString());
+        }
         setShowPicker(false);
     }
+
+    const openTimePicker = () => {
+        setTempTimeDuration(timeDuration || { hours: 0, minutes: 0 });
+        setShowPicker(true);
+      };
+      
 
     const rightOpenValue = -150;
 
@@ -708,13 +762,13 @@ const AddEditDestinations = () => {
                             </View>
                         </View>
 
-                        <TouchableWithoutFeedback onPress={() => infoInputRef.current.focus()}>
+                        <TouchableWithoutFeedback onPress={() => infoInputRef.current?.focus()}>
                             <View style={{ flexDirection: "column", marginTop: 15 }}>
                                 <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
                                     <Ionicons name={"location"} color={"#24a6ad"} />
                                     <Text>Destination:</Text>
                                 </View>
-                                <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5, justifyContent: "center", textAlignVertical: "center" }]} value={tempAlias} onChangeText={setTempAlias} ref={infoInputRef}></TextInput>
+                                <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5, justifyContent: "center", textAlignVertical: "center" }]} value={tempAlias} onChangeText={setTempAlias} editable={!isOriginEdit} ref={infoInputRef}></TextInput>
                             </View>
                         </TouchableWithoutFeedback>
 
@@ -731,25 +785,25 @@ const AddEditDestinations = () => {
 
                         {/* INSERT TIME PICKER HERE */}
                         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                            <TouchableWithoutFeedback onPress={() => infoInputRef.current.focus()}>
+                            <TouchableWithoutFeedback onPress={() => infoInputRef.current?.focus()}>
                                 <View style={{ flexDirection: "column", marginTop: 15, width: "45%" }}>
                                     <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
                                         <Ionicons name={"time"} color={"#24a6ad"} />
                                         <Text>Duration:</Text>
                                     </View>
-                                    <TouchableOpacity style={[styles.addDestinationTextInputs, { paddingHorizontal: 5, justifyContent: 'center', alignItems: 'flex-start' }]} onPress={() => setShowPicker(true)}>
+                                    <TouchableOpacity style={[styles.addDestinationTextInputs, { paddingHorizontal: 5, justifyContent: 'center', alignItems: 'flex-start' }]} onPress={openTimePicker}>
                                         <Text style={{fontSize: 18 }}>{timeDuration ? `${timeDuration.hours}hr ${timeDuration.minutes}min` : ''}</Text>
                                     </TouchableOpacity>
                                 </View>
                             </TouchableWithoutFeedback>
 
-                            <TouchableWithoutFeedback onPress={() => infoInputRef.current.focus()}>
+                            <TouchableWithoutFeedback onPress={() => infoInputRef.current?.focus()}>
                                 <View style={{ flexDirection: "column", marginTop: 15, width: "45%" }}>
                                     <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
                                         <MaterialCommunityIcons name={"priority-high"} color={"#24a6ad"} />
                                         <Text>Priority:</Text>
                                     </View>
-                                    <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5 }]} value={tempPriority} keyboardType="numeric" onChangeText={setTempPriority} ref={infoInputRef} returnKeyType="done"></TextInput>
+                                    <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5 }]} value={tempPriority} keyboardType="numeric" onChangeText={setTempPriority} editable={!isOriginEdit} ref={infoInputRef} returnKeyType="done"></TextInput>
                                 </View>
                             </TouchableWithoutFeedback>
                         </View>
