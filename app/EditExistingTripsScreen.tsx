@@ -21,15 +21,6 @@ const EditExistingTripsScreen = () => {
     const [renameTripName, setRenameTripName] = useState("");
     const [getTrip, setRenameTrip] = useState<any | null>(null);
 
-    const images = [
-        require("../assets/images/createTripImage.jpg"),
-        require("../assets/images/city.jpg"),
-        require("../assets/images/airplane.jpg"),
-        require("../assets/images/hotel.jpg"),
-        require("../assets/images/venice.jpg"),
-        require("../assets/images/food.jpg"),
-    ]
-
     const tripImages = [
         require("../assets/images/editlocations/Africa.jpg"),
         require("../assets/images/editlocations/Alaska.jpg"),
