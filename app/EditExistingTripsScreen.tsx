@@ -28,7 +28,6 @@ const EditExistingTripsScreen = () => {
         require("../assets/images/editlocations/Arkansas.jpg"),
         require("../assets/images/editlocations/China.jpg"),
         require("../assets/images/editlocations/Egypt.jpg"),
-        require("../assets/images/editlocations/Egypt2.jpg"),
         require("../assets/images/editlocations/Florida.jpg"),
         require("../assets/images/editlocations/Georgia.jpg"),
         require("../assets/images/editlocations/Georgia2.jpg"),
