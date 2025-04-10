@@ -466,16 +466,31 @@ const GenerateItineraryScreen = () => {
          *  Calculate index from that
          */
         if (routeGroupIndex !== 0 && daysDictionary) {
+            console.log("Days Dictionary ALL:", daysDictionary);
             let currentIndex = 0;
+            let previousEndTarget = 0;
+            let startTarget = daysDictionary[0];
             // We add the total index count of each day before the current one we're trying to move
             for (let i = 0; i < routeGroupIndex; i++) {
-                currentIndex += (daysDictionary[i] + 1) - i; // EndIndex - StartIndex (Include the End?)
+                console.log("Round ", i);
+                console.log("Days Dictionary is currently:", previousEndTarget);
+                const difference = parseInt(startTarget) - previousEndTarget;
+                console.log("Start target:", typeof startTarget);
+                console.log("previousEndTarget:", typeof previousEndTarget);
+                console.log("difference:", difference);
+                currentIndex = currentIndex + difference; // EndIndex - StartIndex
+                // TODO: Update so that i goes to the next daysDictionary since that's the endpoint
+                previousEndTarget = startTarget;
+                startTarget = daysDictionary[startTarget];
+                console.log("Current calculated index is ", currentIndex);
             }
             // Add current index to get where it would be converted from the routeGroupIndex (total indices before + current group's index)
-            currentIndex += destinationIndex;
+            currentIndex = currentIndex + destinationIndex;
+            console.log("Current calculated index after adding final is ", currentIndex);
             destinationIndex = currentIndex;
             console.log("Calculated index is ", destinationIndex);
         }
+        
     
         // Ensure destinationIndex is valid
         if (destinationIndex < 0 || destinationIndex >= newResultRoute.length) return;
