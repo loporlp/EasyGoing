@@ -26,6 +26,46 @@ const ReviewItineraryScreen = () => {
     const [groupedDestinations, setGroupedDestinations] = useState<Record<string, any[]>>({}); // Groups destinations by date
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({}); // Controls visibility of date sections
 
+    // Same trip images array as EditExistingTripsScreen
+    const tripImages = [
+        require("../assets/images/editlocations/Africa.jpg"),
+        require("../assets/images/editlocations/Alaska.jpg"),
+        require("../assets/images/editlocations/Arkansas.jpg"),
+        require("../assets/images/editlocations/China.jpg"),
+        require("../assets/images/editlocations/Egypt.jpg"),
+        require("../assets/images/editlocations/Florida.jpg"),
+        require("../assets/images/editlocations/Georgia.jpg"),
+        require("../assets/images/editlocations/Georgia2.jpg"),
+        require("../assets/images/editlocations/India.jpg"),
+        require("../assets/images/editlocations/India2.jpg"),
+        require("../assets/images/editlocations/India3.jpg"),
+        require("../assets/images/editlocations/Israel.jpg"),
+        require("../assets/images/editlocations/Italy.jpg"),
+        require("../assets/images/editlocations/Italy2.jpg"),
+        require("../assets/images/editlocations/Jamaica.jpg"),
+        require("../assets/images/editlocations/Japan.jpg"),
+        require("../assets/images/editlocations/Kansas.jpg"),
+        require("../assets/images/editlocations/LosAngles.jpg"),
+        require("../assets/images/editlocations/Mexico.jpg"),
+        require("../assets/images/editlocations/Mexico2.jpg"),
+        require("../assets/images/editlocations/Mexico3.jpg"),
+        require("../assets/images/editlocations/Michigan.jpg"),
+        require("../assets/images/editlocations/Missouori.jpg"),
+        require("../assets/images/editlocations/Montenegro.jpg"),
+        require("../assets/images/editlocations/Netherlands.jpg"),
+        require("../assets/images/editlocations/NewZealand.jpg"),
+        require("../assets/images/editlocations/NorthCarolina.jpg"),
+        require("../assets/images/editlocations/Paris.jpg"),
+        require("../assets/images/editlocations/Paris2.jpg"),
+        require("../assets/images/editlocations/Philippines.jpg"),
+        require("../assets/images/editlocations/Philippines2.jpg"),
+        require("../assets/images/editlocations/Russia.jpg"),
+        require("../assets/images/editlocations/Santorini.jpg"),
+        require("../assets/images/editlocations/Vietnam.jpg"),
+        require("../assets/images/editlocations/Vietnam2.jpg"),
+        require("../assets/images/editlocations/Vietnam3.jpg"),
+    ];      
+
     //load existing trip data and set it as 'trip'
     useEffect(() => {
         const loadTrip = async () => {
@@ -196,7 +236,14 @@ const ReviewItineraryScreen = () => {
             </View>
 
             {/* City Header */}
-            <Image style={styles.backgroundImage} source={require("../assets/images/newyorkcity.jpg")} />
+            <Image
+                style={styles.backgroundImage}
+                source={
+                    tripId
+                    ? tripImages[parseInt(tripId) % tripImages.length]
+                    : require("../assets/images/editlocations/Paris.jpg")
+                }
+            />
             <View style={styles.darkOverlay} />
             <View style={styles.headerContainer}>
                 <View style={styles.screenContainer}>
