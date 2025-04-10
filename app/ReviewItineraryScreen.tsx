@@ -259,13 +259,15 @@ const ReviewItineraryScreen = () => {
                                                     </View>
                                                 </View>
                                             </TouchableOpacity>
-                                            {/* Display transit info */}
+                                            {/* Display transit info only if not last item of the day */}
+                                            {idx < groupedDestinations[date].length - 1 && (
                                             <View style={{ height: 50, backgroundColor: "white", borderTopWidth: 1, borderColor: "lightgray" }}>
                                                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 15 }}>
-                                                    <Ionicons name={dest.mode === 'walking' ? "walk" : "bus"} size={22} color="#24a6ad" />
-                                                    <Text style={{ fontSize: 16 }}>{dest.transportDuration || "Transit"}</Text>
+                                                <Ionicons name={dest.mode === 'walking' ? "walk" : "bus"} size={22} color="#24a6ad" />
+                                                <Text style={{ fontSize: 16 }}>{dest.transportDuration || "Transit"}</Text>
                                                 </View>
                                             </View>
+                                            )}
                                         </View>
                                     ))}
                                 </View>
