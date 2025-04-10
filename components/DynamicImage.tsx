@@ -47,7 +47,10 @@ const DynamicImage = ({ placeName, containerStyle, imageStyle } : DynamicImagePr
   }, [placeName]);
 
   if (error) {
-    return <Text style={styles.error}>{error}</Text>;
+    //default to blue when no image found
+    <View style={[styles.container, containerStyle]}>
+      <Image source={require('../assets/images/blue.png')} style={[styles.image, imageStyle]} />
+    </View>
   }
 
   return (
