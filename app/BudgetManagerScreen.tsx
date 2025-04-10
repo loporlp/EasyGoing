@@ -11,8 +11,17 @@ import moment from 'moment';
 import { SwipeListView } from 'react-native-swipe-list-view';
 
 const BudgetManagerScreen = () => {
-    const navigation = useNavigation();
+    interface Trip {
+        budget: string;
+        origin: string;
+        tripName: string;
+        tripEndDate: string;
+        destinations: any[];
+        tripStartDate: string;
+    }
 
+    const navigation = useNavigation();
+    const [currentTrip, setCurrentTrip] = useState<Trip | null>(null);
     const [budgetHistory, setBudgetHistory] = useState<any[]>([]);
     const [hotelBudget, setHotelBudget] = useState(0);
     const [transportationBudget, setTransportationBudget] = useState(0);
@@ -20,7 +29,7 @@ const BudgetManagerScreen = () => {
     const [thingsToDoBudget, setThingsToDoBudget] = useState(0);
     const [otherBudget, setOtherBudget] = useState(0);
     const [totalBudget, setTotalBudget] = useState(0);
-    const [currentTripID, setCurrentTrip] = useState(0);
+    const [currentTripID, setCurrentTripID] = useState(0);
 
     // Add to history params
     const [expenseTag, setExpenseTag] = useState("");
@@ -91,8 +100,6 @@ const BudgetManagerScreen = () => {
         { label: 'Other', symbol: 'more-horiz', color: '#800080', value: '5' },
     ];
 
-
-
     // Load history when the component mounts
     useEffect(() => {
         let hotelExpense = 0;
@@ -104,12 +111,19 @@ const BudgetManagerScreen = () => {
         const loadHistory = async () => {
 
             var current = await getData("currentTrip");
-            setCurrentTrip(parseInt(current));
-            console.log("CURRENT ID IS: ", currentTripID);
-
+            setCurrentTripID(parseInt(current));
+            console.log("CURRENT ID IS: ", current);
 
             // Get the list of trip IDs from local storage
-            const historyIds = await getData(`history ${current}`);
+            const [tripDetails, historyIds] = await Promise.all([
+                getData(current.toString()),
+                getData(`history ${current}`)
+            ]);
+
+            if (tripDetails) {
+                setCurrentTrip(tripDetails);
+            }
+
             if (historyIds && historyIds.length > 0) {
                 const loadedHistory = [];
 
@@ -156,6 +170,7 @@ const BudgetManagerScreen = () => {
             }
         };
         loadHistory();
+        console.log(JSON.stringify(currentTrip))
     }, []);
 
     useEffect(() => {
@@ -375,7 +390,7 @@ const BudgetManagerScreen = () => {
                                 return <MaterialIcons name="help" color={"gray"} size={22} />;
                         }
                     })()}
-                    <View style={{ flexDirection: "column"}}>
+                    <View style={{ flexDirection: "column" }}>
                         <Text style={{ color: "gray" }}>{moment(item.date).format('MMMM DD, YYYY')}</Text>
                         <Text style={{ fontSize: 18 }}>{item.description}</Text>
                     </View>
@@ -408,32 +423,32 @@ const BudgetManagerScreen = () => {
                             </TouchableOpacity>
                             <Text style={{ fontSize: 22, fontWeight: "700" }}>Budget Manager</Text>
                         </View>
-    
+
                         {/* Banner */}
                         <Image style={styles.backgroundImage} source={require("../assets/images/newyorkcity.jpg")} />
                         <View style={styles.darkOverlay}>
-                            <Text style={{ color: "white", fontSize: 18, fontWeight: "bold" }}>#trip.origin/destination#</Text>
-                            <Text style={{ color: "white", fontSize: 16 }}>Initial Budget: $#budget#</Text>
-                            <Text style={{ color: "white", fontSize: 16 }}>Remaining: $#remainingBudget#</Text>
+                            <Text style={{ color: "white", fontSize: 18, fontWeight: "bold" }}>{currentTrip?.tripName || "Unamed Trip"}</Text>
+                            <Text style={{ color: "white", fontSize: 16 }}>Initial Budget: ${currentTrip?.budget}</Text>
+                            <Text style={{ color: "white", fontSize: 16 }}>Remaining: ${currentTrip?.budget - totalBudget}</Text>
                         </View>
-    
+
                         {/* Summary */}
                         <Text style={{ fontWeight: "700", fontSize: 18, marginTop: 10 }}>Summary</Text>
                         <View style={[styles.divider, { marginTop: 0 }]}></View>
-    
+
                         {/* Expense Bar */}
                         <View style={styles.bar}>
                             {categories.map((category, index) => (
                                 <View key={index} style={{ height: 30, backgroundColor: category.color, width: category.percentage }} />
                             ))}
                         </View>
-    
+
                         {/* Category Summary */}
                         <View style={styles.totalSpentContainer}>
                             {categories.map((category, index) => {
                                 const isIonicon = category.label === "Transportation" || category.label === "Things To Do";
                                 const IconComponent = isIonicon ? Ionicons : MaterialIcons;
-    
+
                                 return (
                                     <TouchableOpacity
                                         key={index}
@@ -455,7 +470,7 @@ const BudgetManagerScreen = () => {
                                 <Text style={{ fontSize: 18, fontWeight: "700" }}>${totalBudget.toFixed(2)}</Text>
                             </View>
                         </View>
-    
+
                         {/* History Header */}
                         <View style={styles.historyView}>
                             <Text style={styles.textLabel}>History</Text>
@@ -469,7 +484,7 @@ const BudgetManagerScreen = () => {
                 contentContainerStyle={{ paddingBottom: 100 }}
                 style={styles.historyContainer}
             />
-    
+
             {/* Category Modal */}
             <Modal
                 visible={isCategoryVisible}
@@ -504,7 +519,7 @@ const BudgetManagerScreen = () => {
                                     <MaterialCommunityIcons name={"close-box"} size={22} color={"red"} />
                                 </TouchableOpacity>
                             </View>
-    
+
                             <ScrollView style={{ width: "100%", height: 300, backgroundColor: "white", borderTopLeftRadius: 10, borderTopRightRadius: 10, padding: 10, marginTop: 10 }} contentContainerStyle={{ alignItems: "center" }}>
                                 {selectedCategoryList.length > 0 ? (
                                     selectedCategoryList.map((expense, index) => (
@@ -520,8 +535,8 @@ const BudgetManagerScreen = () => {
                                         </View>
                                     ))
                                 ) : (
-                                    <Text>No expenses found!</Text>
-                                )}
+                                        <Text>No expenses found!</Text>
+                                    )}
                             </ScrollView>
                             <View style={{ flexDirection: "row", justifyContent: "space-between", padding: 10, backgroundColor: "white", borderTopWidth: 1, borderTopColor: "lightgray", borderBottomLeftRadius: 10, borderBottomRightRadius: 10 }}>
                                 <Text style={{ fontSize: 18, fontWeight: "700" }}>Total:</Text>
@@ -531,7 +546,7 @@ const BudgetManagerScreen = () => {
                     </View>
                 </View>
             </Modal>
-    
+
             {/* Add History Modal */}
             <Modal
                 visible={isAddHistoryVisible}
@@ -542,7 +557,7 @@ const BudgetManagerScreen = () => {
                 <View style={[styles.modalOverlay, { justifyContent: "center" }]}>
                     <View style={{ width: "95%", height: 220, backgroundColor: "#F4F4F4", padding: 20, borderRadius: 10, gap: 10 }}>
                         <Text style={[styles.textLabel, { marginTop: 0 }]}>Add History</Text>
-    
+
                         <Dropdown
                             style={styles.dropdown}
                             placeholderStyle={styles.placeholderStyle}
@@ -560,7 +575,7 @@ const BudgetManagerScreen = () => {
                                 const tag = tags[(value as unknown as number) - 1];
                                 if (!tag) return null;
                                 const iconProps = { size: 20, color: tag.color, style: { marginRight: 5 } };
-    
+
                                 switch (tag.symbol) {
                                     case 'hotel': return <MaterialIcons name="hotel" {...iconProps} />;
                                     case 'airplane': return <Ionicons name="airplane" {...iconProps} />;
@@ -571,7 +586,7 @@ const BudgetManagerScreen = () => {
                                 }
                             }}
                         />
-    
+
                         <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 5 }}>
                             <TextInput value={expenseLabel} onChangeText={setExpenseLabel} placeholder="Name" placeholderTextColor="lightgray" style={{
                                 height: 40, fontSize: 16, width: "65%", backgroundColor: "white",
@@ -584,7 +599,7 @@ const BudgetManagerScreen = () => {
                                 shadowOpacity: 0.3, shadowRadius: 3
                             }} />
                         </View>
-    
+
                         <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 15, gap: 30 }}>
                             <TouchableOpacity onPress={resetHistory} style={{
                                 backgroundColor: "red", height: 35, width: 70, alignItems: "center",
@@ -592,7 +607,7 @@ const BudgetManagerScreen = () => {
                             }}>
                                 <Text style={{ fontSize: 12, color: "white", fontWeight: "700" }}>CANCEL</Text>
                             </TouchableOpacity>
-    
+
                             <TouchableOpacity onPress={addHistory} style={{
                                 backgroundColor: "green", height: 35, width: 70, alignItems: "center",
                                 justifyContent: "center", borderRadius: 10
@@ -605,7 +620,7 @@ const BudgetManagerScreen = () => {
             </Modal>
         </View>
     );
-    
+
 };
 
 const styles = StyleSheet.create({
