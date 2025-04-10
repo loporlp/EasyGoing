@@ -88,6 +88,18 @@ const AddEditDestinations = () => {
                         setTrip(tripDetails);  // Store the full trip data
                         setTripName(tripDetails.tripName);
                         setDestinations(tripDetails.destinations); // Immediately update the destinations so they load on screen
+                        // Set start and end date of trip text
+                        if (tripDetails?.startDate && tripDetails?.endDate) {
+                            const start = new Date(tripDetails.startDate);
+                            const end = new Date(tripDetails.endDate);
+                            setSelectedStartDate(start);
+                            setSelectedEndDate(end);
+                        
+                            const startFormatted = moment(start).format("ddd, MMM D");
+                            const endFormatted = moment(end).format("ddd, MMM D");
+                            setDatesText(`${startFormatted} - ${endFormatted}`);
+                        }
+                        // Set origin text
                         if (destinations.length > 0 && destinations[0].dayOrigin) {
                             setHasOrigin(true);
                             setOriginText(tripDetails.destinations[0].address)
@@ -309,11 +321,31 @@ const AddEditDestinations = () => {
         }
     };
 
+    // Handle finishing changing the trip date
     const handleDone = () => {
         if (selectedStartDate && selectedEndDate) {
+            // Update Trip locally
+            const updatedTrip = {
+                ...trip,
+                startDate: selectedStartDate.toISOString(),
+                endDate: selectedEndDate.toISOString()
+            };
+            setTrip(updatedTrip);
+
+            // Update Trip Textbox
             const startFormatted = moment(selectedStartDate).format("ddd, MMM D");
             const endFormatted = moment(selectedEndDate).format("ddd, MMM D");
             setDatesText(`${startFormatted} - ${endFormatted}`);
+    
+            // Save changes to DB
+            (async () => {
+                try {
+                    await updateTrip(tripId, updatedTrip);
+                    console.log("Trip dates updated successfully");
+                } catch (error) {
+                    console.error("Failed to update trip dates:", error);
+                }
+            })();
         }
         setModalVisible(false);
     };
