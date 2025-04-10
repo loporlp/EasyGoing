@@ -49,7 +49,7 @@ export const getTrips = async () => {
  * Creates a trip in the database and in local storage with specified information then 
  * sets the current trip to that trip
  */
-export const createTrip = async (startDate, endDate, budget, origin) => {
+export const createTrip = async (tripName, startDate, endDate, budget, origin) => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5000); // Set timeout to 5 seconds
 
@@ -65,7 +65,7 @@ export const createTrip = async (startDate, endDate, budget, origin) => {
       },
       body: JSON.stringify({
         trip_details: {
-          "tripName": "",
+          "tripName": tripName,
           "tripStartDate": startDate,
           "tripEndDate": endDate,
           "budget": budget,
