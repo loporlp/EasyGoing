@@ -31,6 +31,9 @@ const AddEditDestinations = () => {
         setTempPriority("")
         setTimeDuration(null);
         setVisible(false);
+        setIsEditing(false);
+        setEditIndex(-1);
+        setIsOriginEdit(false);
     }
 
     // Setting add values
