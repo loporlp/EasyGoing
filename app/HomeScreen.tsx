@@ -459,7 +459,14 @@ const HomeScreen = () => {
                                     <View>
                                         <TouchableOpacity style={styles.recommendDest}>
                                             <View style={styles.destImageWrapper}>
-                                                <Image style={styles.destImage} source={{ uri: item.image }} />
+                                            <Image
+                                                style={styles.destImage}
+                                                source={
+                                                    item.image.startsWith('http://') || item.image.startsWith('https://')
+                                                    ? { uri: item.image }
+                                                    : imageMap[item.image]
+                                                }
+                                            />
                                                 <TouchableOpacity style={styles.saveIconWrapper} onPress={() => handleBookmarkClick(item)}>
                                                     <Ionicons name="bookmark" size={22} color={item.saved ? "#FFD700" : "white"} />
                                                 </TouchableOpacity>
