@@ -17,6 +17,7 @@ import { getRoutePolylines } from "../scripts/routePolyline";
 import { updateDayOrigin, addTripDatesToStartDateTime } from '../scripts/updateTransportDests.js';
 import { calculateTripDates, formatSelectedDestinations, getMatchedPolylinesData, handleSameDateSelection } from '../scripts/dateDividers';
 import { loadDestinations } from '../scripts/destinationLoader';
+import ErrorBoundary from '../components//ErrorBoundary';
 
 const { height } = Dimensions.get('window');
 
@@ -518,7 +519,28 @@ const GenerateItineraryScreen = () => {
         setIsLoading(false);
     };    
 
+    // Catches ALL errors
+    useEffect(() => {
+        // Global error handler for uncaught errors
+        const errorHandler = (error: any, isFatal: boolean | undefined) => {
+            // Ensure isFatal is always a boolean
+            const fatal = isFatal ?? false; 
+            console.log('Caught global error:', error);
+            if (fatal) {
+                console.log('Fatal error:', error);
+            }
+          };
+    
+        ErrorUtils.setGlobalHandler(errorHandler);
+    
+        return () => {
+            // Cleanup when unmounded
+            ErrorUtils.setGlobalHandler(() => {});
+        };
+      }, []);
+
     return (
+        <ErrorBoundary onError={failedPopup}>
         <View style={styles.container}>    
             {isLoading ? (
                     // Show loading spinner while data is being fetched
@@ -530,7 +552,12 @@ const GenerateItineraryScreen = () => {
 
             {!isLoading && (
                 <SafeAreaView style={{ flex: 1 }}>
-                    {frontendOptimalRoute.length > 0 && (
+                    {frontendOptimalRoute.length > 0 &&
+                         Array.isArray(polylinesData) &&
+                         polylinesData.length > 0 &&
+                         polylinesData.every(polyline => 
+                             polyline && Array.isArray(polyline.coordinates) && polyline.coordinates.length > 0
+                         ) ? (
                         <MultiRoutesMap
                             locations={frontendOptimalRoute}
                             transportationModes={transportationModes}
@@ -539,6 +566,12 @@ const GenerateItineraryScreen = () => {
                             markers={markers}
                             bounds={bounds}
                         />
+                    ) : (
+                        <>
+                            {/* Backup if no route is found */}
+                            {console.log("PolylinesData:", polylinesData)}
+                            <Text style={styles.currentLocationText}>No routes found for this day.</Text>
+                        </>
                     )}
                 </SafeAreaView>
             )}
@@ -609,7 +642,7 @@ const GenerateItineraryScreen = () => {
                                 ) : null}
 
                                 {/* Loop through each destination in the current routeGroup */}
-                                {routeGroup.map((destination: { alias: any; address: any; duration: any; priority: any; picture: { url: string; }; mode: string; transportDuration: any; }, destinationIndex: number) => {
+                                {routeGroup && routeGroup.length > 0 && routeGroup.map((destination: { alias: any; address: any; duration: any; priority: any; picture: { url: string; }; mode: string; transportDuration: any; }, destinationIndex: number) => {
                                     const destinationKey = `${destinationGroupKey}-${destinationIndex}`;  // Unique key for each destination
                                     const destinationName = destination.alias;
                                     const destinationAddress = destination.address;
@@ -719,6 +752,10 @@ const GenerateItineraryScreen = () => {
                                         </View>
                                     );
                                 })}
+                                {/* Backup if no routes found */}
+                                {(!routeGroup || routeGroup.length === 0) && (
+                                    <Text style={styles.currentLocationText}>No routes found.</Text>
+                                )}
                             </View>
                         );
                     })}
@@ -737,6 +774,7 @@ const GenerateItineraryScreen = () => {
                 <Text style={styles.buttonText}>Review Itinerary</Text>
             </TouchableOpacity>
         </View>
+        </ErrorBoundary>
     );
 };
 
