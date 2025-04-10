@@ -17,6 +17,7 @@ import { getRoutePolylines } from "../scripts/routePolyline";
 import { updateDayOrigin, addTripDatesToStartDateTime } from '../scripts/updateTransportDests.js';
 import { calculateTripDates, formatSelectedDestinations, getMatchedPolylinesData, handleSameDateSelection } from '../scripts/dateDividers';
 import { loadDestinations } from '../scripts/destinationLoader';
+import ErrorBoundary from '../components//ErrorBoundary';
 
 const { height } = Dimensions.get('window');
 
@@ -36,6 +37,7 @@ const GenerateItineraryScreen = () => {
     const [bounds, setBounds] = useState<any>({});
     const [allRoutesData, setAllRoutesData] = useState<any[]>([]);
     const [toSaveData, setToSaveData] = useState<any[]>([]);
+    const [daysDictionary, setDaysDictionary] = useState<any[]>();
 
     type Place = {
         alias: string;
@@ -338,7 +340,8 @@ const GenerateItineraryScreen = () => {
             reorderDestinations,
             navigation,
             timeChecked,
-            changedModeOfTransport
+            changedModeOfTransport,
+            setDaysDictionary
           });
         };
         
@@ -454,9 +457,40 @@ const GenerateItineraryScreen = () => {
       };
     
     // Function to move the destination up or down
-    const moveDestination = async (destinationIndex: number, direction: string) => {
+    const moveDestination = async (routeGroupIndex: number, destinationIndex: number, direction: string) => {
         setIsLoading(true);
         const newResultRoute = [...resultRoute];
+
+        // For multiple days, routeGroupIndex needs to help calculate the actual destination index
+        /** Get the number of locations per index (by subtracting the end from start)
+         *  Calculate index from that
+         */
+        if (routeGroupIndex !== 0 && daysDictionary) {
+            console.log("Days Dictionary ALL:", daysDictionary);
+            let currentIndex = 0;
+            let previousEndTarget = 0;
+            let startTarget = daysDictionary[0];
+            // We add the total index count of each day before the current one we're trying to move
+            for (let i = 0; i < routeGroupIndex; i++) {
+                console.log("Round ", i);
+                console.log("Days Dictionary is currently:", previousEndTarget);
+                const difference = parseInt(startTarget) - previousEndTarget;
+                console.log("Start target:", typeof startTarget);
+                console.log("previousEndTarget:", typeof previousEndTarget);
+                console.log("difference:", difference);
+                currentIndex = currentIndex + difference; // EndIndex - StartIndex
+                // TODO: Update so that i goes to the next daysDictionary since that's the endpoint
+                previousEndTarget = startTarget;
+                startTarget = daysDictionary[startTarget];
+                console.log("Current calculated index is ", currentIndex);
+            }
+            // Add current index to get where it would be converted from the routeGroupIndex (total indices before + current group's index)
+            currentIndex = currentIndex + destinationIndex;
+            console.log("Current calculated index after adding final is ", currentIndex);
+            destinationIndex = currentIndex;
+            console.log("Calculated index is ", destinationIndex);
+        }
+        
     
         // Ensure destinationIndex is valid
         if (destinationIndex < 0 || destinationIndex >= newResultRoute.length) return;
@@ -478,8 +512,8 @@ const GenerateItineraryScreen = () => {
         }
     
         // Determine the range of affected destinations (since we have prev, current, next locations)
-        const start = Math.max(0, newIndex - 1);
-        const end = Math.min(newResultRoute.length, newIndex + 2); // non-inclusive
+        const start = Math.max(0, newIndex - 2);
+        const end = Math.min(newResultRoute.length, newIndex + 1); // non-inclusive
     
         const affectedSlice = newResultRoute.slice(start, end);
     
@@ -518,7 +552,28 @@ const GenerateItineraryScreen = () => {
         setIsLoading(false);
     };    
 
+    // Catches ALL errors
+    useEffect(() => {
+        // Global error handler for uncaught errors
+        const errorHandler = (error: any, isFatal: boolean | undefined) => {
+            // Ensure isFatal is always a boolean
+            const fatal = isFatal ?? false; 
+            console.log('Caught global error:', error);
+            if (fatal) {
+                console.log('Fatal error:', error);
+            }
+          };
+    
+        ErrorUtils.setGlobalHandler(errorHandler);
+    
+        return () => {
+            // Cleanup when unmounded
+            ErrorUtils.setGlobalHandler(() => {});
+        };
+      }, []);
+
     return (
+        <ErrorBoundary onError={failedPopup}>
         <View style={styles.container}>    
             {isLoading ? (
                     // Show loading spinner while data is being fetched
@@ -530,7 +585,12 @@ const GenerateItineraryScreen = () => {
 
             {!isLoading && (
                 <SafeAreaView style={{ flex: 1 }}>
-                    {frontendOptimalRoute.length > 0 && (
+                    {frontendOptimalRoute.length > 0 &&
+                         Array.isArray(polylinesData) &&
+                         polylinesData.length > 0 &&
+                         polylinesData.every(polyline => 
+                             polyline && Array.isArray(polyline.coordinates) && polyline.coordinates.length > 0
+                         ) ? (
                         <MultiRoutesMap
                             locations={frontendOptimalRoute}
                             transportationModes={transportationModes}
@@ -539,6 +599,12 @@ const GenerateItineraryScreen = () => {
                             markers={markers}
                             bounds={bounds}
                         />
+                    ) : (
+                        <>
+                            {/* Backup if no route is found */}
+                            {console.log("PolylinesData:", polylinesData)}
+                            <Text style={styles.currentLocationText}>No routes found for this day.</Text>
+                        </>
                     )}
                 </SafeAreaView>
             )}
@@ -609,7 +675,7 @@ const GenerateItineraryScreen = () => {
                                 ) : null}
 
                                 {/* Loop through each destination in the current routeGroup */}
-                                {routeGroup.map((destination: { alias: any; address: any; duration: any; priority: any; picture: { url: string; }; mode: string; transportDuration: any; }, destinationIndex: number) => {
+                                {routeGroup && routeGroup.length > 0 && routeGroup.map((destination: { alias: any; address: any; duration: any; priority: any; picture: { url: string; }; mode: string; transportDuration: any; }, destinationIndex: number) => {
                                     const destinationKey = `${destinationGroupKey}-${destinationIndex}`;  // Unique key for each destination
                                     const destinationName = destination.alias;
                                     const destinationAddress = destination.address;
@@ -690,10 +756,22 @@ const GenerateItineraryScreen = () => {
 
                                             {/* Move buttons */}
                                             <View style={styles.buttonContainer}>
-                                                {/* Up Button - But not w/ Origin */}
-                                                {!isLoading && (routeGroupIndex !== 0 || destinationIndex > 1) && (
+
+                                                {/* If it's the first location in any other day, show only the down button */}
+                                                {(routeGroupIndex !== 0 && destinationIndex === 0 ) || (routeGroupIndex === 0 && destinationIndex === 1) && (
                                                     <TouchableOpacity
-                                                        onPress={() => moveDestination(destinationIndex, 'up')}
+                                                        onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'down')}
+                                                        style={styles.moveButton}
+                                                        disabled={isLoading}
+                                                    >
+                                                        <Ionicons name="arrow-down" size={20} color="#000" />
+                                                    </TouchableOpacity>
+                                                )}
+
+                                                {/* If it's the last location in any day, show only the up button */}
+                                                {!(destinationIndex === 0 && destinationIndex === routeGroup.length - 1) && destinationIndex !== 0 && destinationIndex !== routeGroup.length - 1 && !(routeGroupIndex === 0 && destinationIndex === 1) && (
+                                                    <TouchableOpacity
+                                                        onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'up')}
                                                         style={styles.moveButton}
                                                         disabled={isLoading}
                                                     >
@@ -701,24 +779,26 @@ const GenerateItineraryScreen = () => {
                                                     </TouchableOpacity>
                                                 )}
 
-                                                {/* Down Button - But not w/ Origin */}
-                                                {!isLoading && (
-                                                    (routeGroupIndex !== 0 || 
-                                                    (routeGroupIndex !== 0 || destinationIndex > 0)) &&
-                                                    destinationIndex < routeGroup.length - 1
-                                                ) && (
-                                                    <TouchableOpacity
-                                                        onPress={() => moveDestination(destinationIndex, 'down')}
-                                                        style={styles.moveButton}
-                                                        disabled={isLoading}
-                                                    >
-                                                        <Ionicons name="arrow-down" size={20} color="#000" />
-                                                    </TouchableOpacity>
+                                                {/* All other locations have both up and down buttons */}
+                                                {destinationIndex !== 0 && destinationIndex !== routeGroup.length - 1 && !(routeGroupIndex === 0 && destinationIndex === 1) && (
+                                                    <>
+                                                        <TouchableOpacity
+                                                            onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'down')}
+                                                            style={styles.moveButton}
+                                                            disabled={isLoading}
+                                                        >
+                                                            <Ionicons name="arrow-down" size={20} color="#000" />
+                                                        </TouchableOpacity>
+                                                    </>
                                                 )}
                                             </View>
                                         </View>
                                     );
                                 })}
+                                {/* Backup if no routes found */}
+                                {(!routeGroup || routeGroup.length === 0) && (
+                                    <Text style={styles.currentLocationText}>No routes found.</Text>
+                                )}
                             </View>
                         );
                     })}
@@ -737,6 +817,7 @@ const GenerateItineraryScreen = () => {
                 <Text style={styles.buttonText}>Review Itinerary</Text>
             </TouchableOpacity>
         </View>
+        </ErrorBoundary>
     );
 };
 
@@ -1089,7 +1170,7 @@ const styles = StyleSheet.create({
     },
     moveButton: {
         padding: 5,
-        backgroundColor: '#f0f0f0',
+        backgroundColor: "rgba(36,166, 173, 0.8)",
         borderRadius: 5,
         marginHorizontal: 5,
     },
