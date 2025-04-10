@@ -224,7 +224,7 @@ const AddEditDestinations = () => {
             newDestination.dayOrigin = oldDestination.dayOrigin;
             newDestination.cost = oldDestination.cost;
             // Replaces existing destination with the newly edited one
-            trip.destinations.push(newDestination);
+            trip.destinations[editIndex] = newDestination;
             setDestinations([...trip.destinations]);
             updateTrip(tripId, trip); // Ensure tripId is used here
             setIsEditing(false), setEditIndex(-1);
