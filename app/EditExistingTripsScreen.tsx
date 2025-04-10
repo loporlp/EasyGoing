@@ -21,14 +21,46 @@ const EditExistingTripsScreen = () => {
     const [renameTripName, setRenameTripName] = useState("");
     const [getTrip, setRenameTrip] = useState<any | null>(null);
 
-    const images = [
-        require("../assets/images/createTripImage.jpg"),
-        require("../assets/images/city.jpg"),
-        require("../assets/images/airplane.jpg"),
-        require("../assets/images/hotel.jpg"),
-        require("../assets/images/venice.jpg"),
-        require("../assets/images/food.jpg"),
-      ]
+    const tripImages = [
+        require("../assets/images/editlocations/Africa.jpg"),
+        require("../assets/images/editlocations/Alaska.jpg"),
+        require("../assets/images/editlocations/Arkansas.jpg"),
+        require("../assets/images/editlocations/China.jpg"),
+        require("../assets/images/editlocations/Egypt.jpg"),
+        require("../assets/images/editlocations/Egypt2.jpg"),
+        require("../assets/images/editlocations/Florida.jpg"),
+        require("../assets/images/editlocations/Georgia.jpg"),
+        require("../assets/images/editlocations/Georgia2.jpg"),
+        require("../assets/images/editlocations/India.jpg"),
+        require("../assets/images/editlocations/India2.jpg"),
+        require("../assets/images/editlocations/India3.jpg"),
+        require("../assets/images/editlocations/Israel.jpg"),
+        require("../assets/images/editlocations/Italy.jpg"),
+        require("../assets/images/editlocations/Italy2.jpg"),
+        require("../assets/images/editlocations/Jamaica.jpg"),
+        require("../assets/images/editlocations/Japan.jpg"),
+        require("../assets/images/editlocations/Kansas.jpg"),
+        require("../assets/images/editlocations/LosAngles.jpg"),
+        require("../assets/images/editlocations/Mexico.jpg"),
+        require("../assets/images/editlocations/Mexico2.jpg"),
+        require("../assets/images/editlocations/Mexico3.jpg"),
+        require("../assets/images/editlocations/Michigan.jpg"),
+        require("../assets/images/editlocations/Missouori.jpg"),
+        require("../assets/images/editlocations/Montenegro.jpg"),
+        require("../assets/images/editlocations/Netherlands.jpg"),
+        require("../assets/images/editlocations/NewZealand.jpg"),
+        require("../assets/images/editlocations/NorthCarolina.jpg"),
+        require("../assets/images/editlocations/Paris.jpg"),
+        require("../assets/images/editlocations/Paris2.jpg"),
+        require("../assets/images/editlocations/Philippines.jpg"),
+        require("../assets/images/editlocations/Philippines2.jpg"),
+        require("../assets/images/editlocations/Russia.jpg"),
+        require("../assets/images/editlocations/Santorini.jpg"),
+        require("../assets/images/editlocations/Vietnam.jpg"),
+        require("../assets/images/editlocations/Vietnam2.jpg"),
+        require("../assets/images/editlocations/Vietnam3.jpg"),
+    ];
+      
 
     // Load trips when the component mounts
     useEffect(() => {
@@ -173,7 +205,7 @@ const EditExistingTripsScreen = () => {
                             {/* Make this dynamic to take in trip.origin*/}
                             <Image
                                 style={styles.backgroundImage}
-                                source={images[trip.id % images.length]}
+                                source={tripImages[trip.id % tripImages.length]}
                             />
                             <View style={styles.darkOverlay} />
                             <View style={{ flexDirection: "row", justifyContent: "flex-end", position: "absolute", marginTop: 30, right: 0 }}>
