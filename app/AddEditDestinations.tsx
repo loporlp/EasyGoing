@@ -338,12 +338,14 @@ const AddEditDestinations = () => {
             setDatesText(`${startFormatted} - ${endFormatted}`);
     
             // Save changes to DB
-            try {
-                updateTrip(tripId, updatedTrip);
-                console.log("Trip dates updated successfully");
-            } catch (error) {
-                console.error("Failed to update trip dates:", error);
-            }
+            (async () => {
+                try {
+                    await updateTrip(tripId, updatedTrip);
+                    console.log("Trip dates updated successfully");
+                } catch (error) {
+                    console.error("Failed to update trip dates:", error);
+                }
+            })();
         }
         setModalVisible(false);
     };
