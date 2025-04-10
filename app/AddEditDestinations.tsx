@@ -579,8 +579,8 @@ const AddEditDestinations = () => {
 
                     <SavedDestinations
                         SavedDestinations={savedDestinations}
-                        handlePress={() => {}}
-                        deleteLocation={() => {}}
+                        handlePress={handleBookmarkImport}
+                        deleteLocation={function (index: number): void { }}
                     />
                 </View>
             )}
