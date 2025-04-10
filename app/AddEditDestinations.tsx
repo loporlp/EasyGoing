@@ -156,17 +156,31 @@ const AddEditDestinations = () => {
         }
 
         // Check for duplicate alias or location (address)
-        const duplicateExists = trip.destinations.some((dest: any, index: number) => {
-            const isSameAlias = dest.alias.toLowerCase().trim() === tempAlias.toLowerCase().trim();
-            const isSameLocation = dest.address.toLowerCase().trim() === tempLocation.toLowerCase().trim();
-            const isNotSameItem = !isEditing || index !== editIndex;
-            return isNotSameItem && (isSameAlias || isSameLocation);
+        // Normalize inputs
+        const normalizedAlias = tempAlias.toLowerCase().trim();
+        const normalizedLocation = tempLocation.toLowerCase().trim();
+
+        let aliasConflict = false;
+        let locationConflict = false;
+
+        trip.destinations.forEach((dest: any, index: number) => {
+            if (isEditing && index === editIndex) return; // Skip the item being edited
+
+            const existingAlias = dest.alias.toLowerCase().trim();
+            const existingLocation = dest.address.toLowerCase().trim();
+
+            if (existingAlias === normalizedAlias) aliasConflict = true;
+            if (existingLocation === normalizedLocation) locationConflict = true;
         });
 
-        if (duplicateExists) {
-            alert("A destination with the same alias or address already exists. Please choose a different one.");
+        if (aliasConflict || locationConflict) {
+            let conflictMessage = "Duplicate detected:\n";
+            if (aliasConflict) conflictMessage += "- This alias already exists.\n";
+            if (locationConflict) conflictMessage += "- This location already exists.";
+            alert(conflictMessage.trim());
             return;
         }
+
 
 
         // Set default priority to 1 (as an integer) if it's empty or invalid
