@@ -461,9 +461,9 @@ const GenerateItineraryScreen = () => {
         setIsLoading(true);
         const newResultRoute = [...resultRoute];
 
-        // TODO: For multiple days, routeGroupIndex needs to help calculate the actual destination index
-        /** Get the number of locations per index
-         * Calculate index from that
+        // For multiple days, routeGroupIndex needs to help calculate the actual destination index
+        /** Get the number of locations per index (by subtracting the end from start)
+         *  Calculate index from that
          */
         if (routeGroupIndex !== 0 && daysDictionary) {
             let currentIndex = 0;
@@ -474,6 +474,7 @@ const GenerateItineraryScreen = () => {
             // Add current index to get where it would be converted from the routeGroupIndex (total indices before + current group's index)
             currentIndex += destinationIndex;
             destinationIndex = currentIndex;
+            console.log("Calculated index is ", destinationIndex);
         }
     
         // Ensure destinationIndex is valid
@@ -1154,7 +1155,7 @@ const styles = StyleSheet.create({
     },
     moveButton: {
         padding: 5,
-        backgroundColor: '#f0f0f0',
+        backgroundColor: "rgba(36,166, 173, 0.8)",
         borderRadius: 5,
         marginHorizontal: 5,
     },
