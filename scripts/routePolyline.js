@@ -261,7 +261,8 @@ export const getRoutePolylines = async ({
     reorderDestinations,
     navigation,
     timeChecked,
-    changedModeOfTransport
+    changedModeOfTransport,
+    setDaysDictionary
   }) => {
     const { polylines: fetchedPolylines, transportDurations: fetchedDurations, markers: fetchedMarkers, bounds } = await fetchPolylinesAndDurations(optimalRoute, transportationModes);
     
@@ -335,6 +336,7 @@ export const getRoutePolylines = async ({
     try {
         console.log("Dividing Locations Into Groups");
         groupedDays = await divideLocationsIntoGroups(updatedDurations, numberOfDays);
+        setDaysDictionary(groupedDays);
     } catch (error) {
         console.log("GI: Error in divideLocationsIntoGroups:", error);
         groupedDays = null;

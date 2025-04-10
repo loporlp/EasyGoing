@@ -37,6 +37,7 @@ const GenerateItineraryScreen = () => {
     const [bounds, setBounds] = useState<any>({});
     const [allRoutesData, setAllRoutesData] = useState<any[]>([]);
     const [toSaveData, setToSaveData] = useState<any[]>([]);
+    const [daysDictionary, setDaysDictionary] = useState<any[]>();
 
     type Place = {
         alias: string;
@@ -339,7 +340,8 @@ const GenerateItineraryScreen = () => {
             reorderDestinations,
             navigation,
             timeChecked,
-            changedModeOfTransport
+            changedModeOfTransport,
+            setDaysDictionary
           });
         };
         
@@ -455,9 +457,24 @@ const GenerateItineraryScreen = () => {
       };
     
     // Function to move the destination up or down
-    const moveDestination = async (destinationIndex: number, direction: string) => {
+    const moveDestination = async (routeGroupIndex: number, destinationIndex: number, direction: string) => {
         setIsLoading(true);
         const newResultRoute = [...resultRoute];
+
+        // TODO: For multiple days, routeGroupIndex needs to help calculate the actual destination index
+        /** Get the number of locations per index
+         * Calculate index from that
+         */
+        if (routeGroupIndex !== 0 && daysDictionary) {
+            let currentIndex = 0;
+            // We add the total index count of each day before the current one we're trying to move
+            for (let i = 0; i < routeGroupIndex; i++) {
+                currentIndex += (daysDictionary[i] + 1) - i; // EndIndex - StartIndex (Include the End?)
+            }
+            // Add current index to get where it would be converted from the routeGroupIndex (total indices before + current group's index)
+            currentIndex += destinationIndex;
+            destinationIndex = currentIndex;
+        }
     
         // Ensure destinationIndex is valid
         if (destinationIndex < 0 || destinationIndex >= newResultRoute.length) return;
@@ -723,10 +740,22 @@ const GenerateItineraryScreen = () => {
 
                                             {/* Move buttons */}
                                             <View style={styles.buttonContainer}>
-                                                {/* Up Button - But not w/ Origin */}
-                                                {!isLoading && (routeGroupIndex !== 0 || destinationIndex > 1) && (
+
+                                                {/* If it's the first location in any other day, show only the down button */}
+                                                {(routeGroupIndex !== 0 && destinationIndex === 0 ) || (routeGroupIndex === 0 && destinationIndex === 1) && (
                                                     <TouchableOpacity
-                                                        onPress={() => moveDestination(destinationIndex, 'up')}
+                                                        onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'down')}
+                                                        style={styles.moveButton}
+                                                        disabled={isLoading}
+                                                    >
+                                                        <Ionicons name="arrow-down" size={20} color="#000" />
+                                                    </TouchableOpacity>
+                                                )}
+
+                                                {/* If it's the last location in any day, show only the up button */}
+                                                {!(destinationIndex === 0 && destinationIndex === routeGroup.length - 1) && destinationIndex !== 0 && destinationIndex !== routeGroup.length - 1 && !(routeGroupIndex === 0 && destinationIndex === 1) && (
+                                                    <TouchableOpacity
+                                                        onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'up')}
                                                         style={styles.moveButton}
                                                         disabled={isLoading}
                                                     >
@@ -734,19 +763,17 @@ const GenerateItineraryScreen = () => {
                                                     </TouchableOpacity>
                                                 )}
 
-                                                {/* Down Button - But not w/ Origin */}
-                                                {!isLoading && (
-                                                    (routeGroupIndex !== 0 || 
-                                                    (routeGroupIndex !== 0 || destinationIndex > 0)) &&
-                                                    destinationIndex < routeGroup.length - 1
-                                                ) && (
-                                                    <TouchableOpacity
-                                                        onPress={() => moveDestination(destinationIndex, 'down')}
-                                                        style={styles.moveButton}
-                                                        disabled={isLoading}
-                                                    >
-                                                        <Ionicons name="arrow-down" size={20} color="#000" />
-                                                    </TouchableOpacity>
+                                                {/* All other locations have both up and down buttons */}
+                                                {destinationIndex !== 0 && destinationIndex !== routeGroup.length - 1 && !(routeGroupIndex === 0 && destinationIndex === 1) && (
+                                                    <>
+                                                        <TouchableOpacity
+                                                            onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'down')}
+                                                            style={styles.moveButton}
+                                                            disabled={isLoading}
+                                                        >
+                                                            <Ionicons name="arrow-down" size={20} color="#000" />
+                                                        </TouchableOpacity>
+                                                    </>
                                                 )}
                                             </View>
                                         </View>

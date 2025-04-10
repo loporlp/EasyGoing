@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Polyline, Marker } from 'react-native-maps';
 import { useIsFocused } from '@react-navigation/native';
+import ErrorBoundary from './ErrorBoundary';
 
 const stroke_width = 4;
 
@@ -85,6 +86,7 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({
   }, [polylines, transportDurations, markers, bounds, isFocused, onPolylinesReady]);
 
   return (
+    <ErrorBoundary>
     <View style={styles.container}>
       {isLoading ? (
         <View style={styles.loadingContainer}>
@@ -176,6 +178,7 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({
         <Text key={index} style={styles.text}>{mode}</Text>
       ))}*/}
     </View>
+    </ErrorBoundary>
   );
 };
 

@@ -15,10 +15,10 @@ export const getCoords = async (place) => {
                 return coordinates;
             } else {
                 console.log("No coordinates found for the selected place.");
-                throw new Error("No coordinates found");
+                return [];
             }
         } catch (error) {
             console.error("Error while fetching coordinate (nTC)s:", error);
-            throw error;
+            return [];
         }
 }
