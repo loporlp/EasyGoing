@@ -512,8 +512,8 @@ const GenerateItineraryScreen = () => {
         }
     
         // Determine the range of affected destinations (since we have prev, current, next locations)
-        const start = Math.max(0, newIndex - 1);
-        const end = Math.min(newResultRoute.length, newIndex + 2); // non-inclusive
+        const start = Math.max(0, newIndex - 2);
+        const end = Math.min(newResultRoute.length, newIndex + 1); // non-inclusive
     
         const affectedSlice = newResultRoute.slice(start, end);
     
