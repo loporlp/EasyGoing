@@ -336,9 +336,7 @@ const AddEditDestinations = () => {
     const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null); // Explicitly define state type
     const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null); // Explicitly define state type
     const [datesText, setDatesText] = useState("");
-
-    const infoInputRef = useRef(null);
-
+    const infoInputRef = useRef<TextInput>(null);  //set to textinput to allow null value
     const [timeDuration, setTimeDuration] = useState<{ hours: number; minutes: number } | null>(null);
 
     const handleDurationChange = (value: { hours: any; minutes: any; }) => {
@@ -743,7 +741,7 @@ const AddEditDestinations = () => {
                             </View>
                         </View>
 
-                        <TouchableWithoutFeedback onPress={() => infoInputRef.current.focus()}>
+                        <TouchableWithoutFeedback onPress={() => infoInputRef.current?.focus()}>
                             <View style={{ flexDirection: "column", marginTop: 15 }}>
                                 <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
                                     <Ionicons name={"location"} color={"#24a6ad"} />
@@ -766,7 +764,7 @@ const AddEditDestinations = () => {
 
                         {/* INSERT TIME PICKER HERE */}
                         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                            <TouchableWithoutFeedback onPress={() => infoInputRef.current.focus()}>
+                            <TouchableWithoutFeedback onPress={() => infoInputRef.current?.focus()}>
                                 <View style={{ flexDirection: "column", marginTop: 15, width: "45%" }}>
                                     <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
                                         <Ionicons name={"time"} color={"#24a6ad"} />
@@ -778,7 +776,7 @@ const AddEditDestinations = () => {
                                 </View>
                             </TouchableWithoutFeedback>
 
-                            <TouchableWithoutFeedback onPress={() => infoInputRef.current.focus()}>
+                            <TouchableWithoutFeedback onPress={() => infoInputRef.current?.focus()}>
                                 <View style={{ flexDirection: "column", marginTop: 15, width: "45%" }}>
                                     <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
                                         <MaterialCommunityIcons name={"priority-high"} color={"#24a6ad"} />
