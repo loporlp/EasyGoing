@@ -23,6 +23,7 @@ export const fetchPolylinesAndDurations = async (locations, transportationModes)
       destinationCoords = await getCoords({ description: destination, place_id: '' });
     } catch (error) {
       console.log("Error here in routeHelpers.js");
+      throw new Error("Coords couldn't be found in routeHelpers.js (1) (getCoords)");
     }
     
     // Store markers
@@ -87,6 +88,7 @@ export async function getDirectionsBetweenLocations(origin, destination, mode) {
     destinationCoords = await getCoords({ description: destination, place_id: '' });
   } catch (error) {
     console.log("Error in coords for routeHelpers.js");
+    throw new Error("Coords couldn't be found in routeHelpers.js (2) (getCoords)");
   }
 
   // Retrieve the ID token from Firebase
