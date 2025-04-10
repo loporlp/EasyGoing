@@ -321,11 +321,29 @@ const AddEditDestinations = () => {
         }
     };
 
+    // Handle finishing changing the trip date
     const handleDone = () => {
         if (selectedStartDate && selectedEndDate) {
+            // Update Trip locally
+            const updatedTrip = {
+                ...trip,
+                startDate: selectedStartDate.toISOString(),
+                endDate: selectedEndDate.toISOString()
+            };
+            setTrip(updatedTrip);
+
+            // Update Trip Textbox
             const startFormatted = moment(selectedStartDate).format("ddd, MMM D");
             const endFormatted = moment(selectedEndDate).format("ddd, MMM D");
             setDatesText(`${startFormatted} - ${endFormatted}`);
+    
+            // Save changes to DB
+            try {
+                updateTrip(tripId, updatedTrip);
+                console.log("Trip dates updated successfully");
+            } catch (error) {
+                console.error("Failed to update trip dates:", error);
+            }
         }
         setModalVisible(false);
     };
