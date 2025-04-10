@@ -49,6 +49,7 @@ const AddEditDestinations = () => {
     // Track if user is currently editing a destionation (and if so, what index)
     const [isEditing, setIsEditing] = useState(false);
     const [editIndex, setEditIndex] = useState<number>(-1); // To store the index of the item being edited, -1 is default as it shouldn't ever be called if isEditing is false
+    const [isOriginEdit, setIsOriginEdit] = useState(false);
     // Sets trip data
     const [trip, setTrip] = useState<any>(null);
     const [tripId, setTripId] = useState<string | null>(null);
@@ -150,6 +151,10 @@ const AddEditDestinations = () => {
         if (!timeDuration) {
             errorMessage += "Duration is required.\n";
         }
+        // Special check: Alias can't be "Origin" unless editing an existing "Origin"
+        if (!isEditing && tempAlias.trim().toLowerCase() === "origin") {
+            errorMessage += "You cannot use 'Origin' as an alias for a destination.\n";
+        }
         if (errorMessage) {
             alert(errorMessage.trim());
             return;
@@ -244,6 +249,8 @@ const AddEditDestinations = () => {
     const editLocation = (index: number) => {
         setIsEditing(true), setEditIndex(index);
         const oldDestination = trip.destinations[index];
+        //check if origin is being edited
+        setIsOriginEdit(oldDestination.alias.trim().toLowerCase() === "origin");
         //set the values
         setAlias(oldDestination.alias);
         setLocation(oldDestination.address);
@@ -742,7 +749,7 @@ const AddEditDestinations = () => {
                                     <Ionicons name={"location"} color={"#24a6ad"} />
                                     <Text>Destination:</Text>
                                 </View>
-                                <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5, justifyContent: "center", textAlignVertical: "center" }]} value={tempAlias} onChangeText={setTempAlias} ref={infoInputRef}></TextInput>
+                                <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5, justifyContent: "center", textAlignVertical: "center" }]} value={tempAlias} onChangeText={setTempAlias} editable={!isOriginEdit} ref={infoInputRef}></TextInput>
                             </View>
                         </TouchableWithoutFeedback>
 
@@ -777,7 +784,7 @@ const AddEditDestinations = () => {
                                         <MaterialCommunityIcons name={"priority-high"} color={"#24a6ad"} />
                                         <Text>Priority:</Text>
                                     </View>
-                                    <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5 }]} value={tempPriority} keyboardType="numeric" onChangeText={setTempPriority} ref={infoInputRef} returnKeyType="done"></TextInput>
+                                    <TextInput style={[styles.addDestinationTextInputs, { paddingHorizontal: 5 }]} value={tempPriority} keyboardType="numeric" onChangeText={setTempPriority} editable={!isOriginEdit} ref={infoInputRef} returnKeyType="done"></TextInput>
                                 </View>
                             </TouchableWithoutFeedback>
                         </View>
