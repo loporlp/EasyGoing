@@ -45,6 +45,7 @@ const AddEditDestinations = () => {
     const [tempLocation, setTempLocation] = useState("");
     const [tempDuration, setTempDuration] = useState("");
     const [tempPriority, setTempPriority] = useState("");
+    const [tempTimeDuration, setTempTimeDuration] = useState<{ hours: number; minutes: number } | null>(null);
 
     // Track if user is currently editing a destionation (and if so, what index)
     const [isEditing, setIsEditing] = useState(false);
@@ -262,6 +263,11 @@ const AddEditDestinations = () => {
         setTempLocation(oldDestination.address);
         setTempDuration(oldDestination.duration);
         setTempPriority(oldDestination.priority.toString());
+        //set timepicker
+        const minutes = oldDestination.duration || 0;
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        setTimeDuration({ hours, minutes: mins });
         //shows the edit screen
         show()
     }
@@ -340,8 +346,8 @@ const AddEditDestinations = () => {
     const [timeDuration, setTimeDuration] = useState<{ hours: number; minutes: number } | null>(null);
 
     const handleDurationChange = (value: { hours: any; minutes: any; }) => {
-        setTimeDuration({ hours: value.hours, minutes: value.minutes });
-    };
+        setTempTimeDuration({ hours: value.hours, minutes: value.minutes });
+    };    
 
 
     // Handle changed date
@@ -464,6 +470,7 @@ const AddEditDestinations = () => {
                     minuteLabel="min"
                     hideSeconds
                     onDurationChange={handleDurationChange}
+                    initialValue={tempTimeDuration || { hours: 0, minutes: 0 }}
                     styles={{
                         pickerItem: {
                             fontSize: 32,
@@ -485,8 +492,19 @@ const AddEditDestinations = () => {
     }
 
     const selectDuration = () => {
+        if (tempTimeDuration) {
+            setTimeDuration(tempTimeDuration);
+            const totalMinutes = tempTimeDuration.hours * 60 + tempTimeDuration.minutes;
+            setTempDuration(totalMinutes.toString());
+        }
         setShowPicker(false);
     }
+
+    const openTimePicker = () => {
+        setTempTimeDuration(timeDuration || { hours: 0, minutes: 0 });
+        setShowPicker(true);
+      };
+      
 
     const rightOpenValue = -150;
 
@@ -770,7 +788,7 @@ const AddEditDestinations = () => {
                                         <Ionicons name={"time"} color={"#24a6ad"} />
                                         <Text>Duration:</Text>
                                     </View>
-                                    <TouchableOpacity style={[styles.addDestinationTextInputs, { paddingHorizontal: 5, justifyContent: 'center', alignItems: 'flex-start' }]} onPress={() => setShowPicker(true)}>
+                                    <TouchableOpacity style={[styles.addDestinationTextInputs, { paddingHorizontal: 5, justifyContent: 'center', alignItems: 'flex-start' }]} onPress={openTimePicker}>
                                         <Text style={{fontSize: 18 }}>{timeDuration ? `${timeDuration.hours}hr ${timeDuration.minutes}min` : ''}</Text>
                                     </TouchableOpacity>
                                 </View>
