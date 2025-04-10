@@ -487,6 +487,10 @@ const AddEditDestinations = () => {
         setVisible(true);
     };
 
+    const handleCancel = () => {
+        setImportingLocation(false);
+    };
+
     return (
         <View style={styles.container}>
             {/* Background image */}
@@ -566,13 +570,20 @@ const AddEditDestinations = () => {
                 </TouchableOpacity>
             </View>
 
-            {importingLocation ? (
-                <SavedDestinations
-                    SavedDestinations={savedDestinations}
-                    handlePress={handleBookmarkImport}
-                    deleteLocation={function (index: number): void { }}
-                />
-            ) : null}
+            {/* For importing saved locations */}
+            {importingLocation && (
+                <View style={styles.overlay}>
+                    <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+                        <Text style={styles.cancelButtonText}>Cancel</Text>
+                    </TouchableOpacity>
+
+                    <SavedDestinations
+                        SavedDestinations={savedDestinations}
+                        handlePress={() => {}}
+                        deleteLocation={() => {}}
+                    />
+                </View>
+            )}
 
             <Modal
                 visible={isAddTripVisible}
@@ -1085,6 +1096,35 @@ const styles = StyleSheet.create({
         backgroundColor: '#ccc',
         marginVertical: 10,
         width: "100%"
+    },
+    // ==== IMPORTING ==== //
+    overlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 100,
+        paddingTop: 100,
+    },
+
+    cancelButton: {
+        position: 'absolute',
+        top: 40,
+        right: 20,
+        backgroundColor: 'red',
+        padding: 10,
+        borderRadius: 5,
+        zIndex: 2000, 
+    },
+    
+    cancelButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 18
     },
 });
 
