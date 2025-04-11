@@ -593,7 +593,7 @@ const AddEditDestinations = () => {
                 <View style={{ marginTop: 15 }}>
                     <View style={{ flexDirection: "row", marginBottom: 10, alignItems: "center", backgroundColor: "white", borderRadius: 10 }}>
                         <Ionicons name="location" size={22} color={"#24a6ad"} style={{ position: "absolute", zIndex: 1, marginLeft: 10 }} />
-                        <AutocompleteTextBox placeholder="Origin" placeholderTextColor="gray" onPlaceSelect={handleOriginSelect} value={originText} style={{ width: "100%", paddingLeft: 30 }} />
+                        <AutocompleteTextBox placeholder="Origin" placeholderTextColor="gray" onPlaceSelect={handleOriginSelect} value={originText} style={{ width: "100%", paddingLeft: 30, zIndex: 100}} />
                     </View>
 
                     <TouchableOpacity style={[styles.input, { flex: 1, flexDirection: "row", alignItems: 'center' }]} onPress={() => setModalVisible(true)}>
