@@ -8,6 +8,7 @@ import { storeData, getData } from '../scripts/localStore.js';
 import moment from 'moment';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import DynamicImage from "@/components/DynamicImage.js";
 
 /**
  *  City Header (picture of city, overlay with text -> City, Country; Dates Visiting; # travelers)
@@ -282,7 +283,7 @@ const ReviewItineraryScreen = () => {
                                             <TouchableOpacity>
                                                 <View style={styles.destination}>
                                                     <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                                                    <Image source={dest.picture?.url ? { uri: dest.picture.url } : require("../assets/images/newyorkcity.jpg")} style={styles.destinationImage} />
+                                                    <DynamicImage placeName={dest.alias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
                                                         <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10 }}>
                                                             <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                                                                 <Ionicons name="location" size={20} color={"#24a6ad"} />
