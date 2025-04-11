@@ -35,12 +35,6 @@ const SearchScreen = () => {
 
     return (
         <View style={{ flex: 1, flexDirection: "column" }}>
-            <View style={styles.searchSection}>
-                <View style={styles.searchBar}>
-                    <Ionicons name="search" size={20} style={{}} color={"black"} />
-                    <AutocompleteTextBox placeholder="Search..." placeholderTextColor="#d6d6d6" style={styles.destinationInput} />
-                </View>
-            </View>
 
             <View style={styles.searchSection}>
                 <GoBotAI />
@@ -117,6 +111,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingVertical: 5,
         alignSelf: 'center',
+        zIndex: 100
     },
 });
 
