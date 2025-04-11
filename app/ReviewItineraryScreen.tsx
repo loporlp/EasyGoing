@@ -283,24 +283,24 @@ const ReviewItineraryScreen = () => {
                                             <TouchableOpacity>
                                                 <View style={styles.destination}>
                                                     <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                                                    <DynamicImage placeName={dest.alias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
+                                                    <DynamicImage placeName={dest.alias} imageStyle={styles.destinationImage} />
                                                         <View style={{ flex: 1, flexDirection: "column", paddingVertical: 10, marginVertical: 10 }}>
                                                             <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                                                                 <Ionicons name="location" size={20} color={"#24a6ad"} />
-                                                                <Text style={{ flex: 1, fontSize: 20, fontWeight: "700", marginLeft: 5 }}>{dest.alias}</Text>
+                                                                <Text style={{ flex: 1, fontSize: 20, fontWeight: "700"}}>{dest.alias}</Text>
                                                             </View>
-                                                            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginLeft: 5 }}>
+                                                            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                                                                 <MaterialCommunityIcons name={"label"} color={"#24a6ad"} />
                                                                 <Text numberOfLines={1} ellipsizeMode="tail" style={{ marginLeft: 5, color: "gray", marginTop: -5 }}>{dest.address}</Text>
                                                             </View>
                                                             <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5 }}>
                                                                 <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                                                                     <Ionicons name="time" size={18} color={"#24a6ad"} />
-                                                                    <Text style={{ marginLeft: 5 }}>{dest.duration} hr</Text>
+                                                                    <Text>{dest.duration} hr</Text>
                                                                 </View>
                                                                 <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginRight: 5 }}>
                                                                     <MaterialCommunityIcons name="priority-high" size={18} color={"#24a6ad"} />
-                                                                    <Text style={{ marginLeft: 5 }}>{dest.priority}</Text>
+                                                                    <Text>{dest.priority}</Text>
                                                                 </View>
                                                             </View>
                                                         </View>
@@ -452,12 +452,11 @@ const styles = StyleSheet.create({
     },
 
     destinationImage: {
-        width: 70,
-        height: 70,
+        width: 90,
+        height: 90,
         resizeMode: "cover",
         overflow: "hidden",
         borderRadius: 10,
-        marginLeft: 5
     },
 
     buttonContainer: {
