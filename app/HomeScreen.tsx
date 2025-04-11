@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, TextInput, Image, ScrollView, FlatList, ActivityIndicator } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, Image, ScrollView, FlatList, ActivityIndicator, Modal } from 'react-native'
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useHeaderHeight } from '@react-navigation/elements';
@@ -6,12 +6,13 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from "expo-router";
 import { Link } from 'expo-router'
 import { getAuth } from 'firebase/auth';
-import {storeData, getData, fillLocal} from "../scripts/localStore";
+import { storeData, getData, fillLocal } from "../scripts/localStore";
 import storage from '@react-native-async-storage/async-storage';
 import { auth } from '@/firebaseConfig';
-import { updateTrip } from '@/scripts/databaseInteraction';
+import { updateTrip, fetchSummary } from '@/scripts/databaseInteraction';
 import { recommended_places } from '../scripts/recommendedPlacesAi';
 import { getImageUrl } from '../scripts/ImageUtils'
+import processGroupedDestinations from '../scripts/processGroupedDestinations';
 
 const HomeScreen = () => {
 
@@ -19,7 +20,7 @@ const HomeScreen = () => {
     // Trip ids in local storage can be accessed through getData("tripIDs")
     useEffect(() => {
         fillLocal();
-      }, []);
+    }, []);
 
     // Sets up navigations
     const router = useRouter();
@@ -28,6 +29,9 @@ const HomeScreen = () => {
     const [isLoading, setIsLoading] = useState(true);
 
     const headerHeight = useHeaderHeight();
+    const [destSummary, setDestSummary] = useState("");
+    const [destImage, setDestImage] = useState("");
+    const [isModalVisible, setModalVisible] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
     const [locationType, setLocationType] = useState<string>("world travel locations");
     const handleSelectCategory = (index: number) => {
@@ -159,12 +163,12 @@ const HomeScreen = () => {
             const savedList = accountInfo?.[0]?.destinations ?? [];
 
             try {
-                
+
                 const dataString = await recommended_places(3, locationType); // Get 3 recommendations with location type
-                
+
                 // Extract AI message content
                 const recommendations = dataString?.choices?.[0]?.message?.content;
-                
+
                 if (!recommendations) {
                     console.error("Error: No recommendations received");
 
@@ -177,17 +181,17 @@ const HomeScreen = () => {
                             saved: isSaved,
                         };
                     });
-                      
+
                     setDestinationList(updatedBackup);
                     setIsLoading(false);
 
                     return;
                 }
-    
+
                 console.log("Recommendations from AI:", recommendations);
-    
+
                 let parsedData;
-    
+
                 // Check if it's a clean JSON array
                 if (recommendations.trim().startsWith("[") && recommendations.trim().endsWith("]")) {
                     parsedData = JSON.parse(recommendations.trim());
@@ -215,54 +219,54 @@ const HomeScreen = () => {
                 );
 
                 console.log("Updated Data: ", updatedData);
-        
+
                 setDestinationList(updatedData);
             } catch (error) {
                 console.error("Error parsing JSON:", error);
-    
+
                 // Set backup array if parsing fails
                 const updatedBackup = backupArray.map((item) => {
-                const isSaved = savedList.some(
-                    (savedItem: Destination) => savedItem.destination === item.destination
-                );
-                return {
-                    ...item,
-                    saved: isSaved,
-                };
+                    const isSaved = savedList.some(
+                        (savedItem: Destination) => savedItem.destination === item.destination
+                    );
+                    return {
+                        ...item,
+                        saved: isSaved,
+                    };
                 });
 
                 setDestinationList(updatedBackup);
             }
             setIsLoading(false);
         };
-    
+
         fetchData();
     }, [locationType]);
 
     useFocusEffect(
         useCallback(() => {
-          const refreshSavedBookmarks = async () => {
-            const accountInfo = await getData("savedDestinations");
-            const savedList = accountInfo?.[0]?.destinations ?? [];
-      
-            const updatedList = destinationList.map((item) => {
-              const isSaved = savedList.some(
-                (savedItem: Destination) => savedItem.destination === item.destination
-              );
-              return {
-                ...item,
-                saved: isSaved
-              };
-            });
-      
-            setDestinationList(updatedList);
-          };
-      
-          refreshSavedBookmarks();
+            const refreshSavedBookmarks = async () => {
+                const accountInfo = await getData("savedDestinations");
+                const savedList = accountInfo?.[0]?.destinations ?? [];
+
+                const updatedList = destinationList.map((item) => {
+                    const isSaved = savedList.some(
+                        (savedItem: Destination) => savedItem.destination === item.destination
+                    );
+                    return {
+                        ...item,
+                        saved: isSaved
+                    };
+                });
+
+                setDestinationList(updatedList);
+            };
+
+            refreshSavedBookmarks();
         }, [])
-      );      
-    
-      
+    );
+
+
 
     const imageMap = {
         statue: require("../assets/images/statueofliberty.jpg"),
@@ -344,10 +348,10 @@ const HomeScreen = () => {
                 updateBookmarkStyle(destination, true);
                 console.log("Bookmarked");
             }
-    
+
             // Update the database
             accountInfo[0].destinations = savedDestinations;
-            console.log("AccountInfo:", accountInfo[1],accountInfo[0]);
+            console.log("AccountInfo:", accountInfo[1], accountInfo[0]);
             updateTrip(accountInfo[1], accountInfo[0]);
         } catch (error) {
             console.log(error);
@@ -368,8 +372,15 @@ const HomeScreen = () => {
         });
 
         // Force re-render
-        setDestinationList(updatedDestinations); 
+        setDestinationList(updatedDestinations);
     };
+
+    const clickedDest = async (search: string, image: any) => {
+        console.log(search)
+        const summary = await fetchSummary(search);
+        setDestSummary(summary);
+        setDestImage(image);
+    }
 
     return (
         <>
@@ -377,7 +388,7 @@ const HomeScreen = () => {
                 <ScrollView style={styles.container} contentContainerStyle={{ paddingTop: headerHeight, flexGrow: 1 }}>
                     <View style={styles.headerContainer}>
                         <Text style={styles.headerText}>Hello, <Text style={{ color: "#24a6ad" }}>{username}<Text style={{ color: "white" }}>!</Text></Text></Text>
-                        <TouchableOpacity onPress={() => { getData("tripIDs")}} style={styles.notificationButton} onPress={notificationsScreen}>
+                        <TouchableOpacity onPress={() => { getData("tripIDs") }} style={styles.notificationButton} onPress={notificationsScreen}>
                             <Ionicons name="notifications" size={20} color="black" />
                         </TouchableOpacity>
                     </View>
@@ -431,19 +442,19 @@ const HomeScreen = () => {
                                 {isLoading ? (
                                     <ActivityIndicator size="large" color="#0000ff" />
                                 ) : (
-                                    recommendedList.map((item, index) => (
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                handleSelectCategory(index);
-                                                handleTypeOfLocationPress(item.title);
-                                            }}
-                                            style={activeIndex === index ? styles.activeRecommendBtn : styles.recommendBtn}
-                                            key={index}>
-                                            <MaterialCommunityIcons name={item.iconName as any} size={20} color={activeIndex === index ? "white" : "black"} />
-                                            <Text style={activeIndex === index ? styles.recommendBtnTextActive : styles.recommendBtnText}>{item.title}</Text>
-                                        </TouchableOpacity>
-                                    ))
-                                )}
+                                        recommendedList.map((item, index) => (
+                                            <TouchableOpacity
+                                                onPress={() => {
+                                                    handleSelectCategory(index);
+                                                    handleTypeOfLocationPress(item.title);
+                                                }}
+                                                style={activeIndex === index ? styles.activeRecommendBtn : styles.recommendBtn}
+                                                key={index}>
+                                                <MaterialCommunityIcons name={item.iconName as any} size={20} color={activeIndex === index ? "white" : "black"} />
+                                                <Text style={activeIndex === index ? styles.recommendBtnTextActive : styles.recommendBtnText}>{item.title}</Text>
+                                            </TouchableOpacity>
+                                        ))
+                                    )}
                             </ScrollView>
 
                             <FlatList
@@ -457,16 +468,16 @@ const HomeScreen = () => {
                                 }}
                                 renderItem={({ item }) => (
                                     <View>
-                                        <TouchableOpacity style={styles.recommendDest}>
+                                        <TouchableOpacity style={styles.recommendDest} onPress={() => { clickedDest(item.destination, item.image); setModalVisible(true); }}>
                                             <View style={styles.destImageWrapper}>
-                                            <Image
-                                                style={styles.destImage}
-                                                source={
-                                                    item.image.startsWith('http://') || item.image.startsWith('https://')
-                                                    ? { uri: item.image }
-                                                    : imageMap[item.image]
-                                                }
-                                            />
+                                                <Image
+                                                    style={styles.destImage}
+                                                    source={
+                                                        item.image.startsWith('http://') || item.image.startsWith('https://')
+                                                            ? { uri: item.image }
+                                                            : imageMap[item.image]
+                                                    }
+                                                />
                                                 <TouchableOpacity style={styles.saveIconWrapper} onPress={() => handleBookmarkClick(item)}>
                                                     <Ionicons name="bookmark" size={22} color={item.saved ? "#FFD700" : "white"} />
                                                 </TouchableOpacity>
@@ -570,6 +581,25 @@ const HomeScreen = () => {
                     </TouchableOpacity>
                 </View>
             </View>
+
+            <Modal visible={isModalVisible} transparent={true} onRequestClose={() => setModalVisible(false)}>
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Image
+                            style={{width: "100%", borderRadius: 10}}
+                            source={
+                                destImage.startsWith('http://') || destImage.startsWith('https://')
+                                    ? { uri: destImage }
+                                    : imageMap[destImage]
+                            }
+                        />
+                        <Text style={{marginTop: 15, fontSize: 18}}>{destSummary}</Text>
+                        <TouchableOpacity style={{backgroundColor: "red", alignItems: "center", paddingHorizontal: 20, paddingVertical: 10, marginTop: 15}} onPress={() => setModalVisible(false)}>
+                            <Text style={{fontWeight: "700", color: "white"}}>CLOSE</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </>
     );
 }
@@ -771,7 +801,22 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 1, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 3,
-    }
+    },
+
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        width: '95%',
+        backgroundColor: '#F4F4F4',
+        padding: 20,
+        borderRadius: 10,
+        flexDirection: "column",
+        alignItems: "center"
+    },
 });
 
 export default HomeScreen;

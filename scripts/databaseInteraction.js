@@ -338,3 +338,19 @@ export const getHistories = async () => {
     clearTimeout(timeout); // Clear the timeout once the request completes
   }
 };
+
+export const fetchSummary = async (searchTerm) => {
+  if (!searchTerm.trim()) return;
+  try {
+    const response = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(searchTerm)}`
+    );
+    if (!response.ok) throw new Error('Article not found');
+    const data = await response.json();
+    console.log("SEARCH: " + data)
+    return data.extract
+
+  } catch (err) {
+    return err.message;
+  }
+};
