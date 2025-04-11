@@ -1052,7 +1052,7 @@ app.delete('/api/history/:id', verifyFirebaseToken, async (req, res) => {
  */
 app.post('/api/openai/chat', verifyFirebaseToken, async (req, res) => {
     console.log("OpenAI chat proxy called");
-    return res.status(503).json({ error: 'This service is temporarily disableed'});
+    //return res.status(503).json({ error: 'This service is temporarily disableed'});
     try {
         const { model, messages } = req.body;
 
