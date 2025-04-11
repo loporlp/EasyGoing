@@ -93,7 +93,7 @@ export const fillLocal = async (forceRun) => {
     savedTrips = await getData("savedDestinations");
     if(!savedTrips){
         console.log("no saved destinations, creating trip");
-        await createTrip("saved", 0, 0, 0);
+        await createTrip("savedDestinations","saved", 0, 0, 0);
     }
 }
 
