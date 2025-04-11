@@ -524,7 +524,7 @@ const HomeScreen = () => {
                                 }}
                                 renderItem={({ item }) => (
                                     <View>
-                                        <TouchableOpacity style={styles.recommendDest}>
+                                        <TouchableOpacity style={styles.recommendDest} onPress={() => { clickedDest(item.destination, item.image); setModalVisible(true); }}>
                                             <View style={styles.destImageWrapper}>
                                                 <Image style={styles.destImage} source={imageMap[item.image]} />
                                                 <TouchableOpacity style={styles.saveIconWrapper}>
