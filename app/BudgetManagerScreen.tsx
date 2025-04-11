@@ -1,5 +1,5 @@
 // BudgetManager.tsx
-import { useRouter } from "expo-router";
+import { router, useFocusEffect, useRouter } from "expo-router";
 import { View, StyleSheet, TextInput, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, Image, ScrollView, FlatList } from "react-native";
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -9,6 +9,8 @@ import { getData, storeData, fillLocal } from '../scripts/localStore';
 import { Dropdown } from 'react-native-element-dropdown';
 import moment from 'moment';
 import { SwipeListView } from 'react-native-swipe-list-view';
+import { navigate } from "expo-router/build/global-state/routing";
+import { useCallback } from 'react';
 
 const BudgetManagerScreen = () => {
     interface Trip {
@@ -30,6 +32,7 @@ const BudgetManagerScreen = () => {
     const [otherBudget, setOtherBudget] = useState(0);
     const [totalBudget, setTotalBudget] = useState(0);
     const [currentTripID, setCurrentTripID] = useState(0);
+    const [updatedExpenses, setUpdatedExpenses] = useState(0);
 
     // Add to history params
     const [expenseTag, setExpenseTag] = useState("");
@@ -100,82 +103,93 @@ const BudgetManagerScreen = () => {
         { label: 'Other', symbol: 'more-horiz', color: '#800080', value: '5' },
     ];
 
-    // Load history when the component mounts
-    useEffect(() => {
+    const loadHistory = async () => {
+
         let hotelExpense = 0;
         let transportExpense = 0;
         let foodExpense = 0;
         let thingsToDoExpense = 0;
         let otherExpense = 0;
 
-        const loadHistory = async () => {
+        var current = await getData("currentTrip");
+        setCurrentTripID(parseInt(current));
+        console.log("CURRENT ID IS: ", current);
 
-            var current = await getData("currentTrip");
-            setCurrentTripID(parseInt(current));
-            console.log("CURRENT ID IS: ", current);
+        // Get the list of trip IDs from local storage
+        const [tripDetails, historyIds] = await Promise.all([
+            getData(current.toString()),
+            getData(`history ${current}`)
+        ]);
 
-            // Get the list of trip IDs from local storage
-            const [tripDetails, historyIds] = await Promise.all([
-                getData(current.toString()),
-                getData(`history ${current}`)
-            ]);
+        if (tripDetails) {
+            setCurrentTrip(tripDetails);
+        }
 
-            if (tripDetails) {
-                setCurrentTrip(tripDetails);
-            }
+        if (historyIds && historyIds.length > 0) {
+            const loadedHistory = [];
 
-            if (historyIds && historyIds.length > 0) {
-                const loadedHistory = [];
+            // Loop through each history ID and fetch the history details from local storage
+            for (const historyId of historyIds) {
 
-                // Loop through each history ID and fetch the history details from local storage
-                for (const historyId of historyIds) {
+                loadedHistory.unshift({
+                    id: historyId.id,
+                    tag: historyId.tag,
+                    value: historyId.value,
+                    description: historyId.description,
+                    date: historyId.date
+                });
 
-                    loadedHistory.unshift({
-                        id: historyId.id,
-                        tag: historyId.tag,
-                        value: historyId.value,
-                        description: historyId.description,
-                        date: historyId.date
-                    });
-
-                    switch (historyId.tag) {
-                        case 'Hotel':
-                            hotelExpense += parseFloat(historyId.value);
-                            setHotelBudget(hotelExpense);
-                            break;
-                        case 'Transportation':
-                            transportExpense += parseFloat(historyId.value);
-                            setTransportationBudget(transportExpense);
-                            break;
-                        case 'Food':
-                            foodExpense += parseFloat(historyId.value);
-                            setFoodBudget(foodExpense);
-                            break;
-                        case 'Things To Do':
-                            thingsToDoExpense += parseFloat(historyId.value);
-                            setThingsToDoBudget(thingsToDoExpense);
-                            break;
-                        case 'Other':
-                            otherExpense += parseFloat(historyId.value);
-                            setOtherBudget(otherExpense);
-                            break;
-                        default:
-                            break;
-                    }
+                switch (historyId.tag) {
+                    case 'Hotel':
+                        hotelExpense += parseFloat(historyId.value);
+                        setHotelBudget(hotelExpense);
+                        break;
+                    case 'Transportation':
+                        transportExpense += parseFloat(historyId.value);
+                        setTransportationBudget(transportExpense);
+                        break;
+                    case 'Food':
+                        foodExpense += parseFloat(historyId.value);
+                        setFoodBudget(foodExpense);
+                        break;
+                    case 'Things To Do':
+                        thingsToDoExpense += parseFloat(historyId.value);
+                        setThingsToDoBudget(thingsToDoExpense);
+                        break;
+                    case 'Other':
+                        otherExpense += parseFloat(historyId.value);
+                        setOtherBudget(otherExpense);
+                        break;
+                    default:
+                        break;
                 }
-
-                setBudgetHistory(loadedHistory);
-            } else {
-                console.log("No history available in local storage.");
             }
-        };
+
+            setBudgetHistory(loadedHistory);
+        } else {
+            console.log("No history available in local storage.");
+        }
+    };
+
+    // Load history when the component mounts
+    useEffect(() => {
         loadHistory();
         console.log(JSON.stringify(currentTrip))
     }, []);
 
+    useFocusEffect(
+        useCallback(() => {
+            loadHistory(); // or updateHistory()
+        }, [])
+    );
+
     useEffect(() => {
         getHistoriesByTag();
     }, [selectedCategory]);
+
+    useEffect(() => {
+        loadHistory();
+    }, [budgetHistory])
 
     useEffect(() => {
         let totalSpent = hotelBudget + transportationBudget + foodBudget + thingsToDoBudget + otherBudget;
@@ -225,6 +239,7 @@ const BudgetManagerScreen = () => {
 
     // add to history
     const addHistory = async () => {
+        resetHistory();
         setAddHistoryVisible(false);
 
         if (expenseLabel != "" && expensePrice != "" && expensePrice != "" && expenseTag != "") {
@@ -257,6 +272,72 @@ const BudgetManagerScreen = () => {
         setExpenseLabel("");
         setExpensePrice("");
     }
+
+    const loadAndSetHistory = async () => {
+        let hotelExpense = 0;
+        let transportExpense = 0;
+        let foodExpense = 0;
+        let thingsToDoExpense = 0;
+        let otherExpense = 0;
+
+        const current = await getData("currentTrip");
+        setCurrentTripID(parseInt(current));
+
+        const [tripDetails, historyIds] = await Promise.all([
+            getData(current.toString()),
+            getData(`history ${current}`)
+        ]);
+
+        if (tripDetails) {
+            setCurrentTrip(tripDetails);
+        }
+
+        if (historyIds && historyIds.length > 0) {
+            const loadedHistory = [];
+
+            for (const historyId of historyIds) {
+                loadedHistory.unshift({
+                    id: historyId.id,
+                    tag: historyId.tag,
+                    value: historyId.value,
+                    description: historyId.description,
+                    date: historyId.date
+                });
+
+                switch (historyId.tag) {
+                    case 'Hotel':
+                        hotelExpense += parseFloat(historyId.value);
+                        break;
+                    case 'Transportation':
+                        transportExpense += parseFloat(historyId.value);
+                        break;
+                    case 'Food':
+                        foodExpense += parseFloat(historyId.value);
+                        break;
+                    case 'Things To Do':
+                        thingsToDoExpense += parseFloat(historyId.value);
+                        break;
+                    case 'Other':
+                        otherExpense += parseFloat(historyId.value);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            setBudgetHistory(loadedHistory);
+            setHotelBudget(hotelExpense);
+            setTransportationBudget(transportExpense);
+            setFoodBudget(foodExpense);
+            setThingsToDoBudget(thingsToDoExpense);
+            setOtherBudget(otherExpense);
+            setTotalBudget(hotelExpense + transportExpense + foodExpense + thingsToDoExpense + otherExpense);
+        } else {
+            setBudgetHistory([]);
+            console.log("No history available.");
+        }
+    };
+
 
     const updateHistory = async () => {
         const updatedHistory = await getData("history");
@@ -309,8 +390,7 @@ const BudgetManagerScreen = () => {
 
             let totalExpense = hotelBudget + transportationBudget + foodBudget + thingsToDoBudget + otherBudget;
             setTotalBudget(totalExpense)
-
-            setBudgetHistory(newHistory);
+            await loadAndSetHistory();
         }
     }
 
