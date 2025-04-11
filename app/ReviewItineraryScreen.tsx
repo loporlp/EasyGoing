@@ -147,40 +147,63 @@ const ReviewItineraryScreen = () => {
         icalContent += "VERSION:2.0\r\n";
         icalContent += "PRODID:-//EasyGoing//Easygoing//EN\r\n";
         icalContent += "CALSCALE:GREGORIAN\r\n";
-    
-        //loop through destinations to add each as an event
-        trip.destinations.forEach((dest: any, index: number) => {
-            const startTime = new Date(dest.startDateTime);
-            const durationMinutes = parseFloat(dest.duration) || 1;
-            //compute end time using duration
-            const endTime = new Date(startTime.getTime() + durationMinutes * 60 * 1000);
-        
-            //format times to iCal date-time format (UTC).
-            const formattedStart = moment(startTime).utc().format("YYYYMMDD[T]HHmmss[Z]");
-            const formattedEnd = moment(endTime).utc().format("YYYYMMDD[T]HHmmss[Z]");
-            const dtStamp = moment().utc().format("YYYYMMDD[T]HHmmss[Z]");
-            //generate a unique identifier for the event.
-            const uid = `${trip.tripName}-${index}@ezgoing.app`;
-            
-            //add event for destination
-            icalContent += "BEGIN:VEVENT\r\n";
-            icalContent += `UID:${uid}\r\n`;
-            icalContent += `DTSTAMP:${dtStamp}\r\n`;
-            icalContent += `DTSTART:${formattedStart}\r\n`;
-            icalContent += `DTEND:${formattedEnd}\r\n`;
-            icalContent += `SUMMARY:${dest.alias}\r\n`;
-        
-            //add optional content if included
-            if (dest.address) {
-                icalContent += `LOCATION:${dest.address}\r\n`;
-            }
-            if (dest.notes) {
-                //replace newlines to ensure the description is on one line.
-                const description = dest.notes.replace(/\n/g, " ");
-                icalContent += `DESCRIPTION:${description}\r\n`;
-            }
-            icalContent += "END:VEVENT\r\n";
+
+        //group destinations by day
+        const groupedByDate: { [date: string]: any[] } = {};
+        trip.destinations.forEach((dest: any) => {
+            const day = moment(dest.startDateTime).format("YYYY-MM-DD");
+            if (!groupedByDate[day]) groupedByDate[day] = [];
+            groupedByDate[day].push(dest);
         });
+    
+        //loop through each "day" which we grouped above
+        Object.keys(groupedByDate).forEach((dateKey: string, groupIndex: number) => {
+            const events = groupedByDate[dateKey];
+
+            //start each day at 6:00 AM with a max/ending time of 10:00 PM (16 hour day max)
+            let currentTime = moment(dateKey + " 06:00", "YYYY-MM-DD HH:mm");
+            const maxTime = moment(dateKey + " 22:00", "YYYY-MM-DD HH:mm");
+
+            //add each destination as its own event
+            events.forEach((dest: any, index: number) => {
+                //ensure the duration is 1 minute minimum (even if not originally set that way and set to 0)
+                const durationMinutes = Math.max(parseFloat(dest.duration) || 1, 1); 
+
+                //if start time is past 10:00 PM set it to 10:00 PM
+                if (currentTime.isAfter(maxTime)) {
+                    currentTime = moment(dateKey + " 22:00", "YYYY-MM-DD HH:mm");
+                }
+
+                //compute end time for the event
+                const endTime = moment(currentTime).add(durationMinutes, 'minutes');
+                //format times to iCal date-time format (UTC)
+                const formattedStart = currentTime.utc().format("YYYYMMDD[T]HHmmss[Z]");
+                const formattedEnd = endTime.utc().format("YYYYMMDD[T]HHmmss[Z]");
+                const dtStamp = moment().utc().format("YYYYMMDD[T]HHmmss[Z]");
+                //generate a unique ID for each 'event'
+                const uid = `${trip.tripName}-${groupIndex}-${index}@ezgoing.app`;
+
+                icalContent += "BEGIN:VEVENT\r\n";
+                icalContent += `UID:${uid}\r\n`;
+                icalContent += `DTSTAMP:${dtStamp}\r\n`;
+                icalContent += `DTSTART:${formattedStart}\r\n`;
+                icalContent += `DTEND:${formattedEnd}\r\n`;
+                icalContent += `SUMMARY:${dest.alias}\r\n`;
+
+                //add optional content if included
+                if (dest.address) {
+                    icalContent += `LOCATION:${dest.address}\r\n`;
+                }
+                if (dest.notes) {
+                    //replace newlines to make sure description is 1 line
+                    const description = dest.notes.replace(/\n/g, " ");
+                    icalContent += `DESCRIPTION:${description}\r\n`;
+                }
+                icalContent += "END:VEVENT\r\n";
+                currentTime = moment(endTime);
+            });
+        });
+
         //end iCal file
         icalContent += "END:VCALENDAR\r\n";
     
