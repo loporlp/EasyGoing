@@ -6,7 +6,7 @@ Easy Going is a full-stack trip planning application that helps users plan, mana
 
 ---
 
-## 💻 Platform & Requirements
+## Platform & Requirements
 
 ### Backend  
 - **Platform:** Node.js on AWS EC2 (Ubuntu)  
@@ -46,7 +46,7 @@ All code and setup instructions are provided below to ensure the project can be 
 
 ---
 
-### 📦 Prerequisites
+### Prerequisites
 
 Install the following tools on your machine:
 - [Node.js v18+](https://nodejs.org/)
@@ -115,7 +115,7 @@ easy-going/
    node server.js
    ```
 
-> ✅ Optionally use `pm2` or `screen` to keep the server running in the background.
+> Optionally use `pm2` or `screen` to keep the server running in the background.
 
 ---
 
