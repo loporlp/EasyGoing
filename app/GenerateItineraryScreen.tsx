@@ -18,6 +18,7 @@ import { updateDayOrigin, addTripDatesToStartDateTime } from '../scripts/updateT
 import { calculateTripDates, formatSelectedDestinations, getMatchedPolylinesData, handleSameDateSelection } from '../scripts/dateDividers';
 import { loadDestinations } from '../scripts/destinationLoader';
 import ErrorBoundary from '../components//ErrorBoundary';
+import DynamicImage from '../components/DynamicImage';
 
 const { height } = Dimensions.get('window');
 
@@ -699,7 +700,7 @@ const GenerateItineraryScreen = () => {
                                                 </View>
 
                                                 <View style={styles.destinationContainer}>
-                                                    <Image source={{ uri: destinationImageUri }} style={styles.destinationImage} />
+                                                    <DynamicImage placeName={destinationName} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
                                                     <View style={styles.destinationLabel}>
                                                         <Text style={styles.destinationName}>{destinationName}</Text>
                                                         <Text style={styles.destinationDetails}>
