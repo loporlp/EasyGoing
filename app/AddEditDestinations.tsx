@@ -684,12 +684,14 @@ const AddEditDestinations = () => {
                 <View style={styles.modalAutocompleteOverlay}>
                     <View style={styles.modalAutocompleteContent}>
                         <AutocompleteTextBox
-                            onPlaceSelect={(place) => {
+                            onPlaceSelect={(place,) => {
                                 handleAutocompletePlaceSelect(place);
+                                handleOriginSelect(place);
                                 return place.description; // Explicitly return a string
                             }}
                             placeholder="Destination"
                             placeholderTextColor="lightgray"
+                            value={originText}
                             style={{ width: "100%", paddingRight: 25, borderColor: "black", borderWidth: 1, borderRadius: 10 }}
                         />
                         <View style={{ position: "absolute", top: 18, right: 25 }}>
