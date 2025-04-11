@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
         top: 40, // Positioning the list directly below the TextInput
         left: 0,
         right: 0,
-        zIndex: 10, // Ensure the suggestions list appears above the TextInput
+        zIndex: 100, // Ensure the suggestions list appears above the TextInput
         backgroundColor: 'white', // Make sure the list has a background color to separate from the underlying UI
         borderColor: '#ddd',
         borderTopWidth: 1, // Optional, to separate suggestions from the input box visually
