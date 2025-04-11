@@ -18,7 +18,7 @@ import { updateDayOrigin, addTripDatesToStartDateTime } from '../scripts/updateT
 import { calculateTripDates, formatSelectedDestinations, getMatchedPolylinesData, handleSameDateSelection } from '../scripts/dateDividers';
 import { loadDestinations } from '../scripts/destinationLoader';
 import ErrorBoundary from '../components//ErrorBoundary';
-import DynamicImage from "@/components/DynamicImage";
+import DynamicImage from "../components/DynamicImage";
 
 const { height } = Dimensions.get('window');
 
