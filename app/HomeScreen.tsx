@@ -276,36 +276,6 @@ const HomeScreen = () => {
         park: require("../assets/images/CentralPark.jpg"),
         tower: require("../assets/images/skytree.jpg")
     };
-
-    const recentSearches = [
-        {
-            destination: "Statue of Liberty",
-            image: "statue",
-            time: "3h",
-            amount: "$25",
-            review: "4.7",
-            reviewAmt: "105k",
-            saved: false
-        },
-        {
-            destination: "The Metropolitan Meuseum of Art",
-            image: "moma",
-            time: "4h",
-            amount: "$30",
-            review: "4.8",
-            reviewAmt: "84k",
-            saved: false
-        },
-        {
-            destination: "Tokyo Skytree",
-            image: "tower",
-            time: "3h",
-            amount: "$13.49",
-            review: "4.4",
-            reviewAmt: "94k",
-            saved: true
-        }
-    ];
     // Gets the username
     const [username, setUsername] = useState<string>('');
 
@@ -479,56 +449,6 @@ const HomeScreen = () => {
                                                     }
                                                 />
                                                 <TouchableOpacity style={styles.saveIconWrapper} onPress={() => handleBookmarkClick(item)}>
-                                                    <Ionicons name="bookmark" size={22} color={item.saved ? "#FFD700" : "white"} />
-                                                </TouchableOpacity>
-                                            </View>
-
-                                            <View style={styles.destTextWrapper}>
-                                                <View style={{ flex: 1, flexDirection: "row", marginTop: 5, alignItems: "center" }}>
-                                                    <Ionicons name="location" size={22} color={"#24a6ad"} />
-                                                    <Text style={{ marginLeft: 5, fontSize: 20, fontWeight: "bold", flexWrap: "wrap" }} numberOfLines={2} ellipsizeMode="tail">{item.destination}</Text>
-                                                </View>
-                                                <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", top: 8 }}>
-                                                    <View style={{ flex: 1, flexDirection: "row", justifyContent: "flex-start" }}>
-                                                        <View style={{ flex: 1, flexDirection: "row", alignItems: "center", marginTop: -10 }}>
-                                                            <Ionicons name="time" size={18} color={"#24a6ad"} />
-                                                            <Text style={{ marginLeft: 5, fontSize: 16 }}>{item.time}</Text>
-                                                        </View>
-                                                        <View style={{ flex: 1, flexDirection: "row", alignItems: "center", marginTop: -10, marginLeft: -140 }}>
-                                                            <Ionicons name="star" size={18} color={"gold"} />
-                                                            <Text style={{ fontSize: 16 }}>{item.review}</Text>
-                                                            <Text style={{ fontSize: 16 }}>({item.reviewAmt})</Text>
-                                                        </View>
-                                                    </View>
-                                                    <Text style={{ fontSize: 16 }}>{item.amount}</Text>
-                                                </View>
-                                            </View>
-
-                                        </TouchableOpacity>
-                                    </View>
-                                )}
-                            >
-                            </FlatList>
-                        </View>
-
-                        <View style={{ paddingHorizontal: 20, marginTop: 15 }}>
-                            <Text style={{ fontSize: 22, fontWeight: "700", }}>Recent Searches</Text>
-                            <FlatList
-                                horizontal
-                                showsHorizontalScrollIndicator={false}
-                                data={recentSearches}
-                                keyExtractor={(item) => item.destination}
-                                contentContainerStyle={{
-                                    gap: 10,
-                                    marginVertical: 10
-                                }}
-                                renderItem={({ item }) => (
-                                    <View>
-                                        <TouchableOpacity style={styles.recommendDest} onPress={() => { clickedDest(item.destination, item.image); setModalVisible(true); }}>
-                                            <View style={styles.destImageWrapper}>
-                                                <Image style={styles.destImage} source={imageMap[item.image]} />
-                                                <TouchableOpacity style={styles.saveIconWrapper}>
-
                                                     <Ionicons name="bookmark" size={22} color={item.saved ? "#FFD700" : "white"} />
                                                 </TouchableOpacity>
                                             </View>
