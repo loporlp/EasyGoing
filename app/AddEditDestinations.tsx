@@ -602,11 +602,6 @@ const AddEditDestinations = () => {
                     </TouchableOpacity>
 
                     <View style={styles.travelersAndBudgetTextField}>
-                        <TouchableOpacity style={[styles.travelerInput, { flex: 1, flexDirection: "row", alignItems: 'center' }]}>
-                            <Ionicons name="time" size={22} color={"#24a6ad"} />
-                            <TextInput placeholder="Leave at..." placeholderTextColor="gray" keyboardType="numeric" style={{ fontSize: 18, padding: 5 }} />
-                        </TouchableOpacity>
-
                         <TouchableOpacity style={[styles.budgetInput, { flex: 1, flexDirection: "row", alignItems: 'center' }]}>
                             <Ionicons name="wallet" size={22} color={"#24a6ad"} />
                             <TextInput value={trip?.budget ? trip.budget.toString() : "Enter budget"} placeholderTextColor="black" keyboardType="numeric" onChangeText={updateBudget} style={{ fontSize: 18, padding: 5 }} />
@@ -943,7 +938,6 @@ const styles = StyleSheet.create({
 
     budgetInput: {
         height: 40,
-        width: "50%",
         borderColor: '#999',
         borderBottomWidth: 1,
         fontSize: 18,
