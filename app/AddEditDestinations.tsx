@@ -70,6 +70,10 @@ const AddEditDestinations = () => {
     const [importingLocation, setImportingLocation] = useState(false);
     const [savedDestinations, setSavedDestinations] = useState([]);
 
+    const [isAutocompleteModalVisible, setAutocompleteModalVisible] = useState(false);
+    const [selectedAutocompletePlace, setSelectedAutocompletePlace] = useState<string>('');
+    const [locationAddress, setLocationAddress] = useState<string>('');
+
     // Set the check to whatever the stored value is
     useEffect(() => {
         if (trip && typeof trip.optimize !== 'undefined') {
@@ -199,7 +203,7 @@ const AddEditDestinations = () => {
         let timeInMinutes;
         if (timeDuration) {
             timeInMinutes = timeDuration.hours * 60 + timeDuration.minutes;
-          }
+        }
 
         const newDestination = {
             alias: tempAlias,
@@ -351,7 +355,7 @@ const AddEditDestinations = () => {
 
     const handleDurationChange = (value: { hours: any; minutes: any; }) => {
         setTempTimeDuration({ hours: value.hours, minutes: value.minutes });
-    };    
+    };
 
 
     // Handle changed date
@@ -379,7 +383,7 @@ const AddEditDestinations = () => {
             const startFormatted = moment(selectedStartDate).format("ddd, MMM D");
             const endFormatted = moment(selectedEndDate).format("ddd, MMM D");
             setDatesText(`${startFormatted} - ${endFormatted}`);
-    
+
             // Save changes to DB
             (async () => {
                 try {
@@ -391,6 +395,13 @@ const AddEditDestinations = () => {
             })();
         }
         setModalVisible(false);
+    };
+
+    // Handles Selection from Autocomplete
+    const handleAutocompletePlaceSelect = (place: { description: string }) => {
+        setSelectedAutocompletePlace(place.description);
+        setLocationAddress(place.description); // Updates location address
+        setAutocompleteModalVisible(false);
     };
 
 
@@ -507,8 +518,8 @@ const AddEditDestinations = () => {
     const openTimePicker = () => {
         setTempTimeDuration(timeDuration || { hours: 0, minutes: 0 });
         setShowPicker(true);
-      };
-      
+    };
+
 
     const rightOpenValue = -150;
 
@@ -591,10 +602,11 @@ const AddEditDestinations = () => {
 
                 {/* Group of text fields */}
                 <View style={{ marginTop: 15 }}>
-                    <View style={{ flexDirection: "row", marginBottom: 10, alignItems: "center", backgroundColor: "white", borderRadius: 10 }}>
-                        <Ionicons name="location" size={22} color={"#24a6ad"} style={{ position: "absolute", zIndex: 1, marginLeft: 10 }} />
-                        <AutocompleteTextBox placeholder="Origin" placeholderTextColor="gray" onPlaceSelect={handleOriginSelect} value={originText} style={{ width: "100%", paddingLeft: 30 }} />
-                    </View>
+
+                    <TouchableOpacity style={[styles.input, { flex: 1, flexDirection: "row", alignItems: 'center' }]} onPress={() => setAutocompleteModalVisible(true)}>
+                        <Ionicons name="location" size={22} color={"#24a6ad"} />
+                        <Text numberOfLines={1} style={{ fontSize: 18, marginLeft: 5, width: "100%", color: 'black' }}>{selectedAutocompletePlace}</Text>
+                    </TouchableOpacity>
 
                     <TouchableOpacity style={[styles.input, { flex: 1, flexDirection: "row", alignItems: 'center' }]} onPress={() => setModalVisible(true)}>
                         <Ionicons name="calendar-sharp" size={22} color={"#24a6ad"} />
@@ -667,6 +679,28 @@ const AddEditDestinations = () => {
                 </View>
             )}
 
+            {/* Modal with Autocomplete search */}
+            <Modal visible={isAutocompleteModalVisible} transparent={true} onRequestClose={() => setAutocompleteModalVisible(false)}>
+                <View style={styles.modalAutocompleteOverlay}>
+                    <View style={styles.modalAutocompleteContent}>
+                        <AutocompleteTextBox
+                            onPlaceSelect={(place) => {
+                                handleAutocompletePlaceSelect(place);
+                                return place.description; // Explicitly return a string
+                            }}
+                            placeholder="Destination"
+                            placeholderTextColor="lightgray"
+                            style={{ width: "100%", paddingRight: 25, borderColor: "black", borderWidth: 1, borderRadius: 10 }}
+                        />
+                        <View style={{ position: "absolute", top: 18, right: 25 }}>
+                            <TouchableOpacity onPress={() => setAutocompleteModalVisible(false)}>
+                                <Ionicons name="close-circle" size={24} color={"#24a6ad"} />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
             <Modal
                 visible={isAddTripVisible}
                 transparent={true}
@@ -714,7 +748,7 @@ const AddEditDestinations = () => {
                             {(tempAlias == "") ? (
                                 <DynamicImage placeName={tempAlias} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
                             ) : (
-                                <Image source={require("../assets/images/blue.png")} style={[styles.destinationImage, { marginLeft: 0 }]} />
+                                    <Image source={require("../assets/images/blue.png")} style={[styles.destinationImage, { marginLeft: 0 }]} />
                                 )}
                             <View style={{ flexDirection: "column", justifyContent: "flex-start", gap: 5, marginLeft: 10, paddingRight: 140 }}>
                                 <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
@@ -788,7 +822,7 @@ const AddEditDestinations = () => {
                                         <Text>Duration:</Text>
                                     </View>
                                     <TouchableOpacity style={[styles.addDestinationTextInputs, { paddingHorizontal: 5, justifyContent: 'center', alignItems: 'flex-start' }]} onPress={openTimePicker}>
-                                        <Text style={{fontSize: 18 }}>{timeDuration ? `${timeDuration.hours}hr ${timeDuration.minutes}min` : ''}</Text>
+                                        <Text style={{ fontSize: 18 }}>{timeDuration ? `${timeDuration.hours}hr ${timeDuration.minutes}min` : ''}</Text>
                                     </TouchableOpacity>
                                 </View>
                             </TouchableWithoutFeedback>
@@ -1199,13 +1233,31 @@ const styles = StyleSheet.create({
         backgroundColor: 'red',
         padding: 10,
         borderRadius: 5,
-        zIndex: 2000, 
+        zIndex: 2000,
     },
-    
+
     cancelButtonText: {
         color: 'white',
         fontWeight: 'bold',
         fontSize: 18
+    },
+
+    modalAutocompleteOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+
+    modalAutocompleteContent: {
+        width: '100%',
+        height: "40%",
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 10,
+        flexDirection: "column",
+        alignItems: "stretch",
+        justifyContent: "flex-start",
+        paddingTop: 10,
     },
 });
 
