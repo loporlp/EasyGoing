@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { getData, storeData, fillLocal } from '../scripts/localStore';
 import { deleteTrip, updateTrip } from '../scripts/databaseInteraction.js';
 import Toast from 'react-native-toast-message';
+import moment from "moment";
 
 const EditExistingTripsScreen = () => {
     const router = useRouter();
@@ -218,7 +219,7 @@ const EditExistingTripsScreen = () => {
                                     <Text style={styles.upcoming}>UPCOMING TRIP</Text>
                                     <Text style={styles.destinationName}>{trip.details?.tripName ? String(trip.details.tripName) : "Unnamed Trip"}</Text>
                                     <Text numberOfLines={1} style={styles.dates}>{trip.details?.tripStartDate && trip.details?.tripEndDate
-                                        ? `${String(trip.details.tripStartDate)} - ${String(trip.details.tripEndDate)}`
+                                        ? `${moment(trip.details.tripStartDate).format('MMMM DD, YYYY')} - ${moment(trip.details.tripEndDate).format('MMMM DD, YYYY')}`
                                         : "Dates Unavailable"}
                                     </Text>
                                 </View>
