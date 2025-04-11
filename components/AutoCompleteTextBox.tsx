@@ -139,19 +139,20 @@ const AutocompleteTextBox = ({ style, onPlaceSelect, placeholder, placeholderTex
 
             {/* Render the list of suggestions */}
             {addresses.length > 0 && (
+                <View style={styles.dropdownContainer}>
                 <FlatList
-                    data={addresses}
-                    keyExtractor={(item) => item.place_id}
-                    renderItem={({ item }) => (
-                        <TouchableOpacity
-                            onPress={() => handleSelectAddress(item)} // Handle address selection
-                            style={styles.suggestionItem}
-                        >
-                            <Text>{item.description}</Text>
-                        </TouchableOpacity>
-                    )}
-                    style={styles.suggestionList}
+                  data={addresses}
+                  keyExtractor={(item) => item.place_id}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      onPress={() => handleSelectAddress(item)}
+                      style={styles.suggestionItem}
+                    >
+                      <Text>{item.description}</Text>
+                    </TouchableOpacity>
+                  )}
                 />
+              </View>
             )}
         </View>
     );
@@ -193,6 +194,19 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderColor: 'gray',
     },
+    dropdownContainer: {
+        position: 'absolute',
+        top: 40,
+        left: 0,
+        right: 0,
+        backgroundColor: 'white',
+        borderColor: '#ddd',
+        borderTopWidth: 1,
+        borderBottomLeftRadius: 15,
+        borderBottomRightRadius: 15,
+        zIndex: 9999,
+        elevation: 20, 
+      },
 });
 
 export default AutocompleteTextBox;
