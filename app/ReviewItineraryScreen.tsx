@@ -8,7 +8,7 @@ import { storeData, getData } from '../scripts/localStore.js';
 import moment from 'moment';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import DynamicImage from "../components/DynamicImage.js";
+import DynamicImage from '../components/DynamicImage';
 
 /**
  *  City Header (picture of city, overlay with text -> City, Country; Dates Visiting; # travelers)
