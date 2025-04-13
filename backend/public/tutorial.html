@@ -65,6 +65,7 @@
       margin-bottom: 2rem;
       border-radius: 5px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      transition: border-left-color 0.3s ease;
     }
   
     strong {
@@ -84,6 +85,29 @@
         display: block;
         margin: 0.5rem auto;
       }
+    }
+    .step-one {
+        border-left-color: #4CAF50; /* Green */
+    }
+
+    .step-one h2 {
+        color: #4CAF50;
+    }
+
+    .step-two {
+        border-left-color: #FF9800; /* Orange */
+    }
+
+    .step-two h2 {
+        color: #FF9800;
+    }
+
+    .step-three {
+        border-left-color: #9C27B0; /* Purple */
+    }
+
+    .step-three h2 {
+        color: #9C27B0;
     }
   </style>  
 </head>
@@ -166,17 +190,18 @@
   </ul>
   </div>
 
-  <div class="section">
+  <div class="section step-one">
+  <h2>Step 1:</h2>
   <h3>Add Destinations</h3>
   <p>
-    This is Step 1.From the proceeding screen Create New Trip, here, you add all the locations you want to visit.<br>
+    From the proceeding screen Create New Trip, here, you add all the locations you want to visit.<br>
     You will additionally see a few required inputs to fill out:
   </p>
   <ul>
-    <li><strong>Origin:</strong> Required - This is where you will start your trip from; whether it's the airport you arrive at or from your home.</li>
-    <li><strong>Dates:</strong> Optional - If you wish to change your dates, you may select new days with the CalendarPicker here.</li>
-    <li><strong>Budget:</strong> Optional - You may change your proposed budget here.</li>
-    <li><strong>Optimize:</strong> Optional - If you wish for EasyGoing to optimize your schedule and reorder locations, please check this box. Otherwise, EasyGoing will load your trip in order of how you added them to the list.</li>
+    <li><strong>Origin:</strong> <em>Required</em> - This is where you will start your trip from; whether it's the airport you arrive at or from your home.</li>
+    <li><strong>Dates:</strong> <em>Optional</em> - If you wish to change your dates, you may select new days with the CalendarPicker here.</li>
+    <li><strong>Budget:</strong> <em>Optional</em> - You may change your proposed budget here.</li>
+    <li><strong>Optimize:</strong> <em>Optional</em> - If you wish for EasyGoing to optimize your schedule and reorder locations, please check this box. Otherwise, EasyGoing will load your trip in order of how you added them to the list.</li>
   </ul>
   <p>
     When adding a new destination you can choose to either add a new destination or import from your saved locations.<br>
@@ -184,10 +209,10 @@
     A prompt will then pop up (for both new and imported destinations) requiring you to fill in the rest of the information:
   </p>
   <ul>
-    <li><strong>Alias:</strong> Required - A name of your choosing to remember this location.</li>
-    <li><strong>Address:</strong> Required - The exact address of the location, chosen with the autocomplete textbox.</li>
-    <li><strong>Duration:</strong> Required - How long you plan on staying at this destination.</li>
-    <li><strong>Priority:</strong> Optional - If all your locations exceed the total time than your given dates, the Priority System will activate. Locations with a lower number (i.e, 1) are marked as higher priority while larger numbers (i.e, 10) will be removed first. The default priority level is 1.</li>
+    <li><strong>Alias:</strong> <em>Required</em> - A name of your choosing to remember this location.</li>
+    <li><strong>Address:</strong> <em>Required</em> - The exact address of the location, chosen with the autocomplete textbox.</li>
+    <li><strong>Duration:</strong> <em>Required</em> - How long you plan on staying at this destination.</li>
+    <li><strong>Priority:</strong> <em>Optional</em> - If all your locations exceed the total time than your given dates, the Priority System will activate. Locations with a lower number (i.e, 1) are marked as higher priority while larger numbers (i.e, 10) will be removed first. The default priority level is 1.</li>
   </ul>
   <p>
     Additionally, you may edit or delete any existing locations you have added on this trip. The minimum number of required locations is two.<br>
@@ -198,10 +223,11 @@
   </p>
   </div>
 
-  <div class="section">
+  <div class="section step-two">
+  <h2>Step 2:</h2>
   <h3>Generate Itinerary</h3>
   <p>
-    Step 2. Upon hitting "Generate Itinerary" from the Add Destinations Screen, EasyGoing will find routes between your locations and optimize the trip if you had deemed necessary.<br>
+    Upon hitting "Generate Itinerary" from the Add Destinations Screen, EasyGoing will find routes between your locations and optimize the trip if you had deemed necessary.<br>
     Once the trip has loaded, you will be able to view your whole trip loaded on the map, which shows driving routes by default.<br>
     Pressing date headers will show routes for that day's trip only while pressing it again will revert to showing all trips.<br>
     Pressing each location will print up the directions to get to the next destination. Additionally, you're able to change the mode of transportation here. While the transportation mode is changing, you're unable to change it again along with reordering locations until it has finished loading.<br>
@@ -224,16 +250,17 @@
   </p>
   </div>
 
-  <div class="section">
+  <div class="section step-three">
+  <h2>Step 3:</h2>
   <h3>Review Itinerary</h3>
   <p>
-    Step 3. All of your destinations are organized here by their dates. You can press open each day to see information about the location, duration, etc.<br>
+    All of your destinations are organized here by their dates. You can press open each day to see information about the location, duration, etc.<br>
     Here, you're unable to edit any information so you don't have to worry about accidentally pressing the wrong thing.<br>
     Once you have confirmed all of your information, you can either finish the trip by hitting the checkmark in the top right, or you may export your trip into a .ics format for you to add to your calendar.<br>
     When you're done, it will bring you back to the Home Screen.
   </p>
   </div>
-  
+
   <h3>Congratulations! You have successfully made a new trip with EasyGoing!</h3>
 </body>
 </html>
