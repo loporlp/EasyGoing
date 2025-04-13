@@ -5,20 +5,87 @@
   <title>EasyGoing - About</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 2rem;
-      line-height: 1.6;
+      line-height: 1.8;
+      background-color: #f9f9fb;
+      color: #333;
     }
+  
+    nav {
+      margin-bottom: 2rem;
+      background-color: #e3f2fd;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+  
     nav a {
       margin-right: 20px;
       text-decoration: none;
       color: #0077cc;
-      font-weight: bold;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      transition: background-color 0.2s ease-in-out;
     }
-    nav {
+  
+    nav a:hover {
+      background-color: #d0e9ff;
+    }
+  
+    h1 {
+      font-size: 2.4rem;
+      color: #2c3e50;
+      border-bottom: 2px solid #ccc;
+      padding-bottom: 0.5rem;
+    }
+  
+    h2, h3, h4, h5 {
+      color: #0077cc;
+      margin-top: 2rem;
+    }
+  
+    ul {
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+  
+    li {
+      margin-bottom: 0.5rem;
+    }
+  
+    p {
+      margin-bottom: 1rem;
+    }
+  
+    .section {
+      background-color: #ffffff;
+      border-left: 4px solid #0077cc;
+      padding: 1.5rem;
       margin-bottom: 2rem;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
-  </style>
+  
+    strong {
+      color: #333;
+    }
+  
+    @media (max-width: 768px) {
+      body {
+        margin: 1rem;
+      }
+  
+      nav {
+        text-align: center;
+      }
+  
+      nav a {
+        display: block;
+        margin: 0.5rem auto;
+      }
+    }
+  </style>  
 </head>
 <body>
   <h1>User Tutorial</h1>
@@ -39,6 +106,7 @@
     <li>3. Review your itinerary before exporting it to your calendar!</li>
   </ul>
 
+  <div class="section">
   <h3>Home Screen</h3>
   <p>On the Navigation Bar below, there are five buttons:</p>
   <ul>
@@ -83,7 +151,9 @@
   <p>
     You can view your current account and make changes to default settings, account changes, etc.
   </p>
+  </div>
 
+  <div class="section">
   <h3>Create New Trip</h3>
   <p>
     Upon navigating to this screen, you will be prompted to enter a name for your trip. This is optional and you can rename your trip later on the Calendar Screen if you wish to do so.<br>
@@ -94,7 +164,9 @@
     <li><strong>Dates:</strong> The range of days you plan your trip to be chosen with a CalendarPicker.</li>
     <li><strong>Budget:</strong> The amount you're willing to spend on the trip in your desired currency.</li>
   </ul>
+  </div>
 
+  <div class="section">
   <h3>Add Destinations</h3>
   <p>
     This is Step 1.From the proceeding screen Create New Trip, here, you add all the locations you want to visit.<br>
@@ -124,7 +196,9 @@
     EasyGoing will remind you of these limitations if you are to accidentally do so.<br>
     Once you're done, you may click on "Generate Itinerary" to head to Step 2.
   </p>
+  </div>
 
+  <div class="section">
   <h3>Generate Itinerary</h3>
   <p>
     Step 2. Upon hitting "Generate Itinerary" from the Add Destinations Screen, EasyGoing will find routes between your locations and optimize the trip if you had deemed necessary.<br>
@@ -148,14 +222,18 @@
   <p>
     Once you're done customizing your trip with reordering, modes of transportation, etc, you can press "Review Itinerary" to proceed to Step 3.
   </p>
+  </div>
 
+  <div class="section">
   <h3>Review Itinerary</h3>
   <p>
     Step 3. All of your destinations are organized here by their dates. You can press open each day to see information about the location, duration, etc.<br>
     Here, you're unable to edit any information so you don't have to worry about accidentally pressing the wrong thing.<br>
     Once you have confirmed all of your information, you can either finish the trip by hitting the checkmark in the top right, or you may export your trip into a .ics format for you to add to your calendar.<br>
-    When you're done, it will bring you back to the Home Screen.<br>
-    Congratulations! You have successfully made a new trip with EasyGoing!
+    When you're done, it will bring you back to the Home Screen.
   </p>
+  </div>
+  
+  <h3>Congratulations! You have successfully made a new trip with EasyGoing!</h3>
 </body>
 </html>
