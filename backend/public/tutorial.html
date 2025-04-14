@@ -3,124 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>EasyGoing - About</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 2rem;
-      line-height: 1.8;
-      background-color: #f9f9fb;
-      color: #333;
-    }
-  
-    nav {
-      margin-bottom: 2rem;
-      background-color: #e3f2fd;
-      padding: 1rem;
-      border-radius: 8px;
-    }
-  
-    nav a {
-      margin-right: 20px;
-      text-decoration: none;
-      color: #0077cc;
-      font-weight: 600;
-      padding: 0.5rem 1rem;
-      border-radius: 5px;
-      transition: background-color 0.2s ease-in-out;
-    }
-  
-    nav a:hover {
-      background-color: #d0e9ff;
-    }
-  
-    h1 {
-      font-size: 2.4rem;
-      color: #2c3e50;
-      border-bottom: 2px solid #ccc;
-      padding-bottom: 0.5rem;
-    }
-  
-    h2, h3, h4, h5 {
-      color: #0077cc;
-      margin-top: 2rem;
-    }
-  
-    ul {
-      padding-left: 1.5rem;
-      margin-bottom: 1rem;
-    }
-  
-    li {
-      margin-bottom: 0.5rem;
-    }
-  
-    p {
-      margin-bottom: 1rem;
-    }
-  
-    .section {
-      background-color: #ffffff;
-      border-left: 4px solid #0077cc;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-      transition: border-left-color 0.3s ease;
-    }
-  
-    strong {
-      color: #333;
-    }
-  
-    @media (max-width: 768px) {
-      body {
-        margin: 1rem;
-      }
-  
-      nav {
-        text-align: center;
-      }
-  
-      nav a {
-        display: block;
-        margin: 0.5rem auto;
-      }
-    }
-    .step-one {
-        border-left-color: #03A9F4; /* Sky Blue */
-    }
-
-    .step-one h2 {
-        color: #03A9F4;
-    }
-
-    .step-two {
-        border-left-color: #3F51B5; /* Indigo */
-    }
-
-    .step-two h2 {
-        color: #3F51B5;
-    }
-
-    .step-three {
-        border-left-color: #009688; /* Teal */
-    }
-
-    .step-three h2 {
-        color: #009688;
-    }
-
-    img {
-        width: 400px;
-        height: auto;
-        max-height: 400px;
-        margin: 0 auto 1rem auto;
-        border-radius: 5px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        object-fit: contain;
-        display: block;
-    }
-  </style>  
+  <link rel="stylesheet" href="tutorial_styles.css">
 </head>
 <body>
   <h1>User Tutorial</h1>
@@ -290,8 +173,10 @@
   <p>
     Once you have confirmed all of your information, you can either finish the trip by hitting the checkmark in the top right, or you may export your trip into a .ics format for you to add to your calendar.
   </p>
-  <img src="assets/review_export_buttons.jpg" alt="Buttons for exporting/leaving in the top right">
-  <img src="assets/ics_adding.jpg" alt="Adding trip to your calendar via .ics">
+  <div class="images-container">
+    <img src="assets/review_export_buttons.jpg" alt="Buttons for exporting/leaving in the top right">
+    <img src="assets/ics_adding.jpg" alt="Adding trip to your calendar via .ics">
+  </div>
   <p>
     When you're done, it will bring you back to the Home Screen.
   </p>
