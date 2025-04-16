@@ -55,7 +55,10 @@
     You may also navigate to create a new trip by pressing the '+' in the top right corner.<br>
     Additionally, you can manage your budget here by clicking on the three dots to visit the Budget Manager screen.
   </p>
+  <div class="images-container">
   <img src="assets/existing_trips_example.jpg" alt="List of existing trips">
+  <img src="assets/budget_three_dots.jpg" alt="Options for a trip from clicking the three dots button">
+  </div>
   <h5>Budget Manager</h5>
   <p>Your expenses are shown here and are divided into different predefined categories:</p>
   <ul>
@@ -70,6 +73,7 @@
   </p>
   <div class="images-container">
     <img src="assets/budget_summary.jpg" alt="Budget summary example">
+    <img src="assets/budget_category.jpg" alt="All expenses in the Transportation category">
     <img src="assets/adding_expense.jpg" alt="Adding an expenses">
   </div>
   <h4>Account</h4>
@@ -84,11 +88,13 @@
     Upon navigating to this screen, you will be prompted to enter a name for your trip. This is optional and you can rename your trip later on the Calendar Screen if you wish to do so.<br>
     Only three pieces of information are required before proceeding to the next screen:
   </p>
+  <img src="assets/optional_name_prompt.jpg" alt="Add a trip name at the start">
   <ul>
     <li><strong>Place:</strong> The country/state/city you plan to visit by selecting a typed-in autocomplete address.</li>
     <li><strong>Dates:</strong> The range of days you plan your trip to be chosen with a CalendarPicker.</li>
     <li><strong>Budget:</strong> The amount you're willing to spend on the trip in your desired currency.</li>
   </ul>
+  <img src="assets/new_trip_properties.jpg" alt="The three inputs for creating a new trip: country/state/city, dates, and budget">
   </div>
 
   <div class="section step-one">
@@ -143,7 +149,11 @@
     Pressing each location will print up the directions to get to the next destination. Additionally, you're able to change the mode of transportation here. While the transportation mode is changing, you're unable to change it again along with reordering locations until it has finished loading.<br>
     Please note that a change in transportation may end up exceeding the amount of time in that day. You're able to keep the mode change but EasyGoing will remind you that in doing so, your trip for that day exceeds the 16-hour limit.
   </p>
-  <img src="assets/gi_example.png" alt="Example of a list of directions">
+  <div class="images-container">
+    <img src="assets/gi_example.png" alt="Example of a list of directions">
+    <img src="assets/time_warning_popup.jpg" alt="Popup alerting you that the changed transportation mode will exceed total available time">
+    <img src="assets/move_buttons.jpg" alt="Up/down buttons underneath each location to reorder them">
+  </div>
   <p>
     Pressing the Up/Down button below each corresponding location will switch its order with the location above/below it respectively and the map will generate the new route and directions. Please note that you are unable to change the origin and can only reorder locations within days but not across different ones.<br>
     A Route Color Key is provided for you to see which color represents which mode of transportation on the map. This is especially useful for public transportation.<br>
@@ -159,6 +169,8 @@
     <li><strong>Go Back:</strong> "Cancel" - Go back to the Add Destinations Screen and either change durations, remove locations, or increase your trip dates.</li>
     <li><strong>Priority System:</strong> "OK" - This will use the priorities set in the Add Destinations Screen and remove lowest priority destinations until your trip duration will fit the current allocated amount of time.</li>
   </ul>
+</p>
+<img src="assets/priority_warning.jpg" alt="Popup asking if you're fine with the priority system activating to remove locations">
   <p>
     Once you're done customizing your trip with reordering, modes of transportation, etc, you can press "Review Itinerary" to proceed to Step 3.
   </p>
