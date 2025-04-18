@@ -608,11 +608,13 @@ const GenerateItineraryScreen = () => {
                                     <Text style={styles.currentLocationText}>No routes found for this day.</Text>
                                 </>
                             )}
+                        {/* Legend */}
+                        {/* The color code key for routes */}
+                        <RouteColorCodeKey />
                     </SafeAreaView>
                 )}
 
                 <SafeAreaView>
-
                     <ScrollView
                         contentContainerStyle={styles.scrollViewContainer}
                         style={styles.scrollView}
@@ -790,7 +792,7 @@ const GenerateItineraryScreen = () => {
                                                                             )}
 
                                                                             <Text style={styles.additionalText}>
-                                                                                {isLastDestination ? "None" : destinationTransportMode.charAt(0).toUpperCase() + destinationTransportMode.slice(1).toLowerCase()} ({isLastDestination ? "None" : destinationTransportDuration})
+                                                                                {isLastDestination ? "None" : destinationTransportMode.charAt(0).toUpperCase() + destinationTransportMode.slice(1).toLowerCase()} {isLastDestination ? "None" : (destinationTransportDuration)}
                                                                             </Text>
                                                                         </View>
 
@@ -834,9 +836,6 @@ const GenerateItineraryScreen = () => {
                         })}
                     </ScrollView>
                 </SafeAreaView>
-
-                {/* The color code key for routes */}
-                <RouteColorCodeKey />
 
                 {/* "Review Itinerary" button */}
                 <TouchableOpacity

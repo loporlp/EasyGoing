@@ -37,25 +37,24 @@ const DirectionsList: React.FC<DirectionsListProps> = ({ origin, destination, mo
   const renderTransportIcon = (mode: string) => {
     switch (mode) {
       case "DRIVING":
-        return <Ionicons name="car" size={24} color={modeColors[mode.toUpperCase()]} />;
+        return <Ionicons name="car" size={24} color={modeColors[mode.toUpperCase()]} style={{marginRight: 5}}/>;
       case "WALKING":
-        return <MaterialIcons name="directions-walk" size={24} color={modeColors[mode.toUpperCase()]} />;
+        return <MaterialIcons name="directions-walk" size={24} color={modeColors[mode.toUpperCase()]} style={{marginRight: 5}}/>;
       case "BICYCLING":
-        return <Ionicons name="bicycle" size={24} color={modeColors[mode.toUpperCase()]} />;
+        return <Ionicons name="bicycle" size={24} color={modeColors[mode.toUpperCase()]} style={{marginRight: 5}}/>;
       case "TRANSIT":
-        return <MaterialCommunityIcons name="dots-horizontal" size={24} color={modeColors[mode.toUpperCase()]} />;
+        return <MaterialCommunityIcons name="dots-horizontal" size={24} color={modeColors[mode.toUpperCase()]} style={{marginRight: 5}}/>;
       case "BUS":
-        return <MaterialCommunityIcons name="bus" size={24} color={modeColors[mode.toUpperCase()]} />;
+        return <MaterialCommunityIcons name="bus" size={24} color={modeColors[mode.toUpperCase()]} style={{marginRight: 5}}/>;
       case "TRAIN":
-        return <MaterialCommunityIcons name="train" size={24} color={modeColors[mode.toUpperCase()]} />;
+        return <MaterialCommunityIcons name="train" size={24} color={modeColors[mode.toUpperCase()]} style={{marginRight: 5}}/>;
       case "SUBWAY":
-        return <MaterialCommunityIcons name="subway" size={24} color={modeColors[mode.toUpperCase()]} />;
+        return <MaterialCommunityIcons name="subway" size={24} color={modeColors[mode.toUpperCase()]} style={{marginRight: 5}}/>;
       case "TRAM":
-        return <MaterialCommunityIcons name="tram" size={24} color={modeColors[mode.toUpperCase()]} />;
+        return <MaterialCommunityIcons name="tram" size={24} color={modeColors[mode.toUpperCase()]} style={{marginRight: 5}}/>;
       case "FERRY":
-        return <MaterialCommunityIcons name="ferry" size={24} color={modeColors[mode.toUpperCase()]} />;
+        return <MaterialCommunityIcons name="ferry" size={24} color={modeColors[mode.toUpperCase()]} style={{marginRight: 5}}/>;
       default:
-        console.log(mode)
         return null;
     }
   }
