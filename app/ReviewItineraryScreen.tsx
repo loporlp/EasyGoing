@@ -319,7 +319,7 @@ const ReviewItineraryScreen = () => {
                                                             <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginRight: 5 }}>
                                                                 <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                                                                     <Ionicons name="time" size={18} color={"#24a6ad"} />
-                                                                    <Text>{dest.duration} hr</Text>
+                                                                    <Text>{(dest.duration / 60).toFixed(2)} hr</Text>
                                                                 </View>
                                                                 <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginRight: 5 }}>
                                                                     <MaterialCommunityIcons name="priority-high" size={18} color={"#24a6ad"} />
