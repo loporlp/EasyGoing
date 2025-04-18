@@ -727,38 +727,35 @@ const GenerateItineraryScreen = () => {
                                                         </View>
 
                                                         <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
-                                                            {/* CASE 1: First destination of the first day - NO ARROWS */}
-                                                            {(routeGroupIndex === 0 && destinationIndex === 0) ? null :
-
-                                                                /* CASE 2: Second destination of first day - ↓ ONLY */
-                                                                (routeGroupIndex === 0 && destinationIndex === 1) ? (
-                                                                    <TouchableOpacity onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'down')} style={styles.moveButton} disabled={isLoading}>
-                                                                        <Ionicons name="arrow-down" size={20} color="white" />
-                                                                    </TouchableOpacity>
-
-                                                                    /* CASE 3: First destination of any other day - ↓ ONLY */
-                                                                ) : (destinationIndex === 0) ? (
-                                                                    <TouchableOpacity onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'down')} style={styles.moveButton} disabled={isLoading}>
-                                                                        <Ionicons name="arrow-down" size={20} color="white" />
-                                                                    </TouchableOpacity>
-
-                                                                    /* CASE 4: Last destination of the day (and not also first) - ↑ ONLY */
-                                                                ) : (destinationIndex === routeGroup.length - 1) ? (
-                                                                    <TouchableOpacity onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'up')} style={styles.moveButton} disabled={isLoading}>
-                                                                        <Ionicons name="arrow-up" size={20} color="white" />
-                                                                    </TouchableOpacity>
-
-                                                                    /* CASE 5: Middle destinations - ↑ AND ↓ */
-                                                                ) : (
-                                                                                <>
-                                                                                    <TouchableOpacity onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'up')} style={styles.moveButton} disabled={isLoading}>
-                                                                                        <Ionicons name="arrow-up" size={20} color="white" />
-                                                                                    </TouchableOpacity>
-                                                                                    <TouchableOpacity onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'down')} style={styles.moveButton} disabled={isLoading}>
-                                                                                        <Ionicons name="arrow-down" size={20} color="white" />
-                                                                                    </TouchableOpacity>
-                                                                                </>
-                                                                            )}
+                                                            {
+                                                                (routeGroupIndex === 0 && routeGroup.length === 2)
+                                                                    ? null
+                                                                    : (
+                                                                        (routeGroupIndex === 0 && destinationIndex === 0) ? null :
+                                                                            (routeGroupIndex === 0 && destinationIndex === 1) ? (
+                                                                                <TouchableOpacity onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'down')} style={styles.moveButton} disabled={isLoading}>
+                                                                                    <Ionicons name="arrow-down" size={20} color="white" />
+                                                                                </TouchableOpacity>
+                                                                            ) : (destinationIndex === 0) ? (
+                                                                                <TouchableOpacity onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'down')} style={styles.moveButton} disabled={isLoading}>
+                                                                                    <Ionicons name="arrow-down" size={20} color="white" />
+                                                                                </TouchableOpacity>
+                                                                            ) : (destinationIndex === routeGroup.length - 1) ? (
+                                                                                <TouchableOpacity onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'up')} style={styles.moveButton} disabled={isLoading}>
+                                                                                    <Ionicons name="arrow-up" size={20} color="white" />
+                                                                                </TouchableOpacity>
+                                                                            ) : (
+                                                                                            <>
+                                                                                                <TouchableOpacity onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'up')} style={styles.moveButton} disabled={isLoading}>
+                                                                                                    <Ionicons name="arrow-up" size={20} color="white" />
+                                                                                                </TouchableOpacity>
+                                                                                                <TouchableOpacity onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'down')} style={styles.moveButton} disabled={isLoading}>
+                                                                                                    <Ionicons name="arrow-down" size={20} color="white" />
+                                                                                                </TouchableOpacity>
+                                                                                            </>
+                                                                                        )
+                                                                    )
+                                                            }
                                                         </View>
                                                     </View>
                                                 </TouchableOpacity>
@@ -796,7 +793,7 @@ const GenerateItineraryScreen = () => {
                                                                                 {isLastDestination ? "None" : destinationTransportMode.charAt(0).toUpperCase() + destinationTransportMode.slice(1).toLowerCase()} ({isLastDestination ? "None" : destinationTransportDuration})
                                                                             </Text>
                                                                         </View>
-                                                                        
+
                                                                         <View style={{ borderWidth: 1, borderColor: "lightgray", borderRadius: 10, marginBottom: 5 }}>
                                                                             <Picker
                                                                                 selectedValue={destinationTransportMode}
@@ -809,20 +806,20 @@ const GenerateItineraryScreen = () => {
                                                                             </Picker>
                                                                         </View>
 
+                                                                        {/* Directions */}
+                                                                        <View style={{ maxHeight: 300 }}>
+                                                                            <ScrollView nestedScrollEnabled={true}>
+                                                                                <DirectionsList
+                                                                                    origin={routeGroup[destinationIndex]?.address}
+                                                                                    destination={routeGroup[destinationIndex + 1]?.address || "Unknown Destination"}
+                                                                                    mode={destinationTransportMode}
+                                                                                />
+                                                                            </ScrollView>
+                                                                        </View>
+
                                                                     </View>
                                                                 )
                                                         )}
-
-                                                        {/* Directions */}
-                                                        <View style={{ maxHeight: 300 }}>
-                                                            <ScrollView nestedScrollEnabled={true}>
-                                                                <DirectionsList
-                                                                    origin={routeGroup[destinationIndex]?.address}
-                                                                    destination={routeGroup[destinationIndex + 1]?.address || "Unknown Destination"}
-                                                                    mode={destinationTransportMode}
-                                                                />
-                                                            </ScrollView>
-                                                        </View>
                                                     </View>
                                                 )}
                                             </View>
@@ -1047,6 +1044,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         borderColor: "lightgray",
         borderBottomWidth: 1,
+        borderTopWidth: 1,
         padding: 5
     },
 
