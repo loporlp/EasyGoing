@@ -19,6 +19,7 @@ import { calculateTripDates, formatSelectedDestinations, getMatchedPolylinesData
 import { loadDestinations } from '../scripts/destinationLoader';
 import ErrorBoundary from '../components//ErrorBoundary';
 import DynamicImage from '../components/DynamicImage';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const { height } = Dimensions.get('window');
 
@@ -26,10 +27,10 @@ const GenerateItineraryScreen = () => {
     const router = useRouter();
     const navigation = useNavigation();
 
-    const defaultMode : string = "DRIVING";
+    const defaultMode: string = "DRIVING";
 
     // Tracks if map is loading
-    const [isLoading, setIsLoading] = useState(true);  
+    const [isLoading, setIsLoading] = useState(true);
 
     // Routes
     const [polylinesData, setPolylinesData] = useState<any[]>([]);
@@ -64,7 +65,7 @@ const GenerateItineraryScreen = () => {
     }
 
 
-    const [origin, setOrigin] = useState<{ name: string; address: string; duration: number; priority: number}>();
+    const [origin, setOrigin] = useState<{ name: string; address: string; duration: number; priority: number }>();
     const [startDate, setStartDate] = useState<Date>();
     const [endDate, setEndDate] = useState<Date>();
     const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
@@ -91,7 +92,7 @@ const GenerateItineraryScreen = () => {
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
         }
-  
+
         timeoutRef.current = setTimeout(() => {
             if (isLoading) {
                 console.log("Timeout after 60 seconds");
@@ -99,19 +100,19 @@ const GenerateItineraryScreen = () => {
             }
         }, 60 * 1000); // 60 seconds
     };
-  
+
     useEffect(() => {
         if (isLoading) {
             startTimer();
         }
-  
+
         return () => {
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current);
             }
         };
     }, []);
-  
+
     // Watch isLoading changes
     useEffect(() => {
         if (isLoading) {
@@ -143,7 +144,7 @@ const GenerateItineraryScreen = () => {
                 { cancelable: false }
             );
         });
-    }; 
+    };
 
     // Extract transportation mode
     useEffect(() => {
@@ -180,7 +181,7 @@ const GenerateItineraryScreen = () => {
             const destination = Object.values(destinations).find(dest => dest.alias === location);
 
             //console.log("DestLoc:", destination); 
-            return destination; 
+            return destination;
         });
 
         //console.log("OrDest:", orderedDestinations);
@@ -200,7 +201,7 @@ const GenerateItineraryScreen = () => {
 
             // Overrride/replace destinations with orderedDestinations
             // updateTrip with that new variable
-            if(typeof currentTripID === 'number') {
+            if (typeof currentTripID === 'number') {
                 // It's just the trip ID
                 const tripToStore = await getData(currentTripID.toString());
                 console.log("tripToStore Upon Load", tripToStore);
@@ -261,7 +262,7 @@ const GenerateItineraryScreen = () => {
                         // No optimize
                         result = formatRouteInOrder(simplifiedDestinations, origin);
                     }
-                    
+
                     // Check if the result is different from the previous optimal route
                     if (JSON.stringify(result) !== JSON.stringify(prevOptimalRouteRef.current)) {
                         setOptimalRoute(result);
@@ -281,7 +282,7 @@ const GenerateItineraryScreen = () => {
                 console.log("Error when trying to fetch optimal route: ", error);
                 failedPopup();
             }
-           
+
         }
     }, [destinations, origin]);
 
@@ -298,7 +299,7 @@ const GenerateItineraryScreen = () => {
             ],
             { cancelable: false }
         );
-    }; 
+    };
 
     // Pop-Up for when transport change fails
     const failedTransportPopup = () => {
@@ -312,42 +313,42 @@ const GenerateItineraryScreen = () => {
             ],
             { cancelable: false }
         );
-    }; 
+    };
 
     useEffect(() => {
         console.log("Calling Pulled-out fetchPolylinesAndDurations");
         const fetchPolylinesAndDurations = async () => {
-          await getRoutePolylines({
-            optimalRoute,
-            transportationModes,
-            startDate,
-            endDate,
-            destinations,
-            groupedDestinations,
-            grouped2DDestinations,
-            setAllRoutesData,
-            setPolylinesData,
-            setTransportDurations,
-            setMarkers,
-            setBounds,
-            setGroupedDestinations,
-            setGrouped2DDestinations,
-            setTimeChecked,
-            setDestinations,
-            confirmAction,
-            failedTransportPopup,
-            setChangedModeOfTransport,
-            setToSaveData,
-            reorderDestinations,
-            navigation,
-            timeChecked,
-            changedModeOfTransport,
-            setDaysDictionary
-          });
+            await getRoutePolylines({
+                optimalRoute,
+                transportationModes,
+                startDate,
+                endDate,
+                destinations,
+                groupedDestinations,
+                grouped2DDestinations,
+                setAllRoutesData,
+                setPolylinesData,
+                setTransportDurations,
+                setMarkers,
+                setBounds,
+                setGroupedDestinations,
+                setGrouped2DDestinations,
+                setTimeChecked,
+                setDestinations,
+                confirmAction,
+                failedTransportPopup,
+                setChangedModeOfTransport,
+                setToSaveData,
+                reorderDestinations,
+                navigation,
+                timeChecked,
+                changedModeOfTransport,
+                setDaysDictionary
+            });
         };
-        
+
         fetchPolylinesAndDurations();
-      }, [optimalRoute, transportationModes]);
+    }, [optimalRoute, transportationModes]);
 
     const [selectedDestination, setSelectedDestination] = useState<string | null>(null);
     const [transportationText, setTransportationText] = useState("driving");
@@ -362,7 +363,7 @@ const GenerateItineraryScreen = () => {
         console.log("upDests:", updatedDests);
         saveOrderedDestinations(updatedDests);
 
-    }, [toSaveData]);    
+    }, [toSaveData]);
 
     const handlePress = (destination: string) => {
         setSelectedDestination(prev => prev === destination ? null : destination);
@@ -380,17 +381,17 @@ const GenerateItineraryScreen = () => {
             setIsLoading(false);
             return;
         }
-    
+
         const updatedTransportationModes = [...transportationModes];
         updatedTransportationModes[destinationIndex] = selectedMode;
-    
+
         // Update the state with the new array for transportation modes
         setTransportationModes(updatedTransportationModes);
         setTransportationText(selectedMode);
-    
+
         console.log("What happens to transportationModes 2:", updatedTransportationModes);
     };
-    
+
     const reviewItinerary = () => {
         router.push("/ReviewItineraryScreen");
     };
@@ -411,11 +412,11 @@ const GenerateItineraryScreen = () => {
 
         const tempDates = calculateTripDates(startDate, endDate);
         setTripDates(tempDates);
-        
+
         console.log("Trip Dates:", tempDates);
 
         // endDate is set after startDate so use endDate for this useEffect
-    }, [endDate]);    
+    }, [endDate]);
 
     const handleDatePress = (index: SetStateAction<number | null>) => {
         // Check if the same day index is selected again
@@ -423,40 +424,40 @@ const GenerateItineraryScreen = () => {
         if (isSameDateSelected) {
             return;
         }
-    
+
         // Update the selected day index
         setSelectedDayIndex(index);
         console.log("Selected day index", index);
-    
+
         // Get the destinations for this specific day
         const selectedDestinations = groupedDestinations[index];
         console.log("Selected Dests Date:", selectedDestinations);
-    
+
         // Guard against undefined or empty array
         if (!selectedDestinations || selectedDestinations.length === 0) {
             console.warn("No destinations available for this day!");
             return;
         }
-    
+
         // Convert the selectedDestinations into an object with numeric keys
         const formattedDestinations = formatSelectedDestinations(selectedDestinations);
         console.log("Formatted Destinations (Date):", formattedDestinations);
-    
+
         // Get the matched polyline data
         const matchedPolylinesData = getMatchedPolylinesData(grouped2DDestinations, index, formattedDestinations);
-    
+
         // After processing all destinations, update the polyline data
         if (matchedPolylinesData.length > 0) {
             // Remove the last one since that shows route to next day (not necessary right now)
             matchedPolylinesData.pop();
-    
+
             console.log("Updating global polylines data:", matchedPolylinesData);
             setPolylinesData(matchedPolylinesData); // Update the global polyline data
         } else {
             console.warn("No polyline data to update.");
         }
-      };
-    
+    };
+
     // Function to move the destination up or down
     const moveDestination = async (routeGroupIndex: number, destinationIndex: number, direction: string) => {
         setIsLoading(true);
@@ -491,13 +492,13 @@ const GenerateItineraryScreen = () => {
             destinationIndex = currentIndex;
             console.log("Calculated index is ", destinationIndex);
         }
-        
-    
+
+
         // Ensure destinationIndex is valid
         if (destinationIndex < 0 || destinationIndex >= newResultRoute.length) return;
-    
+
         let newIndex = destinationIndex;
-    
+
         if (direction === 'up' && destinationIndex > 0) {
             // Move the destination up
             const [moved] = newResultRoute.splice(destinationIndex, 1);
@@ -511,17 +512,17 @@ const GenerateItineraryScreen = () => {
         } else {
             return;
         }
-    
+
         // Determine the range of affected destinations (since we have prev, current, next locations)
         const start = Math.max(0, newIndex - 2);
         const end = Math.min(newResultRoute.length, newIndex + 1); // non-inclusive
-    
+
         const affectedSlice = newResultRoute.slice(start, end);
-    
+
         try {
             // Recalculate only the affected locations (to save API calls)
             const recalculatedSlice = await recalculatePaths(affectedSlice);
-    
+
             // Replace the affected section in newResultRoute
             for (let i = start, j = 0; i < end; i++, j++) {
                 newResultRoute[i] = {
@@ -537,13 +538,13 @@ const GenerateItineraryScreen = () => {
 
             // Update the frontend map
             const simplifiedDestinations = newResultRoute
-                        .filter(destination => destination.alias !== origin.name)  // Exclude origin
-                        .map(destination => ({
-                            name: destination.alias,
-                            address: destination.address,
-                            duration: destination.duration,
-                            priority: destination.priority
-                        }));
+                .filter(destination => destination.alias !== origin.name)  // Exclude origin
+                .map(destination => ({
+                    name: destination.alias,
+                    address: destination.address,
+                    duration: destination.duration,
+                    priority: destination.priority
+                }));
             const newRouteOrderedArray = formatRouteInOrder(simplifiedDestinations, origin);
             console.log("newRouteOrderedArray:", newRouteOrderedArray);
             setFrontendOptimalRoute(newRouteOrderedArray);
@@ -551,238 +552,216 @@ const GenerateItineraryScreen = () => {
             console.error("Error recalculating paths or saving data:", error);
         }
         setIsLoading(false);
-    };    
+    };
 
     // Catches ALL errors
     useEffect(() => {
         // Global error handler for uncaught errors
         const errorHandler = (error: any, isFatal: boolean | undefined) => {
             // Ensure isFatal is always a boolean
-            const fatal = isFatal ?? false; 
+            const fatal = isFatal ?? false;
             console.log('Caught global error:', error);
             if (fatal) {
                 console.log('Fatal error:', error);
             }
-          };
-    
+        };
+
         ErrorUtils.setGlobalHandler(errorHandler);
-    
+
         return () => {
             // Cleanup when unmounded
-            ErrorUtils.setGlobalHandler(() => {});
+            ErrorUtils.setGlobalHandler(() => { });
         };
-      }, []);
+    }, []);
 
     return (
         <ErrorBoundary onError={failedPopup}>
-        <View style={styles.container}>    
-            {isLoading ? (
+            <View style={styles.container}>
+                {isLoading ? (
                     // Show loading spinner while data is being fetched
                     <ActivityIndicator size="large" color="#0000ff" style={styles.loading} />
                 ) : (
-                    // Once loading is done, show the content
-                    <View></View>
-            )}
-
-            {!isLoading && (
-                <SafeAreaView style={{ flex: 1 }}>
-                    {frontendOptimalRoute.length > 0 &&
-                         Array.isArray(polylinesData) &&
-                         polylinesData.length > 0 &&
-                         polylinesData.every(polyline => 
-                             polyline && Array.isArray(polyline.coordinates) && polyline.coordinates.length > 0
-                         ) ? (
-                        <MultiRoutesMap
-                            locations={frontendOptimalRoute}
-                            transportationModes={transportationModes}
-                            polylines={polylinesData}
-                            transportDurations={transportDurations}
-                            markers={markers}
-                            bounds={bounds}
-                        />
-                    ) : (
-                        <>
-                            {/* Backup if no route is found */}
-                            {console.log("PolylinesData:", polylinesData)}
-                            <Text style={styles.currentLocationText}>No routes found for this day.</Text>
-                        </>
+                        // Once loading is done, show the content
+                        <View></View>
                     )}
-                </SafeAreaView>
-            )}
 
-            <SafeAreaView>
+                {!isLoading && (
+                    <SafeAreaView style={{ flex: 1 }}>
+                        {frontendOptimalRoute.length > 0 &&
+                            Array.isArray(polylinesData) &&
+                            polylinesData.length > 0 &&
+                            polylinesData.every(polyline =>
+                                polyline && Array.isArray(polyline.coordinates) && polyline.coordinates.length > 0
+                            ) ? (
+                                <MultiRoutesMap
+                                    locations={frontendOptimalRoute}
+                                    transportationModes={transportationModes}
+                                    polylines={polylinesData}
+                                    transportDurations={transportDurations}
+                                    markers={markers}
+                                    bounds={bounds}
+                                />
+                            ) : (
+                                <>
+                                    {/* Backup if no route is found */}
+                                    {console.log("PolylinesData:", polylinesData)}
+                                    <Text style={styles.currentLocationText}>No routes found for this day.</Text>
+                                </>
+                            )}
+                    </SafeAreaView>
+                )}
 
-                <ScrollView
-                    contentContainerStyle={styles.scrollViewContainer}
-                    style={styles.scrollView}
-                    nestedScrollEnabled={true}
-                >
-                    {resultRoute.reduce((acc, destination) => {
-                        // If it's a new day (dayOrigin is true), start a new group
-                        if (destination.dayOrigin) {
-                            // If the last group is not empty, push it to the accumulator and start a new group
-                            if (acc.length > 0 && acc[acc.length - 1].length > 0) {
-                                acc.push([]); // Start a new group
+                <SafeAreaView>
+
+                    <ScrollView
+                        contentContainerStyle={styles.scrollViewContainer}
+                        style={styles.scrollView}
+                        nestedScrollEnabled={true}
+                    >
+                        {resultRoute.reduce((acc, destination) => {
+                            // If it's a new day (dayOrigin is true), start a new group
+                            if (destination.dayOrigin) {
+                                // If the last group is not empty, push it to the accumulator and start a new group
+                                if (acc.length > 0 && acc[acc.length - 1].length > 0) {
+                                    acc.push([]); // Start a new group
+                                }
                             }
-                        }
 
-                        // Add the destination to the current group
-                        if (acc.length === 0) {
-                            acc.push([destination]); // Start with the first destination of the group
-                        } else {
-                            acc[acc.length - 1].push(destination); // Add destination to the current group
-                        }
-
-                        return acc;
-                    }, []).map((routeGroup, routeGroupIndex) => {
-                        const destinationGroupKey = `group-${routeGroupIndex}`;
-                        let dateForThisGroup;
-
-                        console.log('routeGroup:', routeGroup);
-                        console.log('routeGroupIndex:', routeGroupIndex);
-
-                        // Calculate the date for the group 
-                        try {
-                            if (routeGroupIndex === 0) {
-                                dateForThisGroup = tripDates[0];
+                            // Add the destination to the current group
+                            if (acc.length === 0) {
+                                acc.push([destination]); // Start with the first destination of the group
                             } else {
-                                dateForThisGroup = tripDates[routeGroupIndex];
+                                acc[acc.length - 1].push(destination); // Add destination to the current group
                             }
-                        } catch (error) {
-                            console.log("Error in calculating group date:", error);
-                            dateForThisGroup = new Date(); // Fallback to current date
-                        }
 
-                        console.log('Date for this group:', dateForThisGroup);
-                        const isSelected = selectedDayIndex === routeGroupIndex;
+                            return acc;
+                        }, []).map((routeGroup, routeGroupIndex) => {
+                            const destinationGroupKey = `group-${routeGroupIndex}`;
+                            let dateForThisGroup;
 
-                        return (
-                            <View key={destinationGroupKey}>
-                                {/* Date Header */}
-                                {routeGroup.length > 0 && (routeGroupIndex === 0 || routeGroup[0].dayOrigin) ? (
-                                    <TouchableOpacity
-                                        onPress={() => handleDatePress(routeGroupIndex)}
-                                        style={[styles.dateHeader, isSelected && styles.selectedDateHeader]}
-                                    >
-                                        <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>
-                                            {formatDate(dateForThisGroup)}
-                                        </Text>
-                                        <Ionicons
-                                            name={isSelected ? "chevron-up" : "chevron-down"}
-                                            size={18}
-                                            color="#000"
-                                        />
-                                    </TouchableOpacity>
-                                ) : null}
+                            console.log('routeGroup:', routeGroup);
+                            console.log('routeGroupIndex:', routeGroupIndex);
 
-                                {/* Loop through each destination in the current routeGroup */}
-                                {routeGroup && routeGroup.length > 0 && routeGroup.map((destination: { alias: any; address: any; duration: any; priority: any; picture: { url: string; }; mode: string; transportDuration: any; }, destinationIndex: number) => {
-                                    const destinationKey = `${destinationGroupKey}-${destinationIndex}`;  // Unique key for each destination
-                                    const destinationName = destination.alias;
-                                    const destinationAddress = destination.address;
-                                    const destinationDuration = destination.duration;
-                                    const destinationPriority = destination.priority;
-                                    const destinationImageUri = destination.picture?.url || '';
-                                    const destinationTransportMode = destination.mode || defaultMode;
-                                    const destinationTransportDuration = destination.transportDuration;
+                            // Calculate the date for the group 
+                            try {
+                                if (routeGroupIndex === 0) {
+                                    dateForThisGroup = tripDates[0];
+                                } else {
+                                    dateForThisGroup = tripDates[routeGroupIndex];
+                                }
+                            } catch (error) {
+                                console.log("Error in calculating group date:", error);
+                                dateForThisGroup = new Date(); // Fallback to current date
+                            }
 
-                                    // Determine if it's the last destination in the current routeGroup
-                                    const isLastDestination = destinationIndex === routeGroup.length - 1;
+                            console.log('Date for this group:', dateForThisGroup);
+                            const isSelected = selectedDayIndex === routeGroupIndex;
 
-                                    return (
-                                        <View key={destinationKey}>
-                                            <TouchableOpacity 
-                                                style={styles.destinationElement} 
-                                                onPress={() => handlePress(destinationKey)}  // Update selectedDestination on click
-                                            >
-                                                <View style={styles.backgroundContainer}>
-                                                    <View style={styles.backgroundOverlay}></View>
+                            return (
+                                <View style={{ padding: 10 }} key={destinationGroupKey}>
+                                    {/* Date Header */}
+                                    {routeGroup.length > 0 && (routeGroupIndex === 0 || routeGroup[0].dayOrigin) ? (
+                                        <TouchableOpacity
+                                            onPress={() => handleDatePress(routeGroupIndex)}
+                                            style={[styles.dateHeader, isSelected && { backgroundColor: '#dcdcdc', }]}
+                                        >
+                                            <View style={{ flexDirection: 'row', justifyContent: "space-between", alignItems: 'center', width: "100%" }}>
+                                                <View style={{ flexDirection: 'row', justifyContent: "flex-start" }}>
+                                                    <Ionicons name="calendar" size={25} color="#24a6ad" />
+                                                    <Text style={styles.dateText}>{formatDate(dateForThisGroup)}</Text>
                                                 </View>
+                                                <View style={{ flexDirection: "row", justifyContent: "flex-end"}}>
+                                                    {isSelected && <MaterialCommunityIcons name={"map-check"} size={25} color="#24a6ad" />}
+                                                </View>
+                                            </View>
+                                        </TouchableOpacity>
+                                    ) : null}
 
-                                                <View style={styles.destinationContainer}>
-                                                    <DynamicImage placeName={destinationName} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
-                                                    <View style={styles.destinationLabel}>
-                                                        <Text style={styles.destinationName}>{destinationName}</Text>
-                                                        <Text style={styles.destinationDetails}>
-                                                            Duration: {Math.floor(destinationDuration / 60)} hrs {destinationDuration % 60} mins | Priority: {destinationPriority}
-                                                        </Text>
+                                    {/* Loop through each destination in the current routeGroup */}
+                                    {routeGroup && routeGroup.length > 0 && routeGroup.map((destination: { alias: any; address: any; duration: any; priority: any; picture: { url: string; }; mode: string; transportDuration: any; }, destinationIndex: number) => {
+                                        const destinationKey = `${destinationGroupKey}-${destinationIndex}`;  // Unique key for each destination
+                                        const destinationName = destination.alias;
+                                        const destinationAddress = destination.address;
+                                        const destinationDuration = destination.duration;
+                                        const destinationPriority = destination.priority;
+                                        const destinationImageUri = destination.picture?.url || '';
+                                        const destinationTransportMode = destination.mode || defaultMode;
+                                        const destinationTransportDuration = destination.transportDuration;
+
+                                        // Determine if it's the last destination in the current routeGroup
+                                        const isLastDestination = destinationIndex === routeGroup.length - 1;
+
+                                        return (
+                                            <View key={destinationKey}>
+                                                <TouchableOpacity
+                                                    style={styles.destinationElement}
+                                                    onPress={() => handlePress(destinationKey)}  // Update selectedDestination on click
+                                                >
+                                                    <View style={styles.backgroundContainer}>
+                                                        <View style={styles.backgroundOverlay}></View>
                                                     </View>
-                                                </View>
-                                            </TouchableOpacity>
 
-                                            {/* Conditional rendering of additional info */}
-                                            {selectedDestination === destinationKey && (
-                                                <View style={styles.additionalInfo}>
-                                                    {/* Show transport mode */}
-                                                    <Text style={styles.additionalText}>
-                                                        Transport Mode: {isLastDestination ? "None" : destinationTransportMode.charAt(0).toUpperCase() + destinationTransportMode.slice(1).toLowerCase()}
-                                                    </Text>
-
-                                                    {/* Dropdown for picking transport mode */}
-                                                    {!isLastDestination && (
-                                                        isLoading ? (
-                                                            <Text style={styles.additionalText}>
-                                                                Loading new transport route...
+                                                    <View style={styles.destinationContainer}>
+                                                        <DynamicImage placeName={destinationName} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
+                                                        <View style={styles.destinationLabel}>
+                                                            <Text style={styles.destinationName}>{destinationName}</Text>
+                                                            <Text style={styles.destinationDetails}>
+                                                                Duration: {Math.floor(destinationDuration / 60)} hrs {destinationDuration % 60} mins | Priority: {destinationPriority}
                                                             </Text>
-                                                        ) : (
-                                                            <Picker
-                                                                selectedValue={destinationTransportMode}
-                                                                onValueChange={(mode: string) => handleModeChange(mode, destinationIndex)}
-                                                            >
-                                                                <Picker.Item label="Driving" value="driving" />
-                                                                <Picker.Item label="Walking" value="walking" />
-                                                                <Picker.Item label="Bicycling" value="bicycling" />
-                                                                <Picker.Item label="Transit" value="transit" />
-                                                            </Picker>
-                                                        )
-                                                    )}
-
-                                                    {/* Show transport duration */}
-                                                    <Text style={styles.additionalText}>
-                                                        Duration: {isLastDestination ? "None" : destinationTransportDuration}
-                                                    </Text>
-
-                                                    {/* Directions */}
-                                                    <View style={{ maxHeight: 300 }}> 
-                                                        <ScrollView nestedScrollEnabled={true}>
-                                                            <DirectionsList
-                                                                origin={routeGroup[destinationIndex]?.address} 
-                                                                destination={routeGroup[destinationIndex + 1]?.address || "Unknown Destination"}
-                                                                mode={destinationTransportMode}
-                                                            />
-                                                        </ScrollView>
+                                                        </View>
                                                     </View>
-                                                </View>
-                                            )}
+                                                </TouchableOpacity>
 
-                                            {/* Move buttons */}
-                                            <View style={styles.buttonContainer}>
+                                                {/* Conditional rendering of additional info */}
+                                                {selectedDestination === destinationKey && (
+                                                    <View style={styles.additionalInfo}>
+                                                        {/* Show transport mode */}
+                                                        <Text style={styles.additionalText}>
+                                                            Transport Mode: {isLastDestination ? "None" : destinationTransportMode.charAt(0).toUpperCase() + destinationTransportMode.slice(1).toLowerCase()}
+                                                        </Text>
 
-                                                {/* If it's the first location in any other day, show only the down button */}
-                                                {(routeGroupIndex !== 0 && destinationIndex === 0 ) || (routeGroupIndex === 0 && destinationIndex === 1) && (
-                                                    <TouchableOpacity
-                                                        onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'down')}
-                                                        style={styles.moveButton}
-                                                        disabled={isLoading}
-                                                    >
-                                                        <Ionicons name="arrow-down" size={20} color="#000" />
-                                                    </TouchableOpacity>
+                                                        {/* Dropdown for picking transport mode */}
+                                                        {!isLastDestination && (
+                                                            isLoading ? (
+                                                                <Text style={styles.additionalText}>
+                                                                    Loading new transport route...
+                                                                </Text>
+                                                            ) : (
+                                                                    <Picker
+                                                                        selectedValue={destinationTransportMode}
+                                                                        onValueChange={(mode: string) => handleModeChange(mode, destinationIndex)}
+                                                                    >
+                                                                        <Picker.Item label="Driving" value="driving" />
+                                                                        <Picker.Item label="Walking" value="walking" />
+                                                                        <Picker.Item label="Bicycling" value="bicycling" />
+                                                                        <Picker.Item label="Transit" value="transit" />
+                                                                    </Picker>
+                                                                )
+                                                        )}
+
+                                                        {/* Show transport duration */}
+                                                        <Text style={styles.additionalText}>
+                                                            Duration: {isLastDestination ? "None" : destinationTransportDuration}
+                                                        </Text>
+
+                                                        {/* Directions */}
+                                                        <View style={{ maxHeight: 300 }}>
+                                                            <ScrollView nestedScrollEnabled={true}>
+                                                                <DirectionsList
+                                                                    origin={routeGroup[destinationIndex]?.address}
+                                                                    destination={routeGroup[destinationIndex + 1]?.address || "Unknown Destination"}
+                                                                    mode={destinationTransportMode}
+                                                                />
+                                                            </ScrollView>
+                                                        </View>
+                                                    </View>
                                                 )}
 
-                                                {/* If it's the last location in any day, show only the up button */}
-                                                {!(destinationIndex === 0 && destinationIndex === routeGroup.length - 1) && destinationIndex !== 0 && destinationIndex !== routeGroup.length - 1 && !(routeGroupIndex === 0 && destinationIndex === 1) && (
-                                                    <TouchableOpacity
-                                                        onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'up')}
-                                                        style={styles.moveButton}
-                                                        disabled={isLoading}
-                                                    >
-                                                        <Ionicons name="arrow-up" size={20} color="#000" />
-                                                    </TouchableOpacity>
-                                                )}
+                                                {/* Move buttons */}
+                                                <View style={styles.buttonContainer}>
 
-                                                {/* All other locations have both up and down buttons */}
-                                                {destinationIndex !== 0 && destinationIndex !== routeGroup.length - 1 && !(routeGroupIndex === 0 && destinationIndex === 1) && (
-                                                    <>
+                                                    {/* If it's the first location in any other day, show only the down button */}
+                                                    {(routeGroupIndex !== 0 && destinationIndex === 0) || (routeGroupIndex === 0 && destinationIndex === 1) && (
                                                         <TouchableOpacity
                                                             onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'down')}
                                                             style={styles.moveButton}
@@ -790,34 +769,57 @@ const GenerateItineraryScreen = () => {
                                                         >
                                                             <Ionicons name="arrow-down" size={20} color="#000" />
                                                         </TouchableOpacity>
-                                                    </>
-                                                )}
+                                                    )}
+
+                                                    {/* If it's the last location in any day, show only the up button */}
+                                                    {!(destinationIndex === 0 && destinationIndex === routeGroup.length - 1) && destinationIndex !== 0 && destinationIndex !== routeGroup.length - 1 && !(routeGroupIndex === 0 && destinationIndex === 1) && (
+                                                        <TouchableOpacity
+                                                            onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'up')}
+                                                            style={styles.moveButton}
+                                                            disabled={isLoading}
+                                                        >
+                                                            <Ionicons name="arrow-up" size={20} color="#000" />
+                                                        </TouchableOpacity>
+                                                    )}
+
+                                                    {/* All other locations have both up and down buttons */}
+                                                    {destinationIndex !== 0 && destinationIndex !== routeGroup.length - 1 && !(routeGroupIndex === 0 && destinationIndex === 1) && (
+                                                        <>
+                                                            <TouchableOpacity
+                                                                onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'down')}
+                                                                style={styles.moveButton}
+                                                                disabled={isLoading}
+                                                            >
+                                                                <Ionicons name="arrow-down" size={20} color="#000" />
+                                                            </TouchableOpacity>
+                                                        </>
+                                                    )}
+                                                </View>
                                             </View>
-                                        </View>
-                                    );
-                                })}
-                                {/* Backup if no routes found */}
-                                {(!routeGroup || routeGroup.length === 0) && (
-                                    <Text style={styles.currentLocationText}>No routes found.</Text>
-                                )}
-                            </View>
-                        );
-                    })}
-                </ScrollView>
-            </SafeAreaView>
+                                        );
+                                    })}
+                                    {/* Backup if no routes found */}
+                                    {(!routeGroup || routeGroup.length === 0) && (
+                                        <Text style={styles.currentLocationText}>No routes found.</Text>
+                                    )}
+                                </View>
+                            );
+                        })}
+                    </ScrollView>
+                </SafeAreaView>
 
-            {/* The color code key for routes */}
-            <RouteColorCodeKey />
+                {/* The color code key for routes */}
+                <RouteColorCodeKey />
 
-            {/* "Review Itinerary" button */}
-            <TouchableOpacity
-                style={[styles.reviewItineraryButton, isLoading && styles.disabledButton]}  // Apply styles to disable button
-                onPress={reviewItinerary}
-                disabled={isLoading}  // Disable the button when map is loading
-            >
-                <Text style={styles.buttonText}>Review Itinerary</Text>
-            </TouchableOpacity>
-        </View>
+                {/* "Review Itinerary" button */}
+                <TouchableOpacity
+                    style={[styles.reviewItineraryButton, isLoading && styles.disabledButton]}  // Apply styles to disable button
+                    onPress={reviewItinerary}
+                    disabled={isLoading}  // Disable the button when map is loading
+                >
+                    <Text style={styles.buttonText}>Review Itinerary</Text>
+                </TouchableOpacity>
+            </View>
         </ErrorBoundary>
     );
 };
@@ -979,12 +981,12 @@ const styles = StyleSheet.create({
         top: 10,
         right: 10,
         backgroundColor: "rgba(36,166, 173, 0.8)",
-        borderRadius: 20, 
+        borderRadius: 20,
         padding: 15,
     },
 
     destImageWrapper: {
-        position: "relative", 
+        position: "relative",
         borderRadius: 10,
         width: "100%",
         height: "70%",
@@ -1061,19 +1063,19 @@ const styles = StyleSheet.create({
     // ==== SCROLL WINDOW FOR DESTINATIONS ==== //
     scrollViewContainer: {
         flexGrow: 1,
+        backgroundColor: "#F4F4F4",
         alignItems: "center",
-        paddingLeft: 10,
-        paddingRight: 10,
-        borderWidth: 2,
-        borderRadius: 10,
-        borderColor: "white",
     },
 
     scrollView: {
         maxHeight: height * 0.45,
-        borderRadius: 10,
+        borderTopRightRadius: 10,
+        borderTopLeftRadius: 10,
         overflow: "hidden",
+        marginTop: -5,
         marginBottom: 10,
+        borderWidth: 1,
+        borderColor: "lightgray",
     },
 
     // ==== GENERATE PLAN BUTTON ==== //
@@ -1102,27 +1104,39 @@ const styles = StyleSheet.create({
         marginRight: 20,
     },
 
-
     dateHeader: {
+        position: "relative",
         flexDirection: "row",
-        marginTop: 10,
-        backgroundColor: "gray",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 10,
+        backgroundColor: "white",
         color: "white",
         width: "100%",
+        elevation: 1,
     },
 
     dateText: {
-        color: "white",
-        marginLeft: 20,
-        marginTop: 10,
-        marginBottom: 10,
+        color: "black",
         fontSize: 18,
+        fontWeight: "700",
+        marginLeft: 5
     },
+
     selectedDateHeader: {
+        position: "relative",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 10,
         backgroundColor: '#dcdcdc',
+        color: "white",
+        width: "100%",
+        elevation: 1,
     },
+
     selectedDateText: {
-            color: '#007aff',
+        color: '#007aff',
     },
 
     additionalInfo: {
