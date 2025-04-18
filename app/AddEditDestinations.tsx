@@ -603,7 +603,7 @@ const AddEditDestinations = () => {
                 {/* Group of text fields */}
                 <View style={{ marginTop: 15 }}>
 
-                    <TouchableOpacity style={[styles.input, { flex: 1, flexDirection: "row", alignItems: 'center' }]} onPress={() => setAutocompleteModalVisible(true)}>
+                    <TouchableOpacity style={[styles.input, { flex: 1, flexDirection: "row", alignItems: 'center' }]} onPlaceSelect={handleOriginSelect} onPress={() => setAutocompleteModalVisible(true)}>
                         <Ionicons name="location" size={22} color={"#24a6ad"} />
                         <Text numberOfLines={1} style={{ fontSize: 18, marginLeft: 5, width: "100%", color: 'black' }}>{selectedAutocompletePlace}</Text>
                     </TouchableOpacity>
@@ -684,14 +684,12 @@ const AddEditDestinations = () => {
                 <View style={styles.modalAutocompleteOverlay}>
                     <View style={styles.modalAutocompleteContent}>
                         <AutocompleteTextBox
-                            onPlaceSelect={(place,) => {
+                            onPlaceSelect={(place) => {
                                 handleAutocompletePlaceSelect(place);
-                                handleOriginSelect(place);
                                 return place.description; // Explicitly return a string
                             }}
                             placeholder="Destination"
                             placeholderTextColor="lightgray"
-                            value={originText}
                             style={{ width: "100%", paddingRight: 25, borderColor: "black", borderWidth: 1, borderRadius: 10 }}
                         />
                         <View style={{ position: "absolute", top: 18, right: 25 }}>
@@ -1054,7 +1052,6 @@ const styles = StyleSheet.create({
         resizeMode: "cover",
         overflow: "hidden",
         borderRadius: 10,
-        marginLeft: -30
     },
 
     hiddenItem: {

@@ -670,7 +670,7 @@ const GenerateItineraryScreen = () => {
                                                     <Ionicons name="calendar" size={25} color="#24a6ad" />
                                                     <Text style={styles.dateText}>{formatDate(dateForThisGroup)}</Text>
                                                 </View>
-                                                <View style={{ flexDirection: "row", justifyContent: "flex-end"}}>
+                                                <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
                                                     {isSelected && <MaterialCommunityIcons name={"map-check"} size={25} color="#24a6ad" />}
                                                 </View>
                                             </View>
@@ -692,7 +692,7 @@ const GenerateItineraryScreen = () => {
                                         const isLastDestination = destinationIndex === routeGroup.length - 1;
 
                                         return (
-                                            <View key={destinationKey}>
+                                            <View key={destinationKey} style={{ backgroundColor: "white" }}>
                                                 <TouchableOpacity
                                                     style={styles.destinationElement}
                                                     onPress={() => handlePress(destinationKey)}  // Update selectedDestination on click
@@ -701,13 +701,13 @@ const GenerateItineraryScreen = () => {
                                                         <View style={styles.backgroundOverlay}></View>
                                                     </View>
 
-                                                    <View style={styles.destinationContainer}>
-                                                        <DynamicImage placeName={destinationName} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
-                                                        <View style={styles.destinationLabel}>
+                                                    <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: "white", width: "100%", height: 75 }}>
+                                                        <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                                            <DynamicImage placeName={destinationName} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
                                                             <Text style={styles.destinationName}>{destinationName}</Text>
-                                                            <Text style={styles.destinationDetails}>
-                                                                Duration: {Math.floor(destinationDuration / 60)} hrs {destinationDuration % 60} mins | Priority: {destinationPriority}
-                                                            </Text>
+                                                        </View>
+                                                        <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+                                                            <Text>Hello</Text>
                                                         </View>
                                                     </View>
                                                 </TouchableOpacity>
@@ -756,45 +756,6 @@ const GenerateItineraryScreen = () => {
                                                         </View>
                                                     </View>
                                                 )}
-
-                                                {/* Move buttons */}
-                                                <View style={styles.buttonContainer}>
-
-                                                    {/* If it's the first location in any other day, show only the down button */}
-                                                    {(routeGroupIndex !== 0 && destinationIndex === 0) || (routeGroupIndex === 0 && destinationIndex === 1) && (
-                                                        <TouchableOpacity
-                                                            onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'down')}
-                                                            style={styles.moveButton}
-                                                            disabled={isLoading}
-                                                        >
-                                                            <Ionicons name="arrow-down" size={20} color="#000" />
-                                                        </TouchableOpacity>
-                                                    )}
-
-                                                    {/* If it's the last location in any day, show only the up button */}
-                                                    {!(destinationIndex === 0 && destinationIndex === routeGroup.length - 1) && destinationIndex !== 0 && destinationIndex !== routeGroup.length - 1 && !(routeGroupIndex === 0 && destinationIndex === 1) && (
-                                                        <TouchableOpacity
-                                                            onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'up')}
-                                                            style={styles.moveButton}
-                                                            disabled={isLoading}
-                                                        >
-                                                            <Ionicons name="arrow-up" size={20} color="#000" />
-                                                        </TouchableOpacity>
-                                                    )}
-
-                                                    {/* All other locations have both up and down buttons */}
-                                                    {destinationIndex !== 0 && destinationIndex !== routeGroup.length - 1 && !(routeGroupIndex === 0 && destinationIndex === 1) && (
-                                                        <>
-                                                            <TouchableOpacity
-                                                                onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'down')}
-                                                                style={styles.moveButton}
-                                                                disabled={isLoading}
-                                                            >
-                                                                <Ionicons name="arrow-down" size={20} color="#000" />
-                                                            </TouchableOpacity>
-                                                        </>
-                                                    )}
-                                                </View>
                                             </View>
                                         );
                                     })}
@@ -1012,23 +973,22 @@ const styles = StyleSheet.create({
 
     destinationElement: {
         width: "100%",
-        height: 75,
-        marginTop: 10,
+        height: 80,
         flexDirection: "row",
         alignItems: "center",
-        padding: 5,
-        position: "relative",
+        borderColor: "lightgray",
+        borderBottomWidth: 1
     },
 
     destinationImage: {
-        height: 70,
-        width: 70,
-        borderRadius: 10,
+        height: 75,
+        width: 75,
     },
 
     destinationContainer: {
         flexDirection: "row",
-        justifyContent: "center",
+        justifyContent: "space-between",
+        alignItems: "center",
     },
 
     destinationLabel: {
@@ -1038,13 +998,13 @@ const styles = StyleSheet.create({
     },
 
     destinationName: {
-        color: "white",
+        color: "black",
         fontSize: 22,
-        fontWeight: "bold",
+        fontWeight: "700",
     },
 
     destinationDetails: {
-        color: "white",
+        color: "black",
         fontSize: 18,
     },
 
@@ -1055,8 +1015,7 @@ const styles = StyleSheet.create({
     },
 
     backgroundOverlay: {
-        flex: 1,
-        backgroundColor: "#24a6ad",
+        backgroundColor: "white",
         borderRadius: 10,
     },
 
@@ -1114,6 +1073,8 @@ const styles = StyleSheet.create({
         color: "white",
         width: "100%",
         elevation: 1,
+        borderColor: "lightgray",
+        borderBottomWidth: 1
     },
 
     dateText: {
