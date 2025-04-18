@@ -702,9 +702,28 @@ const GenerateItineraryScreen = () => {
                                                     </View>
 
                                                     <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: "white", width: "100%", height: 75 }}>
-                                                        <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                                        <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", gap: 5 }}>
                                                             <DynamicImage placeName={destinationName} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
-                                                            <Text style={styles.destinationName}>{destinationName}</Text>
+                                                            <View style={{ flexDirection: "column" }}>
+                                                                <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                                                                    <Ionicons name="location" size={18} color={"#24a6ad"} />
+                                                                    <Text style={styles.destinationName}>{destinationName}</Text>
+                                                                </View>
+                                                                <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                                                                    <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                                                                        <Ionicons name="time" size={18} color={"#24a6ad"} />
+                                                                        <Text style={styles.destinationDetails}>
+                                                                            {Math.floor(destinationDuration / 60)} {Math.floor(destinationDuration / 60) === 1 ? "hr" : "hrs"} {destinationDuration % 60} mins
+                                                                        </Text>
+                                                                        <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                                                                            <MaterialCommunityIcons name="priority-high" size={18} color={"#24a6ad"} />
+                                                                            <Text style={styles.destinationDetails}>
+                                                                                {destinationPriority}
+                                                                            </Text>
+                                                                        </View>
+                                                                    </View>
+                                                                </View>
+                                                            </View>
                                                         </View>
                                                         <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
                                                             <Text>Hello</Text>
@@ -977,7 +996,8 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         borderColor: "lightgray",
-        borderBottomWidth: 1
+        borderBottomWidth: 1,
+        padding: 5
     },
 
     destinationImage: {
@@ -999,7 +1019,7 @@ const styles = StyleSheet.create({
 
     destinationName: {
         color: "black",
-        fontSize: 22,
+        fontSize: 18,
         fontWeight: "700",
     },
 
