@@ -8,11 +8,11 @@ import RouteColorCodeKey from "../components/RouteColorCodeKey";
 import { calculateOptimalRoute, formatRouteInOrder } from '../scripts/optimalRoute.js';
 import { Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useState, useEffect, useRef, SetStateAction } from "react";
+import React, { useState, useEffect, useRef, SetStateAction } from "react";
 import { getData } from '../scripts/localStore.js';
 import { updateTrip } from '../scripts/databaseInteraction.js';
 import { recalculatePaths } from '../scripts/reorderingLocations';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { getRoutePolylines } from "../scripts/routePolyline";
 import { updateDayOrigin, addTripDatesToStartDateTime } from '../scripts/updateTransportDests.js';
 import { calculateTripDates, formatSelectedDestinations, getMatchedPolylinesData, handleSameDateSelection } from '../scripts/dateDividers';
@@ -704,7 +704,7 @@ const GenerateItineraryScreen = () => {
                                                     <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: "white", width: "100%", height: 75 }}>
                                                         <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", gap: 5 }}>
                                                             <DynamicImage placeName={destinationName} containerStyle={styles.destinationImage} imageStyle={styles.destinationImage} />
-                                                            <View style={{ flexDirection: "column" }}>
+                                                            <View style={{ flexDirection: "column", gap: 5 }}>
                                                                 <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
                                                                     <Ionicons name="location" size={18} color={"#24a6ad"} />
                                                                     <Text style={styles.destinationName}>{destinationName}</Text>
@@ -766,10 +766,6 @@ const GenerateItineraryScreen = () => {
                                                 {/* Conditional rendering of additional info */}
                                                 {selectedDestination === destinationKey && (
                                                     <View style={styles.additionalInfo}>
-                                                        {/* Show transport mode */}
-                                                        <Text style={styles.additionalText}>
-                                                            Transport Mode: {isLastDestination ? "None" : destinationTransportMode.charAt(0).toUpperCase() + destinationTransportMode.slice(1).toLowerCase()}
-                                                        </Text>
 
                                                         {/* Dropdown for picking transport mode */}
                                                         {!isLastDestination && (
@@ -778,22 +774,44 @@ const GenerateItineraryScreen = () => {
                                                                     Loading new transport route...
                                                                 </Text>
                                                             ) : (
-                                                                    <Picker
-                                                                        selectedValue={destinationTransportMode}
-                                                                        onValueChange={(mode: string) => handleModeChange(mode, destinationIndex)}
-                                                                    >
-                                                                        <Picker.Item label="Driving" value="driving" />
-                                                                        <Picker.Item label="Walking" value="walking" />
-                                                                        <Picker.Item label="Bicycling" value="bicycling" />
-                                                                        <Picker.Item label="Transit" value="transit" />
-                                                                    </Picker>
+                                                                    <View style={{ flexDirection: "column" }}>
+                                                                        <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", gap: 5, marginBottom: 5 }}>
+                                                                            {destinationTransportMode === "Driving" && (
+                                                                                <Ionicons name={"car"} size={22} color={"#FF0000"} />
+                                                                            )}
+
+                                                                            {destinationTransportMode === "Walking" && (
+                                                                                <MaterialIcons name={"directions-walk"} size={22} color={"#0000FF"} />
+                                                                            )}
+
+                                                                            {destinationTransportMode === "Bicycling" && (
+                                                                                <Ionicons name={"bicycle"} size={22} color={"#00FF00"} />
+                                                                            )}
+
+                                                                            {destinationTransportMode === "Transit" && (
+                                                                                <MaterialCommunityIcons name={"dots-horizontal"} size={22} color={"#800080"} />
+                                                                            )}
+
+                                                                            <Text style={styles.additionalText}>
+                                                                                {isLastDestination ? "None" : destinationTransportMode.charAt(0).toUpperCase() + destinationTransportMode.slice(1).toLowerCase()} ({isLastDestination ? "None" : destinationTransportDuration})
+                                                                            </Text>
+                                                                        </View>
+
+                                                                        <View style={{ borderWidth: 1, borderColor: "lightgray", borderRadius: 10, marginBottom: 5 }}>
+                                                                            <Picker
+                                                                                selectedValue={destinationTransportMode}
+                                                                                onValueChange={(mode: string) => handleModeChange(mode, destinationIndex)}
+                                                                            >
+                                                                                <Picker.Item label="Driving" value="driving" />
+                                                                                <Picker.Item label="Walking" value="walking" />
+                                                                                <Picker.Item label="Bicycling" value="bicycling" />
+                                                                                <Picker.Item label="Transit" value="transit" />
+                                                                            </Picker>
+                                                                        </View>
+
+                                                                    </View>
                                                                 )
                                                         )}
-
-                                                        {/* Show transport duration */}
-                                                        <Text style={styles.additionalText}>
-                                                            Duration: {isLastDestination ? "None" : destinationTransportDuration}
-                                                        </Text>
 
                                                         {/* Directions */}
                                                         <View style={{ maxHeight: 300 }}>
@@ -1154,15 +1172,17 @@ const styles = StyleSheet.create({
 
     additionalInfo: {
         marginTop: 10,
-        backgroundColor: "#f0f0f0",
+        backgroundColor: "white",
         padding: 10,
         borderRadius: 5,
     },
 
     additionalText: {
         fontSize: 16,
-        color: "#333",
+        color: "black",
+        marginBottom: 5
     },
+
     disabledButton: {
         backgroundColor: '#cccccc',
     },
