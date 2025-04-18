@@ -838,15 +838,17 @@ const GenerateItineraryScreen = () => {
                 </SafeAreaView>
 
                 {/* "Review Itinerary" button */}
-                <TouchableOpacity
-                    style={[styles.reviewItineraryButton, isLoading && styles.disabledButton]}  // Apply styles to disable button
-                    onPress={reviewItinerary}
-                    disabled={isLoading}  // Disable the button when map is loading
-                >
-                    <Text style={styles.buttonText}>Review Itinerary</Text>
-                </TouchableOpacity>
+                <View style={{ height: "10%", justifyContent: "center", alignItems: "center", elevation: 5, backgroundColor: "white" }}>
+                    <TouchableOpacity
+                        style={[styles.reviewItineraryButton, isLoading && styles.disabledButton]}  // Apply styles to disable button
+                        onPress={reviewItinerary}
+                        disabled={isLoading}  // Disable the button when map is loading
+                    >
+                        <Text style={styles.buttonText}>Review Itinerary</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
-        </ErrorBoundary>
+        </ErrorBoundary >
     );
 };
 
@@ -1099,7 +1101,6 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 10,
         overflow: "hidden",
         marginTop: -5,
-        marginBottom: 10,
         borderWidth: 1,
         borderColor: "lightgray",
     },
@@ -1110,16 +1111,10 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 40,
         borderRadius: 15,
-        marginTop: 20,
         justifyContent: "center",
         alignItems: "center",
         elevation: 5,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
         alignSelf: "center",
-        marginBottom: 10,
     },
 
     buttonText: {
