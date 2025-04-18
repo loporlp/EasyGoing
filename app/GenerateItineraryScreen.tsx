@@ -610,6 +610,9 @@ const GenerateItineraryScreen = () => {
                             )}
                         {/* Legend */}
                         {/* The color code key for routes */}
+                        <TouchableOpacity style={{position: "absolute", top: 50, left: 20}} onPress={() => { navigation.goBack() }}>
+                            <Ionicons name="arrow-back-outline" size={30} color={"black"} />
+                        </TouchableOpacity>
                         <RouteColorCodeKey />
                     </SafeAreaView>
                 )}
