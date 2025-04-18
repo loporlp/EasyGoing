@@ -671,7 +671,7 @@ const GenerateItineraryScreen = () => {
                                                     <Text style={styles.dateText}>{formatDate(dateForThisGroup)}</Text>
                                                 </View>
                                                 <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
-                                                    {isSelected && <MaterialCommunityIcons name={"map-check"} size={25} color="#24a6ad" />}
+                                                    <MaterialCommunityIcons name={isSelected ? "map-check" : "map-outline"} size={28} color={isSelected ? "#24a6ad" : "lightgray"} />
                                                 </View>
                                             </View>
                                         </TouchableOpacity>
@@ -725,8 +725,40 @@ const GenerateItineraryScreen = () => {
                                                                 </View>
                                                             </View>
                                                         </View>
+
                                                         <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
-                                                            <Text>Hello</Text>
+                                                            {/* CASE 1: First destination of the first day - NO ARROWS */}
+                                                            {(routeGroupIndex === 0 && destinationIndex === 0) ? null :
+
+                                                                /* CASE 2: Second destination of first day - ↓ ONLY */
+                                                                (routeGroupIndex === 0 && destinationIndex === 1) ? (
+                                                                    <TouchableOpacity onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'down')} style={styles.moveButton} disabled={isLoading}>
+                                                                        <Ionicons name="arrow-down" size={20} color="white" />
+                                                                    </TouchableOpacity>
+
+                                                                    /* CASE 3: First destination of any other day - ↓ ONLY */
+                                                                ) : (destinationIndex === 0) ? (
+                                                                    <TouchableOpacity onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'down')} style={styles.moveButton} disabled={isLoading}>
+                                                                        <Ionicons name="arrow-down" size={20} color="white" />
+                                                                    </TouchableOpacity>
+
+                                                                    /* CASE 4: Last destination of the day (and not also first) - ↑ ONLY */
+                                                                ) : (destinationIndex === routeGroup.length - 1) ? (
+                                                                    <TouchableOpacity onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'up')} style={styles.moveButton} disabled={isLoading}>
+                                                                        <Ionicons name="arrow-up" size={20} color="white" />
+                                                                    </TouchableOpacity>
+
+                                                                    /* CASE 5: Middle destinations - ↑ AND ↓ */
+                                                                ) : (
+                                                                                <>
+                                                                                    <TouchableOpacity onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'up')} style={styles.moveButton} disabled={isLoading}>
+                                                                                        <Ionicons name="arrow-up" size={20} color="white" />
+                                                                                    </TouchableOpacity>
+                                                                                    <TouchableOpacity onPress={() => moveDestination(routeGroupIndex, destinationIndex, 'down')} style={styles.moveButton} disabled={isLoading}>
+                                                                                        <Ionicons name="arrow-down" size={20} color="white" />
+                                                                                    </TouchableOpacity>
+                                                                                </>
+                                                                            )}
                                                         </View>
                                                     </View>
                                                 </TouchableOpacity>
