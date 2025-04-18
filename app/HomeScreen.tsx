@@ -506,16 +506,16 @@ const HomeScreen = () => {
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
                         <Image
-                            style={{width: "100%", borderRadius: 10}}
+                            style={{ width: "100%", borderRadius: 10 }}
                             source={
                                 destImage.startsWith('http://') || destImage.startsWith('https://')
                                     ? { uri: destImage }
                                     : imageMap[destImage]
                             }
                         />
-                        <Text style={{marginTop: 15, fontSize: 18}}>{destSummary}</Text>
-                        <TouchableOpacity style={{backgroundColor: "red", alignItems: "center", paddingHorizontal: 20, paddingVertical: 10, marginTop: 15}} onPress={() => setModalVisible(false)}>
-                            <Text style={{fontWeight: "700", color: "white"}}>CLOSE</Text>
+                        <Text style={{ marginTop: 15, fontSize: 18 }}>{destSummary}</Text>
+                        <TouchableOpacity style={{ backgroundColor: "red", alignItems: "center", paddingHorizontal: 20, paddingVertical: 10, marginTop: 15 }} onPress={() => setModalVisible(false)}>
+                            <Text style={{ fontWeight: "700", color: "white" }}>CLOSE</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

@@ -55,7 +55,7 @@ const DirectionsList: React.FC<DirectionsListProps> = ({ origin, destination, mo
       case "FERRY":
         return <MaterialCommunityIcons name="ferry" size={24} color={modeColors[mode.toUpperCase()]} style={{marginRight: 5}}/>;
       default:
-        return null;
+        return <MaterialIcons name="question-mark" size={24} color={'#000'} />
     }
   }
 

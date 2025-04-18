@@ -45,18 +45,18 @@ const RouteColorCodeKey = () => {
     return (
         <View>
             <TouchableOpacity style={styles.button} onPress={() => setModalVisible(true)}>
-                <Ionicons name={"list"} size={20} color={"white"} />
+                <MaterialCommunityIcons name={"script-text-key-outline"} size={20} color={"white"} />
             </TouchableOpacity>
 
             <Modal
-                animationType="fade"
+                animationType="slide"
                 transparent={true}
                 visible={modalVisible}
                 onRequestClose={() => setModalVisible(false)}
             >
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
-                        <Text style={styles.headerText}>Route Colors</Text>
+                        <Text style={styles.headerText}>Route Legend</Text>
                         <View style={{flexDirection: "column", alignItems: "flex-start"}}>
                             {Object.entries(routeColors).map(([mode, color], index) => (
                                 <View key={index} style={styles.routeItem}>
@@ -111,15 +111,16 @@ const styles = StyleSheet.create({
     modalContent: {
         flexDirection: "column",
         backgroundColor: 'white',
-        padding: 10,
+        padding: 15,
         borderRadius: 10,
         width: '80%',
-        alignItems: 'center',
+        alignItems: 'flex-start',
     },
     headerText: {
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 10,
+        alignSelf: 'center'
     },
     routeItem: {
         flexDirection: 'row',
