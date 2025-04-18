@@ -776,19 +776,19 @@ const GenerateItineraryScreen = () => {
                                                             ) : (
                                                                     <View style={{ flexDirection: "column" }}>
                                                                         <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center", gap: 5, marginBottom: 5 }}>
-                                                                            {destinationTransportMode === "Driving" && (
+                                                                            {destinationTransportMode === "driving" && (
                                                                                 <Ionicons name={"car"} size={22} color={"#FF0000"} />
                                                                             )}
 
-                                                                            {destinationTransportMode === "Walking" && (
+                                                                            {destinationTransportMode === "walking" && (
                                                                                 <MaterialIcons name={"directions-walk"} size={22} color={"#0000FF"} />
                                                                             )}
 
-                                                                            {destinationTransportMode === "Bicycling" && (
+                                                                            {destinationTransportMode === "bicycling" && (
                                                                                 <Ionicons name={"bicycle"} size={22} color={"#00FF00"} />
                                                                             )}
 
-                                                                            {destinationTransportMode === "Transit" && (
+                                                                            {destinationTransportMode === "transit" && (
                                                                                 <MaterialCommunityIcons name={"dots-horizontal"} size={22} color={"#800080"} />
                                                                             )}
 
@@ -796,7 +796,7 @@ const GenerateItineraryScreen = () => {
                                                                                 {isLastDestination ? "None" : destinationTransportMode.charAt(0).toUpperCase() + destinationTransportMode.slice(1).toLowerCase()} ({isLastDestination ? "None" : destinationTransportDuration})
                                                                             </Text>
                                                                         </View>
-
+                                                                        
                                                                         <View style={{ borderWidth: 1, borderColor: "lightgray", borderRadius: 10, marginBottom: 5 }}>
                                                                             <Picker
                                                                                 selectedValue={destinationTransportMode}

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { getDirectionsBetweenLocations } from '../scripts/routeHelpers';
 import RenderHtml from 'react-native-render-html';
+import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 
 interface DirectionsListProps {
   origin: string;
@@ -32,6 +33,32 @@ const DirectionsList: React.FC<DirectionsListProps> = ({ origin, destination, mo
     TRAM: '#808080',
     FERRY: '#40E0D0',
   };
+
+  const renderTransportIcon = (mode: string) => {
+    switch (mode) {
+      case "DRIVING":
+        return <Ionicons name="car" size={24} color={modeColors[mode.toUpperCase()]} />;
+      case "WALKING":
+        return <MaterialIcons name="directions-walk" size={24} color={modeColors[mode.toUpperCase()]} />;
+      case "BICYCLING":
+        return <Ionicons name="bicycle" size={24} color={modeColors[mode.toUpperCase()]} />;
+      case "TRANSIT":
+        return <MaterialCommunityIcons name="dots-horizontal" size={24} color={modeColors[mode.toUpperCase()]} />;
+      case "BUS":
+        return <MaterialCommunityIcons name="bus" size={24} color={modeColors[mode.toUpperCase()]} />;
+      case "TRAIN":
+        return <MaterialCommunityIcons name="train" size={24} color={modeColors[mode.toUpperCase()]} />;
+      case "SUBWAY":
+        return <MaterialCommunityIcons name="subway" size={24} color={modeColors[mode.toUpperCase()]} />;
+      case "TRAM":
+        return <MaterialCommunityIcons name="tram" size={24} color={modeColors[mode.toUpperCase()]} />;
+      case "FERRY":
+        return <MaterialCommunityIcons name="ferry" size={24} color={modeColors[mode.toUpperCase()]} />;
+      default:
+        console.log(mode)
+        return null;
+    }
+  }
 
   useEffect(() => {
     const fetchDirections = async () => {
@@ -73,12 +100,10 @@ const DirectionsList: React.FC<DirectionsListProps> = ({ origin, destination, mo
             <View key={index} style={styles.directionStep}>
               <View style={styles.directionContainer}>
                 {/* Color block next to each instruction */}
-                <View
-                  style={{
-                    ...styles.colorBlock,
-                    backgroundColor: modeColors[item.travelMode.toUpperCase()] || '#000',
-                  }}
-                />
+                <View>
+                  {renderTransportIcon(item.travelMode)}
+                </View>
+
                 {/* Render HTML instruction */}
                 <RenderHtml
                   contentWidth={350} // Adjust here if not right size
@@ -114,12 +139,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  colorBlock: {
-    width: 20,
-    height: 20,
-    marginRight: 12,
-    borderRadius: 50,
-  },
+
   error: {
     color: 'red',
     fontSize: 18,
