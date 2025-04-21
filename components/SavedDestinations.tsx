@@ -154,7 +154,6 @@ const styles = StyleSheet.create({
         resizeMode: "cover",
         overflow: "hidden",
         borderRadius: 10,
-        marginLeft: -30
     },
 
     hiddenItem: {

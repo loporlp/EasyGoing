@@ -66,10 +66,9 @@ const DynamicImage = ({ placeName, containerStyle, imageStyle } : DynamicImagePr
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+
   },
+  
   image: {
     width: 400,
     height: 300,

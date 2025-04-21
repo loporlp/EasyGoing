@@ -185,13 +185,11 @@ const MultiRoutesMap: React.FC<MultiRoutesMapProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     justifyContent: 'center',
   },
   map: {
     width: '100%',
     height: '100%',
-    marginTop: 20,
   },
   loadingContainer: {
     flex: 1,
