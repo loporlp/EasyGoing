@@ -174,7 +174,7 @@ const BudgetManagerScreen = () => {
     // Load history when the component mounts
     useEffect(() => {
         loadHistory();
-        console.log(JSON.stringify(currentTrip))
+        console.log(JSON.stringify(currentTrip));
     }, []);
 
     useFocusEffect(
@@ -186,10 +186,6 @@ const BudgetManagerScreen = () => {
     useEffect(() => {
         getHistoriesByTag();
     }, [selectedCategory]);
-
-    useEffect(() => {
-        loadHistory();
-    }, [budgetHistory])
 
     useEffect(() => {
         let totalSpent = hotelBudget + transportationBudget + foodBudget + thingsToDoBudget + otherBudget;
@@ -242,26 +238,84 @@ const BudgetManagerScreen = () => {
         resetHistory();
         setAddHistoryVisible(false);
 
-        if (expenseLabel != "" && expensePrice != "" && expensePrice != "" && expenseTag != "") {
+        if (expenseLabel !== "" && expensePrice !== "" && expenseTag !== "") {
             // date
             const currentDate = new Date();
-            //const formattedDate = moment(currentDate).format('MMMM DD, YYYY');
             let formatNumber = parseFloat(expensePrice).toFixed(2);
-            console.log("Format number: " + formatNumber)
+            console.log("Format number: " + formatNumber);
+
             const createExpense = await createHistory(expenseTag, formatNumber, expenseLabel, null, currentTripID);
 
             if (!createExpense) {
                 console.error("Failed to create expense!");
             } else {
-                const historyReverse = await updateHistory();
+                // Complete refresh of data after adding expense
+                await loadAndSetHistory();
 
-                setBudgetHistory(historyReverse);
-                resetHistory();
+                // Force update of category information
+                updateCategoryTotals();
             }
         } else {
             console.error("Expense report failed");
         }
-    }
+    };
+
+    const updateCategoryTotals = () => {
+        let totalSpent = hotelBudget + transportationBudget + foodBudget + thingsToDoBudget + otherBudget;
+
+        // Create a copy of categories to modify
+        const updatedCategories = [...categories];
+
+        for (let i = 0; i < updatedCategories.length; i++) {
+            const category = updatedCategories[i];
+
+            if (category.label === "Hotel") {
+                category.totalPrice = hotelBudget;
+                category.percentage = totalSpent > 0 ?
+                    (Math.round((hotelBudget / totalSpent) * 100)).toString() + "%" : "0%";
+                category.symbol = tags[0].symbol;
+                category.color = tags[0].color;
+            }
+            else if (category.label === "Transportation") {
+                category.totalPrice = transportationBudget;
+                category.percentage = totalSpent > 0 ?
+                    (Math.round((transportationBudget / totalSpent) * 100)).toString() + "%" : "0%";
+                category.symbol = tags[1].symbol;
+                category.color = tags[1].color;
+            }
+            else if (category.label === "Food") {
+                category.totalPrice = foodBudget;
+                category.percentage = totalSpent > 0 ?
+                    (Math.round((foodBudget / totalSpent) * 100)).toString() + "%" : "0%";
+                category.symbol = tags[2].symbol;
+                category.color = tags[2].color;
+            }
+            else if (category.label === "Things To Do") {
+                category.totalPrice = thingsToDoBudget;
+                category.percentage = totalSpent > 0 ?
+                    (Math.round((thingsToDoBudget / totalSpent) * 100)).toString() + "%" : "0%";
+                category.symbol = tags[3].symbol;
+                category.color = tags[3].color;
+            }
+            else if (category.label === "Other") {
+                category.totalPrice = otherBudget;
+                category.percentage = totalSpent > 0 ?
+                    (Math.round((otherBudget / totalSpent) * 100)).toString() + "%" : "0%";
+                category.symbol = tags[4].symbol;
+                category.color = tags[4].color;
+            }
+        }
+
+        // Sort by total price and update the state
+        const sortedData = updatedCategories.sort((a, b) => b.totalPrice - a.totalPrice);
+        setTotalBudget(totalSpent);
+        setCategories(sortedData);
+
+        // Also update the selected category view if open
+        if (selectedCategory) {
+            getHistoriesByTag();
+        }
+    };
 
     // cancels the creation of a history
     const resetHistory = () => {
@@ -304,36 +358,54 @@ const BudgetManagerScreen = () => {
                     date: historyId.date
                 });
 
+                const value = parseFloat(historyId.value);
+
                 switch (historyId.tag) {
                     case 'Hotel':
-                        hotelExpense += parseFloat(historyId.value);
+                        hotelExpense += value;
                         break;
                     case 'Transportation':
-                        transportExpense += parseFloat(historyId.value);
+                        transportExpense += value;
                         break;
                     case 'Food':
-                        foodExpense += parseFloat(historyId.value);
+                        foodExpense += value;
                         break;
                     case 'Things To Do':
-                        thingsToDoExpense += parseFloat(historyId.value);
+                        thingsToDoExpense += value;
                         break;
                     case 'Other':
-                        otherExpense += parseFloat(historyId.value);
+                        otherExpense += value;
                         break;
                     default:
                         break;
                 }
             }
 
+            // First update the budget history
             setBudgetHistory(loadedHistory);
+
+            // Then update all category budgets
             setHotelBudget(hotelExpense);
             setTransportationBudget(transportExpense);
             setFoodBudget(foodExpense);
             setThingsToDoBudget(thingsToDoExpense);
             setOtherBudget(otherExpense);
-            setTotalBudget(hotelExpense + transportExpense + foodExpense + thingsToDoExpense + otherExpense);
+
+            // After state updates, use setTimeout to ensure they're applied
+            // before recalculating category totals
+            setTimeout(() => {
+                updateCategoryTotals();
+            }, 0);
         } else {
             setBudgetHistory([]);
+            setHotelBudget(0);
+            setTransportationBudget(0);
+            setFoodBudget(0);
+            setThingsToDoBudget(0);
+            setOtherBudget(0);
+            setTotalBudget(0);
+            setSelectedCategoryList([]);
+            setCategories(categories.map(cat => ({ ...cat, totalPrice: 0, percentage: "0%" })));
             console.log("No history available.");
         }
     };
@@ -382,29 +454,25 @@ const BudgetManagerScreen = () => {
         return updatedHistory.reverse();
     }
 
-    const deleteExpense = async (id: string) => {
+    const deleteExpense = async (id) => {
         const del = await deleteHistory(id);
-
+    
         if (del) {
-            const newHistory = await updateHistory();
-
-            let totalExpense = hotelBudget + transportationBudget + foodBudget + thingsToDoBudget + otherBudget;
-            setTotalBudget(totalExpense)
+            // Complete refresh after deleting an expense
             await loadAndSetHistory();
         }
-    }
+    };
 
     // gets history given tag
     const getHistoriesByTag = () => {
-        const categoryHistory = [];
-
-        // rename flight to Transportation
-        for (const expense of budgetHistory) {
-            console.log("Expense tag: " + expense.tag + "; selectedTag: " + selectedCategory)
-            if (expense.tag == selectedCategory) {
-                categoryHistory.push(expense);
-            }
+        if (!selectedCategory || !budgetHistory || budgetHistory.length === 0) {
+            setSelectedCategoryList([]);
+            return;
         }
+
+        const categoryHistory = budgetHistory.filter(expense =>
+            expense.tag === selectedCategory
+        );
 
         setSelectedCategoryList(categoryHistory);
 

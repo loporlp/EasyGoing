@@ -14,7 +14,6 @@ const Settings = () => {
 
   const navigation = useNavigation();
   const router = useRouter();
-  const colorScheme = useColorScheme();
 
   const viewTrips = () => {
     router.replace("/EditExistingTripsScreen")
