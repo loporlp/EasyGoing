@@ -9,7 +9,7 @@ Easy Going is a full-stack trip planning application that helps users plan, mana
 
 ## Architecture Diagram
 
-![Architecture Diagram](architecture.png)
+![Architecture Diagram](ArchitectureDiagram.png)
 
 
 ## Platform & Requirements
